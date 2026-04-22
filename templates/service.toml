@@ -1,0 +1,19 @@
+[[accounts]]
+code = "1000"
+name = "Assets"
+category = "Asset"
+is_group = true
+
+[[accounts]]
+code = "1010"
+name = "Cash in Bank"
+category = "Asset"
+parent_code = "1000"
+is_group = false
+
+[[accounts]]
+code = "3900"
+name = "Retained Earnings"
+category = "Equity"
+is_group = false
+system_tag = "RETAINED_EARNINGS"
