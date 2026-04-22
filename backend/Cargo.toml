@@ -1,0 +1,27 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+shared_core = { path = "../shared_core" }
+
+base64 = "0.22.1"
+bcrypt = "0.17.0"
+chrono = { version = "0.4", features = ["serde"] }
+jsonwebtoken = { version = "8.3" }
+log = "0.4"
+rand = "0.8.5"
+rocket = { version = "0.5", features = ["json", "secrets"] }
+sqlx = { workspace = true }
+serde = { version = "1.0", features = ["derive"] }
+toml = "1.1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+tracing-appender = "0.2"
+uuid = { workspace = true }
+
+
+[dependencies.rocket_db_pools]
+version = "0.2.0"
+features = ["sqlx_postgres"]

@@ -1,3 +1,18 @@
+# Chart of Accounts for a Service-Based Business
+#
+# This TOML file defines a default chart of accounts that can be imported
+# when a new organization is created.
+#
+# - code: A unique identifier for the account.
+# - name: The human-readable name of the account.
+# - category: Must be one of 'Asset', 'Liability', 'Equity', 'Revenue', 'Expense'.
+# - parent_code: The 'code' of the parent account to create a hierarchy.
+# - is_group: If true, this account is a non-postable group header.
+# - system_tag: A unique tag for accounts that the system needs to identify
+#               for automated processes (e.g., creating invoices, calculating earnings).
+
+# 1000-1999: Assets
+# ==============================================================================
 [[accounts]]
 code = "1000"
 name = "Assets"
@@ -5,15 +20,341 @@ category = "Asset"
 is_group = true
 
 [[accounts]]
-code = "1010"
-name = "Cash in Bank"
+code = "1100"
+name = "Current Assets"
 category = "Asset"
 parent_code = "1000"
+is_group = true
+
+[[accounts]]
+code = "1110"
+name = "Cash and Cash Equivalents"
+category = "Asset"
+parent_code = "1100"
+is_group = true
+
+[[accounts]]
+code = "1111"
+name = "Main Checking Account"
+category = "Asset"
+parent_code = "1110"
+is_group = false
+system_tag = "CASH_AT_BANK"
+
+[[accounts]]
+code = "1112"
+name = "Savings Account"
+category = "Asset"
+parent_code = "1110"
+is_group = false
+
+[[accounts]]
+code = "1115"
+name = "Petty Cash"
+category = "Asset"
+parent_code = "1110"
+is_group = false
+
+[[accounts]]
+code = "1200"
+name = "Accounts Receivable"
+category = "Asset"
+parent_code = "1100"
+is_group = false
+system_tag = "ACCOUNTS_RECEIVABLE"
+
+[[accounts]]
+code = "1300"
+name = "Prepaid Expenses"
+category = "Asset"
+parent_code = "1100"
+is_group = false
+
+[[accounts]]
+code = "1500"
+name = "Fixed Assets"
+category = "Asset"
+parent_code = "1000"
+is_group = true
+
+[[accounts]]
+code = "1510"
+name = "Computer Equipment"
+category = "Asset"
+parent_code = "1500"
+is_group = false
+
+[[accounts]]
+code = "1515"
+name = "Accumulated Depreciation on Computer Equipment"
+category = "Asset"
+parent_code = "1500"
+is_group = false
+
+[[accounts]]
+code = "1520"
+name = "Office Furniture and Equipment"
+category = "Asset"
+parent_code = "1500"
+is_group = false
+
+[[accounts]]
+code = "1525"
+name = "Accumulated Depreciation on Office Furniture"
+category = "Asset"
+parent_code = "1500"
+is_group = false
+
+
+# 2000-2999: Liabilities
+# ==============================================================================
+[[accounts]]
+code = "2000"
+name = "Liabilities"
+category = "Liability"
+is_group = true
+
+[[accounts]]
+code = "2100"
+name = "Current Liabilities"
+category = "Liability"
+parent_code = "2000"
+is_group = true
+
+[[accounts]]
+code = "2110"
+name = "Accounts Payable"
+category = "Liability"
+parent_code = "2100"
+is_group = false
+system_tag = "ACCOUNTS_PAYABLE"
+
+[[accounts]]
+code = "2120"
+name = "Credit Card Payable"
+category = "Liability"
+parent_code = "2100"
+is_group = false
+
+[[accounts]]
+code = "2200"
+name = "Sales Tax Payable"
+category = "Liability"
+parent_code = "2100"
+is_group = false
+system_tag = "SALES_TAX_PAYABLE"
+
+[[accounts]]
+code = "2300"
+name = "Wages & Payroll Liabilities"
+category = "Liability"
+parent_code = "2100"
+is_group = false
+
+[[accounts]]
+code = "2500"
+name = "Long-Term Liabilities"
+category = "Liability"
+parent_code = "2000"
+is_group = true
+
+[[accounts]]
+code = "2510"
+name = "Business Loan Payable"
+category = "Liability"
+parent_code = "2500"
+is_group = false
+
+
+# 3000-3999: Equity
+# ==============================================================================
+[[accounts]]
+code = "3000"
+name = "Equity"
+category = "Equity"
+is_group = true
+
+[[accounts]]
+code = "3100"
+name = "Owner's Capital"
+category = "Equity"
+parent_code = "3000"
+is_group = false
+
+[[accounts]]
+code = "3200"
+name = "Owner's Draws"
+category = "Equity"
+parent_code = "3000"
 is_group = false
 
 [[accounts]]
 code = "3900"
 name = "Retained Earnings"
 category = "Equity"
+parent_code = "3000"
 is_group = false
 system_tag = "RETAINED_EARNINGS"
+
+
+# 4000-4999: Revenue
+# ==============================================================================
+[[accounts]]
+code = "4000"
+name = "Revenue"
+category = "Revenue"
+is_group = true
+system_tag = "REVENUE"
+
+[[accounts]]
+code = "4100"
+name = "Consulting Services Income"
+category = "Revenue"
+parent_code = "4000"
+is_group = false
+
+[[accounts]]
+code = "4200"
+name = "Service & Retainer Fees"
+category = "Revenue"
+parent_code = "4000"
+is_group = false
+
+[[accounts]]
+code = "4800"
+name = "Reimbursed Expenses Income"
+category = "Revenue"
+parent_code = "4000"
+is_group = false
+
+[[accounts]]
+code = "4900"
+name = "Other Income"
+category = "Revenue"
+parent_code = "4000"
+is_group = true
+
+[[accounts]]
+code = "4910"
+name = "Interest Income"
+category = "Revenue"
+parent_code = "4900"
+is_group = false
+
+
+# 5000-5999: Cost of Services (Cost of Goods Sold)
+# ==============================================================================
+[[accounts]]
+code = "5000"
+name = "Cost of Services"
+category = "Expense"
+is_group = true
+system_tag = "COST_OF_GOODS_SOLD"
+
+[[accounts]]
+code = "5100"
+name = "Subcontractor Expenses"
+category = "Expense"
+parent_code = "5000"
+is_group = false
+
+[[accounts]]
+code = "5200"
+name = "Software & Subscriptions"
+category = "Expense"
+parent_code = "5000"
+is_group = false
+
+
+# 6000-6999: Operating Expenses
+# ==============================================================================
+[[accounts]]
+code = "6000"
+name = "Operating Expenses"
+category = "Expense"
+is_group = true
+system_tag = "EXPENSE"
+
+[[accounts]]
+code = "6100"
+name = "Salaries and Wages"
+category = "Expense"
+parent_code = "6000"
+is_group = false
+
+[[accounts]]
+code = "6150"
+name = "Payroll Taxes"
+category = "Expense"
+parent_code = "6000"
+is_group = false
+
+[[accounts]]
+code = "6200"
+name = "Rent Expense"
+category = "Expense"
+parent_code = "6000"
+is_group = false
+
+[[accounts]]
+code = "6250"
+name = "Utilities"
+category = "Expense"
+parent_code = "6000"
+is_group = false
+
+[[accounts]]
+code = "6300"
+name = "Telephone and Internet"
+category = "Expense"
+parent_code = "6000"
+is_group = false
+
+[[accounts]]
+code = "6400"
+name = "Office Supplies"
+category = "Expense"
+parent_code = "6000"
+is_group = false
+
+[[accounts]]
+code = "6500"
+name = "Bank Service Charges"
+category = "Expense"
+parent_code = "6000"
+is_group = false
+
+[[accounts]]
+code = "6600"
+name = "Insurance Expense"
+category = "Expense"
+parent_code = "6000"
+is_group = false
+
+[[accounts]]
+code = "6700"
+name = "Professional Fees (Legal & Accounting)"
+category = "Expense"
+parent_code = "6000"
+is_group = false
+
+[[accounts]]
+code = "6800"
+name = "Marketing and Advertising"
+category = "Expense"
+parent_code = "6000"
+is_group = false
+
+[[accounts]]
+code = "6850"
+name = "Travel and Entertainment"
+category = "Expense"
+parent_code = "6000"
+is_group = false
+
+[[accounts]]
+code = "6900"
+name = "Depreciation Expense"
+category = "Expense"
+parent_code = "6000"
+is_group = false

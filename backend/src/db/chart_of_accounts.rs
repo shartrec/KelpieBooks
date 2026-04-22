@@ -1,0 +1,103 @@
+/*
+ * Copyright (c) 2026-2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+
+use rocket_db_pools::sqlx::{self, PgConnection};
+use serde::Deserialize;
+use shared_core::models::{AccountCategory, SystemTag};
+use std::collections::HashMap;
+use uuid::Uuid;
+
+/// Represents the top-level structure of a TOML template file.
+#[derive(Debug, Deserialize)]
+pub struct ChartOfAccountsTemplate {
+    pub accounts: Vec<AccountImport>,
+}
+
+/// Represents a single account entry to be imported from a template.
+#[derive(Debug, Deserialize)]
+pub struct AccountImport {
+    pub code: String,
+    pub name: String,
+    pub category: AccountCategory,
+    pub parent_code: Option<String>,
+    #[serde(default)]
+    pub is_group: bool,
+    pub system_tag: Option<SystemTag>,
+}
+
+pub async fn import_default_accounts(
+    tx: &mut PgConnection,
+    organization_id: Uuid,
+    accounts: Vec<AccountImport>,
+) -> Result<(), sqlx::Error> {
+    let mut code_to_id_map = HashMap::new();
+
+    // First pass: Insert top-level accounts.
+    for account_template in accounts.iter().filter(|a| a.parent_code.is_none()) {
+        let id = insert_account(tx, organization_id, None, account_template).await?;
+        code_to_id_map.insert(account_template.code.clone(), id);
+    }
+
+    // Second pass: Insert child accounts.
+    for account_template in accounts.iter().filter(|a| a.parent_code.is_some()) {
+        let parent_code = account_template.parent_code.as_ref().unwrap();
+        let parent_id = code_to_id_map.get(parent_code).cloned();
+
+        if parent_id.is_none() {
+            log::error!("Parent account with code '{}' not found for account '{}'", parent_code, account_template.name);
+            continue;
+        }
+
+        let id = insert_account(tx, organization_id, parent_id, account_template).await?;
+        code_to_id_map.insert(account_template.code.clone(), id);
+    }
+
+    Ok(())
+}
+
+async fn insert_account(
+    tx: &mut PgConnection,
+    organization_id: Uuid,
+    parent_id: Option<Uuid>,
+    template: &AccountImport,
+) -> Result<Uuid, sqlx::Error> {
+    let record = sqlx::query!(
+        r#"
+        INSERT INTO accounts (organization_id, parent_id, code, name, category, is_group, system_tag)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id
+        "#,
+        organization_id,
+        parent_id,
+        template.code,
+        template.name,
+        template.category as _,
+        template.is_group,
+        template.system_tag as _
+    )
+    .fetch_one(tx)
+    .await?;
+
+    Ok(record.id)
+}
