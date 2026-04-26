@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026. Trevor Campbell and others.
+ * Copyright (c) 2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -22,26 +22,16 @@
  *
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::models::Organization;
+use yew::prelude::*;
+use crate::components::layout::Layout;
 
-fn from_row_to_org(row: &sqlx::postgres::PgRow) -> Organization {
-    Organization {
-        id: row.get("id"),
-        name: row.get("name"),
-        created_at: row.get("created_at"),
+/// The main dashboard page, now using the shared Layout component.
+#[function_component(DashboardPage)]
+pub fn dashboard_page() -> Html {
+    html! {
+        <Layout>
+            <h1>{ "Welcome to your Dashboard" }</h1>
+            <p>{ "This is where your financial overview will appear." }</p>
+        </Layout>
     }
-}
-
-pub async fn create(
-    tx: &mut PgConnection,
-    name: &str,
-) -> Result<Organization, sqlx::Error> {
-    let row = sqlx::query(
-        "INSERT INTO organizations (name) VALUES ($1) RETURNING *"
-    )
-    .bind(name)
-    .fetch_one(tx)
-    .await?;
-    Ok(from_row_to_org(&row))
 }

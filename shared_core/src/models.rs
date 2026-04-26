@@ -24,28 +24,29 @@
 
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
+use strum::Display;
 use uuid::Uuid;
 
-#[derive(Debug, FromRow, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Organization {
     pub id: Uuid,
     pub name: String,
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, FromRow, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct User {
     pub id: Uuid,
     pub organization_id: Uuid,
     pub email: String,
+    pub full_name: String,
+    pub display_name: Option<String>,
     pub password_hash: String,
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, sqlx::Type, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
-#[sqlx(type_name = "account_category")]
-#[allow(non_camel_case_types)]
+#[derive(Debug, Display, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
+#[strum(serialize_all = "PascalCase")]
 pub enum AccountCategory {
     Asset,
     Liability,
@@ -54,21 +55,22 @@ pub enum AccountCategory {
     Expense,
 }
 
-#[derive(Debug, sqlx::Type, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
-#[sqlx(type_name = "system_tag")]
-#[allow(non_camel_case_types)]
+#[derive(Debug, Display, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
+#[strum(serialize_all = "PascalCase")]
 pub enum SystemTag {
-    CASH_AT_BANK,
-    ACCOUNTS_RECEIVABLE,
-    ACCOUNTS_PAYABLE,
-    RETAINED_EARNINGS,
-    SALES_TAX_PAYABLE,
-    REVENUE,
-    EXPENSE,
-    COST_OF_GOODS_SOLD,
+    CashAtBank,
+    AccountsReceivable,
+    AccountsPayable,
+    RetainedEarnings,
+    SalesTaxPayable,
+    Revenue,
+    Expense,
+    CostOfGoodsSold,
 }
 
-#[derive(Debug, FromRow, Serialize, Deserialize)]
+impl SystemTag {}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Account {
     pub id: Uuid,
     pub organization_id: Uuid,
@@ -81,7 +83,7 @@ pub struct Account {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, FromRow, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Transaction {
     pub id: Uuid,
     pub organization_id: Uuid,
@@ -91,7 +93,7 @@ pub struct Transaction {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, FromRow, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct JournalEntry {
     pub id: Uuid,
     pub transaction_id: Uuid,

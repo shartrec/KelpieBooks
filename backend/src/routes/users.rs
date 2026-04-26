@@ -31,14 +31,14 @@ use rocket::{delete, get, post, put, routes, Route};
 use shared_core::models::User;
 use std::ops::Deref;
 use uuid::Uuid;
-
 use rocket_db_pools::Connection;
+use crate::routes::security::AuthenticatedUser;
+use serde::Deserialize;
 
 /// A newtype wrapper for `Uuid` to implement `FromParam` and satisfy the orphan rule.
 #[derive(Clone, Copy)]
 pub struct PathUuid(Uuid);
 
-/// Allows `PathUuid` to be used as a `Uuid` via dereferencing.
 impl Deref for PathUuid {
     type Target = Uuid;
     fn deref(&self) -> &Self::Target {
@@ -46,60 +46,66 @@ impl Deref for PathUuid {
     }
 }
 
-/// Synchronous implementation of `FromParam` for our `PathUuid` newtype.
 impl<'r> FromParam<'r> for PathUuid {
     type Error = uuid::Error;
-
     fn from_param(param: &'r str) -> Result<Self, Self::Error> {
         Uuid::parse_str(param).map(PathUuid)
     }
 }
 
-// This is a placeholder. You'll need to implement a way to get the
-// organization_id from the authenticated user.
-fn get_org_id_from_auth() -> Uuid {
-    // In a real application, you would get this from the user's session or token.
-    // For now, we'll use a placeholder.
-    Uuid::new_v4()
+#[derive(Deserialize)]
+pub struct UserUpdateData {
+    full_name: String,
+    display_name: Option<String>,
 }
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![list, add, update, delete, get]
+    routes![update_me, get_all_users, get_user, delete_user]
 }
 
-#[get("/api/users")]
-pub(crate) async fn list(mut pool: Connection<DbKelpie>) -> Result<Json<Vec<User>>, ApiError> {
-    let org_id = get_org_id_from_auth();
-    let users = user::get_all(&mut *pool, org_id).await?;
-    Ok(Json(users))
-}
+#[put("/api/users/me", data = "<update_data>")]
+pub(crate) async fn update_me(
+    mut pool: Connection<DbKelpie>,
+    auth_user: AuthenticatedUser,
+    update_data: Json<UserUpdateData>,
+) -> Result<Json<User>, ApiError> {
+    // We need the original user object to get the password hash
+    let original_user = user::get(&mut *pool, auth_user.user_id).await?
+        .ok_or_else(|| ApiError::NotFound("User not found".to_string()))?;
 
-#[post("/api/users", data = "<user>")]
-pub(crate) async fn add(user: Json<User>, mut pool: Connection<DbKelpie>) -> Result<Json<User>, ApiError> {
-    let org_id = get_org_id_from_auth();
-    // In a real application, you would hash the password before storing it.
-    let new = user::insert(&mut *pool, org_id, user.email.clone(), user.password_hash.clone()).await?;
-    Ok(Json(new))
-}
+    let updated_user = user::update(
+        &mut *pool,
+        auth_user.user_id,
+        original_user.email, // email is not changing here
+        original_user.password_hash, // password is not changing here
+        update_data.full_name.clone(),
+        update_data.display_name.clone(),
+    ).await?;
 
-#[put("/api/users", data = "<user>")]
-pub(crate) async fn update(user: Json<User>, mut pool: Connection<DbKelpie>) -> Result<Json<User>, ApiError> {
-    let updated_user = user::update(&mut *pool, user.id, user.email.clone(), user.password_hash.clone()).await?;
     Ok(Json(updated_user))
 }
 
-#[delete("/api/users/<id>")]
-pub(crate) async fn delete(id: PathUuid, mut pool: Connection<DbKelpie>) -> Result<&'static str, ApiError> {
-    // We use `*id` to dereference PathUuid to Uuid
-    user::delete(&mut *pool, *id).await?;
-    Ok("OK")
+
+#[get("/api/users")]
+pub(crate) async fn get_all_users(
+    mut pool: Connection<DbKelpie>,
+    auth_user: AuthenticatedUser,
+) -> Result<Json<Vec<User>>, ApiError> {
+    // In a real app, you'd get the organization_id from the authenticated user
+    let users = user::get_all(&mut *pool, auth_user.user_id).await?;
+    Ok(Json(users))
 }
 
 #[get("/api/users/<id>")]
-pub(crate) async fn get(id: PathUuid, mut pool: Connection<DbKelpie>) -> Result<Json<User>, ApiError> {
-    // We use `*id` to dereference PathUuid to Uuid
+pub(crate) async fn get_user(id: PathUuid, mut pool: Connection<DbKelpie>) -> Result<Json<User>, ApiError> {
     match user::get(&mut *pool, *id).await? {
         Some(user) => Ok(Json(user)),
         None => Err(ApiError::NotFound("User not found".to_string())),
     }
+}
+
+#[delete("/api/users/<id>")]
+pub(crate) async fn delete_user(id: PathUuid, mut pool: Connection<DbKelpie>) -> Result<&'static str, ApiError> {
+    user::delete(&mut *pool, *id).await?;
+    Ok("OK")
 }

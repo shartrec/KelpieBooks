@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026. Trevor Campbell and others.
+ * Copyright (c) 2026-2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -21,7 +21,26 @@
  *      Trevor Campbell
  *
  */
+use yew_router::Routable;
 
-pub fn run() {
-    println!("Hello from the frontend!");
+pub mod pages;
+pub mod components;
+pub mod auth;
+
+#[derive(Clone, Routable, PartialEq)]
+pub enum Route {
+    #[at("/register")]
+    Register,
+    #[at("/login")]
+    Login,
+    #[at("/onboard")]
+    Onboard,
+    #[at("/dashboard")]
+    Dashboard,
+    #[at("/profile")]
+    Profile,
+    #[at("/ledger")]
+    Ledger,
+    #[at("/")]
+    Home,
 }

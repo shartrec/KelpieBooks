@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026. Trevor Campbell and others.
+ * Copyright (c) 2026-2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -23,7 +23,7 @@
  */
 
 pub mod models;
-pub mod onboarding;
+pub mod requests;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right

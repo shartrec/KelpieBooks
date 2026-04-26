@@ -39,7 +39,7 @@ name = "Main Checking Account"
 category = "Asset"
 parent_code = "1110"
 is_group = false
-system_tag = "CASH_AT_BANK"
+system_tag = "CashAtBank"
 
 [[accounts]]
 code = "1112"
@@ -61,7 +61,7 @@ name = "Accounts Receivable"
 category = "Asset"
 parent_code = "1100"
 is_group = false
-system_tag = "ACCOUNTS_RECEIVABLE"
+system_tag = "AccountsReceivable"
 
 [[accounts]]
 code = "1300"
@@ -127,7 +127,7 @@ name = "Accounts Payable"
 category = "Liability"
 parent_code = "2100"
 is_group = false
-system_tag = "ACCOUNTS_PAYABLE"
+system_tag = "AccountsPayable"
 
 [[accounts]]
 code = "2120"
@@ -142,7 +142,7 @@ name = "Sales Tax Payable"
 category = "Liability"
 parent_code = "2100"
 is_group = false
-system_tag = "SALES_TAX_PAYABLE"
+system_tag = "SalesTaxPayable"
 
 [[accounts]]
 code = "2300"
@@ -194,7 +194,7 @@ name = "Retained Earnings"
 category = "Equity"
 parent_code = "3000"
 is_group = false
-system_tag = "RETAINED_EARNINGS"
+system_tag = "RetainedEarnings"
 
 
 # 4000-4999: Revenue
@@ -204,7 +204,7 @@ code = "4000"
 name = "Revenue"
 category = "Revenue"
 is_group = true
-system_tag = "REVENUE"
+system_tag = "Revenue"
 
 [[accounts]]
 code = "4100"
@@ -249,7 +249,7 @@ code = "5000"
 name = "Cost of Services"
 category = "Expense"
 is_group = true
-system_tag = "COST_OF_GOODS_SOLD"
+system_tag = "CostOfGoodsSold"
 
 [[accounts]]
 code = "5100"
@@ -273,7 +273,7 @@ code = "6000"
 name = "Operating Expenses"
 category = "Expense"
 is_group = true
-system_tag = "EXPENSE"
+system_tag = "Expense"
 
 [[accounts]]
 code = "6100"

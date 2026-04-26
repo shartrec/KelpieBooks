@@ -22,26 +22,28 @@
  *
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::models::Organization;
+use yew::prelude::*;
+use crate::components::sidebar::Sidebar;
+use crate::components::header::Header;
 
-fn from_row_to_org(row: &sqlx::postgres::PgRow) -> Organization {
-    Organization {
-        id: row.get("id"),
-        name: row.get("name"),
-        created_at: row.get("created_at"),
-    }
+#[derive(Properties, PartialEq)]
+pub struct LayoutProps {
+    pub children: Children,
 }
 
-pub async fn create(
-    tx: &mut PgConnection,
-    name: &str,
-) -> Result<Organization, sqlx::Error> {
-    let row = sqlx::query(
-        "INSERT INTO organizations (name) VALUES ($1) RETURNING *"
-    )
-    .bind(name)
-    .fetch_one(tx)
-    .await?;
-    Ok(from_row_to_org(&row))
+/// A component that provides the main application layout with a sidebar and header.
+/// Any children passed to this component will be rendered in the main content area.
+#[function_component(Layout)]
+pub fn layout(props: &LayoutProps) -> Html {
+    html! {
+        <div class="dashboard-layout">
+            <Sidebar />
+            <div class="dashboard-main">
+                <Header />
+                <main class="dashboard-main-content">
+                    { for props.children.iter() }
+                </main>
+            </div>
+        </div>
+    }
 }

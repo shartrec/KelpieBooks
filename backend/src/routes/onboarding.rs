@@ -29,23 +29,22 @@ use crate::DbKelpie;
 use rocket::serde::json::Json;
 use rocket::{post, routes, Route};
 use rocket_db_pools::Connection;
-use shared_core::onboarding::OnboardingRequest;
+use shared_core::requests::onboard::OnboardingRequest;
 use sqlx::Acquire;
 use std::fs;
+use crate::routes::security::hash_pwd;
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![onboard]
+    routes![register]
 }
 
-#[post("/api/onboarding", data = "<request>")]
-async fn onboard(
+#[post("/api/register", data = "<request>")]
+async fn register(
     mut pool: Connection<DbKelpie>,
     request: Json<OnboardingRequest>,
 ) -> Result<&'static str, ApiError> {
     // 1. Read and parse the chart of accounts template.
-    // This is done outside the transaction. In the future, the template name
-    // could be part of the OnboardingRequest.
-    let toml_str = fs::read_to_string("templates/service.toml")
+    let toml_str = fs::read_to_string(format!("templates/{}.toml", request.coa_template_id))
         .map_err(|e| {
             log::error!("Failed to read chart of accounts template: {}", e);
             ApiError::Error("Server configuration error: Could not load chart of accounts.".to_string())
@@ -63,8 +62,15 @@ async fn onboard(
     let org = db::organization::create(&mut tx, &request.organization_name).await?;
 
     // 4. Create the user.
-    // In a real app, you MUST hash the password.
-    let _user = db::user::insert(&mut tx, org.id, request.user_email.clone(), request.user_password.clone()).await?;
+    let pwd_hash = hash_pwd(&request.user_password)?;
+    let _user = db::user::insert(
+        &mut tx,
+        org.id,
+        request.user_email.clone(),
+        pwd_hash,
+        request.user_full_name.clone(),
+        request.user_display_name.clone(),
+    ).await?;
 
     // 5. Import the chart of accounts for the new organization.
     db::chart_of_accounts::import_default_accounts(&mut tx, org.id, template.accounts).await?;

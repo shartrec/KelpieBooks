@@ -1,0 +1,330 @@
+/*
+ * Copyright (c) 2026-2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+
+:root {
+    --custom-color: #3b0000;
+    --primary-color: #333333;
+    --text-color: #333333;
+    --background-color: #f9fafb;
+}
+
+/* Base Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fafb;
+    color: var(--primary-color);
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+nav {
+    background-color: var(--background-color);
+    flex-direction: column;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+/* Container */
+.page-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column; /* Changed to column for auth pages */
+    align-items: center; /* Center content horizontally */
+    justify-content: center; /* Center content vertically */
+    height: 100vh; /* full browser height */
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Enables vertical scrolling */
+    min-height: 0; /* Prevents content from stretching */
+}
+
+.scrollable-table {
+    flex: 1;
+    overflow-y: auto; /* Enables vertical scrolling */
+    padding: 1rem;
+    background-color: #fafafa;
+    min-height: 0; /* Prevents overflow issues */
+}
+
+/* Headings */
+h1, h2, h3, h4 {
+    margin-bottom: 1rem;
+    color: var(--custom-color);
+}
+
+h1 {
+    font-size: 2.2rem;
+}
+
+h2 {
+    font-size: 1.8rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+}
+
+/* Buttons */
+button {
+    background-color: #f0f0f0;
+    color: var(--custom-color);
+    border: 1px solid #d1d5db;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    margin: 5px;
+}
+button:hover {
+    background-color: #e0e0e0;
+}
+
+button:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.button-group {
+    display: flex;
+    gap: 8px;
+}
+
+.button-group input[type="radio"] {
+    display: none;
+}
+
+.button-group label {
+    padding: 0.5rem 1rem;
+    background: #e0e0e0;
+    border: 3px solid #aaa;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: inset 0 -2px 2px rgba(0,0,0,0.2);
+    user-select: none;
+    transition: background 0.2s, box-shadow 0.2s;
+    width: 12rem;
+    text-align: center;
+}
+
+.button-group label:hover {
+    background: #d0d0d0;
+}
+
+.button-group input[type="radio"]:checked + label {
+    background: #e0ffe0;
+    border: 3px solid #0a0;
+    font-weight: bold;
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+}
+
+.icon-button {
+    color: var(--custom-color);
+    background-color: #f0f0f0;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.icon-button:hover {
+    background-color: #e0e0e0;
+}
+
+.key-button {
+    color: var(--custom-color);
+    background-color: #f0f0f0;
+    border: none;
+    padding: 0;
+}
+.key-button:hover {
+    background-color: #e0e0e0;
+}
+
+.button-row {
+    display: flex;
+    gap: 16px;  /* space between buttons */
+}
+/* Form Inputs */
+input, select, textarea {
+    width: auto; /* Changed from 100% to auto for better control */
+    min-width: 0;
+    max-width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--background-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Auth Form Specifics */
+.auth-form {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.5rem 1rem;
+    align-items: center;
+    max-width: 600px;
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.auth-form label {
+    grid-column: 1;
+    text-align: right;
+}
+
+.auth-form input {
+    grid-column: 2;
+}
+
+.auth-form .form-actions {
+    grid-column: 2;
+    justify-self: end;
+}
+
+.auth-form .error {
+    grid-column: 1 / span 2;
+    color: #e74c3c;
+    background-color: #fbeae5;
+    padding: 0.75rem;
+    border-radius: 6px;
+    text-align: center;
+}
+
+
+/* Table Styles */
+table {
+    table-layout: auto;
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+}
+
+th, td {
+    /*width: 40%;*/
+    padding: 1px 3px;
+    border: 1px solid #e5e7eb;
+    text-align: left;
+}
+
+td.actions {
+    white-space: nowrap;
+    width: 1px; /* Min width for action buttons */
+}
+
+th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+}
+/* Table cell input fix */
+td input, td select, td textarea {
+    margin-bottom: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 1px 3px; /* Match table cell padding */
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+}
+
+.alert {
+    background: #ffe0e0;
+    color: #a00;
+    padding: 12px;
+    margin-bottom: 16px;
+    border: 1px solid #f99;
+    border-radius: 6px;
+    font-weight: bold;
+}
+/* Cards */
+.card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+/* Fade-in Animation */
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+.scrollable-list {
+    flex: 0 0 10rem;
+    overflow-y: auto;
+    padding: 1rem;
+    background-color: #fafafa;
+    min-height: 0; /* Prevents overflow issues */
+}
+.scrollable-list ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Links */
+a {
+    color: var(--background-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}

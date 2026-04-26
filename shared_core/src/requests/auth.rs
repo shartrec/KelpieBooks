@@ -22,26 +22,10 @@
  *
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::models::Organization;
+use serde::{Serialize, Deserialize};
 
-fn from_row_to_org(row: &sqlx::postgres::PgRow) -> Organization {
-    Organization {
-        id: row.get("id"),
-        name: row.get("name"),
-        created_at: row.get("created_at"),
-    }
-}
-
-pub async fn create(
-    tx: &mut PgConnection,
-    name: &str,
-) -> Result<Organization, sqlx::Error> {
-    let row = sqlx::query(
-        "INSERT INTO organizations (name) VALUES ($1) RETURNING *"
-    )
-    .bind(name)
-    .fetch_one(tx)
-    .await?;
-    Ok(from_row_to_org(&row))
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct LoginRequest {
+    pub email: String,
+    pub password_raw: String,
 }

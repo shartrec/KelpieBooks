@@ -21,10 +21,10 @@
  *      Trevor Campbell
  *
  */
-
-use crate::db::security::create_initial_admin;
 use crate::routes::{onboarding, security, users};
 use crate::util::logging::setup_logging;
+use rocket::fs::{relative, FileServer, NamedFile};
+use rocket::{get, routes};
 use rocket_db_pools::Database;
 
 mod db;
@@ -35,6 +35,12 @@ mod routes;
 #[database("kelpie_db")]
 pub(crate) struct DbKelpie(sqlx::PgPool);
 
+#[get("/<_..>", rank = 20)]
+async fn spa_index() -> Option<NamedFile> {
+    // This tells Rocket: "If nothing else matched, just send them the index.html"
+    NamedFile::open(relative!("./static/index.html")).await.ok()
+}
+
 #[rocket::launch]
 fn rocket() -> _ {
     setup_logging();
@@ -42,17 +48,12 @@ fn rocket() -> _ {
 
     let rocket = rocket::build()
         .attach(DbKelpie::init())
-        .attach(rocket::fairing::AdHoc::on_ignite("Create Initial Admin", |rocket| async {
-            let db = DbKelpie::fetch(&rocket).unwrap();
-            let mut con = db.acquire().await.unwrap();
-            if let Err(e) = create_initial_admin(&mut con).await {
-                tracing::error!("Failed to create initial admin user: {:?}", e);
-            }
-            rocket
-        }))
         .mount("/", security::routes())
         .mount("/", onboarding::routes())
-        .mount("/", users::routes());
+        .mount("/", users::routes())
+        .mount("/", FileServer::from(relative!("./static")))
+        // 3. Mount the fallback route with a lower priority (rank 2)
+        .mount("/", routes![spa_index]);
 
     rocket
 }

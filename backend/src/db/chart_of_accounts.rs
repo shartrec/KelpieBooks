@@ -25,6 +25,7 @@
 use rocket_db_pools::sqlx::{self, PgConnection};
 use serde::Deserialize;
 use shared_core::models::{AccountCategory, SystemTag};
+use sqlx::Row;
 use std::collections::HashMap;
 use uuid::Uuid;
 
@@ -82,22 +83,22 @@ async fn insert_account(
     parent_id: Option<Uuid>,
     template: &AccountImport,
 ) -> Result<Uuid, sqlx::Error> {
-    let record = sqlx::query!(
+    let row = sqlx::query(
         r#"
         INSERT INTO accounts (organization_id, parent_id, code, name, category, is_group, system_tag)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        VALUES ($1, $2, $3, $4, $5::account_category, $6, $7::system_tag)
         RETURNING id
-        "#,
-        organization_id,
-        parent_id,
-        template.code,
-        template.name,
-        template.category as _,
-        template.is_group,
-        template.system_tag as _
-    )
-    .fetch_one(tx)
-    .await?;
+        "#)
+        .bind(organization_id)
+        .bind(parent_id)
+        .bind(&template.code)
+        .bind(&template.name)
+        .bind(template.category.to_string())
+        .bind(template.is_group)
+        .bind(template.system_tag.map(|s| s.to_string()))
+        .fetch_one(tx)
+        .await?;
 
-    Ok(record.id)
+    // Retrieve the 'id' from the row and return it.
+    Ok(row.get(0))
 }

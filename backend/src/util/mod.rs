@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) 2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+
 pub mod logging;
 
 use rocket::http::Status;
@@ -6,10 +30,12 @@ use rocket::serde::json::Json;
 use rocket::serde::Serialize;
 use rocket::{Request, Response};
 use rocket_db_pools::sqlx;
+use bcrypt;
 
 #[derive(Debug)]
 pub(crate) enum ApiError {
     Db(sqlx::Error),
+    Hashing(bcrypt::BcryptError),
     Error(String),
     Invalid(String),
     NotFound(String),
@@ -19,6 +45,12 @@ pub(crate) enum ApiError {
 impl From<sqlx::Error> for ApiError {
     fn from(err: sqlx::Error) -> Self {
         ApiError::Db(err)
+    }
+}
+
+impl From<bcrypt::BcryptError> for ApiError {
+    fn from(err: bcrypt::BcryptError) -> Self {
+        ApiError::Hashing(err)
     }
 }
 
@@ -35,6 +67,7 @@ impl<'r> Responder<'r, 'static> for ApiError {
             ApiError::Invalid(msg) => (Status::BadRequest, msg),
             ApiError::Internal(msg) => (Status::InternalServerError, msg),
             ApiError::Db(e) => (Status::Conflict, e.to_string()),
+            ApiError::Hashing(e) => (Status::InternalServerError, format!("Password hashing error: {}", e)),
         };
         let body = Json(ApiErrorMessage { error: msg });
         Response::build()

@@ -1,20 +1,20 @@
 /*
- * Copyright (c) 2025. Trevor Campbell and others.
+ * Copyright (c) 2025-2026. Trevor Campbell and others.
  *
- * This file is part of KelpieRustWeb.
+ * This file is part of KelpieBooks.
  *
- * KelpieRustWeb is free software; you can redistribute it and/or modify
+ * KelpieBooks is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License,or
  * (at your option) any later version.
  *
- * KelpieRustWeb is distributed in the hope that it will be useful,
+ * KelpieBooks is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with KelpieRustWeb; if not, write to the Free Software
+ * along with KelpieBooks; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Contributors:
@@ -23,6 +23,12 @@
  */
 use jsonwebtoken::{decode, encode, errors::Error as JwtError, DecodingKey, EncodingKey, Header, TokenData, Validation};
 use rocket::serde::Serialize;
+use rocket::{get, post, routes, Route};
+use std::sync::OnceLock;
+use bcrypt::{hash, DEFAULT_COST};
+use shared_core::requests::auth::LoginRequest;
+use crate::util::ApiError;
+use crate::routes::Role;
 
 use crate::db::security;
 use crate::DbKelpie;
@@ -33,42 +39,78 @@ use rocket::request::{FromRequest, Outcome};
 use rocket::serde::json::Json;
 use rocket::serde::Deserialize;
 use rocket_db_pools::Connection;
-
-#[derive(Deserialize)]
-struct LoginRequest {
-    username: String,
-    password: String,
-}
+use uuid::Uuid;
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![login, ]
+    routes![login, me, logout]
+}
+
+/// A struct to represent the current user's data sent to the frontend.
+#[derive(Serialize, Debug)]
+pub struct CurrentUser {
+    username: String, // This is the email
+    full_name: String,
+    display_name: Option<String>,
+    role: String,
 }
 
 #[post("/api/login", data = "<login_request>")]
-async fn login(mut pool: Connection<DbKelpie>, cookies: &CookieJar<'_>, login_request: Json<LoginRequest>) -> Result<Status, Status> {
-    let role = security::check_login(&mut *pool, &login_request.username, &login_request.password).await;
+async fn login(mut pool: Connection<DbKelpie>, cookies: &CookieJar<'_>, login_request: Json<LoginRequest>) -> Result<Json<CurrentUser>, Status> {
+    let db_user = security::check_login(&mut pool, &login_request.email, &login_request.password_raw).await;
 
-    match role {
-        Ok(Some(role)) => {
-            let user = AuthenticatedUser {
-                username: login_request.username.clone(),
-                role: role,
+    match db_user {
+        Ok(Some(user)) => {
+            let auth_user = AuthenticatedUser {
+                user_id: user.id,
+                username: user.email,
+                full_name: user.full_name,
+                display_name: user.display_name,
+                role: Role::User, // You might want to get this from the user object in the future
             };
-            let token = generate_session_token(&user);
+            let token = generate_session_token(&auth_user);
             cookies.add(Cookie::build(("session", token))
                 .http_only(false)
             );
 
-            Ok(Status::Ok)
+            let current_user = CurrentUser {
+                username: auth_user.username,
+                full_name: auth_user.full_name,
+                display_name: auth_user.display_name,
+                role: auth_user.role.to_string(),
+            };
+
+            Ok(Json(current_user))
         }
         Ok(None) => Err(Status::Unauthorized),
         Err(_) => Err(Status::InternalServerError),
     }
 }
 
-pub(super) struct AuthenticatedUser {
-    username: String,
-    role: Role,
+/// Endpoint to get the current authenticated user's information.
+#[get("/api/auth/me")]
+async fn me(user: AuthenticatedUser) -> Json<CurrentUser> {
+    Json(CurrentUser {
+        username: user.username,
+        full_name: user.full_name,
+        display_name: user.display_name,
+        role: user.role.to_string(),
+    })
+}
+
+/// Endpoint to log the user out by removing their session cookie.
+#[post("/api/auth/logout")]
+fn logout(cookies: &CookieJar<'_>) -> Status {
+    cookies.remove(Cookie::named("session"));
+    Status::Ok
+}
+
+
+pub(crate) struct AuthenticatedUser {
+    pub(crate) user_id: Uuid,
+    pub(crate) username: String,
+    pub(crate) full_name: String,
+    pub(crate) display_name: Option<String>,
+    pub(crate) role: Role,
 }
 
 #[rocket::async_trait]
@@ -77,7 +119,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
 
     async fn from_request(request: &'r rocket::Request<'_>) -> Outcome<Self, Self::Error> {
         let cookies = request.cookies();
-        if let Some(cookie) = cookies.get_private("session") {
+        if let Some(cookie) = cookies.get("session") {
             if let Some(user) = validate_session_token(cookie.value()) {
                 return Outcome::Success(user);
             }
@@ -88,30 +130,30 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Claims {
-    username: String, // Subject (e.g., username)
-    role: String, // User role (e.g., admin or tipper)
-    exp: usize,   // Expiration time (as a UNIX timestamp)
+    user_id: String,
+    username: String,
+    full_name: String,
+    display_name: Option<String>,
+    role: String,
+    exp: usize,
 }
 
-use crate::routes::Role;
-use rocket::{post, routes, Route};
-use std::sync::OnceLock;
+
+pub(crate) fn hash_pwd(password: &str) -> Result<String, ApiError> {
+    hash(password, DEFAULT_COST)
+        .map_err(|e| ApiError::from(bcrypt::Error::from(e)))
+}
 
 static SECRET_KEY: OnceLock<String> = OnceLock::new();
 
 pub fn init_secret_key() -> String {
-    // Generate a secure random 256-bit key and encode as base64
     let mut buf = [0u8; 32];
     OsRng.fill_bytes(&mut buf);
-    let key = general_purpose::STANDARD.encode(&buf);
-    key
+    general_purpose::STANDARD.encode(&buf)
 }
 
 fn get_secret_key() -> &'static str {
-    SECRET_KEY.get_or_init(|| {
-        // Initialize the secret key if it hasn't been set yet
-        init_secret_key()
-    })
+    SECRET_KEY.get_or_init(init_secret_key)
 }
 
 fn generate_session_token(user: &AuthenticatedUser) -> String {
@@ -121,7 +163,10 @@ fn generate_session_token(user: &AuthenticatedUser) -> String {
         .timestamp() as usize;
 
     let claims = Claims {
+        user_id: user.user_id.to_string(),
         username: user.username.clone(),
+        full_name: user.full_name.clone(),
+        display_name: user.display_name.clone(),
         role: user.role.to_string(),
         exp: expiration,
     };
@@ -131,10 +176,10 @@ fn generate_session_token(user: &AuthenticatedUser) -> String {
         &claims,
         &EncodingKey::from_secret(get_secret_key().as_ref()),
     )
-        .expect("Failed to generate token")
+    .expect("Failed to generate token")
 }
 
-pub(super) fn validate_session_token(token: &str) -> Option<AuthenticatedUser> {
+pub(crate) fn validate_session_token(token: &str) -> Option<AuthenticatedUser> {
     let validation = Validation::default();
     let token_data: Result<TokenData<Claims>, JwtError> = decode(
         token,
@@ -146,8 +191,11 @@ pub(super) fn validate_session_token(token: &str) -> Option<AuthenticatedUser> {
             let now = chrono::Utc::now().timestamp() as usize;
             if data.claims.exp > now {
                 Some(AuthenticatedUser {
+                    user_id: Uuid::parse_str(&data.claims.user_id).unwrap(),
                     username: data.claims.username,
-                    role: Role::from(data.claims.role.as_str()).unwrap_or(Role::Guest),
+                    full_name: data.claims.full_name,
+                    display_name: data.claims.display_name,
+                    role: Role::from(&data.claims.role).unwrap_or(Role::Guest),
                 })
             } else {
                 None

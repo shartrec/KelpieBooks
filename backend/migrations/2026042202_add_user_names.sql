@@ -22,26 +22,14 @@
  *
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::models::Organization;
+-- Add full_name and display_name to the users table
+ALTER TABLE users
+ADD COLUMN full_name TEXT NOT NULL DEFAULT '',
+ADD COLUMN display_name TEXT;
 
-fn from_row_to_org(row: &sqlx::postgres::PgRow) -> Organization {
-    Organization {
-        id: row.get("id"),
-        name: row.get("name"),
-        created_at: row.get("created_at"),
-    }
-}
+-- For any existing users, we can make a reasonable guess for the full_name
+-- by using their email, so the default isn't permanent.
+UPDATE users SET full_name = email WHERE full_name = '';
 
-pub async fn create(
-    tx: &mut PgConnection,
-    name: &str,
-) -> Result<Organization, sqlx::Error> {
-    let row = sqlx::query(
-        "INSERT INTO organizations (name) VALUES ($1) RETURNING *"
-    )
-    .bind(name)
-    .fetch_one(tx)
-    .await?;
-    Ok(from_row_to_org(&row))
-}
+-- Now that all rows have a real value, we can remove the default.
+ALTER TABLE users ALTER COLUMN full_name DROP DEFAULT;
