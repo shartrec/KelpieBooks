@@ -22,27 +22,17 @@
  *
  */
 
-use serde::Deserialize;
 use yew::prelude::*;
-
-/// This struct must match the `CurrentUser` struct from the backend.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
-pub struct CurrentUser {
-    pub username: String, // This is the email
-    pub full_name: String,
-    pub display_name: Option<String>,
-    pub role: String,
-}
+use shared_core::dtos::user_detail::UserDetail;
 
 /// The context that will hold the user's state.
-/// `Option<CurrentUser>` is used because the user might not be logged in.
 #[derive(Debug, Clone, PartialEq)]
 pub struct UserContext {
-    pub user: Option<CurrentUser>,
+    pub user: Option<UserDetail>,
 }
 
 impl Reducible for UserContext {
-    type Action = Option<CurrentUser>;
+    type Action = Option<UserDetail>;
 
     fn reduce(self: std::rc::Rc<Self>, action: Self::Action) -> std::rc::Rc<Self> {
         UserContext { user: action }.into()

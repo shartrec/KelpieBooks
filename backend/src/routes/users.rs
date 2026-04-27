@@ -25,42 +25,29 @@
 use crate::db::user;
 use crate::util::ApiError;
 use crate::DbKelpie;
-use rocket::request::FromParam;
 use rocket::serde::json::Json;
-use rocket::{delete, get, post, put, routes, Route};
-use shared_core::models::User;
-use std::ops::Deref;
-use uuid::Uuid;
+use rocket::{delete, get, put, routes, Route};
+use shared_core::dtos::user_detail::UserDetail;
 use rocket_db_pools::Connection;
-use crate::routes::security::AuthenticatedUser;
+use crate::routes::security::{hash_pwd, AuthenticatedUser};
 use serde::Deserialize;
-
-/// A newtype wrapper for `Uuid` to implement `FromParam` and satisfy the orphan rule.
-#[derive(Clone, Copy)]
-pub struct PathUuid(Uuid);
-
-impl Deref for PathUuid {
-    type Target = Uuid;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<'r> FromParam<'r> for PathUuid {
-    type Error = uuid::Error;
-    fn from_param(param: &'r str) -> Result<Self, Self::Error> {
-        Uuid::parse_str(param).map(PathUuid)
-    }
-}
+use crate::util::types::PathUuid;
 
 #[derive(Deserialize)]
 pub struct UserUpdateData {
+    email: String,
     full_name: String,
     display_name: Option<String>,
 }
 
+#[derive(Deserialize)]
+pub struct PasswordUpdateData {
+    old_password: String,
+    new_password: String,
+}
+
 pub(crate) fn routes() -> Vec<Route> {
-    routes![update_me, get_all_users, get_user, delete_user]
+    routes![update_me, update_password, get_all_users, get_user, delete_user]
 }
 
 #[put("/api/users/me", data = "<update_data>")]
@@ -68,21 +55,56 @@ pub(crate) async fn update_me(
     mut pool: Connection<DbKelpie>,
     auth_user: AuthenticatedUser,
     update_data: Json<UserUpdateData>,
-) -> Result<Json<User>, ApiError> {
-    // We need the original user object to get the password hash
+) -> Result<Json<UserDetail>, ApiError> {
     let original_user = user::get(&mut *pool, auth_user.user_id).await?
         .ok_or_else(|| ApiError::NotFound("User not found".to_string()))?;
 
     let updated_user = user::update(
         &mut *pool,
         auth_user.user_id,
-        original_user.email, // email is not changing here
-        original_user.password_hash, // password is not changing here
+        update_data.email.clone(),
+        original_user.password_hash,
         update_data.full_name.clone(),
         update_data.display_name.clone(),
     ).await?;
 
-    Ok(Json(updated_user))
+    let user_detail = UserDetail {
+        id: updated_user.id,
+        email: updated_user.email,
+        full_name: updated_user.full_name,
+        display_name: updated_user.display_name,
+        role: auth_user.role.to_string(),
+    };
+
+    Ok(Json(user_detail))
+}
+
+#[put("/api/users/me/password", data = "<password_data>")]
+pub(crate) async fn update_password(
+    mut pool: Connection<DbKelpie>,
+    auth_user: AuthenticatedUser,
+    password_data: Json<PasswordUpdateData>,
+) -> Result<&'static str, ApiError> {
+    let original_user = user::get(&mut *pool, auth_user.user_id).await?
+        .ok_or_else(|| ApiError::NotFound("User not found".to_string()))?;
+
+    let valid = bcrypt::verify(&password_data.old_password, &original_user.password_hash)?;
+    if !valid {
+        return Err(ApiError::Invalid("Incorrect old password".to_string()));
+    }
+
+    let new_password_hash = hash_pwd(&password_data.new_password)?;
+
+    user::update(
+        &mut *pool,
+        auth_user.user_id,
+        original_user.email,
+        new_password_hash,
+        original_user.full_name,
+        original_user.display_name,
+    ).await?;
+
+    Ok("Password updated successfully")
 }
 
 
@@ -90,16 +112,31 @@ pub(crate) async fn update_me(
 pub(crate) async fn get_all_users(
     mut pool: Connection<DbKelpie>,
     auth_user: AuthenticatedUser,
-) -> Result<Json<Vec<User>>, ApiError> {
-    // In a real app, you'd get the organization_id from the authenticated user
-    let users = user::get_all(&mut *pool, auth_user.user_id).await?;
-    Ok(Json(users))
+) -> Result<Json<Vec<UserDetail>>, ApiError> {
+    let users = user::get_all(&mut *pool, auth_user.organization_id).await?;
+    let user_details = users.into_iter().map(|user| UserDetail {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        display_name: user.display_name,
+        role: "User".to_string(), // Placeholder
+    }).collect();
+    Ok(Json(user_details))
 }
 
 #[get("/api/users/<id>")]
-pub(crate) async fn get_user(id: PathUuid, mut pool: Connection<DbKelpie>) -> Result<Json<User>, ApiError> {
+pub(crate) async fn get_user(id: PathUuid, mut pool: Connection<DbKelpie>) -> Result<Json<UserDetail>, ApiError> {
     match user::get(&mut *pool, *id).await? {
-        Some(user) => Ok(Json(user)),
+        Some(user) => {
+            let user_detail = UserDetail {
+                id: user.id,
+                email: user.email,
+                full_name: user.full_name,
+                display_name: user.display_name,
+                role: "User".to_string(), // Placeholder
+            };
+            Ok(Json(user_detail))
+        },
         None => Err(ApiError::NotFound("User not found".to_string())),
     }
 }

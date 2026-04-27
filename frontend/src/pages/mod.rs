@@ -26,3 +26,4 @@ pub mod register;
 pub mod login;
 pub mod dashboard;
 pub mod profile;
+pub mod ledger;

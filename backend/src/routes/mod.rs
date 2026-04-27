@@ -25,6 +25,7 @@
 pub(crate) mod security;
 pub(crate) mod users;
 pub(crate) mod onboarding;
+pub(crate) mod accounts;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Role {

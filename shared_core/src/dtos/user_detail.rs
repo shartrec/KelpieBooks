@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026. Trevor Campbell and others.
+ * Copyright (c) 2026-2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -22,9 +22,17 @@
  *
  */
 
-pub(crate) mod security;
-pub(crate) mod user;
-pub(crate) mod organization;
-pub(crate) mod chart_of_accounts;
-pub(crate) mod account;
-pub(crate) mod journal_entry;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+/// A Data Transfer Object representing the user details that are safe
+/// to send to the frontend. This struct explicitly omits sensitive
+/// information like the password hash.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct UserDetail {
+    pub id: Uuid,
+    pub email: String,
+    pub full_name: String,
+    pub display_name: Option<String>,
+    pub role: String,
+}

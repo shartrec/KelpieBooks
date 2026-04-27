@@ -24,6 +24,7 @@
 
 pub mod models;
 pub mod requests;
+pub mod dtos;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026. Trevor Campbell and others.
+ * Copyright (c) 2026-2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -23,6 +23,7 @@
  */
 
 pub mod logging;
+pub mod types;
 
 use rocket::http::Status;
 use rocket::response::Responder;
@@ -35,6 +36,7 @@ use bcrypt;
 #[derive(Debug)]
 pub(crate) enum ApiError {
     Db(sqlx::Error),
+    Conflict(String),
     Hashing(bcrypt::BcryptError),
     Error(String),
     Invalid(String),
@@ -66,7 +68,8 @@ impl<'r> Responder<'r, 'static> for ApiError {
             ApiError::Error(msg) => (Status::InternalServerError, msg),
             ApiError::Invalid(msg) => (Status::BadRequest, msg),
             ApiError::Internal(msg) => (Status::InternalServerError, msg),
-            ApiError::Db(e) => (Status::Conflict, e.to_string()),
+            ApiError::Conflict(e) => (Status::Conflict, e.to_string()),
+            ApiError::Db(e) => (Status::InternalServerError, e.to_string()),
             ApiError::Hashing(e) => (Status::InternalServerError, format!("Password hashing error: {}", e)),
         };
         let body = Json(ApiErrorMessage { error: msg });

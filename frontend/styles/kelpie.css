@@ -27,6 +27,9 @@
     --primary-color: #333333;
     --text-color: #333333;
     --background-color: #f9fafb;
+    --alt-row-color: #ebf5ff;
+    --success-color: #27ae60;
+    --error-color: #e74c3c;
 }
 
 /* Base Reset */
@@ -90,7 +93,10 @@ h1 {
 }
 
 h2 {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
+    margin-top: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 0.5rem;
 }
 
 h3 {
@@ -114,9 +120,19 @@ button:hover {
 }
 
 button:disabled {
-    background-color: #9ca3af;
+    background-color: #e0e0e0;
+    color: #9ca3af;
     cursor: not-allowed;
 }
+
+.button-secondary {
+    background-color: #bdc3c7;
+    color: #2c3e50;
+}
+.button-secondary:hover {
+    background-color: #95a5a6;
+}
+
 
 .button-group {
     display: flex;
@@ -156,18 +172,19 @@ button:disabled {
 }
 
 .icon-button {
-    color: var(--custom-color);
-    background-color: #f0f0f0;
+    background: none;
     border: none;
-    padding: 8px;
+    padding: 2px 4px; /* Reduced padding for compactness */
+    margin: 0 2px; /* Add a little space between buttons */
     cursor: pointer;
-    transition: background-color 0.2s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    border-radius: 4px;
+    color: #576574;
+    display: inline-flex; /* Helps with alignment */
+    vertical-align: middle;
 }
 .icon-button:hover {
     background-color: #e0e0e0;
+    color: #2c3e50;
 }
 
 .key-button {
@@ -203,7 +220,21 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 
+.input-success {
+    border-color: var(--success-color) !important;
+}
+
+.input-error {
+    border-color: var(--error-color) !important;
+}
+
 /* Auth Form Specifics */
+.profile-forms-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
 .auth-form {
     display: grid;
     grid-template-columns: max-content 1fr;
@@ -230,10 +261,19 @@ input:focus, select:focus, textarea:focus {
     justify-self: end;
 }
 
-.auth-form .error {
+.auth-form .error, .error {
     grid-column: 1 / span 2;
-    color: #e74c3c;
+    color: var(--error-color);
     background-color: #fbeae5;
+    padding: 0.75rem;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.success-message {
+    grid-column: 1 / span 2;
+    color: var(--success-color);
+    background-color: #eafaf1;
     padding: 0.75rem;
     border-radius: 6px;
     text-align: center;
@@ -241,29 +281,100 @@ input:focus, select:focus, textarea:focus {
 
 
 /* Table Styles */
-table {
-    table-layout: auto;
+.table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 1rem;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-th, td {
-    /*width: 40%;*/
-    padding: 1px 3px;
-    border: 1px solid #e5e7eb;
+.table th, .table td {
+    padding: 4px 12px; /* Reduced padding for compactness */
+    border-bottom: 1px solid #e5e7eb;
     text-align: left;
 }
 
-td.actions {
-    white-space: nowrap;
-    width: 1px; /* Min width for action buttons */
-}
-
-th {
+.table th {
     background-color: #f3f4f6;
     font-weight: 600;
+    border-top: 1px solid #e5e7eb;
 }
+tbody tr:nth-child(even) {
+    background-color: var(--alt-row-color);
+}
+
+.table-actions {
+    margin-bottom: 1rem;
+}
+
+/* Chart of Accounts Table Specifics */
+.coa-table .code-col { width: 10%; }
+.coa-table .name-col { width: 50%; }
+.coa-table .category-col { width: 15%; }
+.coa-table .balance-col { width: 15%; text-align: right; }
+.coa-table .actions-col { width: 10%; text-align: center; }
+
+.coa-table .parent-account > td {
+    font-weight: bold;
+}
+
+.actions-cell {
+    text-align: center;
+    white-space: nowrap; /* Prevents buttons from wrapping */
+}
+
+.collapse-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 8px 0 0;
+    margin: 0;
+    vertical-align: middle;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    width: 100%;
+    max-width: 500px;
+}
+
+.modal-form {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 1rem;
+    align-items: center;
+}
+
+.modal-form label {
+    text-align: right;
+}
+
+.modal-form .form-actions {
+    grid-column: 2;
+    justify-self: end;
+    display: flex;
+    gap: 1rem;
+}
+
+
 /* Table cell input fix */
 td input, td select, td textarea {
     margin-bottom: 0;

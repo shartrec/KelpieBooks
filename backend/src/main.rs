@@ -21,7 +21,7 @@
  *      Trevor Campbell
  *
  */
-use crate::routes::{onboarding, security, users};
+use crate::routes::{onboarding, security, users, accounts};
 use crate::util::logging::setup_logging;
 use rocket::fs::{relative, FileServer, NamedFile};
 use rocket::{get, routes};
@@ -30,6 +30,7 @@ use rocket_db_pools::Database;
 mod db;
 mod util;
 mod routes;
+mod services;
 
 #[derive(Database)]
 #[database("kelpie_db")]
@@ -51,6 +52,7 @@ fn rocket() -> _ {
         .mount("/", security::routes())
         .mount("/", onboarding::routes())
         .mount("/", users::routes())
+        .mount("/", accounts::routes())
         .mount("/", FileServer::from(relative!("./static")))
         // 3. Mount the fallback route with a lower priority (rank 2)
         .mount("/", routes![spa_index]);

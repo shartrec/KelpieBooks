@@ -28,9 +28,11 @@ use yew_router::prelude::*;
 use frontend::pages::login::LoginPage;
 use frontend::pages::dashboard::DashboardPage;
 use frontend::pages::profile::ProfilePage;
+use frontend::pages::ledger::LedgerPage;
 use frontend::Route;
-use frontend::auth::{CurrentUser, UserContext, UserContextHandle};
+use frontend::auth::{UserContext, UserContextHandle};
 use gloo_net::http::Request;
+use shared_core::dtos::user_detail::UserDetail;
 
 /// The component that contains the router and switches between pages.
 #[function_component(AppRouter)]
@@ -47,14 +49,13 @@ fn app_router() -> Html {
 fn app() -> Html {
     let user_ctx = use_reducer(UserContext::default);
 
-    // This effect runs once when the component mounts to check for an existing session.
     {
         let user_ctx = user_ctx.clone();
         use_effect_with((), move |_| {
             wasm_bindgen_futures::spawn_local(async move {
                 if let Ok(resp) = Request::get("/api/auth/me").send().await {
                     if resp.ok() {
-                        if let Ok(user) = resp.json::<CurrentUser>().await {
+                        if let Ok(user) = resp.json::<UserDetail>().await {
                             user_ctx.dispatch(Some(user));
                         }
                     }
@@ -79,8 +80,8 @@ fn switch(routes: Route) -> Html {
         Route::Onboard => html! { <h1>{ "Onboarding" }</h1> },
         Route::Dashboard => html! { <DashboardPage /> },
         Route::Profile => html! { <ProfilePage /> },
-        Route::Home => html! { <LoginPage /> }, // Default to login
-        Route::Ledger => html! { <h1>{ "Ledger" }</h1> },
+        Route::Ledger => html! { <LedgerPage /> },
+        Route::Home => html! { <LoginPage /> },
     }
 }
 

@@ -29,7 +29,8 @@ use gloo_net::http::Request;
 use yew_router::hooks::use_navigator;
 use shared_core::requests::auth::LoginRequest;
 use crate::Route;
-use crate::auth::{CurrentUser, UserContextHandle};
+use crate::auth::{UserContextHandle};
+use shared_core::dtos::user_detail::UserDetail;
 
 #[function_component(LoginPage)]
 pub fn login_page() -> Html {
@@ -38,15 +39,12 @@ pub fn login_page() -> Html {
     let navigator = use_navigator().unwrap();
     let user_ctx = use_context::<UserContextHandle>().expect("UserContext not found");
 
-    // This effect will run ONLY when `is_login_success` changes to true.
-    // By this point, the LoginForm has been unmounted.
     {
         let navigator = navigator.clone();
         use_effect_with(*is_login_success, move |success| {
             if *success {
                 navigator.push(&Route::Dashboard);
             }
-            // The empty closure `|| ()` is the destructor for the effect.
             || ()
         });
     }
@@ -69,11 +67,8 @@ pub fn login_page() -> Html {
 
                 match resp {
                     Ok(r) if r.ok() => {
-                        if let Ok(user) = r.json::<CurrentUser>().await {
-                            // 1. Update the global context
+                        if let Ok(user) = r.json::<UserDetail>().await {
                             user_ctx.dispatch(Some(user));
-                            // 2. Set local state to true. This triggers a re-render,
-                            //    unmounting the form and running the effect above.
                             is_login_success.set(true);
                         } else {
                             error_state.set(Some("Failed to parse login response.".to_string()));
@@ -94,13 +89,11 @@ pub fn login_page() -> Html {
         <div class="page-container">
             <h1>{"Please login"}</h1>
             if !*is_login_success {
-                // The form is only rendered if login is not yet successful
                 <LoginForm
                     on_login={on_login_submit}
                     error={(*error_state).clone()}
                 />
             } else {
-                // This content is shown briefly while the effect runs and navigates
                 <div class="card">
                     <p>{"Login successful, redirecting to your dashboard..."}</p>
                 </div>
@@ -121,21 +114,8 @@ pub fn login_form(props: &LoginFormProps) -> Html {
     let password = use_state(|| "".to_string());
     let error = props.error.clone();
 
-    let on_user_email_input = {
-        let user_email = user_email.clone();
-        Callback::from(move |e: InputEvent| {
-            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
-            user_email.set(input.value());
-        })
-    };
-
-    let on_password_input = {
-        let password = password.clone();
-        Callback::from(move |e: InputEvent| {
-            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
-            password.set(input.value());
-        })
-    };
+    let on_user_email_input = { let state = user_email.clone(); Callback::from(move |e: InputEvent| { let input: web_sys::HtmlInputElement = e.target_unchecked_into(); state.set(input.value()); }) };
+    let on_password_input = { let state = password.clone(); Callback::from(move |e: InputEvent| { let input: web_sys::HtmlInputElement = e.target_unchecked_into(); state.set(input.value()); }) };
 
     let on_submit = {
         let user_email = user_email.clone();
@@ -154,23 +134,9 @@ pub fn login_form(props: &LoginFormProps) -> Html {
     html! {
         <form onsubmit={on_submit} class="auth-form">
             <label>{"User Email: "}</label>
-            <input
-                type="text"
-                value={(*user_email).clone()}
-                oninput={on_user_email_input}
-                maxlength="64"
-                size="32"
-                autocomplete="username"
-            />
+            <input type="text" value={(*user_email).clone()} oninput={on_user_email_input} required=true autocomplete="username" />
             <label>{"Password: "}</label>
-            <input
-                type="password"
-                value={(*password).clone()}
-                oninput={on_password_input}
-                maxlength="64"
-                size="24"
-                autocomplete="current-password"
-            />
+            <input type="password" value={(*password).clone()} oninput={on_password_input} required=true autocomplete="current-password" />
             <div class="form-actions">
                 <button type="submit">{"Login"}</button>
             </div>

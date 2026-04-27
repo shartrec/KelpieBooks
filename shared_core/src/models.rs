@@ -24,7 +24,7 @@
 
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
-use strum::Display;
+use strum::{Display, EnumString};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -45,7 +45,7 @@ pub struct User {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Display, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, Display, EnumString, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
 #[strum(serialize_all = "PascalCase")]
 pub enum AccountCategory {
     Asset,
@@ -55,7 +55,7 @@ pub enum AccountCategory {
     Expense,
 }
 
-#[derive(Debug, Display, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, Display, EnumString, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
 #[strum(serialize_all = "PascalCase")]
 pub enum SystemTag {
     CashAtBank,

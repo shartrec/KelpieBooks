@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026. Trevor Campbell and others.
+ * Copyright (c) 2026-2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -22,9 +22,28 @@
  *
  */
 
-pub(crate) mod security;
-pub(crate) mod user;
-pub(crate) mod organization;
-pub(crate) mod chart_of_accounts;
-pub(crate) mod account;
-pub(crate) mod journal_entry;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+use crate::models::{AccountCategory, SystemTag};
+
+/// A DTO that combines account data with its calculated balance.
+/// This is the structure that will be sent to the frontend.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AccountWithBalance {
+    pub id: Uuid,
+    pub organization_id: Uuid,
+    pub parent_id: Option<Uuid>,
+    pub code: String,
+    pub name: String,
+    pub category: AccountCategory,
+    pub is_group: bool,
+    pub system_tag: Option<SystemTag>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub balance: i64,
+}
+
+impl PartialEq for AccountWithBalance {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
