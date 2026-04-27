@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026. Trevor Campbell and others.
+ * Copyright (c) 2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -22,10 +22,25 @@
  *
  */
 
-pub mod register;
-pub mod login;
-pub mod dashboard;
-pub mod profile;
-pub mod ledger;
-pub mod account_ledger;
-pub mod new_transaction;
+use rocket_db_pools::sqlx::{self, PgConnection, Row};
+use uuid::Uuid;
+use chrono::NaiveDate;
+
+pub(crate) async fn insert(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    date: NaiveDate,
+    description: Option<String>,
+    reference: Option<String>,
+) -> Result<Uuid, sqlx::Error> {
+    let row = sqlx::query(
+        "INSERT INTO transactions (organization_id, date, description, reference) VALUES ($1, $2, $3, $4) RETURNING id"
+    )
+    .bind(organization_id)
+    .bind(date)
+    .bind(description)
+    .bind(reference)
+    .fetch_one(pool)
+    .await?;
+    Ok(row.get("id"))
+}

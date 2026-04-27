@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026. Trevor Campbell and others.
+ * Copyright (c) 2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -22,10 +22,19 @@
  *
  */
 
-pub mod register;
-pub mod login;
-pub mod dashboard;
-pub mod profile;
-pub mod ledger;
-pub mod account_ledger;
-pub mod new_transaction;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+use chrono::NaiveDate;
+
+/// A DTO representing a journal entry with its running balance at that point in time.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct JournalEntryWithBalance {
+    pub id: Uuid,
+    pub transaction_id: Uuid,
+    pub account_id: Uuid,
+    pub date: NaiveDate,
+    pub description: Option<String>,
+    pub debit: i64,
+    pub credit: i64,
+    pub running_balance: i64,
+}

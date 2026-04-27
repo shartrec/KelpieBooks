@@ -101,4 +101,5 @@ pub struct JournalEntry {
     pub debit: i64,
     pub credit: i64,
     pub description: Option<String>,
+    pub created_at: DateTime<Utc>,
 }

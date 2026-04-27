@@ -77,6 +77,18 @@ This is the most complex UI/UX part, allowing users to create new, balanced jour
     *   The UI should provide a running total of debits and credits and visually indicate whether the transaction is balanced.
     *   The "Save" button should be disabled until the transaction is balanced.
 
+## Phase 5: Enhancements
+
+* Fix bug in that account totals do not roll up on main ledger page. ✔
+
+1. Add account details to the head of the transaction entry page, including a link back to the account.
+2. Default the first account in the transaction entry to be the selected account.
+3. Add description field entry to the journal entry. Take the transaction description from the first journal entry description
+4. Add a date entry field for the transaction. We need this as journals can be entered after the fact.
+5. Support 'Expand' feature on journal entry to show full transaction. 
+
+
+
+
 ## Supplementary tasks
-1. Look at refactoring AccountCategory and SystemTag Enums to work more seemlessly with psql.
-2. 
+1. Look at refactoring AccountCategory and SystemTag Enums to work more seemlessly with psql

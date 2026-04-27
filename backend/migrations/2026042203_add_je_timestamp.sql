@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026. Trevor Campbell and others.
+ * Copyright (c) 2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -22,3 +22,6 @@
  *
  */
 
+-- Add created_at to journal_entries for more precise ordering
+ALTER TABLE journal_entries
+ADD COLUMN created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();

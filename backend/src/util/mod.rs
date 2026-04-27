@@ -32,6 +32,7 @@ use rocket::serde::Serialize;
 use rocket::{Request, Response};
 use rocket_db_pools::sqlx;
 use bcrypt;
+use log::error;
 
 #[derive(Debug)]
 pub(crate) enum ApiError {
@@ -63,6 +64,9 @@ pub(crate) struct ApiErrorMessage {
 
 impl<'r> Responder<'r, 'static> for ApiError {
     fn respond_to(self, _: &'r Request<'_>) -> rocket::response::Result<'static> {
+        // Log the full error details before creating the response
+        error!("API Error: {:?}", self);
+
         let (status, msg) = match self {
             ApiError::NotFound(msg) => (Status::NotFound, msg),
             ApiError::Error(msg) => (Status::InternalServerError, msg),

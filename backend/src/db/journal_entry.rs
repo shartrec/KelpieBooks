@@ -25,6 +25,18 @@
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use shared_core::models::JournalEntry;
 use uuid::Uuid;
+use chrono::{NaiveDate, DateTime, Utc};
+
+pub(crate) struct JournalEntryWithDate {
+    pub id: Uuid,
+    pub transaction_id: Uuid,
+    pub account_id: Uuid,
+    pub debit: i64,
+    pub credit: i64,
+    pub description: Option<String>,
+    pub date: NaiveDate,
+    pub created_at: DateTime<Utc>,
+}
 
 fn from_row_to_journal_entry(row: &sqlx::postgres::PgRow) -> JournalEntry {
     JournalEntry {
@@ -34,6 +46,20 @@ fn from_row_to_journal_entry(row: &sqlx::postgres::PgRow) -> JournalEntry {
         debit: row.get("debit"),
         credit: row.get("credit"),
         description: row.get("description"),
+        created_at: row.get("created_at"),
+    }
+}
+
+fn from_row_to_journal_entry_with_date(row: &sqlx::postgres::PgRow) -> JournalEntryWithDate {
+    JournalEntryWithDate {
+        id: row.get("id"),
+        transaction_id: row.get("transaction_id"),
+        account_id: row.get("account_id"),
+        debit: row.get("debit"),
+        credit: row.get("credit"),
+        description: row.get("description"),
+        date: row.get("date"),
+        created_at: row.get("created_at"),
     }
 }
 
@@ -47,10 +73,58 @@ pub(crate) async fn get_all_by_org(
         FROM journal_entries je
         JOIN transactions t ON je.transaction_id = t.id
         WHERE t.organization_id = $1
-        "#
+        "#,
     )
     .bind(organization_id)
     .fetch_all(pool)
     .await
     .map(|rows| rows.iter().map(from_row_to_journal_entry).collect())
+}
+
+pub(crate) async fn get_all_by_account_with_date(
+    pool: &mut PgConnection,
+    account_id: Uuid,
+) -> Result<Vec<JournalEntryWithDate>, sqlx::Error> {
+    sqlx::query(
+        r#"
+        SELECT
+            je.id,
+            je.transaction_id,
+            je.account_id,
+            je.debit,
+            je.credit,
+            je.description,
+            je.created_at,
+            t.date
+        FROM journal_entries je
+        JOIN transactions t ON je.transaction_id = t.id
+        WHERE je.account_id = $1
+        ORDER BY t.date, je.created_at
+        "#,
+    )
+    .bind(account_id)
+    .fetch_all(pool)
+    .await
+    .map(|rows| rows.iter().map(from_row_to_journal_entry_with_date).collect())
+}
+
+pub(crate) async fn insert(
+    pool: &mut PgConnection,
+    transaction_id: Uuid,
+    account_id: Uuid,
+    debit: i64,
+    credit: i64,
+    description: Option<String>,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        "INSERT INTO journal_entries (transaction_id, account_id, debit, credit, description) VALUES ($1, $2, $3, $4, $5)"
+    )
+    .bind(transaction_id)
+    .bind(account_id)
+    .bind(debit)
+    .bind(credit)
+    .bind(description)
+    .execute(pool)
+    .await?;
+    Ok(())
 }

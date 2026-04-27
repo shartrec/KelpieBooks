@@ -1,7 +1,33 @@
+/*
+ * Copyright (c) 2026-2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+
 use yew::prelude::*;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use std::collections::HashSet;
 use uuid::Uuid;
+use yew_router::prelude::*;
+use crate::Route;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
@@ -37,23 +63,20 @@ pub fn account_row(props: &AccountRowProps) -> Html {
         })
     };
 
-    let on_edit_click = {
-        let on_edit = props.on_edit.clone();
-        let account = props.node.account.clone();
-        Callback::from(move |_| {
-            on_edit.emit(account.clone());
-        })
-    };
-
-    let on_delete_click = {
-        let on_delete = props.on_delete.clone();
-        let account = props.node.account.clone();
-        Callback::from(move |_| {
-            on_delete.emit(account.clone());
-        })
-    };
+    let on_edit_click = { let on_edit = props.on_edit.clone(); let account = props.node.account.clone(); Callback::from(move |_| { on_edit.emit(account.clone()); }) };
+    let on_delete_click = { let on_delete = props.on_delete.clone(); let account = props.node.account.clone(); Callback::from(move |_| { on_delete.emit(account.clone()); }) };
 
     let name_style = format!("padding-left: {}rem;", props.depth as f64 * 1.5);
+
+    let account_name_display = if props.node.account.is_group {
+        html! { { &props.node.account.name } }
+    } else {
+        html! {
+            <Link<Route> to={Route::AccountLedger { id: props.node.account.id }}>
+                { &props.node.account.name }
+            </Link<Route>>
+        }
+    };
 
     html! {
         <>
@@ -69,7 +92,7 @@ pub fn account_row(props: &AccountRowProps) -> Html {
                             }
                         </button>
                     }
-                    { &props.node.account.name }
+                    { account_name_display }
                 </td>
                 <td>{ props.node.account.category.to_string() }</td>
                 <td style="text-align: right;">{ format!("{:.2}", (props.node.account.balance as f64) / 100.0) }</td>
@@ -86,6 +109,7 @@ pub fn account_row(props: &AccountRowProps) -> Html {
                 { for props.node.children.iter().map(|child_node| {
                     html! {
                         <AccountRow
+                            key={child_node.account.id.to_string()}
                             node={child_node.clone()}
                             depth={props.depth + 1}
                             collapsed_nodes={props.collapsed_nodes.clone()}

@@ -2,6 +2,7 @@ use rocket::serde::json::Json;
 use rocket::{get, post, put, delete, routes, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use crate::services::account_service;
 use crate::util::ApiError;
 use crate::DbKelpie;
@@ -9,9 +10,10 @@ use crate::routes::security::AuthenticatedUser;
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 use crate::db::account as account_db;
 use crate::util::types::PathUuid;
+use shared_core::models::Account;
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![get_accounts, create_account, update_account, delete_account]
+    routes![get_accounts, get_account, get_account_entries, create_account, update_account, delete_account]
 }
 
 #[get("/api/accounts")]
@@ -21,6 +23,25 @@ async fn get_accounts(
 ) -> Result<Json<Vec<AccountWithBalance>>, ApiError> {
     let accounts = account_service::get_accounts_with_balances(&mut pool, user.organization_id).await?;
     Ok(Json(accounts))
+}
+
+#[get("/api/accounts/<id>")]
+async fn get_account(
+    mut pool: Connection<DbKelpie>,
+    id: PathUuid,
+) -> Result<Json<Account>, ApiError> {
+    let account = account_db::get(&mut pool, *id).await?
+        .ok_or_else(|| ApiError::NotFound("Account not found".to_string()))?;
+    Ok(Json(account))
+}
+
+#[get("/api/accounts/<id>/entries")]
+async fn get_account_entries(
+    mut pool: Connection<DbKelpie>,
+    id: PathUuid,
+) -> Result<Json<Vec<JournalEntryWithBalance>>, ApiError> {
+    let entries = account_service::get_journal_entries_with_running_balance(&mut pool, *id).await?;
+    Ok(Json(entries))
 }
 
 #[post("/api/accounts", data = "<req>")]

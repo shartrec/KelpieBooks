@@ -29,6 +29,8 @@ use frontend::pages::login::LoginPage;
 use frontend::pages::dashboard::DashboardPage;
 use frontend::pages::profile::ProfilePage;
 use frontend::pages::ledger::LedgerPage;
+use frontend::pages::account_ledger::AccountLedgerPage;
+use frontend::pages::new_transaction::NewTransactionPage;
 use frontend::Route;
 use frontend::auth::{UserContext, UserContextHandle};
 use gloo_net::http::Request;
@@ -81,6 +83,8 @@ fn switch(routes: Route) -> Html {
         Route::Dashboard => html! { <DashboardPage /> },
         Route::Profile => html! { <ProfilePage /> },
         Route::Ledger => html! { <LedgerPage /> },
+        Route::AccountLedger { id } => html! { <AccountLedgerPage account_id={id} /> },
+        Route::NewTransaction => html! { <NewTransactionPage /> },
         Route::Home => html! { <LoginPage /> },
     }
 }

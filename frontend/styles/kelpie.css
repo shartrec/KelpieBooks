@@ -27,6 +27,7 @@
     --primary-color: #333333;
     --text-color: #333333;
     --background-color: #f9fafb;
+    --link-color: #20207f;
     --alt-row-color: #ebf5ff;
     --success-color: #27ae60;
     --error-color: #e74c3c;
@@ -89,18 +90,22 @@ h1, h2, h3, h4 {
 }
 
 h1 {
-    font-size: 2.2rem;
+    font-size: 1.5rem; /* Or 24px, or whatever size you prefer */
+    /* You can add other styles here too */
+    font-weight: 600;
+    margin-bottom: 0.5rem;
 }
 
 h2 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     margin-top: 1rem;
     border-bottom: 1px solid #e5e7eb;
+    font-weight: 500;
     padding-bottom: 0.5rem;
 }
 
 h3 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
 }
 
 /* Buttons */
@@ -432,7 +437,7 @@ td input, td select, td textarea {
 
 /* Links */
 a {
-    color: var(--background-color);
+    color: var(--link-color);
     text-decoration: none;
 }
 

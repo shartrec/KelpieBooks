@@ -6,3 +6,4 @@ pub mod account_row;
 pub mod add_account_modal;
 pub mod edit_account_modal;
 pub mod delete_confirmation_modal;
+pub mod journal_entry_row;

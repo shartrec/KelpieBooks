@@ -28,7 +28,7 @@ use crate::models::{AccountCategory, SystemTag};
 
 /// A DTO that combines account data with its calculated balance.
 /// This is the structure that will be sent to the frontend.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AccountWithBalance {
     pub id: Uuid,
     pub organization_id: Uuid,
@@ -40,10 +40,4 @@ pub struct AccountWithBalance {
     pub system_tag: Option<SystemTag>,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub balance: i64,
-}
-
-impl PartialEq for AccountWithBalance {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
-    }
 }

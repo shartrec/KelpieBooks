@@ -55,6 +55,29 @@ fn from_row_to_account(row: &sqlx::postgres::PgRow) -> Account {
     }
 }
 
+pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<Account>, sqlx::Error> {
+    sqlx::query(
+        r#"
+        SELECT
+            id,
+            organization_id,
+            parent_id,
+            code,
+            name,
+            category::TEXT as category,
+            is_group,
+            system_tag::TEXT as system_tag,
+            created_at
+        FROM accounts
+        WHERE id = $1
+        "#,
+    )
+    .bind(id)
+    .fetch_optional(pool)
+    .await
+    .map(|row| row.map(|r| from_row_to_account(&r)))
+}
+
 pub(crate) async fn get_all_by_org(
     pool: &mut PgConnection,
     organization_id: Uuid,
@@ -74,7 +97,7 @@ pub(crate) async fn get_all_by_org(
         FROM accounts
         WHERE organization_id = $1
         ORDER BY code
-        "#
+        "#,
     )
     .bind(organization_id)
     .fetch_all(pool)
@@ -92,7 +115,7 @@ pub(crate) async fn insert(
         INSERT INTO accounts (organization_id, name, code, category, parent_id, is_group, system_tag)
         VALUES ($1, $2, $3, $4::account_category, $5, $6, $7::system_tag)
         RETURNING id, organization_id, parent_id, code, name, category::TEXT as category, is_group, system_tag::TEXT as system_tag, created_at
-        "#
+        "#,
     )
     .bind(org_id)
     .bind(&req.name)
@@ -117,7 +140,7 @@ pub(crate) async fn update(
         SET name = $1, code = $2, category = $3::account_category, is_group = $4, system_tag = $5::system_tag
         WHERE id = $6
         RETURNING id, organization_id, parent_id, code, name, category::TEXT as category, is_group, system_tag::TEXT as system_tag, created_at
-        "#
+        "#,
     )
     .bind(&req.name)
     .bind(&req.code)
@@ -132,7 +155,7 @@ pub(crate) async fn update(
 
 pub(crate) async fn has_journal_entries(pool: &mut PgConnection, id: Uuid) -> Result<bool, sqlx::Error> {
     let count: i64 = sqlx::query_scalar(
-        "SELECT COUNT(*) FROM journal_entries WHERE account_id = $1"
+        "SELECT COUNT(*) FROM journal_entries WHERE account_id = $1",
     )
     .bind(id)
     .fetch_one(pool)
