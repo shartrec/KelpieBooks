@@ -22,13 +22,13 @@
  *
  */
 
-use yew::prelude::*;
+use crate::Route;
+use gloo_net::http::Request;
+use shared_core::requests::onboard::OnboardingRequest;
 use yew::function_component;
 use yew::html;
-use gloo_net::http::Request;
+use yew::prelude::*;
 use yew_router::hooks::use_navigator;
-use shared_core::requests::onboard::OnboardingRequest;
-use crate::Route;
 
 #[function_component(RegisterPage)]
 pub fn register_page() -> Html {
@@ -46,7 +46,8 @@ pub fn register_page() -> Html {
             wasm_bindgen_futures::spawn_local(async move {
                 let resp = Request::post("/api/register")
                     .json(&reg_data)
-                    .unwrap().send()
+                    .unwrap()
+                    .send()
                     .await;
 
                 match resp {
@@ -91,12 +92,48 @@ pub fn register_form(props: &RegisterFormProps) -> Html {
     let coa_template_id = use_state(|| "service".to_string());
     let error = props.error.clone();
 
-    let on_user_email_input = { let state = user_email.clone(); Callback::from(move |e: InputEvent| { let input: web_sys::HtmlInputElement = e.target_unchecked_into(); state.set(input.value()); }) };
-    let on_password_input = { let state = password.clone(); Callback::from(move |e: InputEvent| { let input: web_sys::HtmlInputElement = e.target_unchecked_into(); state.set(input.value()); }) };
-    let on_full_name_input = { let state = full_name.clone(); Callback::from(move |e: InputEvent| { let input: web_sys::HtmlInputElement = e.target_unchecked_into(); state.set(input.value()); }) };
-    let on_display_name_input = { let state = display_name.clone(); Callback::from(move |e: InputEvent| { let input: web_sys::HtmlInputElement = e.target_unchecked_into(); state.set(input.value()); }) };
-    let on_organisation_input = { let state = organisation.clone(); Callback::from(move |e: InputEvent| { let input: web_sys::HtmlInputElement = e.target_unchecked_into(); state.set(input.value()); }) };
-    let on_coa_template_id_input = { let state = coa_template_id.clone(); Callback::from(move |e: InputEvent| { let input: web_sys::HtmlInputElement = e.target_unchecked_into(); state.set(input.value()); }) };
+    let on_user_email_input = {
+        let state = user_email.clone();
+        Callback::from(move |e: InputEvent| {
+            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
+            state.set(input.value());
+        })
+    };
+    let on_password_input = {
+        let state = password.clone();
+        Callback::from(move |e: InputEvent| {
+            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
+            state.set(input.value());
+        })
+    };
+    let on_full_name_input = {
+        let state = full_name.clone();
+        Callback::from(move |e: InputEvent| {
+            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
+            state.set(input.value());
+        })
+    };
+    let on_display_name_input = {
+        let state = display_name.clone();
+        Callback::from(move |e: InputEvent| {
+            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
+            state.set(input.value());
+        })
+    };
+    let on_organisation_input = {
+        let state = organisation.clone();
+        Callback::from(move |e: InputEvent| {
+            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
+            state.set(input.value());
+        })
+    };
+    let on_coa_template_id_input = {
+        let state = coa_template_id.clone();
+        Callback::from(move |e: InputEvent| {
+            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
+            state.set(input.value());
+        })
+    };
 
     let on_submit = {
         // Clone all the state handles before the `move` closure
@@ -115,9 +152,13 @@ pub fn register_form(props: &RegisterFormProps) -> Html {
                 user_email: (*user_email).clone(),
                 user_password: (*password).clone(),
                 user_full_name: (*full_name).clone(),
-                user_display_name: if display_name.is_empty() { None } else { Some((*display_name).clone()) },
+                user_display_name: if display_name.is_empty() {
+                    None
+                } else {
+                    Some((*display_name).clone())
+                },
                 organization_name: (*organisation).clone(),
-                coa_template_id: (*coa_template_id).clone()
+                coa_template_id: (*coa_template_id).clone(),
             };
             on_register.emit(register_req);
         })

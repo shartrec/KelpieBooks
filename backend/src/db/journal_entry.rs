@@ -22,11 +22,11 @@
  *
  */
 
+use chrono::{DateTime, NaiveDate, Utc};
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
+use shared_core::dtos::journal_entry_detail::JournalEntryDetail;
 use shared_core::models::JournalEntry;
 use uuid::Uuid;
-use chrono::{NaiveDate, DateTime, Utc};
-use shared_core::dtos::journal_entry_detail::JournalEntryDetail;
 
 pub(crate) struct JournalEntryWithDate {
     pub id: Uuid,
@@ -119,7 +119,11 @@ pub(crate) async fn get_all_by_account_with_date(
     .bind(account_id)
     .fetch_all(pool)
     .await
-    .map(|rows| rows.iter().map(from_row_to_journal_entry_with_date).collect())
+    .map(|rows| {
+        rows.iter()
+            .map(from_row_to_journal_entry_with_date)
+            .collect()
+    })
 }
 
 pub(crate) async fn get_all_by_transaction(

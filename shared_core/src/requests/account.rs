@@ -22,9 +22,9 @@
  *
  */
 
+use crate::models::{AccountCategory, SystemTag};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::models::{AccountCategory, SystemTag};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateAccountRequest {

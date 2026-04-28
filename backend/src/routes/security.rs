@@ -21,14 +21,17 @@
  *      Trevor Campbell
  *
  */
-use jsonwebtoken::{decode, encode, errors::Error as JwtError, DecodingKey, EncodingKey, Header, TokenData, Validation};
-use rocket::{get, post, routes, Route};
-use std::sync::OnceLock;
-use bcrypt::{hash, DEFAULT_COST, BcryptError};
-use shared_core::requests::auth::LoginRequest;
-use crate::util::ApiError;
 use crate::routes::Role;
+use crate::util::ApiError;
+use bcrypt::{hash, BcryptError, DEFAULT_COST};
+use jsonwebtoken::{
+    decode, encode, errors::Error as JwtError, DecodingKey, EncodingKey, Header, TokenData,
+    Validation,
+};
+use rocket::{get, post, routes, Route};
 use shared_core::dtos::user_detail::UserDetail;
+use shared_core::requests::auth::LoginRequest;
+use std::sync::OnceLock;
 
 use crate::db::security;
 use crate::DbKelpie;
@@ -46,8 +49,13 @@ pub(crate) fn routes() -> Vec<Route> {
 }
 
 #[post("/api/login", data = "<login_request>")]
-async fn login(mut pool: Connection<DbKelpie>, cookies: &CookieJar<'_>, login_request: Json<LoginRequest>) -> Result<Json<UserDetail>, Status> {
-    let db_user = security::check_login(&mut pool, &login_request.email, &login_request.password_raw).await;
+async fn login(
+    mut pool: Connection<DbKelpie>,
+    cookies: &CookieJar<'_>,
+    login_request: Json<LoginRequest>,
+) -> Result<Json<UserDetail>, Status> {
+    let db_user =
+        security::check_login(&mut pool, &login_request.email, &login_request.password_raw).await;
 
     match db_user {
         Ok(Some(user)) => {
@@ -164,8 +172,12 @@ fn generate_session_token(user: &AuthenticatedUser) -> String {
         exp: expiration,
     };
 
-    encode(&Header::default(), &claims, &EncodingKey::from_secret(get_secret_key().as_ref()))
-        .expect("Failed to generate token")
+    encode(
+        &Header::default(),
+        &claims,
+        &EncodingKey::from_secret(get_secret_key().as_ref()),
+    )
+    .expect("Failed to generate token")
 }
 
 pub(crate) fn validate_session_token(token: &str) -> Option<AuthenticatedUser> {

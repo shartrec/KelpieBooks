@@ -24,10 +24,10 @@
 
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use shared_core::models::Account;
-use uuid::Uuid;
-use std::str::FromStr;
 use shared_core::models::{AccountCategory, SystemTag};
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
+use std::str::FromStr;
+use uuid::Uuid;
 
 fn from_row_to_account(row: &sqlx::postgres::PgRow) -> Account {
     let category_str: String = row.get("category");
@@ -38,7 +38,13 @@ fn from_row_to_account(row: &sqlx::postgres::PgRow) -> Account {
 
     let system_tag = system_tag_str.and_then(|s| {
         SystemTag::from_str(&s)
-            .map_err(|e| log::error!("DB schema and SystemTag enum are out of sync for value '{}': {}", s, e))
+            .map_err(|e| {
+                log::error!(
+                    "DB schema and SystemTag enum are out of sync for value '{}': {}",
+                    s,
+                    e
+                )
+            })
             .ok()
     });
 
@@ -153,13 +159,15 @@ pub(crate) async fn update(
     Ok(from_row_to_account(&row))
 }
 
-pub(crate) async fn has_journal_entries(pool: &mut PgConnection, id: Uuid) -> Result<bool, sqlx::Error> {
-    let count: i64 = sqlx::query_scalar(
-        "SELECT COUNT(*) FROM journal_entries WHERE account_id = $1",
-    )
-    .bind(id)
-    .fetch_one(pool)
-    .await?;
+pub(crate) async fn has_journal_entries(
+    pool: &mut PgConnection,
+    id: Uuid,
+) -> Result<bool, sqlx::Error> {
+    let count: i64 =
+        sqlx::query_scalar("SELECT COUNT(*) FROM journal_entries WHERE account_id = $1")
+            .bind(id)
+            .fetch_one(pool)
+            .await?;
     Ok(count > 0)
 }
 

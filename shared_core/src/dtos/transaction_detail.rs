@@ -22,9 +22,9 @@
  *
  */
 
-use serde::{Deserialize, Serialize};
-use crate::models::Transaction;
 use crate::dtos::journal_entry_detail::JournalEntryDetail;
+use crate::models::Transaction;
+use serde::{Deserialize, Serialize};
 
 /// A DTO representing a full transaction with all its journal entry lines.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

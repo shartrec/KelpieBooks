@@ -1,7 +1,7 @@
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use crate::db::user;
-use shared_core::models::User;
 use crate::util::ApiError;
+use rocket_db_pools::sqlx::{self, PgConnection, Row};
+use shared_core::models::User;
 
 // A temporary struct to hold the joined user and organization data
 pub struct UserWithOrg {
@@ -64,7 +64,8 @@ pub async fn create_initial_admin(pool: &mut PgConnection) -> Result<(), ApiErro
             password_hash,
             "Admin User".to_string(),
             Some("Admin".to_string()),
-        ).await?;
+        )
+        .await?;
         log::info!("Created initial admin user with password 'admin'");
     }
 

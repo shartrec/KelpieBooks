@@ -66,7 +66,11 @@ pub async fn import_default_accounts(
         let parent_id = code_to_id_map.get(parent_code).cloned();
 
         if parent_id.is_none() {
-            log::error!("Parent account with code '{}' not found for account '{}'", parent_code, account_template.name);
+            log::error!(
+                "Parent account with code '{}' not found for account '{}'",
+                parent_code,
+                account_template.name
+            );
             continue;
         }
 

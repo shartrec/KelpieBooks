@@ -22,11 +22,11 @@
  *
  */
 
-use yew::prelude::*;
+use shared_core::models::AccountCategory;
 use shared_core::requests::account::CreateAccountRequest;
-use shared_core::models::{AccountCategory};
-use uuid::Uuid;
 use std::str::FromStr;
+use uuid::Uuid;
+use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct AddAccountModalProps {
@@ -40,11 +40,63 @@ pub fn add_account_modal(props: &AddAccountModalProps) -> Html {
     let request = use_state(CreateAccountRequest::default);
     let error = use_state(|| None::<String>);
 
-    let on_code_input = { let state = request.clone(); Callback::from(move |e: InputEvent| { let mut info = (*state).clone(); info.code = e.target_unchecked_into::<web_sys::HtmlInputElement>().value(); state.set(info); }) };
-    let on_name_input = { let state = request.clone(); Callback::from(move |e: InputEvent| { let mut info = (*state).clone(); info.name = e.target_unchecked_into::<web_sys::HtmlInputElement>().value(); state.set(info); }) };
-    let on_category_change = { let state = request.clone(); Callback::from(move |e: Event| { let mut info = (*state).clone(); info.category = AccountCategory::from_str(&e.target_unchecked_into::<web_sys::HtmlSelectElement>().value()).unwrap(); state.set(info); }) };
-    let on_parent_change = { let state = request.clone(); Callback::from(move |e: Event| { let mut info = (*state).clone(); let val = e.target_unchecked_into::<web_sys::HtmlSelectElement>().value(); info.parent_id = if val.is_empty() { None } else { Uuid::from_str(&val).ok() }; state.set(info); }) };
-    let on_is_group_change = { let state = request.clone(); Callback::from(move |e: Event| { let mut info = (*state).clone(); info.is_group = e.target_unchecked_into::<web_sys::HtmlInputElement>().checked(); state.set(info); }) };
+    let on_code_input = {
+        let state = request.clone();
+        Callback::from(move |e: InputEvent| {
+            let mut info = (*state).clone();
+            info.code = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
+            state.set(info);
+        })
+    };
+    let on_name_input = {
+        let state = request.clone();
+        Callback::from(move |e: InputEvent| {
+            let mut info = (*state).clone();
+            info.name = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
+            state.set(info);
+        })
+    };
+    let on_category_change = {
+        let state = request.clone();
+        Callback::from(move |e: Event| {
+            let mut info = (*state).clone();
+            info.category = AccountCategory::from_str(
+                &e.target_unchecked_into::<web_sys::HtmlSelectElement>()
+                    .value(),
+            )
+            .unwrap();
+            state.set(info);
+        })
+    };
+    let on_parent_change = {
+        let state = request.clone();
+        Callback::from(move |e: Event| {
+            let mut info = (*state).clone();
+            let val = e
+                .target_unchecked_into::<web_sys::HtmlSelectElement>()
+                .value();
+            info.parent_id = if val.is_empty() {
+                None
+            } else {
+                Uuid::from_str(&val).ok()
+            };
+            state.set(info);
+        })
+    };
+    let on_is_group_change = {
+        let state = request.clone();
+        Callback::from(move |e: Event| {
+            let mut info = (*state).clone();
+            info.is_group = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .checked();
+            state.set(info);
+        })
+    };
 
     let on_form_submit = {
         let on_submit = props.on_submit.clone();

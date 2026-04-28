@@ -22,10 +22,10 @@
  *
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use uuid::Uuid;
 use chrono::NaiveDate;
+use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use shared_core::models::Transaction;
+use uuid::Uuid;
 
 fn from_row_to_transaction(row: &sqlx::postgres::PgRow) -> Transaction {
     Transaction {
@@ -38,7 +38,10 @@ fn from_row_to_transaction(row: &sqlx::postgres::PgRow) -> Transaction {
     }
 }
 
-pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<Transaction>, sqlx::Error> {
+pub(crate) async fn get(
+    pool: &mut PgConnection,
+    id: Uuid,
+) -> Result<Option<Transaction>, sqlx::Error> {
     sqlx::query("SELECT * FROM transactions WHERE id = $1")
         .bind(id)
         .fetch_optional(pool)

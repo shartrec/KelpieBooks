@@ -24,6 +24,7 @@
 
 use crate::db;
 use crate::db::chart_of_accounts::ChartOfAccountsTemplate;
+use crate::routes::security::hash_pwd;
 use crate::util::ApiError;
 use crate::DbKelpie;
 use rocket::serde::json::Json;
@@ -32,7 +33,6 @@ use rocket_db_pools::Connection;
 use shared_core::requests::onboard::OnboardingRequest;
 use sqlx::Acquire;
 use std::fs;
-use crate::routes::security::hash_pwd;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![register]
@@ -47,13 +47,14 @@ async fn register(
     let toml_str = fs::read_to_string(format!("templates/{}.toml", request.coa_template_id))
         .map_err(|e| {
             log::error!("Failed to read chart of accounts template: {}", e);
-            ApiError::Error("Server configuration error: Could not load chart of accounts.".to_string())
+            ApiError::Error(
+                "Server configuration error: Could not load chart of accounts.".to_string(),
+            )
         })?;
-    let template: ChartOfAccountsTemplate = toml::from_str(&toml_str)
-        .map_err(|e| {
-            log::error!("Failed to parse chart of accounts template: {}", e);
-            ApiError::Error("Server configuration error: Invalid chart of accounts format.".to_string())
-        })?;
+    let template: ChartOfAccountsTemplate = toml::from_str(&toml_str).map_err(|e| {
+        log::error!("Failed to parse chart of accounts template: {}", e);
+        ApiError::Error("Server configuration error: Invalid chart of accounts format.".to_string())
+    })?;
 
     // 2. Start the database transaction.
     let mut tx = pool.begin().await?;
@@ -70,7 +71,8 @@ async fn register(
         pwd_hash,
         request.user_full_name.clone(),
         request.user_display_name.clone(),
-    ).await?;
+    )
+    .await?;
 
     // 5. Import the chart of accounts for the new organization.
     db::chart_of_accounts::import_default_accounts(&mut tx, org.id, template.accounts).await?;

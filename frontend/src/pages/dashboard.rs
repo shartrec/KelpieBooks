@@ -22,8 +22,8 @@
  *
  */
 
-use yew::prelude::*;
 use crate::components::layout::Layout;
+use yew::prelude::*;
 
 /// The main dashboard page, now using the shared Layout component.
 #[function_component(DashboardPage)]

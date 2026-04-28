@@ -8,29 +8,29 @@
  * the Free Software Foundation; either version 2 of the License,or
  * (at your option) any later version.
  *
- * KelpieBooks is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License 
- * along with KelpieBooks; if not, write to the Free Software 
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Contributors:
  *      Trevor Campbell
  *
  */
-use crate::routes::{onboarding, security, users, accounts, transactions};
+use crate::routes::{accounts, onboarding, security, transactions, users};
 use crate::util::logging::setup_logging;
 use rocket::fs::{relative, FileServer, NamedFile};
 use rocket::{get, routes};
 use rocket_db_pools::Database;
 
 mod db;
-mod util;
 mod routes;
 mod services;
+mod util;
 
 #[derive(Database)]
 #[database("kelpie_db")]

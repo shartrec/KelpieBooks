@@ -1,10 +1,11 @@
-pub mod sidebar;
-pub mod header;
-pub mod layout;
-pub mod chart_of_accounts_table;
 pub mod account_row;
 pub mod add_account_modal;
-pub mod edit_account_modal;
+pub mod chart_of_accounts_table;
 pub mod delete_confirmation_modal;
+pub mod edit_account_modal;
+pub mod header;
+pub mod je_reversal_confirmation_modal;
 pub mod journal_entry_row;
+pub mod layout;
+pub mod sidebar;
 pub mod transaction_row;

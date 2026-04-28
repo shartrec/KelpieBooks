@@ -21,12 +21,12 @@
  *      Trevor Campbell
  *
  */
-use yew_router::Routable;
 use uuid::Uuid;
+use yew_router::Routable;
 
-pub mod pages;
-pub mod components;
 pub mod auth;
+pub mod components;
+pub mod pages;
 
 #[derive(Clone, Routable, PartialEq)]
 pub enum Route {

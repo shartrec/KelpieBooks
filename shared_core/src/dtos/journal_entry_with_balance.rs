@@ -22,9 +22,9 @@
  *
  */
 
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::NaiveDate;
 
 /// A DTO representing a journal entry with its running balance at that point in time.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

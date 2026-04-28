@@ -22,12 +22,12 @@
  *
  */
 
-use yew::prelude::*;
+use crate::auth::UserContextHandle;
 use crate::components::layout::Layout;
-use crate::auth::{UserContextHandle};
-use serde::Serialize;
 use gloo_net::http::Request;
+use serde::Serialize;
 use shared_core::dtos::user_detail::UserDetail;
+use yew::prelude::*;
 
 #[derive(Clone, Serialize, Default, Debug)]
 struct UserUpdate {
@@ -70,9 +70,37 @@ pub fn profile_page() -> Html {
         });
     }
 
-    let on_email_input = { let state = user_update.clone(); Callback::from(move |e: InputEvent| { let mut info = (*state).clone(); info.email = e.target_unchecked_into::<web_sys::HtmlInputElement>().value(); state.set(info); }) };
-    let on_full_name_input = { let state = user_update.clone(); Callback::from(move |e: InputEvent| { let mut info = (*state).clone(); info.full_name = e.target_unchecked_into::<web_sys::HtmlInputElement>().value(); state.set(info); }) };
-    let on_display_name_input = { let state = user_update.clone(); Callback::from(move |e: InputEvent| { let mut info = (*state).clone(); let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value(); info.display_name = if value.is_empty() { None } else { Some(value) }; state.set(info); }) };
+    let on_email_input = {
+        let state = user_update.clone();
+        Callback::from(move |e: InputEvent| {
+            let mut info = (*state).clone();
+            info.email = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
+            state.set(info);
+        })
+    };
+    let on_full_name_input = {
+        let state = user_update.clone();
+        Callback::from(move |e: InputEvent| {
+            let mut info = (*state).clone();
+            info.full_name = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
+            state.set(info);
+        })
+    };
+    let on_display_name_input = {
+        let state = user_update.clone();
+        Callback::from(move |e: InputEvent| {
+            let mut info = (*state).clone();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
+            info.display_name = if value.is_empty() { None } else { Some(value) };
+            state.set(info);
+        })
+    };
 
     let on_submit_details = {
         let user_ctx = user_ctx.clone();
@@ -90,7 +118,8 @@ pub fn profile_page() -> Html {
             wasm_bindgen_futures::spawn_local(async move {
                 let resp = Request::put("/api/users/me")
                     .json(&(*user_update))
-                    .unwrap().send()
+                    .unwrap()
+                    .send()
                     .await;
 
                 match resp {
@@ -115,11 +144,38 @@ pub fn profile_page() -> Html {
     };
 
     // --- Password Form Logic ---
-    let on_old_password_input = { let state = password_update.clone(); Callback::from(move |e: InputEvent| { let mut info = (*state).clone(); info.old_password = e.target_unchecked_into::<web_sys::HtmlInputElement>().value(); state.set(info); }) };
-    let on_new_password_input = { let state = password_update.clone(); Callback::from(move |e: InputEvent| { let mut info = (*state).clone(); info.new_password = e.target_unchecked_into::<web_sys::HtmlInputElement>().value(); state.set(info); }) };
-    let on_confirm_password_input = { let state = confirm_password.clone(); Callback::from(move |e: InputEvent| { state.set(e.target_unchecked_into::<web_sys::HtmlInputElement>().value()); }) };
+    let on_old_password_input = {
+        let state = password_update.clone();
+        Callback::from(move |e: InputEvent| {
+            let mut info = (*state).clone();
+            info.old_password = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
+            state.set(info);
+        })
+    };
+    let on_new_password_input = {
+        let state = password_update.clone();
+        Callback::from(move |e: InputEvent| {
+            let mut info = (*state).clone();
+            info.new_password = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
+            state.set(info);
+        })
+    };
+    let on_confirm_password_input = {
+        let state = confirm_password.clone();
+        Callback::from(move |e: InputEvent| {
+            state.set(
+                e.target_unchecked_into::<web_sys::HtmlInputElement>()
+                    .value(),
+            );
+        })
+    };
 
-    let passwords_match = !password_update.new_password.is_empty() && password_update.new_password == *confirm_password;
+    let passwords_match = !password_update.new_password.is_empty()
+        && password_update.new_password == *confirm_password;
     let can_submit_password = !password_update.old_password.is_empty() && passwords_match;
 
     let on_submit_password = {
@@ -135,7 +191,8 @@ pub fn profile_page() -> Html {
                 wasm_bindgen_futures::spawn_local(async move {
                     let resp = Request::put("/api/users/me/password")
                         .json(&(*password_update))
-                        .unwrap().send()
+                        .unwrap()
+                        .send()
                         .await;
 
                     match resp {
@@ -144,7 +201,8 @@ pub fn profile_page() -> Html {
                             password_error.set(None);
                         }
                         Ok(r) => {
-                            password_error.set(Some(format!("Error changing password: {}", r.status())));
+                            password_error
+                                .set(Some(format!("Error changing password: {}", r.status())));
                         }
                         Err(e) => {
                             password_error.set(Some(format!("Network error: {}", e)));

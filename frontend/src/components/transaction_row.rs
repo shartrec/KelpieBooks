@@ -1,11 +1,12 @@
-use yew::prelude::*;
+use gloo_net::http::Request;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::dtos::transaction_detail::TransactionDetail;
-use gloo_net::http::Request;
+use uuid::Uuid;
+use yew::prelude::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TransactionGroup {
-    pub transaction_id: uuid::Uuid,
+    pub transaction_id: Uuid,
     pub date: chrono::NaiveDate,
     pub description: Option<String>,
     pub primary_entry: JournalEntryWithBalance,
@@ -14,6 +15,7 @@ pub struct TransactionGroup {
 #[derive(Properties, PartialEq)]
 pub struct TransactionRowProps {
     pub transaction_group: TransactionGroup,
+    pub on_reverse: Callback<Uuid>,
 }
 
 #[function_component(TransactionRow)]
@@ -49,6 +51,14 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
         })
     };
 
+    let on_reverse_click = {
+        let on_reverse = props.on_reverse.clone();
+        let transaction_id = props.transaction_group.transaction_id;
+        Callback::from(move |_| {
+            on_reverse.emit(transaction_id);
+        })
+    };
+
     let primary_entry = &props.transaction_group.primary_entry;
 
     html! {
@@ -68,10 +78,15 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                 <td class="amount">{ format!("{:.2}", (primary_entry.debit as f64) / 100.0) }</td>
                 <td class="amount">{ format!("{:.2}", (primary_entry.credit as f64) / 100.0) }</td>
                 <td class="amount">{ format!("{:.2}", (primary_entry.running_balance as f64) / 100.0) }</td>
+                <td class="actions-cell">
+                    <button class="icon-button" onclick={on_reverse_click} title="Reverse Transaction">
+                        <img src="/images/chevron-right.svg" />
+                    </button>
+                </td>
             </tr>
             if *expanded {
                 <tr class="transaction-detail-row">
-                    <td colspan="5">
+                    <td colspan="6">
                         <div class="transaction-detail-content">
                             if *loading_details {
                                 <p>{ "Loading details..." }</p>

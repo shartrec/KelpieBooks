@@ -22,9 +22,9 @@
  *
  */
 
+use chrono::{NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{NaiveDate, Utc};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct JournalEntryLine {

@@ -36,13 +36,15 @@ pub(crate) fn setup_logging() {
     let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
 
     // Store the guard globally to ensure flushing on shutdown
-    LOGGING_GUARD.set(guard).expect("Failed to set logging guard");
+    LOGGING_GUARD
+        .set(guard)
+        .expect("Failed to set logging guard");
 
     // Console logging
     let console_layer = fmt::layer()
         .with_writer(std::io::stdout)
         .with_target(false) // Optional: hide target info
-        .with_level(true);  // Show log levels
+        .with_level(true); // Show log levels
 
     // File logging
     let file_layer = fmt::layer()
@@ -51,13 +53,11 @@ pub(crate) fn setup_logging() {
         .with_target(true) // Include target info
         .with_level(true);
 
-
     // Combine both layers
     let subscriber = Registry::default()
         .with(console_layer)
         .with(file_layer)
         .with(LevelFilter::INFO);
 
-    tracing::subscriber::set_global_default(subscriber)
-        .expect("Failed to set global subscriber");
+    tracing::subscriber::set_global_default(subscriber).expect("Failed to set global subscriber");
 }

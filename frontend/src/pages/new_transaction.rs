@@ -22,19 +22,19 @@
  *
  */
 
-use yew::prelude::*;
-use yew_router::prelude::*;
-use uuid::Uuid;
-use crate::components::layout::Layout;
-use shared_core::requests::transaction::{CreateTransactionRequest, JournalEntryLine};
 use crate::components::journal_entry_row::JournalEntryRow;
-use shared_core::dtos::account_with_balance::AccountWithBalance;
+use crate::components::layout::Layout;
+use crate::Route;
+use chrono::NaiveDate;
 use gloo_net::http::Request;
 use log::info;
 use serde::{Deserialize, Serialize};
-use chrono::NaiveDate;
+use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::models::Account;
-use crate::Route;
+use shared_core::requests::transaction::{CreateTransactionRequest, JournalEntryLine};
+use uuid::Uuid;
+use yew::prelude::*;
+use yew_router::prelude::*;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct NewTransactionQuery {
@@ -57,13 +57,17 @@ pub fn new_transaction_page() -> Html {
         let from_account = from_account.clone();
 
         use_effect_with((), move |_| {
-            let from_account_id = location.query::<NewTransactionQuery>().ok().and_then(|q| q.from_account);
+            let from_account_id = location
+                .query::<NewTransactionQuery>()
+                .ok()
+                .and_then(|q| q.from_account);
             info!("Parsed from_account ID from URL: {:?}", from_account_id);
 
             wasm_bindgen_futures::spawn_local(async move {
                 if let Ok(response) = Request::get("/api/accounts").send().await {
                     if let Ok(accounts) = response.json::<Vec<AccountWithBalance>>().await {
-                        let postable = accounts.into_iter()
+                        let postable = accounts
+                            .into_iter()
                             .filter(|a| !a.is_group)
                             .map(|a| (a.id, a.name))
                             .collect();
@@ -72,17 +76,16 @@ pub fn new_transaction_page() -> Html {
                 }
 
                 if let Some(id) = from_account_id {
-                    if let Ok(response) = Request::get(&format!("/api/accounts/{}", id)).send().await {
+                    if let Ok(response) =
+                        Request::get(&format!("/api/accounts/{}", id)).send().await
+                    {
                         if let Ok(acc) = response.json::<Account>().await {
                             from_account.set(Some(acc));
                         }
                     }
                 }
 
-                let mut entries = vec![
-                    JournalEntryLine::default(),
-                    JournalEntryLine::default(),
-                ];
+                let mut entries = vec![JournalEntryLine::default(), JournalEntryLine::default()];
                 if let Some(id) = from_account_id {
                     entries[0].account_id = id;
                 }
@@ -125,7 +128,9 @@ pub fn new_transaction_page() -> Html {
     let on_date_change = {
         let request = request.clone();
         Callback::from(move |e: Event| {
-            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
             if let Ok(date) = NaiveDate::parse_from_str(&value, "%Y-%m-%d") {
                 let mut new_req = (*request).clone();
                 new_req.date = date;
@@ -145,10 +150,16 @@ pub fn new_transaction_page() -> Html {
             e.prevent_default();
             if is_balanced {
                 let mut req = (*request).clone();
-                req.entries.retain(|entry| !entry.account_id.is_nil() && (entry.debit != 0 || entry.credit != 0));
+                req.entries.retain(|entry| {
+                    !entry.account_id.is_nil() && (entry.debit != 0 || entry.credit != 0)
+                });
                 let navigator = navigator.clone();
                 wasm_bindgen_futures::spawn_local(async move {
-                    let resp = Request::post("/api/transactions").json(&req).unwrap().send().await;
+                    let resp = Request::post("/api/transactions")
+                        .json(&req)
+                        .unwrap()
+                        .send()
+                        .await;
                     if resp.is_ok() {
                         navigator.back();
                     } else {

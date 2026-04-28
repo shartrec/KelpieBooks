@@ -22,9 +22,9 @@
  *
  */
 
+use crate::models::{AccountCategory, SystemTag};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::models::{AccountCategory, SystemTag};
 
 /// A DTO that combines account data with its calculated balance.
 /// This is the structure that will be sent to the frontend.

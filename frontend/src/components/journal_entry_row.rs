@@ -8,13 +8,13 @@
  * the Free Software Foundation; either version 2 of the License,or
  * (at your option) any later version.
  *
- * KelpieBooks is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License 
- * along with KelpieBooks; if not, write to the Free Software 
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Contributors:
@@ -22,10 +22,10 @@
  *
  */
 
-use yew::prelude::*;
 use shared_core::requests::transaction::JournalEntryLine;
 use uuid::Uuid;
 use web_sys::HtmlSelectElement;
+use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct JournalEntryRowProps {
@@ -54,7 +54,9 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
         let on_change = props.on_change.clone();
         let entry = props.entry.clone();
         Callback::from(move |e: InputEvent| {
-            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
             let mut updated_entry = entry.clone();
             updated_entry.description = if value.is_empty() { None } else { Some(value) };
             on_change.emit(updated_entry);
@@ -65,7 +67,9 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
         let on_change = props.on_change.clone();
         let entry = props.entry.clone();
         Callback::from(move |e: InputEvent| {
-            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
             if let Ok(amount) = value.parse::<f64>() {
                 let mut updated_entry = entry.clone();
                 updated_entry.debit = (amount * 100.0) as i64;
@@ -79,7 +83,9 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
         let on_change = props.on_change.clone();
         let entry = props.entry.clone();
         Callback::from(move |e: InputEvent| {
-            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
             if let Ok(amount) = value.parse::<f64>() {
                 let mut updated_entry = entry.clone();
                 updated_entry.credit = (amount * 100.0) as i64;

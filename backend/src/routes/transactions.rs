@@ -1,14 +1,14 @@
+use crate::db;
+use crate::routes::security::AuthenticatedUser;
+use crate::util::types::PathUuid;
+use crate::util::ApiError;
+use crate::DbKelpie;
 use rocket::serde::json::Json;
 use rocket::{get, post, routes, Route};
 use rocket_db_pools::Connection;
-use sqlx::Acquire;
-use shared_core::requests::transaction::CreateTransactionRequest;
-use crate::db;
-use crate::util::ApiError;
-use crate::DbKelpie;
-use crate::routes::security::AuthenticatedUser;
 use shared_core::dtos::transaction_detail::TransactionDetail;
-use crate::util::types::PathUuid;
+use shared_core::requests::transaction::CreateTransactionRequest;
+use sqlx::Acquire;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![create_transaction, get_transaction, reverse_transaction]
@@ -19,7 +19,8 @@ async fn get_transaction(
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
 ) -> Result<Json<TransactionDetail>, ApiError> {
-    let transaction = db::transaction::get(&mut pool, *id).await?
+    let transaction = db::transaction::get(&mut pool, *id)
+        .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 
     let entries = db::journal_entry::get_all_by_transaction(&mut pool, *id).await?;
@@ -36,12 +37,16 @@ async fn reverse_transaction(
     user: AuthenticatedUser,
     id: PathUuid,
 ) -> Result<&'static str, ApiError> {
-    let original_transaction = db::transaction::get(&mut pool, *id).await?
+    let original_transaction = db::transaction::get(&mut pool, *id)
+        .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 
     let original_entries = db::journal_entry::get_all_by_transaction(&mut pool, *id).await?;
 
-    let reversal_description = format!("Reversal of transaction {}", &original_transaction.id.to_string()[..8]);
+    let reversal_description = format!(
+        "Reversal of transaction {}",
+        &original_transaction.id.to_string()[..8]
+    );
 
     let mut tx = pool.begin().await?;
 
@@ -51,7 +56,8 @@ async fn reverse_transaction(
         original_transaction.date,
         Some(reversal_description),
         original_transaction.reference,
-    ).await?;
+    )
+    .await?;
 
     for entry in &original_entries {
         db::journal_entry::insert(
@@ -61,7 +67,8 @@ async fn reverse_transaction(
             entry.credit, // Swap debit and credit
             entry.debit,
             entry.description.clone(),
-        ).await?;
+        )
+        .await?;
     }
 
     tx.commit().await?;
@@ -79,7 +86,9 @@ async fn create_transaction(
     let total_credits: i64 = req.entries.iter().map(|e| e.credit).sum();
 
     if total_debits == 0 || total_credits == 0 || total_debits != total_credits {
-        return Err(ApiError::Invalid("Transaction must be balanced and not zero.".to_string()));
+        return Err(ApiError::Invalid(
+            "Transaction must be balanced and not zero.".to_string(),
+        ));
     }
 
     let main_description = req.entries.get(0).and_then(|e| e.description.clone());
@@ -92,7 +101,8 @@ async fn create_transaction(
         req.date,
         main_description,
         req.reference.clone(),
-    ).await?;
+    )
+    .await?;
 
     for entry in &req.entries {
         db::journal_entry::insert(
@@ -102,7 +112,8 @@ async fn create_transaction(
             entry.debit,
             entry.credit,
             entry.description.clone(),
-        ).await?;
+        )
+        .await?;
     }
 
     tx.commit().await?;

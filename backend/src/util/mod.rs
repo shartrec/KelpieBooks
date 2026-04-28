@@ -25,14 +25,14 @@
 pub mod logging;
 pub mod types;
 
+use bcrypt;
+use log::error;
 use rocket::http::Status;
 use rocket::response::Responder;
 use rocket::serde::json::Json;
 use rocket::serde::Serialize;
 use rocket::{Request, Response};
 use rocket_db_pools::sqlx;
-use bcrypt;
-use log::error;
 
 #[derive(Debug)]
 pub(crate) enum ApiError {
@@ -74,13 +74,19 @@ impl<'r> Responder<'r, 'static> for ApiError {
             ApiError::Internal(msg) => (Status::InternalServerError, msg),
             ApiError::Conflict(e) => (Status::Conflict, e.to_string()),
             ApiError::Db(e) => (Status::InternalServerError, e.to_string()),
-            ApiError::Hashing(e) => (Status::InternalServerError, format!("Password hashing error: {}", e)),
+            ApiError::Hashing(e) => (
+                Status::InternalServerError,
+                format!("Password hashing error: {}", e),
+            ),
         };
         let body = Json(ApiErrorMessage { error: msg });
         Response::build()
             .status(status)
             .header(rocket::http::ContentType::JSON)
-            .sized_body(body.0.error.len(), std::io::Cursor::new(body.0.error.to_string()))
+            .sized_body(
+                body.0.error.len(),
+                std::io::Cursor::new(body.0.error.to_string()),
+            )
             .ok()
     }
 }

@@ -22,8 +22,8 @@
  *
  */
 
-use yew::prelude::*;
 use shared_core::dtos::user_detail::UserDetail;
+use yew::prelude::*;
 
 /// The context that will hold the user's state.
 #[derive(Debug, Clone, PartialEq)]

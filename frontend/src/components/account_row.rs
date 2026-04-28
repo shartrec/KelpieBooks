@@ -22,12 +22,12 @@
  *
  */
 
-use yew::prelude::*;
+use crate::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use std::collections::HashSet;
 use uuid::Uuid;
+use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::Route;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
@@ -63,8 +63,20 @@ pub fn account_row(props: &AccountRowProps) -> Html {
         })
     };
 
-    let on_edit_click = { let on_edit = props.on_edit.clone(); let account = props.node.account.clone(); Callback::from(move |_| { on_edit.emit(account.clone()); }) };
-    let on_delete_click = { let on_delete = props.on_delete.clone(); let account = props.node.account.clone(); Callback::from(move |_| { on_delete.emit(account.clone()); }) };
+    let on_edit_click = {
+        let on_edit = props.on_edit.clone();
+        let account = props.node.account.clone();
+        Callback::from(move |_| {
+            on_edit.emit(account.clone());
+        })
+    };
+    let on_delete_click = {
+        let on_delete = props.on_delete.clone();
+        let account = props.node.account.clone();
+        Callback::from(move |_| {
+            on_delete.emit(account.clone());
+        })
+    };
 
     let name_style = format!("padding-left: {}rem;", props.depth as f64 * 1.5);
 

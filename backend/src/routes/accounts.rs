@@ -1,19 +1,26 @@
+use crate::db::account as account_db;
+use crate::routes::security::AuthenticatedUser;
+use crate::services::account_service;
+use crate::util::types::PathUuid;
+use crate::util::ApiError;
+use crate::DbKelpie;
 use rocket::serde::json::Json;
-use rocket::{get, post, put, delete, routes, Route};
+use rocket::{delete, get, post, put, routes, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
-use crate::services::account_service;
-use crate::util::ApiError;
-use crate::DbKelpie;
-use crate::routes::security::AuthenticatedUser;
-use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
-use crate::db::account as account_db;
-use crate::util::types::PathUuid;
 use shared_core::models::Account;
+use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![get_accounts, get_account, get_account_entries, create_account, update_account, delete_account]
+    routes![
+        get_accounts,
+        get_account,
+        get_account_entries,
+        create_account,
+        update_account,
+        delete_account
+    ]
 }
 
 #[get("/api/accounts")]
@@ -21,7 +28,8 @@ async fn get_accounts(
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
 ) -> Result<Json<Vec<AccountWithBalance>>, ApiError> {
-    let accounts = account_service::get_accounts_with_balances(&mut pool, user.organization_id).await?;
+    let accounts =
+        account_service::get_accounts_with_balances(&mut pool, user.organization_id).await?;
     Ok(Json(accounts))
 }
 
@@ -30,7 +38,8 @@ async fn get_account(
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
 ) -> Result<Json<Account>, ApiError> {
-    let account = account_db::get(&mut pool, *id).await?
+    let account = account_db::get(&mut pool, *id)
+        .await?
         .ok_or_else(|| ApiError::NotFound("Account not found".to_string()))?;
     Ok(Json(account))
 }
@@ -92,7 +101,9 @@ async fn delete_account(
     id: PathUuid,
 ) -> Result<&'static str, ApiError> {
     if account_db::has_journal_entries(&mut pool, *id).await? {
-        return Err(ApiError::Conflict("Cannot delete an account with journal entries.".to_string()));
+        return Err(ApiError::Conflict(
+            "Cannot delete an account with journal entries.".to_string(),
+        ));
     }
 
     let rows_affected = account_db::delete(&mut pool, *id).await?;

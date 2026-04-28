@@ -21,8 +21,8 @@
  *      Trevor Campbell
  *
  */
-use shared_core::models::User;
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
+use shared_core::models::User;
 use uuid::Uuid;
 
 fn from_row_to_user(row: &sqlx::postgres::PgRow) -> User {
@@ -95,7 +95,10 @@ pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<User
         .map(|row| row.map(|r| from_row_to_user(&r)))
 }
 
-pub(crate) async fn get_by_email(pool: &mut PgConnection, email: &str) -> Result<Option<User>, sqlx::Error> {
+pub(crate) async fn get_by_email(
+    pool: &mut PgConnection,
+    email: &str,
+) -> Result<Option<User>, sqlx::Error> {
     sqlx::query("SELECT * FROM users WHERE email = $1")
         .bind(email)
         .fetch_optional(pool)
@@ -103,7 +106,10 @@ pub(crate) async fn get_by_email(pool: &mut PgConnection, email: &str) -> Result
         .map(|row| row.map(|r| from_row_to_user(&r)))
 }
 
-pub(crate) async fn get_all(pool: &mut PgConnection, organization_id: Uuid) -> Result<Vec<User>, sqlx::Error> {
+pub(crate) async fn get_all(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+) -> Result<Vec<User>, sqlx::Error> {
     sqlx::query("SELECT * FROM users WHERE organization_id = $1 ORDER BY email")
         .bind(organization_id)
         .fetch_all(pool)

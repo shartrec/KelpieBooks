@@ -8,13 +8,13 @@
  * the Free Software Foundation; either version 2 of the License,or
  * (at your option) any later version.
  *
- * KelpieBooks is distributed in the hope that it will be useful, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License 
- * along with KelpieBooks; if not, write to the Free Software 
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Contributors:
@@ -22,11 +22,11 @@
  *
  */
 
-use yew::prelude::*;
-use shared_core::requests::account::UpdateAccountRequest;
-use shared_core::models::AccountCategory;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::models::AccountCategory;
+use shared_core::requests::account::UpdateAccountRequest;
 use std::str::FromStr;
+use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct EditAccountModalProps {
@@ -45,10 +45,48 @@ pub fn edit_account_modal(props: &EditAccountModalProps) -> Html {
         system_tag: props.account.system_tag,
     });
 
-    let on_code_input = { let state = request.clone(); Callback::from(move |e: InputEvent| { let mut info = (*state).clone(); info.code = e.target_unchecked_into::<web_sys::HtmlInputElement>().value(); state.set(info); }) };
-    let on_name_input = { let state = request.clone(); Callback::from(move |e: InputEvent| { let mut info = (*state).clone(); info.name = e.target_unchecked_into::<web_sys::HtmlInputElement>().value(); state.set(info); }) };
-    let on_category_change = { let state = request.clone(); Callback::from(move |e: Event| { let mut info = (*state).clone(); info.category = AccountCategory::from_str(&e.target_unchecked_into::<web_sys::HtmlSelectElement>().value()).unwrap(); state.set(info); }) };
-    let on_is_group_change = { let state = request.clone(); Callback::from(move |e: Event| { let mut info = (*state).clone(); info.is_group = e.target_unchecked_into::<web_sys::HtmlInputElement>().checked(); state.set(info); }) };
+    let on_code_input = {
+        let state = request.clone();
+        Callback::from(move |e: InputEvent| {
+            let mut info = (*state).clone();
+            info.code = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
+            state.set(info);
+        })
+    };
+    let on_name_input = {
+        let state = request.clone();
+        Callback::from(move |e: InputEvent| {
+            let mut info = (*state).clone();
+            info.name = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
+            state.set(info);
+        })
+    };
+    let on_category_change = {
+        let state = request.clone();
+        Callback::from(move |e: Event| {
+            let mut info = (*state).clone();
+            info.category = AccountCategory::from_str(
+                &e.target_unchecked_into::<web_sys::HtmlSelectElement>()
+                    .value(),
+            )
+            .unwrap();
+            state.set(info);
+        })
+    };
+    let on_is_group_change = {
+        let state = request.clone();
+        Callback::from(move |e: Event| {
+            let mut info = (*state).clone();
+            info.is_group = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .checked();
+            state.set(info);
+        })
+    };
 
     let on_form_submit = {
         let on_submit = props.on_submit.clone();

@@ -22,9 +22,9 @@
  *
  */
 
+use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::DateTime;
 
 /// A DTO representing a journal entry line, including the name of the account.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

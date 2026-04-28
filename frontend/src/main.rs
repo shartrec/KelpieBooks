@@ -22,19 +22,19 @@
  *
  */
 
-use frontend::pages::register::{RegisterPage};
-use yew::prelude::*;
-use yew_router::prelude::*;
-use frontend::pages::login::LoginPage;
-use frontend::pages::dashboard::DashboardPage;
-use frontend::pages::profile::ProfilePage;
-use frontend::pages::ledger::LedgerPage;
-use frontend::pages::account_ledger::AccountLedgerPage;
-use frontend::pages::new_transaction::NewTransactionPage;
-use frontend::Route;
 use frontend::auth::{UserContext, UserContextHandle};
+use frontend::pages::account_ledger::AccountLedgerPage;
+use frontend::pages::dashboard::DashboardPage;
+use frontend::pages::ledger::LedgerPage;
+use frontend::pages::login::LoginPage;
+use frontend::pages::new_transaction::NewTransactionPage;
+use frontend::pages::profile::ProfilePage;
+use frontend::pages::register::RegisterPage;
+use frontend::Route;
 use gloo_net::http::Request;
 use shared_core::dtos::user_detail::UserDetail;
+use yew::prelude::*;
+use yew_router::prelude::*;
 
 /// The component that contains the router and switches between pages.
 #[function_component(AppRouter)]

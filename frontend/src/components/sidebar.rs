@@ -22,9 +22,10 @@
  *
  */
 
+use crate::Route;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::Route; // Assuming your router's Route enum is in lib.rs or main.rs
+// Assuming your router's Route enum is in lib.rs or main.rs
 
 #[function_component(Sidebar)]
 pub fn sidebar() -> Html {

@@ -22,15 +22,15 @@
  *
  */
 
-use yew::prelude::*;
+use crate::auth::UserContextHandle;
+use crate::Route;
+use gloo_net::http::Request;
+use shared_core::dtos::user_detail::UserDetail;
+use shared_core::requests::auth::LoginRequest;
 use yew::function_component;
 use yew::html;
-use gloo_net::http::Request;
+use yew::prelude::*;
 use yew_router::hooks::use_navigator;
-use shared_core::requests::auth::LoginRequest;
-use crate::Route;
-use crate::auth::{UserContextHandle};
-use shared_core::dtos::user_detail::UserDetail;
 
 #[function_component(LoginPage)]
 pub fn login_page() -> Html {
@@ -62,7 +62,8 @@ pub fn login_page() -> Html {
             wasm_bindgen_futures::spawn_local(async move {
                 let resp = Request::post("/api/login")
                     .json(&login_data)
-                    .unwrap().send()
+                    .unwrap()
+                    .send()
                     .await;
 
                 match resp {
@@ -114,8 +115,20 @@ pub fn login_form(props: &LoginFormProps) -> Html {
     let password = use_state(|| "".to_string());
     let error = props.error.clone();
 
-    let on_user_email_input = { let state = user_email.clone(); Callback::from(move |e: InputEvent| { let input: web_sys::HtmlInputElement = e.target_unchecked_into(); state.set(input.value()); }) };
-    let on_password_input = { let state = password.clone(); Callback::from(move |e: InputEvent| { let input: web_sys::HtmlInputElement = e.target_unchecked_into(); state.set(input.value()); }) };
+    let on_user_email_input = {
+        let state = user_email.clone();
+        Callback::from(move |e: InputEvent| {
+            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
+            state.set(input.value());
+        })
+    };
+    let on_password_input = {
+        let state = password.clone();
+        Callback::from(move |e: InputEvent| {
+            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
+            state.set(input.value());
+        })
+    };
 
     let on_submit = {
         let user_email = user_email.clone();
