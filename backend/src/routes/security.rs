@@ -99,7 +99,7 @@ async fn me(user: AuthenticatedUser) -> Json<UserDetail> {
 
 #[post("/api/auth/logout")]
 fn logout(cookies: &CookieJar<'_>) -> Status {
-    cookies.remove(Cookie::named("session"));
+    cookies.remove(Cookie::from("session"));
     Status::Ok
 }
 

@@ -1,7 +1,6 @@
 use crate::db::user;
 use crate::util::ApiError;
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::models::User;
+use rocket_db_pools::sqlx::{self, PgConnection};
 
 // A temporary struct to hold the joined user and organization data
 pub struct UserWithOrg {
@@ -11,7 +10,6 @@ pub struct UserWithOrg {
     pub full_name: String,
     pub display_name: Option<String>,
     pub password_hash: String,
-    pub created_at: chrono::DateTime<chrono::Utc>,
     pub strict_audit_mode: bool,
 }
 
@@ -30,7 +28,6 @@ pub async fn check_login(
             u.full_name,
             u.display_name,
             u.password_hash,
-            u.created_at,
             o.strict_audit_mode
         FROM users u
         JOIN organizations o ON u.organization_id = o.id
@@ -48,7 +45,7 @@ pub async fn check_login(
     }
     Ok(None)
 }
-
+#[allow(unused)]
 pub async fn create_initial_admin(pool: &mut PgConnection) -> Result<(), ApiError> {
     let count: Option<i64> = sqlx::query_scalar!("SELECT COUNT(*) FROM users")
         .fetch_one(&mut *pool)

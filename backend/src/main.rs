@@ -21,6 +21,8 @@
  *      Trevor Campbell
  *
  */
+#![forbid(unsafe_code)]
+
 use crate::routes::{accounts, onboarding, security, transactions, users};
 use crate::util::logging::setup_logging;
 use rocket::fs::{relative, FileServer, NamedFile};
