@@ -35,7 +35,7 @@ use crate::DbKelpie;
 use base64::{engine::general_purpose, Engine as _};
 use rand::{rngs::OsRng, RngCore};
 use rocket::http::{Cookie, CookieJar, Status};
-use rocket::request::{FromRequest, Outcome};
+use rocket::request::{FromRequest, Outcome, Request};
 use rocket::serde::json::Json;
 use rocket::serde::{Deserialize, Serialize};
 use rocket_db_pools::Connection;
@@ -47,13 +47,14 @@ pub(crate) fn routes() -> Vec<Route> {
 
 #[post("/api/login", data = "<login_request>")]
 async fn login(mut pool: Connection<DbKelpie>, cookies: &CookieJar<'_>, login_request: Json<LoginRequest>) -> Result<Json<UserDetail>, Status> {
-    let db_user = security::check_login(&mut *pool, &login_request.email, &login_request.password_raw).await;
+    let db_user = security::check_login(&mut pool, &login_request.email, &login_request.password_raw).await;
 
     match db_user {
         Ok(Some(user)) => {
             let auth_user = AuthenticatedUser {
                 user_id: user.id,
                 organization_id: user.organization_id,
+                strict_audit_mode: user.strict_audit_mode,
                 username: user.email.clone(),
                 full_name: user.full_name.clone(),
                 display_name: user.display_name.clone(),
@@ -97,6 +98,7 @@ fn logout(cookies: &CookieJar<'_>) -> Status {
 pub(crate) struct AuthenticatedUser {
     pub(crate) user_id: Uuid,
     pub(crate) organization_id: Uuid,
+    pub(crate) strict_audit_mode: bool,
     pub(crate) username: String,
     pub(crate) full_name: String,
     pub(crate) display_name: Option<String>,
@@ -107,7 +109,7 @@ pub(crate) struct AuthenticatedUser {
 impl<'r> FromRequest<'r> for AuthenticatedUser {
     type Error = ();
 
-    async fn from_request(request: &'r rocket::Request<'_>) -> Outcome<Self, Self::Error> {
+    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         if let Some(cookie) = request.cookies().get("session") {
             if let Some(user) = validate_session_token(cookie.value()) {
                 return Outcome::Success(user);
@@ -121,6 +123,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
 struct Claims {
     user_id: String,
     organization_id: String,
+    strict_audit_mode: bool,
     username: String,
     full_name: String,
     display_name: Option<String>,
@@ -153,6 +156,7 @@ fn generate_session_token(user: &AuthenticatedUser) -> String {
     let claims = Claims {
         user_id: user.user_id.to_string(),
         organization_id: user.organization_id.to_string(),
+        strict_audit_mode: user.strict_audit_mode,
         username: user.username.clone(),
         full_name: user.full_name.clone(),
         display_name: user.display_name.clone(),
@@ -177,6 +181,7 @@ pub(crate) fn validate_session_token(token: &str) -> Option<AuthenticatedUser> {
                 Some(AuthenticatedUser {
                     user_id: Uuid::parse_str(&data.claims.user_id).unwrap(),
                     organization_id: Uuid::parse_str(&data.claims.organization_id).unwrap(),
+                    strict_audit_mode: data.claims.strict_audit_mode,
                     username: data.claims.username,
                     full_name: data.claims.full_name,
                     display_name: data.claims.display_name,

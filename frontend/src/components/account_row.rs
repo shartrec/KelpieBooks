@@ -86,9 +86,9 @@ pub fn account_row(props: &AccountRowProps) -> Html {
                     if is_parent {
                         <button onclick={on_toggle_collapse} class="collapse-toggle">
                             if is_collapsed {
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                <img src="/images/chevron-right.svg" alt="Expand" />
                             } else {
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                <img src="/images/chevron-down.svg" alt="Collapse" />
                             }
                         </button>
                     }
@@ -98,10 +98,10 @@ pub fn account_row(props: &AccountRowProps) -> Html {
                 <td style="text-align: right;">{ format!("{:.2}", (props.node.account.balance as f64) / 100.0) }</td>
                 <td class="actions-cell">
                     <button class="icon-button" onclick={on_edit_click}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <img src="/images/edit.svg" alt="Edit" />
                     </button>
                     <button class="icon-button" onclick={on_delete_click}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <img src="/images/delete.svg" alt="Delete" />
                     </button>
                 </td>
             </tr>

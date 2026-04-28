@@ -1,14 +1,47 @@
-use rocket_db_pools::sqlx::PgConnection;
+use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use crate::db::user;
 use shared_core::models::User;
 use crate::util::ApiError;
+
+// A temporary struct to hold the joined user and organization data
+pub struct UserWithOrg {
+    pub id: uuid::Uuid,
+    pub organization_id: uuid::Uuid,
+    pub email: String,
+    pub full_name: String,
+    pub display_name: Option<String>,
+    pub password_hash: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub strict_audit_mode: bool,
+}
 
 pub async fn check_login(
     pool: &mut PgConnection,
     email: &str,
     password_raw: &str,
-) -> Result<Option<User>, ApiError> {
-    if let Some(user) = user::get_by_email(pool, email).await? {
+) -> Result<Option<UserWithOrg>, ApiError> {
+    let user_with_org = sqlx::query_as!(
+        UserWithOrg,
+        r#"
+        SELECT
+            u.id,
+            u.organization_id,
+            u.email,
+            u.full_name,
+            u.display_name,
+            u.password_hash,
+            u.created_at,
+            o.strict_audit_mode
+        FROM users u
+        JOIN organizations o ON u.organization_id = o.id
+        WHERE u.email = $1
+        "#,
+        email
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    if let Some(user) = user_with_org {
         if bcrypt::verify(password_raw, &user.password_hash)? {
             return Ok(Some(user));
         }
@@ -17,18 +50,12 @@ pub async fn check_login(
 }
 
 pub async fn create_initial_admin(pool: &mut PgConnection) -> Result<(), ApiError> {
-    // Check if there are any users
-    let count = sqlx::query!("SELECT COUNT(*) FROM users")
+    let count: Option<i64> = sqlx::query_scalar!("SELECT COUNT(*) FROM users")
         .fetch_one(&mut *pool)
-        .await?
-        .count
-        .unwrap_or(0);
+        .await?;
 
-    if count == 0 {
-        // Create a default organization
+    if matches!(count, None | Some(0)) {
         let org = crate::db::organization::create(pool, "Default Organization").await?;
-
-        // Create the admin user
         let password_hash = bcrypt::hash("admin", bcrypt::DEFAULT_COST)?;
         user::insert(
             pool,

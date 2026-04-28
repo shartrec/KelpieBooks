@@ -26,6 +26,7 @@ use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use shared_core::models::JournalEntry;
 use uuid::Uuid;
 use chrono::{NaiveDate, DateTime, Utc};
+use shared_core::dtos::journal_entry_detail::JournalEntryDetail;
 
 pub(crate) struct JournalEntryWithDate {
     pub id: Uuid,
@@ -59,6 +60,19 @@ fn from_row_to_journal_entry_with_date(row: &sqlx::postgres::PgRow) -> JournalEn
         credit: row.get("credit"),
         description: row.get("description"),
         date: row.get("date"),
+        created_at: row.get("created_at"),
+    }
+}
+
+fn from_row_to_journal_entry_detail(row: &sqlx::postgres::PgRow) -> JournalEntryDetail {
+    JournalEntryDetail {
+        id: row.get("id"),
+        transaction_id: row.get("transaction_id"),
+        account_id: row.get("account_id"),
+        account_name: row.get("account_name"),
+        debit: row.get("debit"),
+        credit: row.get("credit"),
+        description: row.get("description"),
         created_at: row.get("created_at"),
     }
 }
@@ -106,6 +120,33 @@ pub(crate) async fn get_all_by_account_with_date(
     .fetch_all(pool)
     .await
     .map(|rows| rows.iter().map(from_row_to_journal_entry_with_date).collect())
+}
+
+pub(crate) async fn get_all_by_transaction(
+    pool: &mut PgConnection,
+    transaction_id: Uuid,
+) -> Result<Vec<JournalEntryDetail>, sqlx::Error> {
+    sqlx::query(
+        r#"
+        SELECT
+            je.id,
+            je.transaction_id,
+            je.account_id,
+            a.name as account_name,
+            je.debit,
+            je.credit,
+            je.description,
+            je.created_at
+        FROM journal_entries je
+        JOIN accounts a ON je.account_id = a.id
+        WHERE je.transaction_id = $1
+        ORDER BY je.debit DESC, je.credit
+        "#,
+    )
+    .bind(transaction_id)
+    .fetch_all(pool)
+    .await
+    .map(|rows| rows.iter().map(from_row_to_journal_entry_detail).collect())
 }
 
 pub(crate) async fn insert(

@@ -70,27 +70,22 @@ pub fn header() -> Html {
         html! { <span></span> }
     };
 
-    // SVG Icons
-    let profile_icon = html! { <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> };
-    let logout_icon = html! { <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> };
-
     html! {
         <header class="header">
             <div class="header-content">
                 <div class="user-menu">
                     <button onclick={toggle_dropdown} class="user-menu-trigger">
                         { user_display }
-                        // A little chevron icon to indicate a dropdown
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <img src="/images/chevron-down.svg" alt="Toggle menu" />
                     </button>
                     if *dropdown_open {
                         <div class="user-menu-dropdown">
                             <Link<Route> to={Route::Profile} classes="dropdown-item">
-                                { profile_icon }
+                                <img src="/images/user.svg" alt="Profile" />
                                 <span>{ "Edit Profile" }</span>
                             </Link<Route>>
                             <button onclick={on_logout_click} class="dropdown-item">
-                                { logout_icon }
+                                <img src="/images/logout.svg" alt="Logout" />
                                 <span>{ "Logout" }</span>
                             </button>
                         </div>

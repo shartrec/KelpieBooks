@@ -87,8 +87,21 @@ This is the most complex UI/UX part, allowing users to create new, balanced jour
 4. Add a date entry field for the transaction. We need this as journals can be entered after the fact.
 5. Support 'Expand' feature on journal entry to show full transaction. 
 
+## Phase 6: Journal edit reversal
 
+Implementation Recommendation for KelpieBooks
 
+1. System Setting: Add a flag in your organizations table: strict_audit_mode (boolean).
+
+  * Strict Mode = ON: Disable the "Edit" button on the UI for any posted journal. Only provide a "Reverse and Re-create" button.
+  * Strict Mode = OFF: Allow edits, but only within the current fiscal period.
+  * The "Period Lock": Regardless of settings, never allow an edit if a period is marked as closed. (This is future)
+
+2. The "Straightforward Reversal" Utility
+
+  *  Provide a "Reverse" button that automatically creates a new Journal Entry with the same accounts, swapped Debits/Credits, and a memo stating: "Reversal of JE #123." Use just the first few, say 8, digits of the UUID.
+
+3. Add edit transaction facility
 
 ## Supplementary tasks
 1. Look at refactoring AccountCategory and SystemTag Enums to work more seemlessly with psql

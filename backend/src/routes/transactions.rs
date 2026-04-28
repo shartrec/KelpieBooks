@@ -1,29 +1,5 @@
-/*
- * Copyright (c) 2026. Trevor Campbell and others.
- *
- * This file is part of KelpieBooks.
- *
- * KelpieBooks is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License,or
- * (at your option) any later version.
- *
- * KelpieBooks is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with KelpieBooks; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * Contributors:
- *      Trevor Campbell
- *
- */
-
 use rocket::serde::json::Json;
-use rocket::{post, routes, Route};
+use rocket::{get, post, routes, Route};
 use rocket_db_pools::Connection;
 use sqlx::Acquire;
 use shared_core::requests::transaction::CreateTransactionRequest;
@@ -31,9 +7,66 @@ use crate::db;
 use crate::util::ApiError;
 use crate::DbKelpie;
 use crate::routes::security::AuthenticatedUser;
+use shared_core::dtos::transaction_detail::TransactionDetail;
+use crate::util::types::PathUuid;
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![create_transaction]
+    routes![create_transaction, get_transaction, reverse_transaction]
+}
+
+#[get("/api/transactions/<id>")]
+async fn get_transaction(
+    mut pool: Connection<DbKelpie>,
+    id: PathUuid,
+) -> Result<Json<TransactionDetail>, ApiError> {
+    let transaction = db::transaction::get(&mut pool, *id).await?
+        .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
+
+    let entries = db::journal_entry::get_all_by_transaction(&mut pool, *id).await?;
+
+    Ok(Json(TransactionDetail {
+        transaction,
+        entries,
+    }))
+}
+
+#[post("/api/transactions/<id>/reverse")]
+async fn reverse_transaction(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    id: PathUuid,
+) -> Result<&'static str, ApiError> {
+    let original_transaction = db::transaction::get(&mut pool, *id).await?
+        .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
+
+    let original_entries = db::journal_entry::get_all_by_transaction(&mut pool, *id).await?;
+
+    let reversal_description = format!("Reversal of transaction {}", &original_transaction.id.to_string()[..8]);
+
+    let mut tx = pool.begin().await?;
+
+    let new_transaction_id = db::transaction::insert(
+        &mut tx,
+        user.organization_id,
+        original_transaction.date,
+        Some(reversal_description),
+        original_transaction.reference,
+    ).await?;
+
+    for entry in &original_entries {
+        db::journal_entry::insert(
+            &mut tx,
+            new_transaction_id,
+            entry.account_id,
+            entry.credit, // Swap debit and credit
+            entry.debit,
+            entry.description.clone(),
+        ).await?;
+    }
+
+    tx.commit().await?;
+
+    Ok("Transaction reversed successfully.")
 }
 
 #[post("/api/transactions", data = "<req>")]
@@ -49,13 +82,15 @@ async fn create_transaction(
         return Err(ApiError::Invalid("Transaction must be balanced and not zero.".to_string()));
     }
 
+    let main_description = req.entries.get(0).and_then(|e| e.description.clone());
+
     let mut tx = pool.begin().await?;
 
     let transaction_id = db::transaction::insert(
         &mut tx,
         user.organization_id,
         req.date,
-        req.description.clone(),
+        main_description,
         req.reference.clone(),
     ).await?;
 

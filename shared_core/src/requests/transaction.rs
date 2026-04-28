@@ -28,14 +28,19 @@ use chrono::{NaiveDate, Utc};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct JournalEntryLine {
+    #[serde(default = "Uuid::new_v4")]
+    pub line_id: Uuid, // A unique ID for the frontend to use as a key
     pub account_id: Uuid,
     pub debit: i64,
     pub credit: i64,
     pub description: Option<String>,
 }
+
+// Custom default to ensure a new UUID is generated each time
 impl Default for JournalEntryLine {
     fn default() -> Self {
         Self {
+            line_id: Uuid::new_v4(),
             account_id: Uuid::nil(),
             debit: 0,
             credit: 0,
@@ -62,4 +67,3 @@ impl Default for CreateTransactionRequest {
         }
     }
 }
-

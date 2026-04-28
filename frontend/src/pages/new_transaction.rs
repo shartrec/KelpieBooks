@@ -30,36 +30,36 @@ use shared_core::requests::transaction::{CreateTransactionRequest, JournalEntryL
 use crate::components::journal_entry_row::JournalEntryRow;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use gloo_net::http::Request;
-use serde::Deserialize;
+use log::info;
+use serde::{Deserialize, Serialize};
+use chrono::NaiveDate;
+use shared_core::models::Account;
+use crate::Route;
 
-#[derive(Deserialize, PartialEq, Clone)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct NewTransactionQuery {
+    #[serde(default)]
     #[serde(rename = "from_account")]
     pub from_account: Option<Uuid>,
 }
 
-#[derive(Properties, PartialEq)]
-pub struct NewTransactionPageProps {
-    #[prop_or_default]
-    #[prop_or_else(NewTransactionQuery::default)]
-    pub query: NewTransactionQuery,
-}
-
-impl Default for NewTransactionQuery {
-    fn default() -> Self {
-        Self { from_account: None }
-    }
-}
-
 #[function_component(NewTransactionPage)]
-pub fn new_transaction_page(props: &NewTransactionPageProps) -> Html {
+pub fn new_transaction_page() -> Html {
     let request = use_state(CreateTransactionRequest::default);
     let postable_accounts = use_state(Vec::new);
+    let from_account = use_state(|| None::<Account>);
     let navigator = use_navigator().unwrap();
+    let location = use_location().unwrap();
 
     {
+        let request = request.clone();
         let postable_accounts = postable_accounts.clone();
+        let from_account = from_account.clone();
+
         use_effect_with((), move |_| {
+            let from_account_id = location.query::<NewTransactionQuery>().ok().and_then(|q| q.from_account);
+            info!("Parsed from_account ID from URL: {:?}", from_account_id);
+
             wasm_bindgen_futures::spawn_local(async move {
                 if let Ok(response) = Request::get("/api/accounts").send().await {
                     if let Ok(accounts) = response.json::<Vec<AccountWithBalance>>().await {
@@ -70,26 +70,29 @@ pub fn new_transaction_page(props: &NewTransactionPageProps) -> Html {
                         postable_accounts.set(postable);
                     }
                 }
+
+                if let Some(id) = from_account_id {
+                    if let Ok(response) = Request::get(&format!("/api/accounts/{}", id)).send().await {
+                        if let Ok(acc) = response.json::<Account>().await {
+                            from_account.set(Some(acc));
+                        }
+                    }
+                }
+
+                let mut entries = vec![
+                    JournalEntryLine::default(),
+                    JournalEntryLine::default(),
+                ];
+                if let Some(id) = from_account_id {
+                    entries[0].account_id = id;
+                }
+                let mut new_req = (*request).clone();
+                new_req.entries = entries;
+                request.set(new_req);
             });
+            || ()
         });
     }
-
-    use_effect_with(props.query.from_account, {
-        let request = request.clone();
-        move |from_account| {
-            let mut entries = vec![
-                JournalEntryLine::default(),
-                JournalEntryLine::default(),
-            ];
-            if let Some(id) = from_account {
-                entries[0].account_id = *id;
-            }
-            let mut new_req = (*request).clone();
-            new_req.entries = entries;
-            request.set(new_req);
-            || ()
-        }
-    });
 
     let on_entry_change = {
         let request = request.clone();
@@ -114,6 +117,18 @@ pub fn new_transaction_page(props: &NewTransactionPageProps) -> Html {
             if request.entries.len() > 2 {
                 let mut new_req = (*request).clone();
                 new_req.entries.remove(index);
+                request.set(new_req);
+            }
+        })
+    };
+
+    let on_date_change = {
+        let request = request.clone();
+        Callback::from(move |e: Event| {
+            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            if let Ok(date) = NaiveDate::parse_from_str(&value, "%Y-%m-%d") {
+                let mut new_req = (*request).clone();
+                new_req.date = date;
                 request.set(new_req);
             }
         })
@@ -144,19 +159,49 @@ pub fn new_transaction_page(props: &NewTransactionPageProps) -> Html {
         })
     };
 
+    let on_cancel = {
+        let navigator = navigator.clone();
+        Callback::from(move |_| {
+            navigator.back();
+        })
+    };
+
+    let page_header = if let Some(acc) = &*from_account {
+        html! {
+            <div class="page-subheader">
+                <h3>{ "New Transaction for Account: " }<Link<Route> to={Route::AccountLedger { id: acc.id }}>{ &acc.name }</Link<Route>></h3>
+            </div>
+        }
+    } else {
+        html! {}
+    };
+
     html! {
         <Layout>
             <h1>{ "New Journal Transaction" }</h1>
+            { page_header }
             <form onsubmit={on_submit} class="transaction-form">
-                // TODO: Add Date and Description fields
+                <div class="transaction-header">
+                    <label>
+                        { "Date:" }
+                        <input type="date" value={request.date.to_string()} onchange={on_date_change} />
+                    </label>
+                </div>
 
                 <div class="journal-entries">
+                    <div class="journal-entry-header">
+                        <span>{ "Account" }</span>
+                        <span>{ "Description" }</span>
+                        <span>{ "Debit" }</span>
+                        <span>{ "Credit" }</span>
+                        <span></span>
+                    </div>
                     { for request.entries.iter().enumerate().map(|(i, entry)| {
                         let on_change = { let on_entry_change = on_entry_change.clone(); Callback::from(move |updated_entry| { on_entry_change.emit((i, updated_entry)); }) };
                         let on_delete = { let on_delete_line = on_delete_line.clone(); Callback::from(move |_| { on_delete_line.emit(i); }) };
                         html!{
                             <JournalEntryRow
-                                key={i}
+                                key={entry.line_id.to_string()}
                                 entry={entry.clone()}
                                 on_change={on_change}
                                 on_delete={on_delete}
@@ -175,6 +220,7 @@ pub fn new_transaction_page(props: &NewTransactionPageProps) -> Html {
                 </div>
 
                 <div class="form-actions">
+                    <button type="button" onclick={on_cancel} class="button-secondary">{ "Cancel" }</button>
                     <button type="submit" disabled={!is_balanced}>{ "Save Transaction" }</button>
                 </div>
             </form>

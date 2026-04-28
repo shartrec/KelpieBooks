@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026. Trevor Campbell and others.
+ * Copyright (c) 2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -22,27 +22,14 @@
  *
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::models::Organization;
+use serde::{Deserialize, Serialize};
+use crate::models::Transaction;
+use crate::dtos::journal_entry_detail::JournalEntryDetail;
 
-fn from_row_to_org(row: &sqlx::postgres::PgRow) -> Organization {
-    Organization {
-        id: row.get("id"),
-        name: row.get("name"),
-        strict_audit_mode: row.get("strict_audit_mode"),
-        created_at: row.get("created_at"),
-    }
-}
-
-pub async fn create(
-    tx: &mut PgConnection,
-    name: &str,
-) -> Result<Organization, sqlx::Error> {
-    let row = sqlx::query(
-        "INSERT INTO organizations (name) VALUES ($1) RETURNING *"
-    )
-    .bind(name)
-    .fetch_one(tx)
-    .await?;
-    Ok(from_row_to_org(&row))
+/// A DTO representing a full transaction with all its journal entry lines.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TransactionDetail {
+    #[serde(flatten)]
+    pub transaction: Transaction,
+    pub entries: Vec<JournalEntryDetail>,
 }

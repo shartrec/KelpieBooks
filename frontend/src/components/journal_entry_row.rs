@@ -50,6 +50,17 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
         })
     };
 
+    let on_description_change = {
+        let on_change = props.on_change.clone();
+        let entry = props.entry.clone();
+        Callback::from(move |e: InputEvent| {
+            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            let mut updated_entry = entry.clone();
+            updated_entry.description = if value.is_empty() { None } else { Some(value) };
+            on_change.emit(updated_entry);
+        })
+    };
+
     let on_debit_change = {
         let on_change = props.on_change.clone();
         let entry = props.entry.clone();
@@ -93,6 +104,7 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
                     <option value={id.to_string()} selected={*id == props.entry.account_id}>{name}</option>
                 })}
             </select>
+            <input type="text" placeholder="Description" value={props.entry.description.clone().unwrap_or_default()} oninput={on_description_change} />
             <input type="number" step="0.01" placeholder="Debit" value={(props.entry.debit as f64 / 100.0).to_string()} oninput={on_debit_change} />
             <input type="number" step="0.01" placeholder="Credit" value={(props.entry.credit as f64 / 100.0).to_string()} oninput={on_credit_change} />
             <button type="button" onclick={on_delete_click} class="icon-button">{ "X" }</button>

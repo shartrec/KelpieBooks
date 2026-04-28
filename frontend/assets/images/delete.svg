@@ -1,0 +1,25 @@
+<!--
+  - Copyright (c) 2026. Trevor Campbell and others.
+  -
+  - This file is part of KelpieBooks.
+  -
+  - KelpieBooks is free software; you can redistribute it and/or modify
+  - it under the terms of the GNU General Public License as published by
+  - the Free Software Foundation; either version 2 of the License,or
+  - (at your option) any later version.
+  -
+  - KelpieBooks is distributed in the hope that it will be useful, 
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of 
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  - See the GNU General Public License for more details.
+  -
+  - You should have received a copy of the GNU General Public License 
+  - along with KelpieBooks; if not, write to the Free Software 
+  - Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  -
+  - Contributors:
+  -      Trevor Campbell
+  -
+  -->
+
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>

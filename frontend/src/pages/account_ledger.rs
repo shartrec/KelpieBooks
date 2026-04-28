@@ -28,23 +28,21 @@ use uuid::Uuid;
 use crate::components::layout::Layout;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use gloo_net::http::Request;
+use log::info;
 use crate::Route;
 use shared_core::models::Account;
-use serde::{Deserialize, Serialize};
+use crate::pages::new_transaction::NewTransactionQuery;
+use crate::components::transaction_row::{TransactionRow, TransactionGroup};
+use std::collections::HashMap;
 
-#[derive(Properties, PartialEq)]
+#[derive(Debug, Properties, PartialEq)]
 pub struct AccountLedgerPageProps {
     pub account_id: Uuid,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-struct NewTransactionQuery {
-    #[serde(rename = "from_account")]
-    from_account: Option<Uuid>,
-}
-
 #[function_component(AccountLedgerPage)]
 pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
+    info!("Account Ledger Props {:?}", props);
     let entries = use_state(|| Vec::<JournalEntryWithBalance>::new());
     let account = use_state(|| None::<Account>);
     let error = use_state(|| None::<String>);
@@ -89,6 +87,23 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
     let account_name = account.as_ref().map(|a| a.name.clone()).unwrap_or_default();
     let query = NewTransactionQuery { from_account: Some(props.account_id) };
 
+    let transaction_groups = {
+        let mut groups: HashMap<Uuid, TransactionGroup> = HashMap::new();
+        for entry in entries.iter() {
+            if entry.account_id == props.account_id {
+                groups.insert(entry.transaction_id, TransactionGroup {
+                    transaction_id: entry.transaction_id,
+                    date: entry.date,
+                    description: entry.description.clone(),
+                    primary_entry: entry.clone(),
+                });
+            }
+        }
+        let mut sorted_groups: Vec<TransactionGroup> = groups.into_values().collect();
+        sorted_groups.sort_by(|a, b| a.date.cmp(&b.date));
+        sorted_groups
+    };
+
     html! {
         <Layout>
             <h1>{ format!("Ledger: {}", account_name) }</h1>
@@ -107,20 +122,14 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                         <tr>
                             <th>{ "Date" }</th>
                             <th>{ "Description" }</th>
-                            <th style="text-align: right;">{ "Debit" }</th>
-                            <th style="text-align: right;">{ "Credit" }</th>
-                            <th style="text-align: right;">{ "Balance" }</th>
+                            <th class="amount">{ "Debit" }</th>
+                            <th class="amount">{ "Credit" }</th>
+                            <th class="amount">{ "Balance" }</th>
                         </tr>
                     </thead>
                     <tbody>
-                        { for entries.iter().map(|entry| html! {
-                            <tr>
-                                <td>{ entry.date.to_string() }</td>
-                                <td>{ entry.description.clone().unwrap_or_default() }</td>
-                                <td style="text-align: right;">{ format!("{:.2}", (entry.debit as f64) / 100.0) }</td>
-                                <td style="text-align: right;">{ format!("{:.2}", (entry.credit as f64) / 100.0) }</td>
-                                <td style="text-align: right;">{ format!("{:.2}", (entry.running_balance as f64) / 100.0) }</td>
-                            </tr>
+                        { for transaction_groups.into_iter().map(|group| html! {
+                            <TransactionRow key={group.transaction_id.to_string()} transaction_group={group.clone()} />
                         })}
                     </tbody>
                 </table>

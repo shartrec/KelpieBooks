@@ -31,6 +31,7 @@ use uuid::Uuid;
 pub struct Organization {
     pub id: Uuid,
     pub name: String,
+    pub strict_audit_mode: bool,
     pub created_at: DateTime<Utc>,
 }
 
@@ -83,7 +84,7 @@ pub struct Account {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Transaction {
     pub id: Uuid,
     pub organization_id: Uuid,
@@ -93,7 +94,7 @@ pub struct Transaction {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct JournalEntry {
     pub id: Uuid,
     pub transaction_id: Uuid,

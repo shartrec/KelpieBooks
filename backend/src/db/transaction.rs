@@ -25,6 +25,26 @@
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use uuid::Uuid;
 use chrono::NaiveDate;
+use shared_core::models::Transaction;
+
+fn from_row_to_transaction(row: &sqlx::postgres::PgRow) -> Transaction {
+    Transaction {
+        id: row.get("id"),
+        organization_id: row.get("organization_id"),
+        date: row.get("date"),
+        description: row.get("description"),
+        reference: row.get("reference"),
+        created_at: row.get("created_at"),
+    }
+}
+
+pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<Transaction>, sqlx::Error> {
+    sqlx::query("SELECT * FROM transactions WHERE id = $1")
+        .bind(id)
+        .fetch_optional(pool)
+        .await
+        .map(|row| row.map(|r| from_row_to_transaction(&r)))
+}
 
 pub(crate) async fn insert(
     pool: &mut PgConnection,

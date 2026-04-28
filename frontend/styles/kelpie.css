@@ -91,7 +91,6 @@ h1, h2, h3, h4 {
 
 h1 {
     font-size: 1.5rem; /* Or 24px, or whatever size you prefer */
-    /* You can add other styles here too */
     font-weight: 600;
     margin-bottom: 0.5rem;
 }
@@ -107,6 +106,22 @@ h2 {
 h3 {
     font-size: 1.3rem;
 }
+
+.page-subheader {
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background-color: #eafaf1;
+    border-radius: 6px;
+}
+
+.page-subheader h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
 
 /* Buttons */
 button {
@@ -377,6 +392,95 @@ tbody tr:nth-child(even) {
     justify-self: end;
     display: flex;
     gap: 1rem;
+}
+
+/* Transaction Form Styles */
+.transaction-form {
+    width: 100%;
+    max-width: 900px;
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-header {
+    margin-bottom: 1.5rem;
+}
+
+.journal-entry-header, .journal-entry-row {
+    display: grid;
+    grid-template-columns: 20% 1fr 110px 110px 30px;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.journal-entry-header {
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+    font-size: 0.9rem;
+    color: #576574;
+}
+
+.journal-entry-row input, .journal-entry-row select {
+    margin-bottom: 0;
+    padding: 6px 8px; /* More compact inputs */
+    width: 100%;
+}
+
+.totals {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    font-weight: bold;
+}
+
+.totals .balanced {
+    color: var(--success-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: #eafaf1;
+}
+
+.totals .unbalanced {
+    color: var(--error-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: #fbeae5;
+}
+
+/* Account Ledger Styles */
+.amount {
+    text-align: right;
+}
+
+.transaction-detail-row td {
+    padding: 0;
+    border-top: none;
+}
+
+.transaction-detail-content {
+    padding: 1rem 1.5rem;
+    background-color: #f9fafb;
+}
+
+.transaction-detail-content .journal-entry-header {
+    grid-template-columns: 25% 1fr 120px 120px;
+}
+
+.transaction-detail-content .journal-entry-line {
+    display: grid;
+    grid-template-columns: 25% 1fr 120px 120px;
+    gap: 0.5rem 1rem;
+    padding: 4px 0;
+    font-size: 0.9rem;
 }
 
 
