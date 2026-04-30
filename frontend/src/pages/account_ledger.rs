@@ -24,16 +24,19 @@
 
 use crate::components::layout::Layout;
 use crate::components::transaction_row::{TransactionGroup, TransactionRow};
+use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::pages::new_transaction::NewTransactionQuery;
 use crate::Route;
 use gloo_net::http::Request;
 use log::info;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
-use shared_core::models::Account;
+use shared_core::requests::transaction::ReverseTransactionRequest;
+use shared_core::models::{Account, AccountCategory};
 use std::collections::HashMap;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use crate::components::je_reversal_confirmation_modal::ReversalConfirmationModal;
 
 #[derive(Debug, Properties, PartialEq)]
 pub struct AccountLedgerPageProps {
@@ -42,11 +45,22 @@ pub struct AccountLedgerPageProps {
 
 #[function_component(AccountLedgerPage)]
 pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
+    let report_ctx = use_report_context();
+
+    use_effect_with((), move |_| {
+        let on_export = Callback::from(|_| {
+            web_sys::window().unwrap().alert_with_message("Exporting Account Ledger...").unwrap();
+        });
+        report_ctx.dispatch(ReportAction::SetOnExport(Some(on_export)));
+        move || report_ctx.dispatch(ReportAction::SetOnExport(None))
+    });
+
     info!("Account Ledger Props {:?}", props);
     let entries = use_state(|| Vec::<JournalEntryWithBalance>::new());
     let account = use_state(|| None::<Account>);
     let error = use_state(|| None::<String>);
     let loading = use_state(|| true);
+    let transaction_to_reverse = use_state(|| None::<JournalEntryWithBalance>);
 
     let fetch_entries = {
         let entries = entries.clone();
@@ -79,6 +93,13 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         })
     };
 
+    let on_modal_close = {
+        let transaction_to_reverse = transaction_to_reverse.clone();
+        Callback::from(move |_: ()| {
+            transaction_to_reverse.set(None);
+        })
+    };
+
     {
         let account = account.clone();
         let account_id = props.account_id;
@@ -97,27 +118,53 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         });
     }
 
-    let on_reverse = {
+    let on_reverse_confirm = {
+        let on_modal_close = on_modal_close.clone();
         let fetch_entries = fetch_entries.clone();
         let error = error.clone();
-        Callback::from(move |transaction_id: Uuid| {
-            let fetch_entries = fetch_entries.clone();
-            let error = error.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                let url = format!("/api/transactions/{}/reverse", transaction_id);
-                let resp = Request::post(&url).send().await;
-                if resp.is_ok() {
-                    fetch_entries.emit(());
-                } else {
-                    error.set(Some("Failed to reverse transaction.".to_string()));
-                }
-            });
+        let transaction_id = transaction_to_reverse.as_ref().map(|t| t.transaction_id);
+        Callback::from(move |description: String| {
+            if let Some(id) = transaction_id {
+                let on_modal_close = on_modal_close.clone();
+                let fetch_entries = fetch_entries.clone();
+                let error = error.clone();
+                wasm_bindgen_futures::spawn_local(async move {
+                    let url = format!("/api/transactions/{}/reverse", id);
+                    let req_body = ReverseTransactionRequest { description };
+                    let resp = Request::post(&url)
+                        .json(&req_body)
+                        .map_err(|e| e.to_string());
+
+                    match resp {
+                        Ok(req) => {
+                            let resp = req.send().await;
+                            match resp {
+                                Ok(r) if r.ok() => {
+                                    on_modal_close.emit(());
+                                    fetch_entries.emit(());
+                                }
+                                Ok(r) => {
+                                    error.set(Some(format!("Failed to reverse transaction: {}", r.status())))
+                                }
+                                Err(e) => error.set(Some(format!("Network error: {}", e))),
+                            }
+                        }
+                        Err(e) => error.set(Some(format!("Serialization error: {}", e))),
+                    }
+                });
+            }
         })
     };
+    let on_reverse_click = {
+        let transaction_to_reverse = transaction_to_reverse.clone();
+        Callback::from(move |t| transaction_to_reverse.set(Some(t)))
+    };
+
 
     let account_name = account.as_ref().map(|a| a.name.clone()).unwrap_or_default();
     let query = NewTransactionQuery {
         from_account: Some(props.account_id),
+        ..Default::default()
     };
 
     let transaction_groups = {
@@ -147,12 +194,22 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                 <Link<Route, NewTransactionQuery> to={Route::NewTransaction} query={query} classes="button">
                     { "Add New Transaction" }
                 </Link<Route, NewTransactionQuery>>
+                if let Some(acc) = &*account {
+                    if acc.category == AccountCategory::Expense {
+                        <Link<Route> to={Route::ProfitLoss} classes="button button-secondary">
+                            { "View this account in P&L" }
+                        </Link<Route>>
+                    }
+                }
             </div>
             if *loading {
                 <p>{ "Loading..." }</p>
             } else if let Some(err) = &*error {
                 <div class="error">{ err }</div>
             } else {
+
+            if let Some(jeb) = &*transaction_to_reverse { <ReversalConfirmationModal jeb={jeb.clone()} on_close={on_modal_close.clone()} on_confirm={on_reverse_confirm.clone()} /> }
+
                 <table class="table">
                     <thead>
                         <tr>
@@ -169,7 +226,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                             <TransactionRow
                                 key={group.transaction_id.to_string()}
                                 transaction_group={group.clone()}
-                                on_reverse={on_reverse.clone()}
+                                on_reverse={on_reverse_click.clone()}
                             />
                         })}
                     </tbody>

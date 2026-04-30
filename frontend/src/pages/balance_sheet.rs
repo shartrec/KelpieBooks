@@ -22,18 +22,17 @@
  *
  */
 
-use crate::components::chart_of_accounts_table::ChartOfAccountsTable;
 use crate::components::layout::Layout;
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use yew::prelude::*;
 
-#[function_component(LedgerPage)]
-pub fn ledger_page() -> Html {
+#[function_component(BalanceSheetPage)]
+pub fn balance_sheet_page() -> Html {
     let report_ctx = use_report_context();
 
     use_effect_with((), move |_| {
         let on_export = Callback::from(|_| {
-            web_sys::window().unwrap().alert_with_message("Exporting Chart of Accounts...").unwrap();
+            web_sys::window().unwrap().alert_with_message("Exporting Balance Sheet...").unwrap();
         });
         report_ctx.dispatch(ReportAction::SetOnExport(Some(on_export)));
         move || report_ctx.dispatch(ReportAction::SetOnExport(None))
@@ -41,9 +40,8 @@ pub fn ledger_page() -> Html {
 
     html! {
         <Layout>
-            <h1>{ "Chart of Accounts" }</h1>
-            <p>{ "This is a list of all accounts in your organization. The balances include all transactions and are rolled up into parent accounts." }</p>
-            <ChartOfAccountsTable />
+            <h1>{ "Balance Sheet" }</h1>
+            <p>{ "This is a placeholder for the Balance Sheet report." }</p>
         </Layout>
     }
 }

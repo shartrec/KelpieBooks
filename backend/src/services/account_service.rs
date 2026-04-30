@@ -27,14 +27,14 @@ use crate::util::ApiError;
 use rocket_db_pools::sqlx::PgConnection;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use uuid::Uuid;
 
 pub async fn get_accounts_with_balances(
     pool: &mut PgConnection,
     organization_id: Uuid,
 ) -> Result<Vec<AccountWithBalance>, ApiError> {
-    let mut accounts = db::account::get_all_by_org(pool, organization_id).await?;
+    let accounts = db::account::get_all_by_org(pool, organization_id).await?;
     let entries = db::journal_entry::get_all_by_org(pool, organization_id).await?;
 
     let mut balances: HashMap<Uuid, i64> = HashMap::new();
@@ -44,14 +44,36 @@ pub async fn get_accounts_with_balances(
         *balances.entry(entry.account_id).or_insert(0) += entry.debit - entry.credit;
     }
 
-    // 2. Sort accounts by code in descending order. This ensures children are processed before parents.
-    accounts.sort_by(|a, b| b.code.cmp(&a.code));
+    // 2. Build a map of parent to children and child counts for topological sort.
+    let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
+    let mut child_count: HashMap<Uuid, usize> = HashMap::new();
 
-    // 3. Iterate and roll up balances from child to parent.
     for account in &accounts {
+        child_count.entry(account.id).or_insert(0);
         if let Some(parent_id) = account.parent_id {
-            let child_balance = *balances.get(&account.id).unwrap_or(&0);
-            *balances.entry(parent_id).or_insert(0) += child_balance;
+            parent_map.insert(account.id, parent_id);
+            *child_count.entry(parent_id).or_insert(0) += 1;
+        }
+    }
+
+    // 3. Use Dependency-Driven Roll-up (topological sort from leaves to roots).
+    let mut queue: VecDeque<Uuid> = child_count
+        .iter()
+        .filter(|(_, &count)| count == 0)
+        .map(|(&id, _)| id)
+        .collect();
+
+    while let Some(account_id) = queue.pop_front() {
+        if let Some(&parent_id) = parent_map.get(&account_id) {
+            let balance = *balances.get(&account_id).unwrap_or(&0);
+            *balances.entry(parent_id).or_insert(0) += balance;
+
+            if let Some(count) = child_count.get_mut(&parent_id) {
+                *count -= 1;
+                if *count == 0 {
+                    queue.push_back(parent_id);
+                }
+            }
         }
     }
 

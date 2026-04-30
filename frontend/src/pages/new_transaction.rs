@@ -41,6 +41,9 @@ pub struct NewTransactionQuery {
     #[serde(default)]
     #[serde(rename = "from_account")]
     pub from_account: Option<Uuid>,
+    #[serde(default)]
+    #[serde(rename = "duplicate_from")]
+    pub duplicate_from: Option<Uuid>,
 }
 
 #[function_component(NewTransactionPage)]
@@ -57,11 +60,10 @@ pub fn new_transaction_page() -> Html {
         let from_account = from_account.clone();
 
         use_effect_with((), move |_| {
-            let from_account_id = location
-                .query::<NewTransactionQuery>()
-                .ok()
-                .and_then(|q| q.from_account);
-            info!("Parsed from_account ID from URL: {:?}", from_account_id);
+            let query = location.query::<NewTransactionQuery>().ok();
+            let from_account_id = query.as_ref().and_then(|q| q.from_account);
+            let duplicate_from_id = query.as_ref().and_then(|q| q.duplicate_from);
+            info!("Parsed IDs from URL: from_account={:?}, duplicate_from={:?}", from_account_id, duplicate_from_id);
 
             wasm_bindgen_futures::spawn_local(async move {
                 if let Ok(response) = Request::get("/api/accounts").send().await {
@@ -85,12 +87,29 @@ pub fn new_transaction_page() -> Html {
                     }
                 }
 
-                let mut entries = vec![JournalEntryLine::default(), JournalEntryLine::default()];
-                if let Some(id) = from_account_id {
-                    entries[0].account_id = id;
+                let mut new_req = CreateTransactionRequest::default();
+
+                if let Some(id) = duplicate_from_id {
+                    if let Ok(response) = Request::get(&format!("/api/transactions/{}", id)).send().await {
+                        if let Ok(detail) = response.json::<shared_core::dtos::transaction_detail::TransactionDetail>().await {
+                            new_req.description = detail.transaction.description;
+                            new_req.reference = detail.transaction.reference;
+                            new_req.entries = detail.entries.into_iter().map(|e| JournalEntryLine {
+                                line_id: Uuid::new_v4(),
+                                account_id: e.account_id,
+                                debit: e.debit,
+                                credit: e.credit,
+                                description: e.description,
+                            }).collect();
+                        }
+                    }
+                } else {
+                    let mut entries = vec![JournalEntryLine::default(), JournalEntryLine::default()];
+                    if let Some(id) = from_account_id {
+                        entries[0].account_id = id;
+                    }
+                    new_req.entries = entries;
                 }
-                let mut new_req = (*request).clone();
-                new_req.entries = entries;
                 request.set(new_req);
             });
             || ()

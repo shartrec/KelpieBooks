@@ -1,8 +1,11 @@
+use crate::Route;
+use crate::pages::new_transaction::NewTransactionQuery;
 use gloo_net::http::Request;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::dtos::transaction_detail::TransactionDetail;
 use uuid::Uuid;
 use yew::prelude::*;
+use yew_router::prelude::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TransactionGroup {
@@ -15,7 +18,7 @@ pub struct TransactionGroup {
 #[derive(Properties, PartialEq)]
 pub struct TransactionRowProps {
     pub transaction_group: TransactionGroup,
-    pub on_reverse: Callback<Uuid>,
+    pub on_reverse: Callback<JournalEntryWithBalance>,
 }
 
 #[function_component(TransactionRow)]
@@ -23,6 +26,7 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
     let expanded = use_state(|| false);
     let transaction_detail = use_state(|| None::<TransactionDetail>);
     let loading_details = use_state(|| false);
+    let dropdown_open = use_state(|| false);
 
     let on_toggle_expand = {
         let expanded = expanded.clone();
@@ -53,13 +57,26 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
 
     let on_reverse_click = {
         let on_reverse = props.on_reverse.clone();
-        let transaction_id = props.transaction_group.transaction_id;
+        let transaction_detail = props.transaction_group.primary_entry.clone();
+        let dropdown_open = dropdown_open.clone();
         Callback::from(move |_| {
-            on_reverse.emit(transaction_id);
+            dropdown_open.set(false);
+            on_reverse.emit(transaction_detail.clone());
+        })
+    };
+
+    let on_toggle_dropdown = {
+        let dropdown_open = dropdown_open.clone();
+        Callback::from(move |_| {
+            dropdown_open.set(!*dropdown_open);
         })
     };
 
     let primary_entry = &props.transaction_group.primary_entry;
+    let duplicate_query = NewTransactionQuery {
+        duplicate_from: Some(props.transaction_group.transaction_id),
+        ..Default::default()
+    };
 
     html! {
         <>
@@ -79,9 +96,27 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                 <td class="amount">{ format!("{:.2}", (primary_entry.credit as f64) / 100.0) }</td>
                 <td class="amount">{ format!("{:.2}", (primary_entry.running_balance as f64) / 100.0) }</td>
                 <td class="actions-cell">
-                    <button class="icon-button" onclick={on_reverse_click} title="Reverse Transaction">
-                        <img src="/images/chevron-right.svg" />
-                    </button>
+                    <div class="actions-dropdown">
+                        <button class="icon-button" onclick={on_toggle_dropdown} title="Actions">
+                            <img src="/images/more-vertical.svg" alt="Actions" />
+                        </button>
+                        if *dropdown_open {
+                            <div class="actions-dropdown-content">
+                                <button class="dropdown-item" onclick={on_reverse_click}>
+                                    <img src="/images/reverse.svg" alt="Reverse" />
+                                    <span>{ "Reverse" }</span>
+                                </button>
+                                <Link<Route, NewTransactionQuery>
+                                    to={Route::NewTransaction}
+                                    query={duplicate_query}
+                                    classes="dropdown-item"
+                                >
+                                    <img src="/images/edit.svg" alt="Duplicate" />
+                                    <span>{ "Duplicate" }</span>
+                                </Link<Route, NewTransactionQuery>>
+                            </div>
+                        }
+                    </div>
                 </td>
             </tr>
             if *expanded {
@@ -92,8 +127,8 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                                 <p>{ "Loading details..." }</p>
                             } else if let Some(detail) = &*transaction_detail {
                                 <div class="journal-entry-header">
-                                    <span>{ "Account" }</span>
-                                    <span>{ "Description" }</span>
+                                    <span>{ "Details for trans" }</span>
+                                    <span>{ &detail.transaction.id.to_string()[0..8] }</span>
                                     <span class="amount">{ "Debit" }</span>
                                     <span class="amount">{ "Credit" }</span>
                                 </div>

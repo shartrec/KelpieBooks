@@ -53,29 +53,41 @@ pub async fn import_default_accounts(
     accounts: Vec<AccountImport>,
 ) -> Result<(), sqlx::Error> {
     let mut code_to_id_map = HashMap::new();
+    let mut remaining_accounts = accounts;
 
-    // First pass: Insert top-level accounts.
-    for account_template in accounts.iter().filter(|a| a.parent_code.is_none()) {
-        let id = insert_account(tx, organization_id, None, account_template).await?;
-        code_to_id_map.insert(account_template.code.clone(), id);
-    }
+    while !remaining_accounts.is_empty() {
+        let (ready_to_import, next_remaining): (Vec<_>, Vec<_>) =
+            remaining_accounts.into_iter().partition(|a| {
+                match &a.parent_code {
+                    None => true,
+                    Some(parent_code) => code_to_id_map.contains_key(parent_code),
+                }
+            });
 
-    // Second pass: Insert child accounts.
-    for account_template in accounts.iter().filter(|a| a.parent_code.is_some()) {
-        let parent_code = account_template.parent_code.as_ref().unwrap();
-        let parent_id = code_to_id_map.get(parent_code).cloned();
-
-        if parent_id.is_none() {
-            log::error!(
-                "Parent account with code '{}' not found for account '{}'",
-                parent_code,
-                account_template.name
-            );
-            continue;
+        if ready_to_import.is_empty() {
+            // This happens if there are missing parents or circular dependencies
+            for a in next_remaining {
+                log::error!(
+                    "Could not import account '{}' (code {}): parent '{}' not found or circular dependency.",
+                    a.name,
+                    a.code,
+                    a.parent_code.unwrap_or_default()
+                );
+            }
+            break;
         }
 
-        let id = insert_account(tx, organization_id, parent_id, account_template).await?;
-        code_to_id_map.insert(account_template.code.clone(), id);
+        for account_template in ready_to_import {
+            let parent_id = account_template
+                .parent_code
+                .as_ref()
+                .and_then(|code| code_to_id_map.get(code).cloned());
+
+            let id = insert_account(tx, organization_id, parent_id, &account_template).await?;
+            code_to_id_map.insert(account_template.code.clone(), id);
+        }
+
+        remaining_accounts = next_remaining;
     }
 
     Ok(())

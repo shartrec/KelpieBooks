@@ -104,4 +104,4 @@ Implementation Recommendation for KelpieBooks
 3. Add edit transaction facility
 
 ## Supplementary tasks
-1. Look at refactoring AccountCategory and SystemTag Enums to work more seemlessly with psql
+1. Look at refactoring AccountCategory and SystemTag Enums to work more seamlessly with psql ✔

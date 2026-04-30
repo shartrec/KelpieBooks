@@ -67,3 +67,8 @@ impl Default for CreateTransactionRequest {
         }
     }
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ReverseTransactionRequest {
+    pub description: String,
+}

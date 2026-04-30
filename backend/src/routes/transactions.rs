@@ -1,3 +1,4 @@
+use chrono::{Local, NaiveDate};
 use crate::db;
 use crate::routes::security::AuthenticatedUser;
 use crate::util::types::PathUuid;
@@ -7,7 +8,7 @@ use rocket::serde::json::Json;
 use rocket::{get, post, routes, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::transaction_detail::TransactionDetail;
-use shared_core::requests::transaction::CreateTransactionRequest;
+use shared_core::requests::transaction::{CreateTransactionRequest, ReverseTransactionRequest};
 use sqlx::Acquire;
 
 pub(crate) fn routes() -> Vec<Route> {
@@ -31,11 +32,12 @@ async fn get_transaction(
     }))
 }
 
-#[post("/api/transactions/<id>/reverse")]
+#[post("/api/transactions/<id>/reverse", data = "<req>")]
 async fn reverse_transaction(
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
     id: PathUuid,
+    req: Json<ReverseTransactionRequest>,
 ) -> Result<&'static str, ApiError> {
     let original_transaction = db::transaction::get(&mut pool, *id)
         .await?
@@ -43,18 +45,13 @@ async fn reverse_transaction(
 
     let original_entries = db::journal_entry::get_all_by_transaction(&mut pool, *id).await?;
 
-    let reversal_description = format!(
-        "Reversal of transaction {}",
-        &original_transaction.id.to_string()[..8]
-    );
-
     let mut tx = pool.begin().await?;
 
     let new_transaction_id = db::transaction::insert(
         &mut tx,
         user.organization_id,
-        original_transaction.date,
-        Some(reversal_description),
+        Local::now().date_naive(),
+        Some(req.description.clone()),
         original_transaction.reference,
     )
     .await?;
@@ -66,7 +63,7 @@ async fn reverse_transaction(
             entry.account_id,
             entry.credit, // Swap debit and credit
             entry.debit,
-            entry.description.clone(),
+            Some(format!("{} - {}", req.description.clone(), entry.description.clone().unwrap_or("".to_string()))),
         )
         .await?;
     }

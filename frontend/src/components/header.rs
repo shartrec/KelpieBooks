@@ -23,14 +23,17 @@
  */
 
 use crate::auth::UserContextHandle;
+use crate::contexts::report_context::ReportContext;
 use crate::Route;
 use gloo_net::http::Request;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use chrono::NaiveDate;
 
 #[function_component(Header)]
 pub fn header() -> Html {
     let user_ctx = use_context::<UserContextHandle>();
+    let report_ctx = use_context::<ReportContext>();
     let navigator = use_navigator().unwrap();
     let dropdown_open = use_state(|| false);
 
@@ -59,6 +62,45 @@ pub fn header() -> Html {
         })
     };
 
+    let on_start_change = {
+        let report_ctx = report_ctx.clone();
+        Callback::from(move |e: Event| {
+            if let Some(ctx) = &report_ctx {
+                let target: web_sys::HtmlInputElement = e.target_unchecked_into();
+                if let Ok(new_date) = NaiveDate::parse_from_str(&target.value(), "%Y-%m-%d") {
+                    let mut current = ctx.date_range.clone();
+                    current.start_date = new_date;
+                    ctx.dispatch(crate::contexts::report_context::ReportAction::SetDateRange(current));
+                }
+            }
+        })
+    };
+
+    let on_end_change = {
+        let report_ctx = report_ctx.clone();
+        Callback::from(move |e: Event| {
+            if let Some(ctx) = &report_ctx {
+                let target: web_sys::HtmlInputElement = e.target_unchecked_into();
+                if let Ok(new_date) = NaiveDate::parse_from_str(&target.value(), "%Y-%m-%d") {
+                    let mut current = ctx.date_range.clone();
+                    current.end_date = new_date;
+                    ctx.dispatch(crate::contexts::report_context::ReportAction::SetDateRange(current));
+                }
+            }
+        })
+    };
+
+    let on_export_click = {
+        let report_ctx = report_ctx.clone();
+        Callback::from(move |_| {
+            if let Some(ctx) = &report_ctx {
+                if let Some(on_export) = &ctx.on_export {
+                    on_export.emit(());
+                }
+            }
+        })
+    };
+
     let user_display = if let Some(handle) = user_ctx {
         if let Some(user) = &handle.user {
             let name_to_display = user.display_name.as_ref().unwrap_or(&user.full_name);
@@ -70,9 +112,31 @@ pub fn header() -> Html {
         html! { <span></span> }
     };
 
+    let route = use_route::<Route>().unwrap_or(Route::Home);
+    let is_report_route = matches!(route, Route::Ledger | Route::TrialBalance | Route::ProfitLoss | Route::BalanceSheet | Route::AccountLedger { .. });
+
     html! {
         <header class="header">
             <div class="header-content">
+                <div class="header-left">
+                    if is_report_route {
+                        if let Some(ctx) = report_ctx {
+                            <div class="header-action-bar">
+                                <div class="date-range-selector">
+                                    <label>{ "From: " }</label>
+                                    <input type="date" value={ctx.date_range.start_date.to_string()} onchange={on_start_change} />
+                                    <label>{ "To: " }</label>
+                                    <input type="date" value={ctx.date_range.end_date.to_string()} onchange={on_end_change} />
+                                </div>
+                                if ctx.on_export.is_some() {
+                                    <button class="icon-button" onclick={on_export_click} title="Export to CSV">
+                                        <img src="/images/download.svg" alt="Export" />
+                                    </button>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
                 <div class="user-menu">
                     <button onclick={toggle_dropdown} class="user-menu-trigger">
                         { user_display }

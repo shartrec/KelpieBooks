@@ -29,6 +29,15 @@ use yew_router::prelude::*;
 
 #[function_component(Sidebar)]
 pub fn sidebar() -> Html {
+    let reports_open = use_state(|| false);
+
+    let toggle_reports = {
+        let reports_open = reports_open.clone();
+        Callback::from(move |_| {
+            reports_open.set(!*reports_open);
+        })
+    };
+
     html! {
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -37,11 +46,24 @@ pub fn sidebar() -> Html {
             <nav class="sidebar-nav">
                 <ul>
                     <li><Link<Route> to={Route::Dashboard}>{ "Dashboard" }</Link<Route>></li>
-                    <li><Link<Route> to={Route::Ledger}>{ "Ledger" }</Link<Route>></li>
-                    // Add more links as pages are created
-                    // <li><Link<Route> to={Route::Accounts}>{ "Accounts" }</Link<Route>></li>
-                    // <li><Link<Route> to={Route::Transactions}>{ "Transactions" }</Link<Route>></li>
-                    // <li><Link<Route> to={Route::Reports}>{ "Reports" }</Link<Route>></li>
+                    <li><Link<Route> to={Route::Ledger}>{ "Accounts" }</Link<Route>></li>
+                    <li class="sidebar-group">
+                        <div class="sidebar-group-header" onclick={toggle_reports}>
+                            <span>{ "Reports" }</span>
+                            <img 
+                                src="/images/chevron-right.svg" 
+                                alt="Toggle" 
+                                class={if *reports_open { "rotated" } else { "" }}
+                            />
+                        </div>
+                        if *reports_open {
+                            <ul class="sidebar-sub-nav">
+                                <li><Link<Route> to={Route::TrialBalance}>{ "Trial Balance" }</Link<Route>></li>
+                                <li><Link<Route> to={Route::ProfitLoss}>{ "Profit & Loss" }</Link<Route>></li>
+                                <li><Link<Route> to={Route::BalanceSheet}>{ "Balance Sheet" }</Link<Route>></li>
+                            </ul>
+                        }
+                    </li>
                 </ul>
             </nav>
         </aside>

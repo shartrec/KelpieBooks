@@ -23,11 +23,14 @@
  */
 
 use frontend::auth::{UserContext, UserContextHandle};
+use frontend::contexts::report_context::ReportContextProvider;
 use frontend::pages::account_ledger::AccountLedgerPage;
+use frontend::pages::balance_sheet::BalanceSheetPage;
 use frontend::pages::dashboard::DashboardPage;
 use frontend::pages::ledger::LedgerPage;
 use frontend::pages::login::LoginPage;
 use frontend::pages::new_transaction::NewTransactionPage;
+use frontend::pages::profit_loss::ProfitLossPage;
 use frontend::pages::profile::ProfilePage;
 use frontend::pages::register::RegisterPage;
 use frontend::Route;
@@ -69,7 +72,9 @@ fn app() -> Html {
 
     html! {
         <ContextProvider<UserContextHandle> context={user_ctx}>
-            <AppRouter />
+            <ReportContextProvider>
+                <AppRouter />
+            </ReportContextProvider>
         </ContextProvider<UserContextHandle>>
     }
 }
@@ -83,6 +88,9 @@ fn switch(routes: Route) -> Html {
         Route::Dashboard => html! { <DashboardPage /> },
         Route::Profile => html! { <ProfilePage /> },
         Route::Ledger => html! { <LedgerPage /> },
+        Route::TrialBalance => html! { <LedgerPage /> },
+        Route::ProfitLoss => html! { <ProfitLossPage /> },
+        Route::BalanceSheet => html! { <BalanceSheetPage /> },
         Route::AccountLedger { id } => html! { <AccountLedgerPage account_id={id} /> },
         Route::NewTransaction => html! { <NewTransactionPage /> },
         Route::Home => html! { <LoginPage /> },

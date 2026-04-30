@@ -25,6 +25,7 @@ use uuid::Uuid;
 use yew_router::Routable;
 
 pub mod auth;
+pub mod contexts;
 pub mod components;
 pub mod pages;
 
@@ -42,6 +43,12 @@ pub enum Route {
     Profile,
     #[at("/ledger")]
     Ledger,
+    #[at("/reports/trial-balance")]
+    TrialBalance,
+    #[at("/reports/profit-loss")]
+    ProfitLoss,
+    #[at("/reports/balance-sheet")]
+    BalanceSheet,
     #[at("/accounts/:id")]
     AccountLedger { id: Uuid },
     #[at("/transactions/new")]

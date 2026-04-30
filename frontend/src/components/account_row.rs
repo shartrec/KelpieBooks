@@ -112,9 +112,11 @@ pub fn account_row(props: &AccountRowProps) -> Html {
                     <button class="icon-button" onclick={on_edit_click}>
                         <img src="/images/edit.svg" alt="Edit" />
                     </button>
-                    <button class="icon-button" onclick={on_delete_click}>
-                        <img src="/images/delete.svg" alt="Delete" />
-                    </button>
+                    if !is_parent && props.node.account.balance == 0 {
+                        <button class="icon-button" onclick={on_delete_click}>
+                            <img src="/images/delete.svg" alt="Delete" />
+                        </button>
+                    }
                 </td>
             </tr>
             if is_parent && !is_collapsed {

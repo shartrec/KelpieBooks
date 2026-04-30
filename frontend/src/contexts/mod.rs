@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026. Trevor Campbell and others.
+ * Copyright (c) 2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -22,12 +22,4 @@
  *
  */
 
-pub mod account_ledger;
-pub mod balance_sheet;
-pub mod dashboard;
-pub mod ledger;
-pub mod login;
-pub mod new_transaction;
-pub mod profit_loss;
-pub mod profile;
-pub mod register;
+pub mod report_context;

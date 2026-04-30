@@ -143,7 +143,7 @@ pub fn add_account_modal(props: &AddAccountModalProps) -> Html {
 
                     <label>{"Parent Account:"}</label>
                     <select onchange={on_parent_change}>
-                        <option value="">{ "None (Root Account)" }</option>
+                        <option value="" selected=true>{ "None (Root Account)" }</option>
                         { for props.parent_accounts.iter().map(|(id, name)| html! {
                             <option value={id.to_string()}>{name}</option>
                         })}
