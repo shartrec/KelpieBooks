@@ -26,6 +26,8 @@ use crate::components::layout::Layout;
 use crate::components::transaction_row::{TransactionGroup, TransactionRow};
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::pages::new_transaction::NewTransactionQuery;
+use crate::utils::csv::download_csv;
+use crate::utils::typst::download_typst;
 use crate::Route;
 use gloo_net::http::Request;
 use log::info;
@@ -46,21 +48,62 @@ pub struct AccountLedgerPageProps {
 #[function_component(AccountLedgerPage)]
 pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
     let report_ctx = use_report_context();
-
-    use_effect_with((), move |_| {
-        let on_export = Callback::from(|_| {
-            web_sys::window().unwrap().alert_with_message("Exporting Account Ledger...").unwrap();
-        });
-        report_ctx.dispatch(ReportAction::SetOnExport(Some(on_export)));
-        move || report_ctx.dispatch(ReportAction::SetOnExport(None))
-    });
-
-    info!("Account Ledger Props {:?}", props);
     let entries = use_state(|| Vec::<JournalEntryWithBalance>::new());
     let account = use_state(|| None::<Account>);
     let error = use_state(|| None::<String>);
     let loading = use_state(|| true);
     let transaction_to_reverse = use_state(|| None::<JournalEntryWithBalance>);
+
+    {
+        let report_ctx = report_ctx.clone();
+        let entries = entries.clone();
+        use_effect_with(entries.clone(), move |_| {
+            let entries1 = entries.clone();
+            let on_export_csv = Callback::from(move |_| {
+                let mut csv_content = String::new();
+                csv_content.push_str("Date,Description,Debit,Credit,Balance\n");
+                for entry in entries1.iter() {
+                    let debit = if entry.debit > 0 { (entry.debit as f64) / 100.0 } else { 0.0 };
+                    let credit = if entry.credit > 0 { (entry.credit as f64) / 100.0 } else { 0.0 };
+                    let balance = ((entry.debit - entry.credit) as f64) / 100.0;
+                    csv_content.push_str(&format!("{},\"{}\",{},{},{}\n", entry.date, entry.description.clone().unwrap_or("".to_string()), debit, credit, balance));
+                }
+                if let Err(e) = download_csv("account_ledger.csv", &csv_content) {
+                    gloo_console::error!("Failed to download CSV:", e);
+                }
+            });
+
+            let on_export_typst = Callback::from(move |_| {
+                let mut typst_content = String::new();
+                typst_content.push_str("#set text(size: 10pt)\n");
+                typst_content.push_str("#set page(margin: (top: 2cm, bottom: 2cm, left: 1.5cm, right: 1.5cm))\n\n");
+                typst_content.push_str("= Account Ledger\n\n");
+                typst_content.push_str("#table(\n");
+                typst_content.push_str("  columns: (auto, 1fr, 1fr, 1fr, 1fr),\n");
+                typst_content.push_str("  [*Date*], [*Description*], [*Debit*], [*Credit*], [*Balance*],\n");
+                for entry in entries.iter() {
+                    let debit = if entry.debit > 0 { format!("{:.2}", (entry.debit as f64) / 100.0) } else { "".to_string() };
+                    let credit = if entry.credit > 0 { format!("{:.2}", (entry.credit as f64) / 100.0) } else { "".to_string() };
+                    let balance = format!("{:.2}", ((entry.debit - entry.credit) as f64) / 100.0);
+                    typst_content.push_str(&format!("  \"{}\", \"{}\", align(right)[{}], align(right)[{}], align(right)[{}],\n", entry.date, entry.description.clone().unwrap_or("".to_string()), debit, credit, balance));
+                }
+                typst_content.push_str(")\n");
+
+                if let Err(e) = download_typst("account_ledger.typ", &typst_content) {
+                    gloo_console::error!("Failed to download Typst file:", e);
+                }
+            });
+
+            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(on_export_csv)));
+            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(on_export_typst)));
+            move || {
+                report_ctx.dispatch(ReportAction::SetOnExportCsv(None));
+                report_ctx.dispatch(ReportAction::SetOnExportTypst(None));
+            }
+        });
+    }
+
+    info!("Account Ledger Props {:?}", props);
 
     let fetch_entries = {
         let entries = entries.clone();

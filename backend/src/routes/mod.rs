@@ -24,6 +24,7 @@
 
 pub(crate) mod accounts;
 pub(crate) mod onboarding;
+pub(crate) mod reports;
 pub(crate) mod security;
 pub(crate) mod transactions;
 pub(crate) mod users;

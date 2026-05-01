@@ -31,3 +31,4 @@ pub mod new_transaction;
 pub mod profit_loss;
 pub mod profile;
 pub mod register;
+pub mod trial_balance;

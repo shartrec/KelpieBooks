@@ -46,7 +46,8 @@ impl Default for DateRange {
 #[derive(Clone, Debug, PartialEq)]
 pub enum ReportAction {
     SetDateRange(DateRange),
-    SetOnExport(Option<Callback<()>>),
+    SetOnExportCsv(Option<Callback<()>>),
+    SetOnExportTypst(Option<Callback<()>>),
 }
 
 pub type ReportState = ReportContextData;
@@ -54,7 +55,8 @@ pub type ReportState = ReportContextData;
 #[derive(Clone, Debug, PartialEq)]
 pub struct ReportContextData {
     pub date_range: DateRange,
-    pub on_export: Option<Callback<()>>,
+    pub on_export_csv: Option<Callback<()>>,
+    pub on_export_typst: Option<Callback<()>>,
 }
 
 impl Default for ReportContextData {
@@ -66,7 +68,8 @@ impl Default for ReportContextData {
             .unwrap_or_default();
         Self {
             date_range,
-            on_export: None,
+            on_export_csv: None,
+            on_export_typst: None,
         }
     }
 }
@@ -84,12 +87,22 @@ impl Reducible for ReportContextData {
                     ..(*self).clone()
                 }.into()
             }
-            ReportAction::SetOnExport(on_export) => {
-                if self.on_export == on_export {
+            ReportAction::SetOnExportCsv(on_export_csv) => {
+                if self.on_export_csv == on_export_csv {
                     self
                 } else {
                     Self {
-                        on_export,
+                        on_export_csv,
+                        ..(*self).clone()
+                    }.into()
+                }
+            }
+            ReportAction::SetOnExportTypst(on_export_typst) => {
+                if self.on_export_typst == on_export_typst {
+                    self
+                } else {
+                    Self {
+                        on_export_typst,
                         ..(*self).clone()
                     }.into()
                 }

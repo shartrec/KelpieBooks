@@ -33,6 +33,7 @@ use frontend::pages::new_transaction::NewTransactionPage;
 use frontend::pages::profit_loss::ProfitLossPage;
 use frontend::pages::profile::ProfilePage;
 use frontend::pages::register::RegisterPage;
+use frontend::pages::trial_balance::TrialBalancePage;
 use frontend::Route;
 use gloo_net::http::Request;
 use shared_core::dtos::user_detail::UserDetail;
@@ -88,7 +89,7 @@ fn switch(routes: Route) -> Html {
         Route::Dashboard => html! { <DashboardPage /> },
         Route::Profile => html! { <ProfilePage /> },
         Route::Ledger => html! { <LedgerPage /> },
-        Route::TrialBalance => html! { <LedgerPage /> },
+        Route::TrialBalance => html! { <TrialBalancePage /> },
         Route::ProfitLoss => html! { <ProfitLossPage /> },
         Route::BalanceSheet => html! { <BalanceSheetPage /> },
         Route::AccountLedger { id } => html! { <AccountLedgerPage account_id={id} /> },

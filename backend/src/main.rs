@@ -23,7 +23,7 @@
  */
 #![forbid(unsafe_code)]
 
-use crate::routes::{accounts, onboarding, security, transactions, users};
+use crate::routes::{accounts, onboarding, reports, security, transactions, users};
 use crate::util::logging::setup_logging;
 use rocket::fs::{relative, FileServer, NamedFile};
 use rocket::{get, routes};
@@ -55,6 +55,7 @@ fn rocket() -> _ {
         .mount("/", onboarding::routes())
         .mount("/", users::routes())
         .mount("/", accounts::routes())
+        .mount("/", reports::routes())
         .mount("/", transactions::routes())
         .mount("/", FileServer::from(relative!("./static")))
         // 3. Mount the fallback route with a lower priority (rank 2)

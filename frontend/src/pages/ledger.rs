@@ -32,11 +32,18 @@ pub fn ledger_page() -> Html {
     let report_ctx = use_report_context();
 
     use_effect_with((), move |_| {
-        let on_export = Callback::from(|_| {
-            web_sys::window().unwrap().alert_with_message("Exporting Chart of Accounts...").unwrap();
+        let on_export_csv = Callback::from(|_| {
+            web_sys::window().unwrap().alert_with_message("Exporting Chart of Accounts to CSV...").unwrap();
         });
-        report_ctx.dispatch(ReportAction::SetOnExport(Some(on_export)));
-        move || report_ctx.dispatch(ReportAction::SetOnExport(None))
+        let on_export_typst = Callback::from(|_| {
+            web_sys::window().unwrap().alert_with_message("Exporting Chart of Accounts to Typst...").unwrap();
+        });
+        report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(on_export_csv)));
+        report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(on_export_typst)));
+        move || {
+            report_ctx.dispatch(ReportAction::SetOnExportCsv(None));
+            report_ctx.dispatch(ReportAction::SetOnExportTypst(None));
+        }
     });
 
     html! {

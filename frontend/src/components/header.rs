@@ -90,12 +90,23 @@ pub fn header() -> Html {
         })
     };
 
-    let on_export_click = {
+    let on_export_csv_click = {
         let report_ctx = report_ctx.clone();
         Callback::from(move |_| {
             if let Some(ctx) = &report_ctx {
-                if let Some(on_export) = &ctx.on_export {
-                    on_export.emit(());
+                if let Some(on_export_csv) = &ctx.on_export_csv {
+                    on_export_csv.emit(());
+                }
+            }
+        })
+    };
+
+    let on_export_typst_click = {
+        let report_ctx = report_ctx.clone();
+        Callback::from(move |_| {
+            if let Some(ctx) = &report_ctx {
+                if let Some(on_export_typst) = &ctx.on_export_typst {
+                    on_export_typst.emit(());
                 }
             }
         })
@@ -128,9 +139,14 @@ pub fn header() -> Html {
                                     <label>{ "To: " }</label>
                                     <input type="date" value={ctx.date_range.end_date.to_string()} onchange={on_end_change} />
                                 </div>
-                                if ctx.on_export.is_some() {
-                                    <button class="icon-button" onclick={on_export_click} title="Export to CSV">
-                                        <img src="/images/download.svg" alt="Export" />
+                                if ctx.on_export_csv.is_some() {
+                                    <button class="icon-button" onclick={on_export_csv_click} title="Export to CSV">
+                                        <img src="/images/download.svg" alt="Export CSV" />
+                                    </button>
+                                }
+                                if ctx.on_export_typst.is_some() {
+                                    <button class="icon-button" onclick={on_export_typst_click} title="Export to Typst">
+                                        <img src="/images/file-text.svg" alt="Export Typst" />
                                     </button>
                                 }
                             </div>
