@@ -24,16 +24,16 @@
 
 use crate::components::layout::Layout;
 use crate::contexts::report_context::{use_report_context, ReportAction};
-use crate::utils::csv::download_csv;
-use crate::utils::typst::download_typst;
+use crate::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::models::AccountCategory;
 use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
 use gloo_net::http::Request;
 use yew_router::prelude::*;
-use crate::Route;
+use shared_core::util::format_currency;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
@@ -97,89 +97,30 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> (Vec<AccountNode>, Ve
 #[function_component(ProfitLossPage)]
 pub fn profit_loss_page() -> Html {
     let report_ctx = use_report_context();
-    let accounts = use_state(Vec::<AccountWithBalance>::new);
+    let accounts = use_state(|| Rc::new(Vec::<AccountWithBalance>::new()));
     let loading = use_state(|| true);
     let error = use_state(|| None::<String>);
     let collapsed_nodes = use_state(HashSet::<Uuid>::new);
 
-    let (revenue_nodes, expense_nodes, net_income) = build_account_nodes(&accounts);
+    let memoized_data = use_memo(accounts.clone(), |accounts| {
+        build_account_nodes(accounts)
+    });
+
+    let (revenue_nodes, expense_nodes, net_income) = (*memoized_data).clone();
 
     {
         let report_ctx = report_ctx.clone();
-        let accounts = accounts.clone();
-        use_effect_with(accounts.clone(), move |_| {
-            let accounts_csv = accounts.clone();
-            let on_export_csv = Callback::from(move |_| {
-                let (revenue_nodes, expense_nodes, net_income) = build_account_nodes(&accounts_csv);
-                let mut csv_content = String::new();
-                csv_content.push_str("Account,Balance\n");
-
-                fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String) {
-                    let indent = " ".repeat(depth * 2);
-                    let display_balance = if node.account.category == AccountCategory::Revenue {
-                        -node.account.balance
-                    } else {
-                        node.account.balance
-                    };
-                    content.push_str(&format!("\"{}{}\",\"{}\"\n", indent, node.account.name, (display_balance as f64) / 100.0));
-                    for child in &node.children {
-                        build_csv_rows(child, depth + 1, content);
-                    }
-                }
-
-                csv_content.push_str("Revenue,\n");
-                for node in &revenue_nodes {
-                    build_csv_rows(node, 0, &mut csv_content);
-                }
-                csv_content.push_str("Expenses,\n");
-                for node in &expense_nodes {
-                    build_csv_rows(node, 0, &mut csv_content);
-                }
-                csv_content.push_str(&format!("\"Net Income\",\"{}\"\n", (net_income as f64) / 100.0));
-
-                if let Err(e) = download_csv("profit_and_loss.csv", &csv_content) {
-                    gloo_console::error!("Failed to download CSV:", e);
-                }
-            });
-
-            let accounts_typst = accounts.clone();
-            let on_export_typst = Callback::from(move |_| {
-                let (revenue_nodes, expense_nodes, net_income) = build_account_nodes(&accounts_typst);
-                let mut typst_content = String::new();
-                typst_content.push_str("#set text(size: 10pt)\n");
-                typst_content.push_str("#set page(margin: (top: 2cm, bottom: 2cm, left: 1.5cm, right: 1.5cm))\n\n");
-                typst_content.push_str("= Profit & Loss\n\n");
-
-                fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String) {
-                    let indent = " ".repeat(depth * 2);
-                    let display_balance = if node.account.category == AccountCategory::Revenue {
-                        -node.account.balance
-                    } else {
-                        node.account.balance
-                    };
-                    content.push_str(&format!("{}{}[{:.2}]\n", indent, node.account.name, (display_balance as f64) / 100.0));
-                    for child in &node.children {
-                        build_typst_rows(child, depth + 1, content);
-                    }
-                }
-
-                typst_content.push_str("== Revenue\n\n");
-                for node in &revenue_nodes {
-                    build_typst_rows(node, 0, &mut typst_content);
-                }
-                typst_content.push_str("\n== Expenses\n\n");
-                for node in &expense_nodes {
-                    build_typst_rows(node, 0, &mut typst_content);
-                }
-                typst_content.push_str(&format!("\n*Net Income:* {:.2}\n", (net_income as f64) / 100.0));
-
-                if let Err(e) = download_typst("profit_and_loss.typ", &typst_content) {
-                    gloo_console::error!("Failed to download Typst file:", e);
-                }
-            });
-
-            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(on_export_csv)));
-            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(on_export_typst)));
+        use_effect_with((), move |_| {
+            let start_date = report_ctx.date_range.start_date;
+            let end_date = report_ctx.date_range.end_date;
+            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(move |_| {
+                let url = format!("/api/reports/profit-loss/export/csv?start={}&end={}", start_date, end_date);
+                web_sys::window().unwrap().location().set_href(&url).unwrap();
+            }))));
+            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(move |_| {
+                let url = format!("/api/reports/profit-loss/export/typst?start={}&end={}", start_date, end_date);
+                web_sys::window().unwrap().location().set_href(&url).unwrap();
+            }))));
             move || {
                 report_ctx.dispatch(ReportAction::SetOnExportCsv(None));
                 report_ctx.dispatch(ReportAction::SetOnExportTypst(None));
@@ -209,7 +150,7 @@ pub fn profit_loss_page() -> Html {
                         if resp.ok() {
                             match resp.json::<Vec<AccountWithBalance>>().await {
                                 Ok(data) => {
-                                    accounts.set(data);
+                                    accounts.set(Rc::new(data));
                                     error.set(None);
                                 }
                                 Err(e) => error.set(Some(format!("Failed to parse P&L data: {}", e))),
@@ -280,7 +221,7 @@ pub fn profit_loss_page() -> Html {
                         <td />
                     }
                     <td style="text-align: right;">
-                        { format!("{:.2}", (display_balance as f64) / 100.0) }
+                        { format_currency(&display_balance) }
                     </td>
                     if !is_parent {
                         <td />
@@ -324,7 +265,7 @@ pub fn profit_loss_page() -> Html {
                                 <td><strong>{ "Net Income" }</strong></td>
                                 <td />
                                 <td style="text-align: right;">
-                                    <strong>{ format!("{:.2}", (net_income as f64) / 100.0) }</strong>
+                                    <strong>{ format_currency(&net_income) }</strong>
                                 </td>
                             </tr>
                         </tbody>

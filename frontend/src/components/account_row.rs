@@ -28,6 +28,7 @@ use std::collections::HashSet;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use shared_core::util::format_currency;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
@@ -107,7 +108,7 @@ pub fn account_row(props: &AccountRowProps) -> Html {
                     { account_name_display }
                 </td>
                 <td>{ props.node.account.category.to_string() }</td>
-                <td style="text-align: right;">{ format!("{:.2}", (props.node.account.balance as f64) / 100.0) }</td>
+                <td style="text-align: right;">{ format_currency(&props.node.account.balance) }</td>
                 <td class="actions-cell">
                     <button class="icon-button" onclick={on_edit_click}>
                         <img src="/images/edit.svg" alt="Edit" />

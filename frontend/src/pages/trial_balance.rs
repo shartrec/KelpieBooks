@@ -24,16 +24,16 @@
 
 use crate::components::layout::Layout;
 use crate::contexts::report_context::{use_report_context, ReportAction};
-use crate::utils::csv::download_csv;
-use crate::utils::typst::download_typst;
 use crate::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::models::AccountCategory;
 use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
 use gloo_net::http::Request;
 use yew_router::prelude::Link;
+use shared_core::util::format_currency;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
@@ -41,6 +41,7 @@ pub struct AccountNode {
     pub children: Vec<AccountNode>,
 }
 
+// Helper function to build the hierarchical account nodes
 fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
     let mut acc_map: HashMap<Uuid, AccountWithBalance> = HashMap::new();
     let mut pc_map: HashMap<Uuid, Vec<Uuid>> = HashMap::new();
@@ -84,185 +85,34 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
 #[function_component(TrialBalancePage)]
 pub fn trial_balance_page() -> Html {
     let report_ctx = use_report_context();
-    let accounts = use_state(Vec::<AccountWithBalance>::new);
+    let accounts = use_state(|| Rc::new(Vec::<AccountWithBalance>::new()));
     let loading = use_state(|| true);
     let error = use_state(|| None::<String>);
     let collapsed_nodes = use_state(HashSet::<Uuid>::new);
 
-    let account_nodes = build_account_nodes(&accounts);
+    let memoized_data = use_memo(accounts.clone(), |accounts| {
+        let account_nodes = build_account_nodes(accounts);
+        let (total_debit, total_credit) = AccountWithBalance::calculate_totals(accounts);
+        (account_nodes, total_debit, total_credit)
+    });
 
-    let (total_debit, total_credit) = {
-        let mut debit_sum = 0;
-        let mut credit_sum = 0;
-
-        for acc in accounts.iter() {
-            if acc.parent_id.is_none() {
-                match acc.category {
-                    AccountCategory::Asset | AccountCategory::Expense => {
-                        if acc.balance >= 0 {
-                            debit_sum += acc.balance;
-                        } else {
-                            credit_sum += acc.balance.abs();
-                        }
-                    }
-                    AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
-                        if acc.balance <= 0 {
-                            credit_sum += acc.balance.abs();
-                        } else {
-                            debit_sum += acc.balance;
-                        }
-                    }
-                }
-            }
-        }
-        (debit_sum, credit_sum)
-    };
+    let (account_nodes, total_debit, total_credit) = &*memoized_data;
 
     {
         let report_ctx = report_ctx.clone();
-        let accounts = accounts.clone();
-
-        use_effect_with(accounts.clone(), move |_| {
-            let accounts_csv = accounts.clone();
-            let on_export_csv = Callback::from(move |_| {
-                let account_nodes = build_account_nodes(&accounts_csv);
-                let (total_debit, total_credit) = {
-                    let mut debit_sum = 0;
-                    let mut credit_sum = 0;
-                    for acc in accounts_csv.iter() {
-                        if acc.parent_id.is_none() {
-                            match acc.category {
-                                AccountCategory::Asset | AccountCategory::Expense => {
-                                    if acc.balance >= 0 {
-                                        debit_sum += acc.balance;
-                                    } else {
-                                        credit_sum += acc.balance.abs();
-                                    }
-                                }
-                                AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
-                                    if acc.balance <= 0 {
-                                        credit_sum += acc.balance.abs();
-                                    } else {
-                                        debit_sum += acc.balance;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    (debit_sum, credit_sum)
-                };
-
-                let mut csv_content = String::new();
-                csv_content.push_str("Account,Debit,Credit\n");
-
-                fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String) {
-                    let indent = " ".repeat(depth * 2);
-                    let (debit_display, credit_display) = match node.account.category {
-                        AccountCategory::Asset | AccountCategory::Expense => {
-                            if node.account.balance >= 0 {
-                                (format!("{:.2}", (node.account.balance as f64) / 100.0), "".to_string())
-                            } else {
-                                ("".to_string(), format!("{:.2}", (node.account.balance.abs() as f64) / 100.0))
-                            }
-                        },
-                        AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
-                            if node.account.balance <= 0 {
-                                ("".to_string(), format!("{:.2}", (node.account.balance.abs() as f64) / 100.0))
-                            } else {
-                                (format!("{:.2}", (node.account.balance as f64) / 100.0), "".to_string())
-                            }
-                        },
-                    };
-                    content.push_str(&format!("\"{}{}\",\"{}\",\"{}\"\n", indent, node.account.name, debit_display, credit_display));
-                    for child in &node.children {
-                        build_csv_rows(child, depth + 1, content);
-                    }
-                }
-
-                for node in &account_nodes {
-                    build_csv_rows(node, 0, &mut csv_content);
-                }
-                csv_content.push_str(&format!("\"Total\",\"{}\",\"{}\"\n", (total_debit as f64) / 100.0, (total_credit as f64) / 100.0));
-
-                if let Err(e) = download_csv("trial_balance.csv", &csv_content) {
-                    gloo_console::error!("Failed to download CSV:", e);
-                }
-            });
-
-            let accounts_typst = accounts.clone();
-            let on_export_typst = Callback::from(move |_| {
-                let account_nodes = build_account_nodes(&accounts_typst);
-                let (total_debit, total_credit) = {
-                    let mut debit_sum = 0;
-                    let mut credit_sum = 0;
-                    for acc in accounts_typst.iter() {
-                        if acc.parent_id.is_none() {
-                            match acc.category {
-                                AccountCategory::Asset | AccountCategory::Expense => {
-                                    if acc.balance >= 0 {
-                                        debit_sum += acc.balance;
-                                    } else {
-                                        credit_sum += acc.balance.abs();
-                                    }
-                                }
-                                AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
-                                    if acc.balance <= 0 {
-                                        credit_sum += acc.balance.abs();
-                                    } else {
-                                        debit_sum += acc.balance;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    (debit_sum, credit_sum)
-                };
-
-                let mut typst_content = String::new();
-                typst_content.push_str("#set text(size: 10pt)\n");
-                typst_content.push_str("#set page(margin: (top: 2cm, bottom: 2cm, left: 1.5cm, right: 1.5cm))\n\n");
-                typst_content.push_str("= Trial Balance\n\n");
-                typst_content.push_str("#table(\n");
-                typst_content.push_str("  columns: (auto, 1fr, 1fr),\n");
-                typst_content.push_str("  [*Account*], [*Debit*], [*Credit*],\n");
-
-                fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String) {
-                    let indent = " ".repeat(depth * 2);
-                    let (debit_display, credit_display) = match node.account.category {
-                        AccountCategory::Asset | AccountCategory::Expense => {
-                            if node.account.balance >= 0 {
-                                (format!("{:.2}", (node.account.balance as f64) / 100.0), "".to_string())
-                            } else {
-                                ("".to_string(), format!("{:.2}", (node.account.balance.abs() as f64) / 100.0))
-                            }
-                        },
-                        AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
-                            if node.account.balance <= 0 {
-                                ("".to_string(), format!("{:.2}", (node.account.balance.abs() as f64) / 100.0))
-                            } else {
-                                (format!("{:.2}", (node.account.balance as f64) / 100.0), "".to_string())
-                            }
-                        },
-                    };
-                    content.push_str(&format!("  \"{}{}\", align(right)[{}], align(right)[{}],\n", indent, node.account.name, debit_display, credit_display));
-                    for child in &node.children {
-                        build_typst_rows(child, depth + 1, content);
-                    }
-                }
-
-                for node in &account_nodes {
-                    build_typst_rows(node, 0, &mut typst_content);
-                }
-                typst_content.push_str(&format!("  [*Total*], align(right)[*{}*], align(right)[*{}*],\n", (total_debit as f64) / 100.0, (total_credit as f64) / 100.0));
-                typst_content.push_str(")\n");
-
-                if let Err(e) = download_typst("trial_balance.typ", &typst_content) {
-                    gloo_console::error!("Failed to download Typst file:", e);
-                }
-            });
-
-            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(on_export_csv)));
-            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(on_export_typst)));
+        use_effect_with((), move |_| {
+            let report_ctx1 = report_ctx.clone();
+            let date = report_ctx1.date_range.end_date;
+            report_ctx1.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(move |_| {
+                let url = format!("/api/reports/trial-balance/export/csv?date={}", date);
+                web_sys::window().unwrap().location().set_href(&url).unwrap();
+            }))));
+            let report_ctx1 = report_ctx.clone();
+            let date = report_ctx1.date_range.end_date;
+            report_ctx1.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(move |_| {
+                let url = format!("/api/reports/trial-balance/export/typst?date={}", date);
+                web_sys::window().unwrap().location().set_href(&url).unwrap();
+            }))));
             move || {
                 report_ctx.dispatch(ReportAction::SetOnExportCsv(None));
                 report_ctx.dispatch(ReportAction::SetOnExportTypst(None));
@@ -289,7 +139,7 @@ pub fn trial_balance_page() -> Html {
                         if resp.ok() {
                             match resp.json::<Vec<AccountWithBalance>>().await {
                                 Ok(data) => {
-                                    accounts.set(data);
+                                    accounts.set(Rc::new(data));
                                     error.set(None);
                                 }
                                 Err(e) => error.set(Some(format!("Failed to parse Trial Balance data: {}", e))),
@@ -337,19 +187,17 @@ pub fn trial_balance_page() -> Html {
 
         let (debit_display, credit_display) = match node.account.category {
             AccountCategory::Asset | AccountCategory::Expense => {
-                // Normal balance is Debit
                 if node.account.balance >= 0 {
-                    (format!("{:.2}", (node.account.balance as f64) / 100.0), "".to_string())
+                    (format_currency(&node.account.balance), "".to_string())
                 } else {
-                    ("".to_string(), format!("{:.2}", (node.account.balance.abs() as f64) / 100.0))
+                    ("".to_string(), format_currency(&node.account.balance.abs()))
                 }
             },
             AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
-                // Normal balance is Credit
                 if node.account.balance <= 0 {
-                    ("".to_string(), format!("{:.2}", (node.account.balance.abs() as f64) / 100.0))
+                    ("".to_string(), format_currency(&node.account.balance.abs()))
                 } else {
-                    (format!("{:.2}", (node.account.balance as f64) / 100.0), "".to_string())
+                    (format_currency(&node.account.balance), "".to_string())
                 }
             },
         };
@@ -404,8 +252,8 @@ pub fn trial_balance_page() -> Html {
                             { for account_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
                             <tr class="report-total-row">
                                 <td><strong>{ "Total" }</strong></td>
-                                <td style="text-align: right;"><strong>{ format!("{:.2}", (total_debit as f64) / 100.0) }</strong></td>
-                                <td style="text-align: right;"><strong>{ format!("{:.2}", (total_credit as f64) / 100.0) }</strong></td>
+                                <td style="text-align: right;"><strong>{ format_currency(&*total_debit) }</strong></td>
+                                <td style="text-align: right;"><strong>{ format_currency(&*total_credit) }</strong></td>
                             </tr>
                         </tbody>
                     </table>

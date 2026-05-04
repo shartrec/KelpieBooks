@@ -32,9 +32,14 @@ use rocket::{get, routes, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::reports::balance_sheet::BalanceSheet;
+use crate::export::trial_balance_export::{generate_trial_balance_csv, generate_trial_balance_typst};
+use crate::export::profit_loss_export::{generate_profit_loss_csv, generate_profit_loss_typst};
+use crate::export::balance_sheet_export::{generate_balance_sheet_csv, generate_balance_sheet_typst};
+use crate::export::DownloadFile;
+use rocket::http::ContentType;
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![get_profit_loss, get_balance_sheet, get_trial_balance]
+    routes![get_profit_loss, get_balance_sheet, get_trial_balance, export_trial_balance, export_profit_loss, export_balance_sheet]
 }
 
 #[get("/api/reports/profit-loss?<start>&<end>")]
@@ -77,4 +82,88 @@ async fn get_trial_balance(
 
     let report = report_service::get_trial_balance(&mut pool, user.organization_id, report_date).await?;
     Ok(Json(report))
+}
+
+#[get("/api/reports/trial-balance/export/<format>?<date>")]
+async fn export_trial_balance(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    format: String,
+    date: String,
+) -> Result<DownloadFile, ApiError> {
+    let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
+        .map_err(|_| ApiError::Invalid("Invalid date".to_string()))?;
+
+    let accounts = report_service::get_trial_balance(&mut pool, user.organization_id, report_date).await?;
+
+    let (content, content_type, filename) = match format.as_str() {
+        "csv" => {
+            let csv_data = generate_trial_balance_csv(&accounts);
+            (csv_data.into_bytes(), ContentType::CSV, "trial_balance.csv".to_string())
+        }
+        "typst" => {
+            let typst_data = generate_trial_balance_typst(&accounts, report_date);
+            (typst_data.into_bytes(), ContentType::Plain, "trial_balance.typ".to_string())
+        }
+        _ => return Err(ApiError::Invalid("Invalid format".to_string())),
+    };
+
+    Ok(DownloadFile::new(content, filename, content_type))
+}
+
+#[get("/api/reports/profit-loss/export/<format>?<start>&<end>")]
+async fn export_profit_loss(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    format: String,
+    start: String,
+    end: String,
+) -> Result<DownloadFile, ApiError> {
+    let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
+        .map_err(|_| ApiError::Invalid("Invalid start date".to_string()))?;
+    let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
+        .map_err(|_| ApiError::Invalid("Invalid end date".to_string()))?;
+
+    let accounts = report_service::get_profit_loss(&mut pool, user.organization_id, start_date, end_date).await?;
+
+    let (content, content_type, filename) = match format.as_str() {
+        "csv" => {
+            let csv_data = generate_profit_loss_csv(&accounts);
+            (csv_data.into_bytes(), ContentType::CSV, "profit_loss.csv".to_string())
+        }
+        "typst" => {
+            let typst_data = generate_profit_loss_typst(&accounts, start_date, end_date);
+            (typst_data.into_bytes(), ContentType::Plain, "profit_loss.typ".to_string())
+        }
+        _ => return Err(ApiError::Invalid("Invalid format".to_string())),
+    };
+
+    Ok(DownloadFile::new(content, filename, content_type))
+}
+
+#[get("/api/reports/balance-sheet/export/<format>?<date>")]
+async fn export_balance_sheet(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    format: String,
+    date: String,
+) -> Result<DownloadFile, ApiError> {
+    let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
+        .map_err(|_| ApiError::Invalid("Invalid date".to_string()))?;
+
+    let balance_sheet = report_service::get_balance_sheet(&mut pool, user.organization_id, report_date).await?;
+
+    let (content, content_type, filename) = match format.as_str() {
+        "csv" => {
+            let csv_data = generate_balance_sheet_csv(&balance_sheet);
+            (csv_data.into_bytes(), ContentType::CSV, "balance_sheet.csv".to_string())
+        }
+        "typst" => {
+            let typst_data = generate_balance_sheet_typst(&balance_sheet);
+            (typst_data.into_bytes(), ContentType::Plain, "balance_sheet.typ".to_string())
+        }
+        _ => return Err(ApiError::Invalid("Invalid format".to_string())),
+    };
+
+    Ok(DownloadFile::new(content, filename, content_type))
 }

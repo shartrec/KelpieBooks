@@ -22,3 +22,11 @@
  *
  */
 pub mod info;
+
+pub fn format_currency(&amount: &i64) -> String {
+    format!("${:.2}", (amount as f64) / 100.0)
+}
+
+pub fn format_currency_typ(&amount: &i64) -> String {
+    format!("\\${:.2}", (amount as f64) / 100.0)
+}

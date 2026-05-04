@@ -33,6 +33,7 @@ mod db;
 mod routes;
 mod services;
 mod util;
+mod export;
 
 #[derive(Database)]
 #[database("kelpie_db")]

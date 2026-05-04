@@ -146,7 +146,7 @@ pub fn header() -> Html {
                                 }
                                 if ctx.on_export_typst.is_some() {
                                     <button class="icon-button" onclick={on_export_typst_click} title="Export to Typst">
-                                        <img src="/images/file-text.svg" alt="Export Typst" />
+                                        <img src="/images/export-pdf.svg" alt="Export Typst" />
                                     </button>
                                 }
                             </div>

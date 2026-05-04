@@ -41,3 +41,33 @@ pub struct AccountWithBalance {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub balance: i64,
 }
+
+impl AccountWithBalance {
+
+    pub fn calculate_totals(accounts: &[Self]) -> (i64, i64) {
+        let mut debit_sum = 0;
+        let mut credit_sum = 0;
+
+        for acc in accounts.iter() {
+            if !acc.is_group {
+                match acc.category {
+                    AccountCategory::Asset | AccountCategory::Expense => {
+                        if acc.balance >= 0 {
+                            debit_sum += acc.balance;
+                        } else {
+                            credit_sum += acc.balance.abs();
+                        }
+                    }
+                    AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
+                        if acc.balance <= 0 {
+                            credit_sum += acc.balance.abs();
+                        } else {
+                            debit_sum += acc.balance;
+                        }
+                    }
+                }
+            }
+        }
+        (debit_sum, credit_sum)
+    }
+}

@@ -6,6 +6,7 @@ use shared_core::dtos::transaction_detail::TransactionDetail;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use shared_core::util::format_currency;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TransactionGroup {
@@ -92,9 +93,9 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                     { primary_entry.date.to_string() }
                 </td>
                 <td>{ props.transaction_group.description.clone().unwrap_or_default() }</td>
-                <td class="amount">{ format!("{:.2}", (primary_entry.debit as f64) / 100.0) }</td>
-                <td class="amount">{ format!("{:.2}", (primary_entry.credit as f64) / 100.0) }</td>
-                <td class="amount">{ format!("{:.2}", (primary_entry.running_balance as f64) / 100.0) }</td>
+                <td class="amount">{ format_currency(&primary_entry.debit) }</td>
+                <td class="amount">{ format_currency(&primary_entry.credit) }</td>
+                <td class="amount">{ format_currency(&primary_entry.running_balance) }</td>
                 <td class="actions-cell">
                     <div class="actions-dropdown">
                         <button class="icon-button" onclick={on_toggle_dropdown} title="Actions">
@@ -136,8 +137,8 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                                     <div class="journal-entry-line">
                                         <span>{ &entry.account_name }</span>
                                         <span>{ entry.description.clone().unwrap_or_default() }</span>
-                                        <span class="amount">{ format!("{:.2}", (entry.debit as f64) / 100.0) }</span>
-                                        <span class="amount">{ format!("{:.2}", (entry.credit as f64) / 100.0) }</span>
+                                        <span class="amount">{ format_currency(&entry.debit) }</span>
+                                        <span class="amount">{ format_currency(&entry.credit) }</span>
                                     </div>
                                 })}
                             } else {

@@ -25,7 +25,7 @@
 use crate::dtos::account_with_balance::AccountWithBalance;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BalanceSheet {
     pub assets: Vec<AccountWithBalance>,
     pub liabilities: Vec<AccountWithBalance>,

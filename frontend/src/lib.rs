@@ -28,7 +28,6 @@ pub mod auth;
 pub mod contexts;
 pub mod components;
 pub mod pages;
-pub mod utils;
 
 #[derive(Clone, Routable, PartialEq)]
 pub enum Route {

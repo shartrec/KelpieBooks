@@ -11,6 +11,9 @@ use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::models::Account;
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
+use crate::export::DownloadFile;
+use crate::export::account_ledger_export::{generate_ledger_csv, generate_ledger_typst};
+use rocket::http::ContentType;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -19,7 +22,8 @@ pub(crate) fn routes() -> Vec<Route> {
         get_account_entries,
         create_account,
         update_account,
-        delete_account
+        delete_account,
+        export_account_ledger
     ]
 }
 
@@ -112,4 +116,27 @@ async fn delete_account(
     }
 
     Ok("Account deleted successfully.")
+}
+
+#[get("/api/accounts/<id>/export/<format>")]
+async fn export_account_ledger(
+    mut pool: Connection<DbKelpie>,
+    id: PathUuid,
+    format: String,
+) -> Result<DownloadFile, ApiError> {
+    let entries = account_service::get_journal_entries_with_running_balance(&mut pool, *id).await?;
+
+    let (content, content_type, filename) = match format.as_str() {
+        "csv" => {
+            let csv_data = generate_ledger_csv(&entries);
+            (csv_data.into_bytes(), ContentType::CSV, "account_ledger.csv".to_string())
+        }
+        "typst" => {
+            let typst_data = generate_ledger_typst(&entries);
+            (typst_data.into_bytes(), ContentType::Plain, "account_ledger.typ".to_string())
+        }
+        _ => return Err(ApiError::Invalid("Invalid format".to_string())),
+    };
+
+    Ok(DownloadFile::new(content, filename, content_type))
 }

@@ -24,17 +24,31 @@
 
 use crate::components::layout::Layout;
 use crate::contexts::report_context::{use_report_context, ReportAction};
-use crate::utils::csv::download_csv;
-use crate::utils::typst::download_typst;
 use crate::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::reports::balance_sheet::BalanceSheet;
 use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
 use gloo_net::http::Request;
 use yew_router::prelude::Link;
+use shared_core::util::format_currency;
 
+#[derive(Clone)]
+pub struct BalanceSheetHolder {
+    pub balance_sheet: BalanceSheet,
+    pub timestamp: i64 ,
+}
+
+impl PartialEq for BalanceSheetHolder {
+    fn eq(&self, other: &Self) -> bool {
+        self.timestamp == other.timestamp
+    }
+    fn ne(&self, other: &Self) -> bool {
+        self.timestamp != other.timestamp
+    }
+}
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
     pub account: AccountWithBalance,
@@ -84,106 +98,36 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
 #[function_component(BalanceSheetPage)]
 pub fn balance_sheet_page() -> Html {
     let report_ctx = use_report_context();
-    let balance_sheet = use_state(BalanceSheet::default);
+    let balance_sheet_holder = use_state(|| Rc::new(BalanceSheetHolder {
+        balance_sheet: BalanceSheet::default(),
+        timestamp: 0,
+    }));
     let loading = use_state(|| true);
     let error = use_state(|| None::<String>);
     let collapsed_nodes = use_state(HashSet::<Uuid>::new);
 
-    let asset_nodes = build_account_nodes(&balance_sheet.assets);
-    let liability_nodes = build_account_nodes(&balance_sheet.liabilities);
-    let equity_nodes = build_account_nodes(&balance_sheet.equity);
+    let memoized_nodes = use_memo(balance_sheet_holder.clone(), |bs_holder| {
+        (
+            build_account_nodes(&bs_holder.balance_sheet.assets),
+            build_account_nodes(&bs_holder.balance_sheet.liabilities),
+            build_account_nodes(&bs_holder.balance_sheet.equity),
+        )
+    });
+
+    let (asset_nodes, liability_nodes, equity_nodes) = (*memoized_nodes).clone();
 
     {
         let report_ctx = report_ctx.clone();
-        let balance_sheet = balance_sheet.clone();
-
         use_effect_with((), move |_| {
-            let balance_sheet_csv = balance_sheet.clone();
-            let on_export_csv = Callback::from(move |_| {
-                let asset_nodes = build_account_nodes(&balance_sheet_csv.assets);
-                let liability_nodes = build_account_nodes(&balance_sheet_csv.liabilities);
-                let equity_nodes = build_account_nodes(&balance_sheet_csv.equity);
-                let mut csv_content = String::new();
-                csv_content.push_str("Account,Balance\n");
-
-                fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String) {
-                    let indent = " ".repeat(depth * 2);
-                    content.push_str(&format!("\"{}{}\",\"{}\"\n", indent, node.account.name, (node.account.balance as f64) / 100.0));
-                    for child in &node.children {
-                        build_csv_rows(child, depth + 1, content);
-                    }
-                }
-
-                csv_content.push_str("Assets,\n");
-                for node in &asset_nodes {
-                    build_csv_rows(node, 0, &mut csv_content);
-                }
-                csv_content.push_str(&format!("\"Total Assets\",\"{}\"\n", (balance_sheet_csv.total_assets as f64) / 100.0));
-
-                csv_content.push_str("Liabilities,\n");
-                for node in &liability_nodes {
-                    build_csv_rows(node, 0, &mut csv_content);
-                }
-                csv_content.push_str(&format!("\"Total Liabilities\",\"{}\"\n", (balance_sheet_csv.total_liabilities as f64) / 100.0));
-
-                csv_content.push_str("Equity,\n");
-                for node in &equity_nodes {
-                    build_csv_rows(node, 0, &mut csv_content);
-                }
-                csv_content.push_str(&format!("\"Current Year Earnings\",\"{}\"\n", (balance_sheet_csv.net_income as f64) / 100.0));
-                csv_content.push_str(&format!("\"Total Equity\",\"{}\"\n", (balance_sheet_csv.total_equity as f64) / 100.0));
-                csv_content.push_str(&format!("\"Total Liabilities & Equity\",\"{}\"\n", ((balance_sheet_csv.total_liabilities + balance_sheet_csv.total_equity) as f64) / 100.0));
-
-                if let Err(e) = download_csv("balance_sheet.csv", &csv_content) {
-                    gloo_console::error!("Failed to download CSV:", e);
-                }
-            });
-
-            let balance_sheet_typst = balance_sheet.clone();
-            let on_export_typst = Callback::from(move |_| {
-                let asset_nodes = build_account_nodes(&balance_sheet_typst.assets);
-                let liability_nodes = build_account_nodes(&balance_sheet_typst.liabilities);
-                let equity_nodes = build_account_nodes(&balance_sheet_typst.equity);
-                let mut typst_content = String::new();
-                typst_content.push_str("#set text(size: 10pt)\n");
-                typst_content.push_str("#set page(margin: (top: 2cm, bottom: 2cm, left: 1.5cm, right: 1.5cm))\n\n");
-                typst_content.push_str("= Balance Sheet\n\n");
-
-                fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String) {
-                    let indent = " ".repeat(depth * 2);
-                    content.push_str(&format!("{}{}[{:.2}]\n", indent, node.account.name, (node.account.balance as f64) / 100.0));
-                    for child in &node.children {
-                        build_typst_rows(child, depth + 1, content);
-                    }
-                }
-
-                typst_content.push_str("== Assets\n\n");
-                for node in &asset_nodes {
-                    build_typst_rows(node, 0, &mut typst_content);
-                }
-                typst_content.push_str(&format!("\n*Total Assets:* {:.2}\n", (balance_sheet_typst.total_assets as f64) / 100.0));
-
-                typst_content.push_str("\n== Liabilities\n\n");
-                for node in &liability_nodes {
-                    build_typst_rows(node, 0, &mut typst_content);
-                }
-                typst_content.push_str(&format!("\n*Total Liabilities:* {:.2}\n", (balance_sheet_typst.total_liabilities as f64) / 100.0));
-
-                typst_content.push_str("\n== Equity\n\n");
-                for node in &equity_nodes {
-                    build_typst_rows(node, 0, &mut typst_content);
-                }
-                typst_content.push_str(&format!("\n  Current Year Earnings: {:.2}\n", (balance_sheet_typst.net_income as f64) / 100.0));
-                typst_content.push_str(&format!("\n*Total Equity:* {:.2}\n", (balance_sheet_typst.total_equity as f64) / 100.0));
-                typst_content.push_str(&format!("\n*Total Liabilities & Equity:* {:.2}\n", ((balance_sheet_typst.total_liabilities + balance_sheet_typst.total_equity) as f64) / 100.0));
-
-                if let Err(e) = download_typst("balance_sheet.typ", &typst_content) {
-                    gloo_console::error!("Failed to download Typst file:", e);
-                }
-            });
-
-            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(on_export_csv)));
-            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(on_export_typst)));
+            let date = report_ctx.date_range.end_date;
+            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(move |_| {
+                let url = format!("/api/reports/balance-sheet/export/csv?date={}", date);
+                web_sys::window().unwrap().location().set_href(&url).unwrap();
+            }))));
+            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(move |_| {
+                let url = format!("/api/reports/balance-sheet/export/typst?date={}", date);
+                web_sys::window().unwrap().location().set_href(&url).unwrap();
+            }))));
             move || {
                 report_ctx.dispatch(ReportAction::SetOnExportCsv(None));
                 report_ctx.dispatch(ReportAction::SetOnExportTypst(None));
@@ -192,13 +136,13 @@ pub fn balance_sheet_page() -> Html {
     }
 
     {
-        let balance_sheet = balance_sheet.clone();
+        let balance_sheet_holder = balance_sheet_holder.clone();
         let loading = loading.clone();
         let error = error.clone();
         let report_date = report_ctx.date_range.end_date;
 
         use_effect_with(report_date, move |&report_date| {
-            let balance_sheet = balance_sheet.clone();
+            let balance_sheet_holder = balance_sheet_holder.clone();
             let loading = loading.clone();
             let error = error.clone();
 
@@ -210,7 +154,11 @@ pub fn balance_sheet_page() -> Html {
                         if resp.ok() {
                             match resp.json::<BalanceSheet>().await {
                                 Ok(data) => {
-                                    balance_sheet.set(data);
+                                    let data_holder = BalanceSheetHolder {
+                                        balance_sheet: data,
+                                        timestamp: chrono::Utc::now().timestamp(),
+                                    };
+                                    balance_sheet_holder.set(Rc::new(data_holder));
                                     error.set(None);
                                 }
                                 Err(e) => error.set(Some(format!("Failed to parse Balance Sheet data: {}", e))),
@@ -272,7 +220,7 @@ pub fn balance_sheet_page() -> Html {
                         { account_name_display }
                     </td>
                     <td style="text-align: right;">
-                        { format!("{:.2}", (node.account.balance as f64) / 100.0) }
+                        { format_currency(&node.account.balance) }
                     </td>
                 </tr>
                 if is_parent && !is_collapsed {
@@ -307,30 +255,30 @@ pub fn balance_sheet_page() -> Html {
                             { for asset_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
                             <tr class="report-total-row">
                                 <td><strong>{ "Total Assets" }</strong></td>
-                                <td style="text-align: right;"><strong>{ format!("{:.2}", (balance_sheet.total_assets as f64) / 100.0) }</strong></td>
+                                <td style="text-align: right;"><strong>{ format_currency(&balance_sheet_holder.balance_sheet.total_assets) }</strong></td>
                             </tr>
 
                             <tr class="report-section-header"><td colspan="2">{ "Liabilities" }</td></tr>
                             { for liability_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
                             <tr class="report-total-row">
                                 <td><strong>{ "Total Liabilities" }</strong></td>
-                                <td style="text-align: right;"><strong>{ format!("{:.2}", (balance_sheet.total_liabilities as f64) / 100.0) }</strong></td>
+                                <td style="text-align: right;"><strong>{ format_currency(&balance_sheet_holder.balance_sheet.total_liabilities) }</strong></td>
                             </tr>
 
                             <tr class="report-section-header"><td colspan="2">{ "Equity" }</td></tr>
                             { for equity_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
                             <tr>
                                 <td style="padding-left: 1.5rem">{ "Current Year Earnings" }</td>
-                                <td style="text-align: right;">{ format!("{:.2}", (balance_sheet.net_income as f64) / 100.0) }</td>
+                                <td style="text-align: right;">{ format_currency(&balance_sheet_holder.balance_sheet.net_income) }</td>
                             </tr>
                             <tr class="report-total-row">
                                 <td><strong>{ "Total Equity" }</strong></td>
-                                <td style="text-align: right;"><strong>{ format!("{:.2}", (balance_sheet.total_equity as f64) / 100.0) }</strong></td>
+                                <td style="text-align: right;"><strong>{ format_currency(&balance_sheet_holder.balance_sheet.total_equity) }</strong></td>
                             </tr>
 
                             <tr class="report-total-row">
                                 <td><strong>{ "Total Liabilities & Equity" }</strong></td>
-                                <td style="text-align: right;"><strong>{ format!("{:.2}", ((balance_sheet.total_liabilities + balance_sheet.total_equity) as f64) / 100.0) }</strong></td>
+                                <td style="text-align: right;"><strong>{ format_currency(&(balance_sheet_holder.balance_sheet.total_liabilities + balance_sheet_holder.balance_sheet.total_equity)) }</strong></td>
                             </tr>
                         </tbody>
                     </table>
