@@ -25,9 +25,10 @@
 -- 1. Organizations (Multi-tenancy)
 CREATE TABLE organizations
 (
-    id         UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
-    name       TEXT        NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id                UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
+    name              TEXT        NOT NULL,
+    strict_audit_mode BOOLEAN     NOT NULL DEFAULT TRUE,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- 2. Users
@@ -37,13 +38,14 @@ CREATE TABLE users
     organization_id UUID        NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
     email           TEXT        NOT NULL UNIQUE,
     password_hash   TEXT        NOT NULL,
+    full_name       TEXT        NOT NULL,
+    display_name    TEXT,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 
 -- =============================================================================
--- From: 2026042202_chart_of_accounts.sql
--- and  2026042204_add_system_tags.sql
+-- Chart of Accounts
 -- =============================================================================
 
 CREATE TYPE account_category AS ENUM ('Asset', 'Liability', 'Equity', 'Revenue', 'Expense');
@@ -89,7 +91,7 @@ CREATE INDEX idx_accounts_parent ON accounts (parent_id);
 
 
 -- =============================================================================
--- From: 2026042203_journal_entries.sql
+-- Transactions and Journal Entries
 -- =============================================================================
 
 -- The Header: Represents the "event"
@@ -115,6 +117,7 @@ CREATE TABLE journal_entries
     credit         BIGINT NOT NULL  DEFAULT 0,
 
     description    TEXT, -- Line-specific memo
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT check_amount_positive CHECK (debit >= 0 AND credit >= 0),
     CONSTRAINT check_not_both_zero CHECK (debit > 0 OR credit > 0)
