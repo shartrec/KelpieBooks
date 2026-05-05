@@ -7,6 +7,7 @@
 /.idea/dataSources.xml
 /.idea/KelpieBooks.iml
 /.idea/modules.xml
+/.idea/sqldialects.xml
 /.idea/vcs.xml
 /backend/.sqlx
 /backend/static/
