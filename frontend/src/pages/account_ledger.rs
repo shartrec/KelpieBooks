@@ -37,6 +37,7 @@ use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use shared_core::util::format_currency;
 use crate::components::je_reversal_confirmation_modal::ReversalConfirmationModal;
 
 #[derive(Debug, Properties, PartialEq)]
@@ -56,13 +57,15 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
     {
         let report_ctx = report_ctx.clone();
         let account_id = props.account_id;
-        use_effect_with((), move |_| {
+        use_effect_with((report_ctx.date_range.clone(),), move |_| {
+            let start_date = report_ctx.date_range.start_date;
+            let end_date = report_ctx.date_range.end_date;
             report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(move |_| {
-                let url = format!("/api/accounts/{}/export/csv", account_id);
+                let url = format!("/api/accounts/{}/export/csv?start={}&end={}", account_id, start_date, end_date);
                 web_sys::window().unwrap().location().set_href(&url).unwrap();
             }))));
             report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(move |_| {
-                let url = format!("/api/accounts/{}/export/typst", account_id);
+                let url = format!("/api/accounts/{}/export/pdf?start={}&end={}", account_id, start_date, end_date);
                 web_sys::window().unwrap().location().set_href(&url).unwrap();
             }))));
             move || {
@@ -79,13 +82,16 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         let error = error.clone();
         let loading = loading.clone();
         let account_id = props.account_id;
+        let report_ctx = use_report_context();
         Callback::from(move |()| {
             let entries = entries.clone();
             let error = error.clone();
             let loading = loading.clone();
+            let start_date = report_ctx.date_range.start_date;
+            let end_date = report_ctx.date_range.end_date;
             wasm_bindgen_futures::spawn_local(async move {
                 loading.set(true);
-                let entries_url = format!("/api/accounts/{}/entries", account_id);
+                let entries_url = format!("/api/accounts/{}/entries?start={}&end={}", account_id, start_date, end_date);
                 let fetched_entries = Request::get(&entries_url).send().await;
                 loading.set(false);
                 match fetched_entries {
@@ -116,7 +122,9 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         let account = account.clone();
         let account_id = props.account_id;
         let fetch_entries = fetch_entries.clone();
-        use_effect_with(account_id, move |&account_id| {
+        let report_ctx = use_report_context();
+        use_effect_with((account_id, report_ctx.date_range.clone()), move |(account_id, _)| {
+            let account_id = *account_id;
             wasm_bindgen_futures::spawn_local(async move {
                 let acc_url = format!("/api/accounts/{}", account_id);
                 if let Ok(response) = Request::get(&acc_url).send().await {
@@ -182,7 +190,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
     let transaction_groups = use_memo(entries.clone(), |entries| {
         let mut groups: HashMap<Uuid, TransactionGroup> = HashMap::new();
         for entry in entries.iter() {
-            if entry.account_id == props.account_id {
+            if entry.description != Some("Opening Balance".to_string()) {
                 groups.insert(
                     entry.transaction_id,
                     TransactionGroup {
@@ -198,6 +206,8 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         sorted_groups.sort_by(|a, b| a.date.cmp(&b.date));
         sorted_groups
     });
+
+    let opening_balance_entry = entries.iter().find(|e| e.description == Some("Opening Balance".to_string()));
 
     html! {
         <Layout>
@@ -234,6 +244,16 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                         </tr>
                     </thead>
                     <tbody>
+                        if let Some(entry) = opening_balance_entry {
+                            <tr>
+                                <td>{ &entry.date.to_string() }</td>
+                                <td>{ "Opening Balance" }</td>
+                                <td class="amount">{ if entry.debit > 0 { format_currency(&entry.debit) } else { "".to_string() } }</td>
+                                <td class="amount">{ if entry.credit > 0 { format_currency(&entry.credit) } else { "".to_string() } }</td>
+                                <td class="amount">{ format_currency(&entry.running_balance) }</td>
+                                <td></td>
+                            </tr>
+                        }
                         { for transaction_groups.iter().map(|group| html! {
                             <TransactionRow
                                 key={group.transaction_id.to_string()}

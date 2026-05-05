@@ -118,7 +118,7 @@ pub fn profit_loss_page() -> Html {
                 web_sys::window().unwrap().location().set_href(&url).unwrap();
             }))));
             report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(move |_| {
-                let url = format!("/api/reports/profit-loss/export/typst?start={}&end={}", start_date, end_date);
+                let url = format!("/api/reports/profit-loss/export/pdf?start={}&end={}", start_date, end_date);
                 web_sys::window().unwrap().location().set_href(&url).unwrap();
             }))));
             move || {

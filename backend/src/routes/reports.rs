@@ -36,6 +36,7 @@ use crate::export::trial_balance_export::{generate_trial_balance_csv, generate_t
 use crate::export::profit_loss_export::{generate_profit_loss_csv, generate_profit_loss_typst};
 use crate::export::balance_sheet_export::{generate_balance_sheet_csv, generate_balance_sheet_typst};
 use crate::export::DownloadFile;
+use crate::export::utils::compile_typst_to_pdf;
 use rocket::http::ContentType;
 
 pub(crate) fn routes() -> Vec<Route> {
@@ -101,9 +102,13 @@ async fn export_trial_balance(
             let csv_data = generate_trial_balance_csv(&accounts);
             (csv_data.into_bytes(), ContentType::CSV, "trial_balance.csv".to_string())
         }
-        "typst" => {
+        "pdf" => {
             let typst_data = generate_trial_balance_typst(&accounts, report_date);
-            (typst_data.into_bytes(), ContentType::Plain, "trial_balance.typ".to_string())
+
+            match compile_typst_to_pdf(typst_data) {
+                Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
+                Err(e) => return Err(ApiError::Internal(e)),
+            }
         }
         _ => return Err(ApiError::Invalid("Invalid format".to_string())),
     };
@@ -131,9 +136,12 @@ async fn export_profit_loss(
             let csv_data = generate_profit_loss_csv(&accounts);
             (csv_data.into_bytes(), ContentType::CSV, "profit_loss.csv".to_string())
         }
-        "typst" => {
+        "pdf" => {
             let typst_data = generate_profit_loss_typst(&accounts, start_date, end_date);
-            (typst_data.into_bytes(), ContentType::Plain, "profit_loss.typ".to_string())
+            match compile_typst_to_pdf(typst_data) {
+                Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
+                Err(e) => return Err(ApiError::Internal(e)),
+            }
         }
         _ => return Err(ApiError::Invalid("Invalid format".to_string())),
     };
@@ -158,9 +166,12 @@ async fn export_balance_sheet(
             let csv_data = generate_balance_sheet_csv(&balance_sheet);
             (csv_data.into_bytes(), ContentType::CSV, "balance_sheet.csv".to_string())
         }
-        "typst" => {
-            let typst_data = generate_balance_sheet_typst(&balance_sheet);
-            (typst_data.into_bytes(), ContentType::Plain, "balance_sheet.typ".to_string())
+        "pdf" => {
+            let typst_data = generate_balance_sheet_typst(&balance_sheet, report_date);
+            match compile_typst_to_pdf(typst_data) {
+                Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
+                Err(e) => return Err(ApiError::Internal(e)),
+            }
         }
         _ => return Err(ApiError::Invalid("Invalid format".to_string())),
     };

@@ -110,7 +110,7 @@ pub fn trial_balance_page() -> Html {
             let report_ctx1 = report_ctx.clone();
             let date = report_ctx1.date_range.end_date;
             report_ctx1.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(move |_| {
-                let url = format!("/api/reports/trial-balance/export/typst?date={}", date);
+                let url = format!("/api/reports/trial-balance/export/pdf?date={}", date);
                 web_sys::window().unwrap().location().set_href(&url).unwrap();
             }))));
             move || {

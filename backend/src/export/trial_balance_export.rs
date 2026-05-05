@@ -28,7 +28,7 @@ use std::collections::HashMap;
 use chrono::NaiveDate;
 use uuid::Uuid;
 use shared_core::util::format_currency_typ;
-use crate::export::utils::wrap_report_layout;
+use crate::export::utils::{build_table_header, wrap_report_layout};
 
 #[derive(Clone, Debug)]
 pub struct AccountNode {
@@ -121,19 +121,7 @@ pub fn generate_trial_balance_typst(accounts: &[AccountWithBalance], report_date
     let (total_debit, total_credit) = AccountWithBalance::calculate_totals(accounts);
 
     let mut typst_content = String::new();
-
-    typst_content.push_str(r###"#table(
-        columns: (auto, 1fr, 1fr),
-        fill: (x, y) => {
-        if y == 0 { rgb("#f4f7f6") } // Header color matches your frontend
-        else if calc.even(y) { luma(250) } // Very light gray for alternating rows
-        else { white }
-    },
-    table.header(
-        repeat: true,
-        [*Account*], [*Debit*], [*Credit*],
-        table.hline(stroke: 0.5pt + gray) // Subtle line under header
-    ),"###);
+    typst_content.push_str(&*build_table_header(&["Account", "Debit", "Credit"], &[false, true, true]));
 
     fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String) {
         let indent = "#h(2.0em)".repeat(depth);

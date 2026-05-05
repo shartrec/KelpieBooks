@@ -56,7 +56,7 @@ pub type ReportState = ReportContextData;
 pub struct ReportContextData {
     pub date_range: DateRange,
     pub on_export_csv: Option<Callback<()>>,
-    pub on_export_typst: Option<Callback<()>>,
+    pub on_export_pdf: Option<Callback<()>>,
 }
 
 impl Default for ReportContextData {
@@ -69,7 +69,7 @@ impl Default for ReportContextData {
         Self {
             date_range,
             on_export_csv: None,
-            on_export_typst: None,
+            on_export_pdf: None,
         }
     }
 }
@@ -97,12 +97,12 @@ impl Reducible for ReportContextData {
                     }.into()
                 }
             }
-            ReportAction::SetOnExportTypst(on_export_typst) => {
-                if self.on_export_typst == on_export_typst {
+            ReportAction::SetOnExportTypst(on_export_pdf) => {
+                if self.on_export_pdf == on_export_pdf {
                     self
                 } else {
                     Self {
-                        on_export_typst,
+                        on_export_pdf,
                         ..(*self).clone()
                     }.into()
                 }

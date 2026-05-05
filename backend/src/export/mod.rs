@@ -2,7 +2,7 @@ pub mod trial_balance_export;
 pub mod profit_loss_export;
 pub mod balance_sheet_export;
 pub mod account_ledger_export;
-mod utils;
+pub(crate) mod utils;
 
 use rocket::response::{Responder, Response};
 use rocket::Request;

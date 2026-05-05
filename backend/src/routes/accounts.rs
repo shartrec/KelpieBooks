@@ -1,3 +1,4 @@
+use chrono::NaiveDate;
 use crate::db::account as account_db;
 use crate::routes::security::AuthenticatedUser;
 use crate::services::account_service;
@@ -14,6 +15,7 @@ use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest}
 use crate::export::DownloadFile;
 use crate::export::account_ledger_export::{generate_ledger_csv, generate_ledger_typst};
 use rocket::http::ContentType;
+use crate::export::utils::compile_typst_to_pdf;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -48,12 +50,18 @@ async fn get_account(
     Ok(Json(account))
 }
 
-#[get("/api/accounts/<id>/entries")]
+#[get("/api/accounts/<id>/entries?<start>&<end>")]
 async fn get_account_entries(
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
+    start: String,
+    end: String,
 ) -> Result<Json<Vec<JournalEntryWithBalance>>, ApiError> {
-    let entries = account_service::get_journal_entries_with_running_balance(&mut pool, *id).await?;
+    let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
+        .map_err(|_| ApiError::Invalid("Invalid start date".to_string()))?;
+    let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
+        .map_err(|_| ApiError::Invalid("Invalid end date".to_string()))?;
+    let entries = account_service::get_journal_entries_with_running_balance(&mut pool, *id, start_date, end_date).await?;
     Ok(Json(entries))
 }
 
@@ -118,25 +126,40 @@ async fn delete_account(
     Ok("Account deleted successfully.")
 }
 
-#[get("/api/accounts/<id>/export/<format>")]
+#[get("/api/accounts/<id>/export/<format>?<start>&<end>")]
 async fn export_account_ledger(
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
     format: String,
+    start: String,
+    end: String,
 ) -> Result<DownloadFile, ApiError> {
-    let entries = account_service::get_journal_entries_with_running_balance(&mut pool, *id).await?;
+    let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
+        .map_err(|_| ApiError::Invalid("Invalid start date".to_string()))?;
+    let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
+        .map_err(|_| ApiError::Invalid("Invalid end date".to_string()))?;
 
-    let (content, content_type, filename) = match format.as_str() {
-        "csv" => {
-            let csv_data = generate_ledger_csv(&entries);
-            (csv_data.into_bytes(), ContentType::CSV, "account_ledger.csv".to_string())
-        }
-        "typst" => {
-            let typst_data = generate_ledger_typst(&entries);
-            (typst_data.into_bytes(), ContentType::Plain, "account_ledger.typ".to_string())
-        }
-        _ => return Err(ApiError::Invalid("Invalid format".to_string())),
-    };
+    let account = account_db::get(&mut pool, *id).await?;
+    if let Some(account) = account {
+        let entries = account_service::get_journal_entries_with_running_balance(&mut pool, *id, start_date, end_date).await?;
 
-    Ok(DownloadFile::new(content, filename, content_type))
+        let (content, content_type, filename) = match format.as_str() {
+            "csv" => {
+                let csv_data = generate_ledger_csv(&entries);
+                (csv_data.into_bytes(), ContentType::CSV, "account_ledger.csv".to_string())
+            }
+            "pdf" => {
+                let typst_data = generate_ledger_typst(&entries, account.name.as_str(), start_date, end_date);
+                match compile_typst_to_pdf(typst_data) {
+                    Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
+                    Err(e) => return Err(ApiError::Internal(e)),
+                }
+            }
+            _ => return Err(ApiError::Invalid("Invalid format".to_string())),
+        };
+
+        Ok(DownloadFile::new(content, filename, content_type))
+    } else {
+        Err(ApiError::NotFound("Account not found".to_string()))
+    }
 }

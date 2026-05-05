@@ -125,7 +125,7 @@ pub fn balance_sheet_page() -> Html {
                 web_sys::window().unwrap().location().set_href(&url).unwrap();
             }))));
             report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(move |_| {
-                let url = format!("/api/reports/balance-sheet/export/typst?date={}", date);
+                let url = format!("/api/reports/balance-sheet/export/pdf?date={}", date);
                 web_sys::window().unwrap().location().set_href(&url).unwrap();
             }))));
             move || {

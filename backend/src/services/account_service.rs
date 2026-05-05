@@ -29,6 +29,7 @@ use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use std::collections::{HashMap, VecDeque};
 use uuid::Uuid;
+use chrono::NaiveDate;
 
 pub async fn get_accounts_with_balances(
     pool: &mut PgConnection,
@@ -100,26 +101,40 @@ pub async fn get_accounts_with_balances(
 pub async fn get_journal_entries_with_running_balance(
     pool: &mut PgConnection,
     account_id: Uuid,
+    start_date: NaiveDate,
+    end_date: NaiveDate,
 ) -> Result<Vec<JournalEntryWithBalance>, ApiError> {
-    let entries = db::journal_entry::get_all_by_account_with_date(pool, account_id).await?;
-    let mut running_balance = 0;
+    let opening_balance = db::journal_entry::get_balance_before_date(pool, account_id, start_date).await?;
+    let entries = db::journal_entry::get_all_by_account_in_date_range(pool, account_id, start_date, end_date).await?;
 
-    let result = entries
-        .into_iter()
-        .map(|entry| {
-            running_balance += entry.debit - entry.credit;
-            JournalEntryWithBalance {
-                id: entry.id,
-                transaction_id: entry.transaction_id,
-                account_id: entry.account_id,
-                date: entry.date,
-                description: entry.description,
-                debit: entry.debit,
-                credit: entry.credit,
-                running_balance,
-            }
-        })
-        .collect();
+    let mut running_balance = opening_balance;
+    let mut result = Vec::new();
+
+    // Add an opening balance entry
+    result.push(JournalEntryWithBalance {
+        id: Uuid::new_v4(), // Bogus ID
+        transaction_id: Uuid::new_v4(),
+        account_id,
+        date: start_date,
+        description: Some("Opening Balance".to_string()),
+        debit: if opening_balance > 0 { opening_balance } else { 0 },
+        credit: if opening_balance < 0 { -opening_balance } else { 0 },
+        running_balance: opening_balance,
+    });
+
+    for entry in entries {
+        running_balance += entry.debit - entry.credit;
+        result.push(JournalEntryWithBalance {
+            id: entry.id,
+            transaction_id: entry.transaction_id,
+            account_id: entry.account_id,
+            date: entry.date,
+            description: entry.description,
+            debit: entry.debit,
+            credit: entry.credit,
+            running_balance,
+        });
+    }
 
     Ok(result)
 }

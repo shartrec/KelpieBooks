@@ -25,7 +25,10 @@
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::reports::balance_sheet::BalanceSheet;
 use std::collections::HashMap;
+use chrono::NaiveDate;
 use uuid::Uuid;
+use shared_core::util::format_currency_typ;
+use crate::export::utils::{build_table_header, wrap_report_layout};
 
 #[derive(Clone, Debug)]
 pub struct AccountNode {
@@ -110,41 +113,47 @@ pub fn generate_balance_sheet_csv(balance_sheet: &BalanceSheet) -> String {
     csv_content
 }
 
-pub fn generate_balance_sheet_typst(balance_sheet: &BalanceSheet) -> String {
+pub fn generate_balance_sheet_typst(balance_sheet: &BalanceSheet, report_date: NaiveDate) -> String {
     let asset_nodes = build_account_nodes(&balance_sheet.assets);
     let liability_nodes = build_account_nodes(&balance_sheet.liabilities);
     let equity_nodes = build_account_nodes(&balance_sheet.equity);
+
     let mut typst_content = String::new();
-    typst_content.push_str("#set text(size: 10pt)\n");
-    typst_content.push_str("#set page(margin: (top: 2cm, bottom: 2cm, left: 1.5cm, right: 1.5cm))\n\n");
-    typst_content.push_str("= Balance Sheet\n\n");
+
+    typst_content.push_str(&*build_table_header(&["Account", "", ""], &[false, true, true]));
 
     fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String) {
         let indent = "#h(2.0em)".repeat(depth);
-        content.push_str(&format!("  [{} {}], align(right)[{:.2}],\n", indent, node.account.name, (node.account.balance as f64) / 100.0));
+        content.push_str(&format!("  [{} {}], align(right)[{}],[],\n", indent, node.account.name, format_currency_typ(&node.account.balance)));
         for child in &node.children {
             build_typst_rows(child, depth + 1, content);
         }
     }
 
-    typst_content.push_str("== Assets\n\n");
+    typst_content.push_str("[*Assets*],[],[],\n");
     for node in &asset_nodes {
         build_typst_rows(node, 0, &mut typst_content);
     }
-    typst_content.push_str(&format!("\n*Total Assets:* {:.2}\n", (balance_sheet.total_assets as f64) / 100.0));
+    typst_content.push_str(&format!("align(right)[*Total Assets:*],[],align(right)[*{}*],\n", format_currency_typ(&balance_sheet.total_assets)));
 
-    typst_content.push_str("\n== Liabilities\n\n");
+    typst_content.push_str("[*Liabilities*],[],[],\n");
     for node in &liability_nodes {
         build_typst_rows(node, 0, &mut typst_content);
     }
-    typst_content.push_str(&format!("\n*Total Liabilities:* {:.2}\n", (balance_sheet.total_liabilities as f64) / 100.0));
+    typst_content.push_str(&format!("align(right)[*Total Liabilities:*],[],align(right)[*{}*],\n", format_currency_typ(&balance_sheet.total_liabilities)));
 
-    typst_content.push_str("\n== Equity\n\n");
+    typst_content.push_str("[*Equity*],[],[],\n");
     for node in &equity_nodes {
         build_typst_rows(node, 0, &mut typst_content);
     }
-    typst_content.push_str(&format!("\n  Current Year Earnings: {:.2}\n", (balance_sheet.net_income as f64) / 100.0));
-    typst_content.push_str(&format!("\n*Total Equity:* {:.2}\n", (balance_sheet.total_equity as f64) / 100.0));
-    typst_content.push_str(&format!("\n*Total Liabilities & Equity:* {:.2}\n", ((balance_sheet.total_liabilities + balance_sheet.total_equity) as f64) / 100.0));
-    typst_content
+    typst_content.push_str(&format!("[Current Year Earnings],align(right)[{}],[],", format_currency_typ(&balance_sheet.net_income)));
+
+    typst_content.push_str(&format!("align(right)[*Total Equity*],[],align(right)[*{}*],\n", format_currency_typ(&balance_sheet.total_equity)));
+    typst_content.push_str(&format!("align(right)[*Total Liabilities & Equity*],[],align(right)[*{}*],\n", format_currency_typ(&&(balance_sheet.total_liabilities + balance_sheet.total_equity))));
+
+    typst_content.push_str(")\n");
+
+    let report_qual = format!("As at {}", report_date.format("%d %b %Y").to_string().as_str());
+    wrap_report_layout("Alice St", "Balance Sheet", &*report_qual, typst_content.as_str() )
+
 }

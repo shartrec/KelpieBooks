@@ -101,12 +101,12 @@ pub fn header() -> Html {
         })
     };
 
-    let on_export_typst_click = {
+    let on_export_pdf_click = {
         let report_ctx = report_ctx.clone();
         Callback::from(move |_| {
             if let Some(ctx) = &report_ctx {
-                if let Some(on_export_typst) = &ctx.on_export_typst {
-                    on_export_typst.emit(());
+                if let Some(on_export_pdf) = &ctx.on_export_pdf {
+                    on_export_pdf.emit(());
                 }
             }
         })
@@ -144,9 +144,9 @@ pub fn header() -> Html {
                                         <img src="/images/download.svg" alt="Export CSV" />
                                     </button>
                                 }
-                                if ctx.on_export_typst.is_some() {
-                                    <button class="icon-button" onclick={on_export_typst_click} title="Export to Typst">
-                                        <img src="/images/export-pdf.svg" alt="Export Typst" />
+                                if ctx.on_export_pdf.is_some() {
+                                    <button class="icon-button" onclick={on_export_pdf_click} title="Export to PDF">
+                                        <img src="/images/export-pdf.svg" alt="Export PDF" />
                                     </button>
                                 }
                             </div>

@@ -173,3 +173,59 @@ pub(crate) async fn insert(
     .await?;
     Ok(())
 }
+
+pub(crate) async fn get_balance_before_date(
+    pool: &mut PgConnection,
+    account_id: Uuid,
+    date: NaiveDate,
+) -> Result<i64, sqlx::Error> {
+    let result = sqlx::query(
+        r#"
+        SELECT COALESCE(SUM(debit - credit), 0)::BIGINT as balance
+        FROM journal_entries je
+        JOIN transactions t ON je.transaction_id = t.id
+        WHERE je.account_id = $1 AND t.date < $2
+        "#,
+    )
+    .bind(account_id)
+    .bind(date)
+    .fetch_one(pool)
+    .await?;
+
+    Ok(result.get("balance"))
+}
+
+pub(crate) async fn get_all_by_account_in_date_range(
+    pool: &mut PgConnection,
+    account_id: Uuid,
+    start_date: NaiveDate,
+    end_date: NaiveDate,
+) -> Result<Vec<JournalEntryWithDate>, sqlx::Error> {
+    sqlx::query(
+        r#"
+        SELECT
+            je.id,
+            je.transaction_id,
+            je.account_id,
+            je.debit,
+            je.credit,
+            je.description,
+            je.created_at,
+            t.date
+        FROM journal_entries je
+        JOIN transactions t ON je.transaction_id = t.id
+        WHERE je.account_id = $1 AND t.date >= $2 AND t.date <= $3
+        ORDER BY t.date, je.created_at
+        "#,
+    )
+    .bind(account_id)
+    .bind(start_date)
+    .bind(end_date)
+    .fetch_all(pool)
+    .await
+    .map(|rows| {
+        rows.iter()
+            .map(from_row_to_journal_entry_with_date)
+            .collect()
+    })
+}
