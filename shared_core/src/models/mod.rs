@@ -38,6 +38,7 @@ pub struct Organization {
     pub name: String,
     pub strict_audit_mode: bool,
     pub created_at: DateTime<Utc>,
+    pub locked_until: Option<NaiveDate>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

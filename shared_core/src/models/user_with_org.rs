@@ -37,4 +37,5 @@ pub struct UserWithOrg {
     pub password_hash: String,
     pub created_at: DateTime<Utc>,
     pub organisation_name: String,
+    pub strict_audit_mode: bool,
 }

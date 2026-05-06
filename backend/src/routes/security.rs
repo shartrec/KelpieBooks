@@ -67,7 +67,7 @@ async fn login(
             let auth_user = AuthenticatedUser {
                 user_id: user.id,
                 organization_id: user.organization_id,
-                strict_audit_mode: false, // TODO: Get this from the organization
+                strict_audit_mode: user.strict_audit_mode,
                 username: user.email.clone(),
                 full_name: user.full_name.clone(),
                 display_name: user.display_name.clone(),

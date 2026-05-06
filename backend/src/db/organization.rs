@@ -3,6 +3,17 @@ use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use uuid::Uuid;
 use shared_core::models::Organization;
 
+pub(crate) async fn get(
+    pool: &mut PgConnection,
+    id: Uuid,
+) -> Result<Option<Organization>, sqlx::Error> {
+    sqlx::query("SELECT * FROM organizations WHERE id = $1")
+        .bind(id)
+        .fetch_optional(pool)
+        .await
+        .map(|row| row.map(|r| from_row_to_org(&r)))
+}
+
 pub(crate) async fn set_locked_until(
     pool: &mut PgConnection,
     id: Uuid,
@@ -21,6 +32,7 @@ fn from_row_to_org(row: &sqlx::postgres::PgRow) -> Organization {
         name: row.get("name"),
         strict_audit_mode: row.get("strict_audit_mode"),
         created_at: row.get("created_at"),
+        locked_until: row.get("locked_until"),
     }
 }
 

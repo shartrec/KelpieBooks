@@ -142,30 +142,6 @@ pub fn header() -> Html {
                 <div class="header-left">
                     <h3>{ organisation_name }</h3>
                 </div>
-                <div >
-                    if is_report_route {
-                        if let Some(ctx) = report_ctx {
-                            <div class="header-action-bar">
-                                <div class="date-range-selector">
-                                    <label>{ "From: " }</label>
-                                    <input type="date" value={ctx.date_range.start_date.to_string()} onchange={on_start_change} />
-                                    <label>{ "To: " }</label>
-                                    <input type="date" value={ctx.date_range.end_date.to_string()} onchange={on_end_change} />
-                                </div>
-                                if ctx.on_export_csv.is_some() {
-                                    <button class="icon-button" onclick={on_export_csv_click} title="Export to CSV">
-                                        <img src="/images/download.svg" alt="Export CSV" />
-                                    </button>
-                                }
-                                if ctx.on_export_pdf.is_some() {
-                                    <button class="icon-button" onclick={on_export_pdf_click} title="Export to PDF">
-                                        <img src="/images/export-pdf.svg" alt="Export PDF" />
-                                    </button>
-                                }
-                            </div>
-                        }
-                    }
-                </div>
                 <div class="user-menu">
                     <button onclick={toggle_dropdown} class="user-menu-trigger">
                         { user_display }
@@ -184,6 +160,31 @@ pub fn header() -> Html {
                         </div>
                     }
                 </div>
+            </div>
+            <div class="report-options">
+                if is_report_route {
+                    if let Some(ctx) = report_ctx {
+                        <div class="header-action-bar">
+                            <div class="date-range-selector">
+                                <label>{ "From: " }</label>
+                                <input type="date" value={ctx.date_range.start_date.to_string()} onchange={on_start_change} />
+                                <label>{ "To: " }</label>
+                                <input type="date" value={ctx.date_range.end_date.to_string()} onchange={on_end_change} />
+
+                            if ctx.on_export_csv.is_some() {
+                                <button class="icon-button" onclick={on_export_csv_click} title="Export to CSV">
+                                    <img src="/images/download.svg" alt="Export CSV" />
+                                </button>
+                            }
+                            if ctx.on_export_pdf.is_some() {
+                                <button class="icon-button" onclick={on_export_pdf_click} title="Export to PDF">
+                                    <img src="/images/export-pdf.svg" alt="Export PDF" />
+                                </button>
+                            }
+                            </div>
+                        </div>
+                    }
+                }
             </div>
         </header>
     }

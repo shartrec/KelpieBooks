@@ -1,4 +1,4 @@
-use chrono::Local;
+use chrono::{Local, NaiveDate};
 use crate::db;
 use crate::routes::security::AuthenticatedUser;
 use crate::util::types::PathUuid;
@@ -43,6 +43,20 @@ async fn reverse_transaction(
         .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 
+    let organization = db::organization::get(&mut pool, user.organization_id)
+        .await?
+        .ok_or_else(|| ApiError::NotFound("Organization not found".to_string()))?;
+
+    let reversal_date = if let Some(locked_until) = organization.locked_until {
+        if original_transaction.date <= locked_until {
+            locked_until.succ_opt().unwrap_or(locked_until)
+        } else {
+            original_transaction.date
+        }
+    } else {
+        original_transaction.date
+    };
+
     let original_entries = db::journal_entry::get_all_by_transaction(&mut pool, *id).await?;
 
     let mut tx = pool.begin().await?;
@@ -50,7 +64,7 @@ async fn reverse_transaction(
     let new_transaction_id = db::transaction::insert(
         &mut tx,
         user.organization_id,
-        Local::now().date_naive(),
+        reversal_date,
         Some(req.description.clone()),
         original_transaction.reference,
     )

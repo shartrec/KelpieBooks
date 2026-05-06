@@ -137,6 +137,13 @@ body {
     height: 100%; /* Fill the header height for better centering */
 }
 
+.report-options {
+    background-color: var(--main-bg-color);
+    display: flex;
+    align-items: center; /* Vertically centers children */
+    border-bottom: 1px solid var(--header-border-color);
+}
+
 /* Force the date range group to align its internal labels and inputs */
 .header-action-bar .date-range-selector {
     display: flex;
@@ -274,9 +281,11 @@ body {
     padding: 5px;
     border: 1px solid var(--header-border-color);
     border-radius: 4px;
+    margin-top: 3px;
+    margin-bottom: 3px;
 }
 
 .header-action-bar .date-range-selector label {
     font-size: 0.9rem;
-    color: var(--text-muted);
+    color: var(--text-color);
 }
