@@ -28,6 +28,7 @@ use shared_core::models::{AccountCategory, SystemTag};
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 use std::str::FromStr;
 use uuid::Uuid;
+use chrono::NaiveDate;
 
 fn from_row_to_account(row: &sqlx::postgres::PgRow) -> Account {
     let category_str: String = row.get("category");
@@ -177,4 +178,84 @@ pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, sql
         .execute(pool)
         .await?;
     Ok(result.rows_affected())
+}
+
+pub(crate) async fn get_balance_for_category(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    category: AccountCategory,
+    date: NaiveDate,
+) -> Result<i64, sqlx::Error> {
+    let result = sqlx::query(
+        r#"
+        SELECT COALESCE(SUM(je.debit - je.credit), 0)::BIGINT as balance
+        FROM journal_entries je
+        JOIN transactions t ON je.transaction_id = t.id
+        JOIN accounts a ON je.account_id = a.id
+        WHERE t.organization_id = $1 AND a.category = $2 AND t.date <= $3
+        "#,
+    )
+    .bind(organization_id)
+    .bind(category.to_string())
+    .bind(date)
+    .fetch_one(pool)
+    .await?;
+    Ok(result.get("balance"))
+}
+
+pub(crate) async fn get_all_by_category(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    categories: Vec<AccountCategory>,
+) -> Result<Vec<Account>, sqlx::Error> {
+    let category_strs: Vec<String> = categories.into_iter().map(|c| c.to_string()).collect();
+    sqlx::query(
+        r#"
+        SELECT
+            id,
+            organization_id,
+            parent_id,
+            code,
+            name,
+            category::TEXT as category,
+            is_group,
+            system_tag::TEXT as system_tag,
+            created_at
+        FROM accounts
+        WHERE organization_id = $1 AND category::TEXT = ANY($2)
+        "#,
+    )
+    .bind(organization_id)
+    .bind(category_strs)
+    .fetch_all(pool)
+    .await
+    .map(|rows| rows.iter().map(from_row_to_account).collect())
+}
+
+pub(crate) async fn get_by_system_tag(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    tag: &str,
+) -> Result<Option<Account>, sqlx::Error> {
+    sqlx::query(
+        r#"
+        SELECT
+            id,
+            organization_id,
+            parent_id,
+            code,
+            name,
+            category::TEXT as category,
+            is_group,
+            system_tag::TEXT as system_tag,
+            created_at
+        FROM accounts
+        WHERE organization_id = $1 AND system_tag::TEXT = $2
+        "#,
+    )
+    .bind(organization_id)
+    .bind(tag)
+    .fetch_optional(pool)
+    .await
+    .map(|row| row.map(|r| from_row_to_account(&r)))
 }

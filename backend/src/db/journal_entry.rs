@@ -229,3 +229,24 @@ pub(crate) async fn get_all_by_account_in_date_range(
             .collect()
     })
 }
+
+pub(crate) async fn get_balance_up_to_date(
+    pool: &mut PgConnection,
+    account_id: Uuid,
+    date: NaiveDate,
+) -> Result<i64, sqlx::Error> {
+    let result = sqlx::query(
+        r#"
+        SELECT COALESCE(SUM(debit - credit), 0)::BIGINT as balance
+        FROM journal_entries je
+        JOIN transactions t ON je.transaction_id = t.id
+        WHERE je.account_id = $1 AND t.date <= $2
+        "#,
+    )
+    .bind(account_id)
+    .bind(date)
+    .fetch_one(pool)
+    .await?;
+
+    Ok(result.get("balance"))
+}

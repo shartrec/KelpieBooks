@@ -45,26 +45,3 @@ pub async fn check_login(
     }
     Ok(None)
 }
-#[allow(unused)]
-pub async fn create_initial_admin(pool: &mut PgConnection) -> Result<(), ApiError> {
-    let count: Option<i64> = sqlx::query_scalar!("SELECT COUNT(*) FROM users")
-        .fetch_one(&mut *pool)
-        .await?;
-
-    if matches!(count, None | Some(0)) {
-        let org = crate::db::organization::create(pool, "Default Organization").await?;
-        let password_hash = bcrypt::hash("admin", bcrypt::DEFAULT_COST)?;
-        user::insert(
-            pool,
-            org.id,
-            "admin@kelpie.local".to_string(),
-            password_hash,
-            "Admin User".to_string(),
-            Some("Admin".to_string()),
-        )
-        .await?;
-        log::info!("Created initial admin user with password 'admin'");
-    }
-
-    Ok(())
-}
