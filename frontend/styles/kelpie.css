@@ -248,6 +248,36 @@ input:focus, select:focus, textarea:focus {
     border-color: var(--error-color) !important;
 }
 
+.currency-input {
+    text-align: right;
+    font-family: 'Courier New', Courier, monospace; /* Monospace keeps decimals aligned */
+    padding-right: 8px;
+}
+.journal-entries {
+    display: grid;
+    gap: 5px;
+}
+
+.journal-entry-header, .journal-entry-row {
+    display: grid;
+    /* Account, Description, Debit, Credit, Delete button */
+    grid-template-columns: 2fr 3fr 1fr 1fr 40px;
+    align-items: center;
+}
+
+.journal-entry-header span:nth-child(3),
+.journal-entry-header span:nth-child(4) {
+    text-align: right; /* Align 'Debit' and 'Credit' headers to the right */
+    padding-right: 8px;
+}
+
+/* Optional: style for the totals section to match */
+.totals div {
+    text-align: right;
+    font-weight: bold;
+    margin-top: 0px;
+}
+
 /* Auth Form Specifics */
 .profile-forms-container {
     display: flex;

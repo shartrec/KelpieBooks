@@ -26,18 +26,36 @@ use shared_core::requests::transaction::JournalEntryLine;
 use uuid::Uuid;
 use web_sys::HtmlSelectElement;
 use yew::prelude::*;
-use shared_core::util::format_currency;
+use crate::components::currency_input::CurrencyInput;
 
 #[derive(Properties, PartialEq)]
 pub struct JournalEntryRowProps {
     pub entry: JournalEntryLine,
     pub on_change: Callback<JournalEntryLine>,
     pub on_delete: Callback<()>,
-    pub accounts: Vec<(Uuid, String)>, // All postable accounts
+    pub accounts: Vec<(Uuid, String)>,
+    #[prop_or(false)]
+    pub should_focus: bool,
 }
 
 #[function_component(JournalEntryRow)]
 pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
+
+    let select_ref = use_node_ref(); // Create the reference
+
+    // Effect that runs when 'should_focus' changes
+    use_effect_with(props.should_focus, {
+        let select_ref = select_ref.clone();
+        move |&should_focus| {
+            if should_focus {
+                if let Some(element) = select_ref.cast::<HtmlSelectElement>() {
+                    let _ = element.focus(); // Focus the account selector
+                }
+            }
+            || ()
+        }
+    });
+
     let on_account_change = {
         let on_change = props.on_change.clone();
         let entry = props.entry.clone();
@@ -64,37 +82,26 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
         })
     };
 
+    // Updated: Accept i64 directly, no more f64 parsing here!
     let on_debit_change = {
         let on_change = props.on_change.clone();
         let entry = props.entry.clone();
-        Callback::from(move |e: InputEvent| {
-            let value = e
-                .target_unchecked_into::<web_sys::HtmlInputElement>()
-                .value();
-            if let Ok(amount) = value.parse::<f64>() {
-                let mut updated_entry = entry.clone();
-                updated_entry.debit = (amount * 100.0).round() as i64;
-                updated_entry.credit = 0; // Ensure debit and credit are mutually exclusive
-                info!("Entry as cents = {}, formatted {}", amount, updated_entry.debit);
-                on_change.emit(updated_entry);
-            }
+        Callback::from(move |cents: i64| {
+            let mut updated_entry = entry.clone();
+            updated_entry.debit = cents;
+            updated_entry.credit = 0; // Maintain mutual exclusivity
+            on_change.emit(updated_entry);
         })
     };
 
     let on_credit_change = {
         let on_change = props.on_change.clone();
         let entry = props.entry.clone();
-        Callback::from(move |e: InputEvent| {
-            let value = e
-                .target_unchecked_into::<web_sys::HtmlInputElement>()
-                .value();
-            if let Ok(amount) = value.parse::<f64>() {
-                let mut updated_entry = entry.clone();
-                updated_entry.credit = (amount * 100.0).round() as i64;
-                updated_entry.debit = 0; // Ensure debit and credit are mutually exclusive
-                info!("Entry as cents = {}, formatted {}", amount,  updated_entry.credit);
-                on_change.emit(updated_entry);
-            }
+        Callback::from(move |cents: i64| {
+            let mut updated_entry = entry.clone();
+            updated_entry.credit = cents;
+            updated_entry.debit = 0; // Maintain mutual exclusivity
+            on_change.emit(updated_entry);
         })
     };
 
@@ -107,15 +114,28 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
 
     html! {
         <div class="journal-entry-row">
-            <select onchange={on_account_change}>
+            <select ref={select_ref} onchange={on_account_change}>
                 <option value="" disabled=true selected={props.entry.account_id.is_nil()}>{ "Select Account" }</option>
                 { for props.accounts.iter().map(|(id, name)| html! {
                     <option value={id.to_string()} selected={*id == props.entry.account_id}>{name}</option>
                 })}
             </select>
-            <input type="text" placeholder="Description" value={props.entry.description.clone().unwrap_or_default()} oninput={on_description_change} />
-            <input type="number" step="0.01" placeholder="Debit" value={format_currency(&props.entry.debit)} oninput={on_debit_change} />
-            <input type="number" step="0.01" placeholder="Credit" value={format_currency(&props.entry.credit)} oninput={on_credit_change} />
+            <input type="text" placeholder="Description"
+                   value={props.entry.description.clone().unwrap_or_default()}
+                   oninput={on_description_change} />
+
+            // USE THE SPECIALIZED COMPONENT HERE
+            <CurrencyInput
+                value={props.entry.debit}
+                on_change={on_debit_change}
+                placeholder="0.00"
+            />
+            <CurrencyInput
+                value={props.entry.credit}
+                on_change={on_credit_change}
+                placeholder="0.00"
+            />
+
             <button type="button" onclick={on_delete_click} class="icon-button">{ "X" }</button>
         </div>
     }

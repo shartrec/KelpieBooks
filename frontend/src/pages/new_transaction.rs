@@ -49,6 +49,7 @@ pub struct NewTransactionQuery {
 #[function_component(NewTransactionPage)]
 pub fn new_transaction_page() -> Html {
     let request = use_state(CreateTransactionRequest::default);
+    let focus_index = use_state(|| None::<usize>);
     let postable_accounts = use_state(Vec::new);
     let from_account = use_state(|| None::<Account>);
     let navigator = use_navigator().unwrap();
@@ -125,9 +126,6 @@ pub fn new_transaction_page() -> Html {
 
                 let total_debits: i64 = new_req.entries.iter().map(|e| e.debit).sum();
                 let total_credits: i64 = new_req.entries.iter().map(|e| e.credit).sum();
-                if index == new_req.entries.len() - 1 && total_debits != total_credits {
-                    new_req.entries.push(JournalEntryLine::default());
-                }
             }
             request.set(new_req);
         })
@@ -206,6 +204,18 @@ pub fn new_transaction_page() -> Html {
         html! {}
     };
 
+    let value = focus_index.clone();
+    let add_line = {
+        let request = request.clone();
+        Callback::from(move |_| {
+            let mut new_req = (*request).clone();
+            let new_idx = new_req.entries.len();
+            new_req.entries.push(JournalEntryLine::default());
+            request.set(new_req);
+            value.set(Some(new_idx));
+        })
+    };
+
     html! {
         <Layout>
             <h1>{ "New Journal Transaction" }</h1>
@@ -236,11 +246,14 @@ pub fn new_transaction_page() -> Html {
                                 on_change={on_change}
                                 on_delete={on_delete}
                                 accounts={(*postable_accounts).clone()}
+                                should_focus={*focus_index == Some(i)}
                             />
                         }
                     })}
                 </div>
-
+                <div class="form-actions">
+                    <button type="button" onclick={add_line} class="button-add-row">{ "Add Line" }</button>
+                </div>
                 <div class="totals">
                     <div>{ format!("Debits: {:.2}", total_debits as f64 / 100.0) }</div>
                     <div>{ format!("Credits: {:.2}", total_credits as f64 / 100.0) }</div>
@@ -255,5 +268,5 @@ pub fn new_transaction_page() -> Html {
                 </div>
             </form>
         </Layout>
-    }
+     }
 }

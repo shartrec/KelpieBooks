@@ -78,7 +78,7 @@ pub fn currency_input(props: &CurrencyProps) -> Html {
     html! {
         <input
             type="text"
-            class={classes!(props.class.clone())}
+            class={classes!(props.class.clone(), "currency-input")}
             placeholder={props.placeholder.clone()}
             value={(*display_value).clone()}
             {oninput}
