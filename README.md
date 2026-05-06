@@ -21,9 +21,9 @@ Before you begin, ensure you have the following tools installed:
   ```sh
   cargo install cargo-watch
   ```
-- **`wasm-pack`**: For building the WebAssembly frontend.
+- **`trunk`**: For building the WebAssembly frontend.
   ```sh
-  cargo install wasm-pack
+  cargo install trunk
   ```
 - **PostgreSQL**: A running PostgreSQL database server. You can install it locally or use a Docker container.
 
@@ -79,10 +79,10 @@ The frontend assets need to be built before they can be served by the backend.
     cd ../frontend
     ```
 
-2.  **Build the WebAssembly Package**:
+2.  **Build the WebAssembly Package using Trunk**:
     This command compiles the Yew application into a WebAssembly package and places the output in the `frontend/pkg` directory.
     ```sh
-    wasm-pack build --target web --out-name wasm --out-dir ./pkg
+    trunk build -M
     ```
 
 ### 5. Running the Application
