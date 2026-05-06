@@ -70,7 +70,7 @@ pub(crate) async fn update_me(
         &mut *pool,
         auth_user.user_id,
         update_data.email.clone(),
-        original_user.password_hash,
+        original_user.password_hash.clone(),
         update_data.full_name.clone(),
         update_data.display_name.clone(),
     )
@@ -82,6 +82,7 @@ pub(crate) async fn update_me(
         full_name: updated_user.full_name,
         display_name: updated_user.display_name,
         role: auth_user.role.to_string(),
+        organisation_name: original_user.organisation_name,
     };
 
     Ok(Json(user_detail))
@@ -131,6 +132,7 @@ pub(crate) async fn get_all_users(
             full_name: user.full_name,
             display_name: user.display_name,
             role: "User".to_string(), // Placeholder
+            organisation_name: user.organisation_name,
         })
         .collect();
     Ok(Json(user_details))
@@ -149,6 +151,7 @@ pub(crate) async fn get_user(
                 full_name: user.full_name,
                 display_name: user.display_name,
                 role: "User".to_string(), // Placeholder
+                organisation_name: user.organisation_name,
             };
             Ok(Json(user_detail))
         }

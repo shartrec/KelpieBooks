@@ -112,6 +112,16 @@ pub fn header() -> Html {
         })
     };
 
+    let organisation_name = if let Some(handle) = &user_ctx {
+        if let Some(user) = &handle.user {
+            user.organisation_name.clone()
+        } else {
+            "Kelpie Books".to_string()
+        }
+    } else {
+        "Kelpie Books".to_string()
+    };
+
     let user_display = if let Some(handle) = user_ctx {
         if let Some(user) = &handle.user {
             let name_to_display = user.display_name.as_ref().unwrap_or(&user.full_name);
@@ -130,6 +140,9 @@ pub fn header() -> Html {
         <header class="header">
             <div class="header-content">
                 <div class="header-left">
+                    <h3>{ organisation_name }</h3>
+                </div>
+                <div >
                     if is_report_route {
                         if let Some(ctx) = report_ctx {
                             <div class="header-action-bar">

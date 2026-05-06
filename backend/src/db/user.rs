@@ -22,11 +22,11 @@
  *
  */
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::models::User;
+use shared_core::models::{User, UserWithOrg};
 use uuid::Uuid;
 
-fn from_row_to_user(row: &sqlx::postgres::PgRow) -> User {
-    User {
+fn from_row_to_user_with_org(row: &sqlx::postgres::PgRow) -> UserWithOrg {
+    UserWithOrg {
         id: row.get("id"),
         organization_id: row.get("organization_id"),
         email: row.get("email"),
@@ -34,6 +34,7 @@ fn from_row_to_user(row: &sqlx::postgres::PgRow) -> User {
         display_name: row.get("display_name"),
         password_hash: row.get("password_hash"),
         created_at: row.get("created_at"),
+        organisation_name: row.get("organisation_name"),
     }
 }
 
@@ -55,7 +56,15 @@ pub(crate) async fn insert(
     .bind(display_name)
     .fetch_one(pool)
     .await?;
-    Ok(from_row_to_user(&row))
+    Ok(User {
+        id: row.get("id"),
+        organization_id: row.get("organization_id"),
+        email: row.get("email"),
+        full_name: row.get("full_name"),
+        display_name: row.get("display_name"),
+        password_hash: row.get("password_hash"),
+        created_at: row.get("created_at"),
+    })
 }
 
 pub(crate) async fn update(
@@ -76,7 +85,15 @@ pub(crate) async fn update(
     .bind(id)
     .fetch_one(pool)
     .await?;
-    Ok(from_row_to_user(&row))
+    Ok(User {
+        id: row.get("id"),
+        organization_id: row.get("organization_id"),
+        email: row.get("email"),
+        full_name: row.get("full_name"),
+        display_name: row.get("display_name"),
+        password_hash: row.get("password_hash"),
+        created_at: row.get("created_at"),
+    })
 }
 
 pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, sqlx::Error> {
@@ -87,32 +104,32 @@ pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, sql
     Ok(result.rows_affected())
 }
 
-pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<User>, sqlx::Error> {
-    sqlx::query("SELECT * FROM users WHERE id = $1")
+pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<UserWithOrg>, sqlx::Error> {
+    sqlx::query("SELECT u.*, o.name as organisation_name FROM users u JOIN organizations o ON u.organization_id = o.id WHERE u.id = $1")
         .bind(id)
         .fetch_optional(pool)
         .await
-        .map(|row| row.map(|r| from_row_to_user(&r)))
+        .map(|row| row.map(|r| from_row_to_user_with_org(&r)))
 }
 
 pub(crate) async fn get_by_email(
     pool: &mut PgConnection,
     email: &str,
-) -> Result<Option<User>, sqlx::Error> {
-    sqlx::query("SELECT * FROM users WHERE email = $1")
+) -> Result<Option<UserWithOrg>, sqlx::Error> {
+    sqlx::query("SELECT u.*, o.name as organisation_name FROM users u JOIN organizations o ON u.organization_id = o.id WHERE u.email = $1")
         .bind(email)
         .fetch_optional(pool)
         .await
-        .map(|row| row.map(|r| from_row_to_user(&r)))
+        .map(|row| row.map(|r| from_row_to_user_with_org(&r)))
 }
 
 pub(crate) async fn get_all(
     pool: &mut PgConnection,
     organization_id: Uuid,
-) -> Result<Vec<User>, sqlx::Error> {
-    sqlx::query("SELECT * FROM users WHERE organization_id = $1 ORDER BY email")
+) -> Result<Vec<UserWithOrg>, sqlx::Error> {
+    sqlx::query("SELECT u.*, o.name as organisation_name FROM users u JOIN organizations o ON u.organization_id = o.id WHERE u.organization_id = $1 ORDER BY u.email")
         .bind(organization_id)
         .fetch_all(pool)
         .await
-        .map(|rows| rows.iter().map(from_row_to_user).collect())
+        .map(|rows| rows.iter().map(from_row_to_user_with_org).collect())
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026. Trevor Campbell and others.
+ * Copyright (c) 2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -22,18 +22,19 @@
  *
  */
 
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
-/// A Data Transfer Object representing the user details that are safe
-/// to send to the frontend. This struct explicitly omits sensitive
-/// information like the password hash.
+use uuid::Uuid;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct UserDetail {
+pub struct UserWithOrg {
     pub id: Uuid,
+    pub organization_id: Uuid,
     pub email: String,
     pub full_name: String,
     pub display_name: Option<String>,
-    pub role: String,
+    pub password_hash: String,
+    pub created_at: DateTime<Utc>,
     pub organisation_name: String,
 }

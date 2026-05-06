@@ -33,7 +33,7 @@ use shared_core::dtos::user_detail::UserDetail;
 use shared_core::requests::auth::LoginRequest;
 use std::sync::OnceLock;
 
-use crate::db::security;
+use crate::db::user;
 use crate::DbKelpie;
 use base64::{engine::general_purpose, Engine as _};
 use rand::{rngs::OsRng, RngCore};
@@ -55,18 +55,24 @@ async fn login(
     login_request: Json<LoginRequest>,
 ) -> Result<Json<UserDetail>, Status> {
     let db_user =
-        security::check_login(&mut pool, &login_request.email, &login_request.password_raw).await;
+        user::get_by_email(&mut pool, &login_request.email).await;
 
     match db_user {
         Ok(Some(user)) => {
+            let valid = bcrypt::verify(&login_request.password_raw, &user.password_hash).unwrap_or(false);
+            if !valid {
+                return Err(Status::Unauthorized);
+            }
+
             let auth_user = AuthenticatedUser {
                 user_id: user.id,
                 organization_id: user.organization_id,
-                strict_audit_mode: user.strict_audit_mode,
+                strict_audit_mode: false, // TODO: Get this from the organization
                 username: user.email.clone(),
                 full_name: user.full_name.clone(),
                 display_name: user.display_name.clone(),
                 role: Role::User,
+                organisation_name: user.organisation_name.clone(),
             };
             let token = generate_session_token(&auth_user);
             cookies.add(Cookie::build(("session", token)).http_only(false));
@@ -77,6 +83,7 @@ async fn login(
                 full_name: user.full_name,
                 display_name: user.display_name,
                 role: auth_user.role.to_string(),
+                organisation_name: user.organisation_name,
             };
 
             Ok(Json(user_detail))
@@ -94,6 +101,7 @@ async fn me(user: AuthenticatedUser) -> Json<UserDetail> {
         full_name: user.full_name,
         display_name: user.display_name,
         role: user.role.to_string(),
+        organisation_name: user.organisation_name,
     })
 }
 
@@ -111,6 +119,7 @@ pub(crate) struct AuthenticatedUser {
     pub(crate) full_name: String,
     pub(crate) display_name: Option<String>,
     pub(crate) role: Role,
+    pub(crate) organisation_name: String,
 }
 
 #[rocket::async_trait]
@@ -137,6 +146,7 @@ struct Claims {
     display_name: Option<String>,
     role: String,
     exp: usize,
+    organisation_name: String,
 }
 
 pub(crate) fn hash_pwd(password: &str) -> Result<String, ApiError> {
@@ -170,6 +180,7 @@ fn generate_session_token(user: &AuthenticatedUser) -> String {
         display_name: user.display_name.clone(),
         role: user.role.to_string(),
         exp: expiration,
+        organisation_name: user.organisation_name.clone(),
     };
 
     encode(
@@ -198,6 +209,7 @@ pub(crate) fn validate_session_token(token: &str) -> Option<AuthenticatedUser> {
                     full_name: data.claims.full_name,
                     display_name: data.claims.display_name,
                     role: Role::from(&data.claims.role).unwrap_or(Role::Guest),
+                    organisation_name: data.claims.organisation_name,
                 })
             } else {
                 None

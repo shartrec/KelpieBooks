@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026. Trevor Campbell and others.
+ * Copyright (c) 2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -21,6 +21,11 @@
  *      Trevor Campbell
  *
  */
+
+pub mod user_with_org;
+
+pub use user_with_org::UserWithOrg;
+
 
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};

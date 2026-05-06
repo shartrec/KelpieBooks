@@ -130,6 +130,39 @@ body {
     flex-direction: column;
 }
 
+.header-action_bar {
+    display: flex;
+    align-items: center; /* Vertically centers children */
+    gap: 15px;
+    height: 100%; /* Fill the header height for better centering */
+}
+
+/* Force the date range group to align its internal labels and inputs */
+.header-action-bar .date-range-selector {
+    display: flex;
+    align-items: center; /* This is the key for "From: [date]" alignment */
+    gap: 8px;
+    line-height: 1; /* Prevents text descenders from pushing the label down */
+}
+
+/* Standardize the input height to match the user menu trigger */
+.header-action-bar .date-range-selector input[type="date"] {
+    padding: 6px 8px; /* Slightly more padding for a modern look */
+    border: 1px solid var(--header-border-color);
+    border-radius: 4px;
+    height: 32px; /* Explicit height ensures it matches buttons exactly */
+    box-sizing: border-box; /* Includes padding/border in the height calculation */
+}
+
+/* Ensure labels are vertically centered relative to the inputs */
+.header-action-bar .date-range-selector label {
+    font-size: 0.9rem;
+    color: var(--text-color); /* Fixed from variable 'text-muted' which wasn't in root */
+    display: flex;
+    align-items: center;
+}
+
+
 .header {
     background-color: var(--header-bg-color);
     border-bottom: 1px solid var(--header-border-color);
@@ -147,12 +180,6 @@ body {
     flex-grow: 1;
 }
 
-.header-action-bar {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
 .dashboard-main-content {
     padding: 30px;
     flex-grow: 1;
@@ -161,10 +188,13 @@ body {
 
 /* User Menu Styles */
 .user-menu {
+    align-items: center; /* This is the key for "From: [date]" alignment */
     position: relative;
 }
 
 .user-menu-trigger {
+    height: 32px; /* Matches the date input height */
+    padding: 0 8px;
     background: none;
     border: none;
     cursor: pointer;
@@ -173,7 +203,6 @@ body {
     gap: 8px;
     font-size: 1rem;
     font-weight: 500;
-    padding: 8px;
     border-radius: 6px;
     transition: background-color 0.2s;
 }
