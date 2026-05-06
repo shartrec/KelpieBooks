@@ -9,3 +9,4 @@ pub mod journal_entry_row;
 pub mod layout;
 pub mod sidebar;
 pub mod transaction_row;
+mod currency_input;

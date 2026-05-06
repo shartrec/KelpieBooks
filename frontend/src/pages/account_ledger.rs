@@ -216,13 +216,13 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                 <Link<Route, NewTransactionQuery> to={Route::NewTransaction} query={query} classes="button">
                     { "Add New Transaction" }
                 </Link<Route, NewTransactionQuery>>
-                if let Some(acc) = &*account {
-                    if acc.category == AccountCategory::Expense {
-                        <Link<Route> to={Route::ProfitLoss} classes="button button-secondary">
-                            { "View this account in P&L" }
-                        </Link<Route>>
-                    }
-                }
+                // if let Some(acc) = &*account {
+                //     if acc.category == AccountCategory::Expense {
+                //         <Link<Route> to={Route::ProfitLoss} classes="button button-secondary">
+                //             { "View this account in P&L" }
+                //         </Link<Route>>
+                //     }
+                // }
             </div>
             if *loading {
                 <p>{ "Loading..." }</p>

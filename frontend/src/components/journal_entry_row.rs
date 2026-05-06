@@ -21,11 +21,12 @@
  *      Trevor Campbell
  *
  */
-
+use log::info;
 use shared_core::requests::transaction::JournalEntryLine;
 use uuid::Uuid;
 use web_sys::HtmlSelectElement;
 use yew::prelude::*;
+use shared_core::util::format_currency;
 
 #[derive(Properties, PartialEq)]
 pub struct JournalEntryRowProps {
@@ -72,8 +73,9 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
                 .value();
             if let Ok(amount) = value.parse::<f64>() {
                 let mut updated_entry = entry.clone();
-                updated_entry.debit = (amount * 100.0) as i64;
+                updated_entry.debit = (amount * 100.0).round() as i64;
                 updated_entry.credit = 0; // Ensure debit and credit are mutually exclusive
+                info!("Entry as cents = {}, formatted {}", amount, updated_entry.debit);
                 on_change.emit(updated_entry);
             }
         })
@@ -88,8 +90,9 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
                 .value();
             if let Ok(amount) = value.parse::<f64>() {
                 let mut updated_entry = entry.clone();
-                updated_entry.credit = (amount * 100.0) as i64;
+                updated_entry.credit = (amount * 100.0).round() as i64;
                 updated_entry.debit = 0; // Ensure debit and credit are mutually exclusive
+                info!("Entry as cents = {}, formatted {}", amount,  updated_entry.credit);
                 on_change.emit(updated_entry);
             }
         })
@@ -111,8 +114,8 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
                 })}
             </select>
             <input type="text" placeholder="Description" value={props.entry.description.clone().unwrap_or_default()} oninput={on_description_change} />
-            <input type="number" step="0.01" placeholder="Debit" value={(props.entry.debit as f64 / 100.0).to_string()} oninput={on_debit_change} />
-            <input type="number" step="0.01" placeholder="Credit" value={(props.entry.credit as f64 / 100.0).to_string()} oninput={on_credit_change} />
+            <input type="number" step="0.01" placeholder="Debit" value={format_currency(&props.entry.debit)} oninput={on_debit_change} />
+            <input type="number" step="0.01" placeholder="Credit" value={format_currency(&props.entry.credit)} oninput={on_credit_change} />
             <button type="button" onclick={on_delete_click} class="icon-button">{ "X" }</button>
         </div>
     }
