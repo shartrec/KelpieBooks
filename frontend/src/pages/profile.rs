@@ -232,10 +232,10 @@ pub fn profile_page() -> Html {
                         <button type="submit">{"Save Details"}</button>
                     </div>
                     if *details_success {
-                        <div class="success-message">{"Profile saved successfully!"}</div>
+                        <div class="message message__success">{"Profile saved successfully!"}</div>
                     }
                     if let Some(err) = (*details_error).clone() {
-                        <div class="error">{err}</div>
+                        <div class="message message__error">{err}</div>
                     }
                 </form>
 
@@ -259,10 +259,10 @@ pub fn profile_page() -> Html {
                         <button type="submit" disabled={!can_submit_password}>{"Change Password"}</button>
                     </div>
                     if *password_success {
-                        <div class="success-message">{"Password changed successfully!"}</div>
+                        <div class="message message__success">{"Password changed successfully!"}</div>
                     }
                     if let Some(err) = (*password_error).clone() {
-                        <div class="error">{err}</div>
+                        <div class="message message__error">{err}</div>
                     }
                 </form>
             </div>

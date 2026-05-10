@@ -35,6 +35,7 @@ body {
   // Basic defaults
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 // Generic Form Elements
@@ -56,37 +57,6 @@ input, select, textarea {
     box-shadow: 0 0 0 2px rgba($brand-primary, 0.2);
   }
 }
-
-button {
-  cursor: pointer;
-  border: none;
-  font-family: inherit;
-  transition: all 0.2s ease;
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-}
-
-.success-message {
-  grid-column: 1 / span 2;
-  color: var(--success-color);
-  background-color: #eafaf1;
-  padding: 0.75rem;
-  border-radius: 6px;
-  text-align: center;
-}
-
-.error {
-  grid-column: 1 / span 2;
-  color: var(--error-color);
-  background-color: #fbeae5;
-  padding: 0.75rem;
-  border-radius: 6px;
-  text-align: center;
-}
-
 
 /* Modal Styles */
 .modal {
@@ -148,30 +118,54 @@ button {
 }
 
 /* Buttons */
+// Base button styles and default button appearance
 button {
-  background-color: #f0f0f7;
-  color: $brand-dark;
-  border: 1px solid #d1d5db;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
+  font-family: inherit;
   font-size: 1rem;
-  transition: background-color 0.3s ease;
+  cursor: pointer;
+  padding: 10px 20px;
   margin: 5px;
+  border: 1px solid $border-color;
+  border-radius: 6px;
+  background-color: $bg-main;
+  color: $brand-dark;
+  transition: background-color 0.3s ease, color 0.3s ease, opacity 0.2s ease;
+
   &:hover {
-    background-color: #e0e0e7;
+    background-color: darken($bg-main, 5%);
   }
+
   &:disabled {
-    background-color: #e0e0e0;
-    color: #9ca3af;
+    background-color: darken($bg-main, 5%);
+    color: lighten($text-main, 40%);
     cursor: not-allowed;
+    opacity: 0.6;
   }
-  &-secondary {
+
+  &.button-secondary { // Using a class for modifiers is more explicit
     background-color: #bdc3c7;
     color: #2c3e50;
     &:hover {
-      background-color: #95a5a6;
+      background-color: darken(#bdc3c7, 10%);
     }
+  }
+}
+
+/* Message/Alert Styles */
+.message {
+  grid-column: 1 / span 2;
+  padding: 0.75rem;
+  border-radius: 6px;
+  text-align: center;
+
+  &__success {
+    color: $color-success;
+    background-color: lighten($color-success, 45%);
+  }
+
+  &__error {
+    color: $color-error;
+    background-color: lighten($color-error, 30%);
   }
 }
 
@@ -184,8 +178,8 @@ button {
 
   label {
     padding: 0.5rem 1rem;
-    background: #e0e0e0;
-    border: 3px solid #aaa;
+    background: darken($bg-main, 5%);
+    border: 3px solid darken($border-color, 15%);
     border-radius: 6px;
     cursor: pointer;
     box-shadow: inset 0 -2px 2px rgba(0,0,0,0.2);
@@ -194,13 +188,13 @@ button {
     width: 12rem;
     text-align: center;
     &:hover {
-      background: #d0d0d0;
+      background: darken($bg-main, 10%);
     }
   }
 
   input[type="radio"]:checked + label {
-    background: #e0ffe0;
-    border: 3px solid #0a0;
+    background: lighten($color-success, 40%);
+    border-color: $color-success;
     font-weight: bold;
   }
 
@@ -217,25 +211,25 @@ button {
     margin: 0 2px; /* Add a little space between buttons */
     cursor: pointer;
     border-radius: 4px;
-    color: #576574;
+    color: lighten($text-main, 20%);
     display: inline-flex; /* Helps with alignment */
     vertical-align: middle;
 
-    :hover {
-      background-color: #e0e0e0;
-      color: #2c3e50;
+    &:hover {
+      background-color: darken($bg-main, 5%);
+      color: $text-main;
     }
   }
 }
 
 
 .key-button {
-  color: var(--custom-color);
-  background-color: #f0f0f0;
+  background-color: transparent;
   border: none;
   padding: 0;
-  :hover {
-    background-color: #e0e0e0;
+  cursor: pointer;
+  &:hover {
+    background-color: darken($bg-main, 5%);
   }
 }
 
@@ -252,4 +246,3 @@ button {
   margin: 0;
   vertical-align: middle;
 }
-
