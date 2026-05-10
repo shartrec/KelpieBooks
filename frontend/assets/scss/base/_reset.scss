@@ -1,0 +1,39 @@
+/* _reset.scss */
+
+// 1. Core Reset
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+// 2. Consistent Body
+body {
+  min-height: 100vh;
+  text-rendering: optimizeSpeed;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased; // Makes fonts look crisper on Mac
+}
+
+// 3. Remove list styles (Crucial for Sidebars/Menus)
+ul, ol {
+  list-style: none;
+}
+
+// 4. Image/Media consistency
+img, picture, svg {
+  max-width: 100%;
+  display: block;
+}
+
+// 5. Inherit fonts for form elements
+// Browsers often force a specific font on inputs, breaking your design consistency
+input, button, textarea, select {
+  font: inherit;
+}
+
+// 6. Remove table spacing
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}

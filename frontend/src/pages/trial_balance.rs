@@ -34,6 +34,7 @@ use yew::prelude::*;
 use gloo_net::http::Request;
 use yew_router::prelude::Link;
 use shared_core::util::format_currency;
+use crate::components::report_options::ReportOptions;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
@@ -159,7 +160,7 @@ pub fn trial_balance_page() -> Html {
     fn render_report_row(node: &AccountNode, depth: usize, collapsed: &UseStateHandle<HashSet<Uuid>>) -> Html {
         let is_parent = !node.children.is_empty();
         let is_collapsed = collapsed.contains(&node.account.id);
-        let name_style = format!("padding-left: {}rem;", depth as f64 * 1.5);
+        let indent_class = format!("report__indent__level_{}", depth);
 
         let on_toggle = {
             let collapsed = collapsed.clone();
@@ -204,8 +205,8 @@ pub fn trial_balance_page() -> Html {
 
         html! {
             <>
-                <tr class={if is_parent { "parent-account" } else { "" }}>
-                    <td style={name_style}>
+                <tr class={format!{"{} {}", indent_class, if is_parent { "parent-account "} else { "" }}}>
+                    <td>
                         if is_parent {
                             <button onclick={on_toggle} class="collapse-toggle">
                                 if is_collapsed {
@@ -230,17 +231,16 @@ pub fn trial_balance_page() -> Html {
     html! {
         <Layout>
             <div class="report-page">
-                <h3>{ "Trial Balance" }</h3>
-                <p class="report-period">
-                    { format!("As of {}", report_ctx.date_range.end_date) }
-                </p>
-
+                <div class="report-header">
+                    <h3>{ "Trial Balance" }</h3>
+                    <ReportOptions show_start_date={false} show_end_date={true} />
+                </div>
                 if *loading {
                     <p>{ "Loading..." }</p>
                 } else if let Some(err) = &*error {
                     <div class="error">{ err }</div>
                 } else {
-                    <table class="table report-table">
+                    <table class="report-table">
                         <thead>
                             <tr>
                                 <th>{ "Account" }</th>

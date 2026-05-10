@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2026-2026. Trevor Campbell and others.
+/*!
+ * Copyright (c) 2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -22,14 +22,21 @@
  *
  */
 
-pub mod account_ledger;
-pub mod balance_sheet;
-pub mod dashboard;
-pub mod ledger;
-pub mod login;
-pub mod new_transaction;
-pub mod profit_loss;
-pub mod profile;
-pub mod register;
-pub mod trial_balance;
-pub mod style_guide;
+// 1. Abstracts (No compiled CSS, just rules)
+@use 'abstracts/variables';
+@use 'abstracts/mixins';
+
+// 2. Base (Global styles)
+@import 'base/base';
+@import 'base/layout';
+@import 'base/reset';
+@import 'base/typography';
+
+// 3. Components (The meat of the app)
+@import 'components/journal';
+@import 'components/login';
+@import 'components/reports';
+@import 'components/profile';
+@import 'components/sidebar';
+@import 'components/tables';
+@import 'components/user-menu';

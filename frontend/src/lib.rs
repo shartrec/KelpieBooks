@@ -55,4 +55,8 @@ pub enum Route {
     NewTransaction,
     #[at("/")]
     Home,
+
+    // Not really a page, but it's a good example of a page that doesn't have a route
+    #[at("/style-guide")]
+    StyleGuide,
 }

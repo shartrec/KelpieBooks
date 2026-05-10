@@ -1,0 +1,70 @@
+/*!
+ * Copyright (c) 2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+
+.login {
+  &__page-contianer {
+    flex: 1;
+    display: flex;
+    flex-direction: column; /* Changed to column for auth pages */
+    align-items: center; /* Center content horizontally */
+    justify-content: center; /* Center content vertically */
+    height: 60vh; /* full browser height */
+  }
+
+  &__form {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.5rem 1rem;
+    align-items: center;
+    max-width: 600px;
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+
+    label {
+      grid-column: 1;
+      text-align: right;
+    }
+
+    input {
+      grid-column: 2;
+    }
+
+    &__form-actions {
+      grid-column: 2;
+      justify-self: end;
+    }
+
+    &__error {
+      grid-column: 1 / span 2;
+      color: var(--error-color);
+      background-color: #fbeae5;
+      padding: 0.75rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+  }
+}

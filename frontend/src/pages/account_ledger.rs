@@ -39,6 +39,7 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 use shared_core::util::format_currency;
 use crate::components::je_reversal_confirmation_modal::ReversalConfirmationModal;
+use crate::components::report_options::ReportOptions;
 
 #[derive(Debug, Properties, PartialEq)]
 pub struct AccountLedgerPageProps {
@@ -74,8 +75,6 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
             }
         });
     }
-
-    info!("Account Ledger Props {:?}", props);
 
     let fetch_entries = {
         let entries = entries.clone();
@@ -211,18 +210,14 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
 
     html! {
         <Layout>
-            <h1>{ format!("Ledger: {}", account_name) }</h1>
+            <div class="report-header">
+                <h3>{ format!("Ledger: {}", account_name) }</h3>
+                <ReportOptions show_start_date={true} show_end_date={true} />
+            </div>
             <div class="table-actions">
                 <Link<Route, NewTransactionQuery> to={Route::NewTransaction} query={query} classes="button">
                     { "Add New Transaction" }
                 </Link<Route, NewTransactionQuery>>
-                // if let Some(acc) = &*account {
-                //     if acc.category == AccountCategory::Expense {
-                //         <Link<Route> to={Route::ProfitLoss} classes="button button-secondary">
-                //             { "View this account in P&L" }
-                //         </Link<Route>>
-                //     }
-                // }
             </div>
             if *loading {
                 <p>{ "Loading..." }</p>
@@ -232,7 +227,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
 
             if let Some(jeb) = &*transaction_to_reverse { <ReversalConfirmationModal jeb={jeb.clone()} on_close={on_modal_close.clone()} on_confirm={on_reverse_confirm.clone()} /> }
 
-                <table class="table">
+                <table class="report-table">
                     <thead>
                         <tr>
                             <th>{ "Date" }</th>

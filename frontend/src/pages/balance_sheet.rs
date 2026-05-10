@@ -34,6 +34,7 @@ use yew::prelude::*;
 use gloo_net::http::Request;
 use yew_router::prelude::Link;
 use shared_core::util::format_currency;
+use crate::components::report_options::ReportOptions;
 
 #[derive(Clone)]
 pub struct BalanceSheetHolder {
@@ -178,7 +179,7 @@ pub fn balance_sheet_page() -> Html {
     fn render_report_row(node: &AccountNode, depth: usize, collapsed: &UseStateHandle<HashSet<Uuid>>) -> Html {
         let is_parent = !node.children.is_empty();
         let is_collapsed = collapsed.contains(&node.account.id);
-        let name_style = format!("padding-left: {}rem;", depth as f64 * 1.5);
+        let indent_class = format!("report__indent__level_{}", depth);
 
         let on_toggle = {
             let collapsed = collapsed.clone();
@@ -206,8 +207,8 @@ pub fn balance_sheet_page() -> Html {
 
         html! {
             <>
-                <tr class={if is_parent { "parent-account" } else { "" }}>
-                    <td style={name_style}>
+                <tr class={format!{"{} {}", indent_class, if is_parent { "parent-account "} else { "" }}}>
+                    <td>
                         if is_parent {
                             <button onclick={on_toggle} class="collapse-toggle">
                                 if is_collapsed {
@@ -233,17 +234,17 @@ pub fn balance_sheet_page() -> Html {
     html! {
         <Layout>
             <div class="report-page">
-                <h3>{ "Balance Sheet" }</h3>
-                <p class="report-period">
-                    { format!("As of {}", report_ctx.date_range.end_date) }
-                </p>
+                <div class="report-header">
+                    <h3>{ "Balance Sheet" }</h3>
+                    <ReportOptions show_start_date={false} show_end_date={true} />
+                </div>
 
                 if *loading {
                     <p>{ "Loading..." }</p>
                 } else if let Some(err) = &*error {
                     <div class="error">{ err }</div>
                 } else {
-                    <table class="table report-table">
+                    <table class="report-table">
                         <thead>
                             <tr>
                                 <th>{ "Account" }</th>
@@ -251,21 +252,21 @@ pub fn balance_sheet_page() -> Html {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="report-section-header"><td colspan="2">{ "Assets" }</td></tr>
+                            <tr class="report__section-header"><td colspan="2">{ "Assets" }</td></tr>
                             { for asset_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
                             <tr class="report-total-row">
                                 <td><strong>{ "Total Assets" }</strong></td>
                                 <td style="text-align: right;"><strong>{ format_currency(&balance_sheet_holder.balance_sheet.total_assets) }</strong></td>
                             </tr>
 
-                            <tr class="report-section-header"><td colspan="2">{ "Liabilities" }</td></tr>
+                            <tr class="report__section-header"><td colspan="2">{ "Liabilities" }</td></tr>
                             { for liability_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
                             <tr class="report-total-row">
                                 <td><strong>{ "Total Liabilities" }</strong></td>
                                 <td style="text-align: right;"><strong>{ format_currency(&balance_sheet_holder.balance_sheet.total_liabilities) }</strong></td>
                             </tr>
 
-                            <tr class="report-section-header"><td colspan="2">{ "Equity" }</td></tr>
+                            <tr class="report__section-header"><td colspan="2">{ "Equity" }</td></tr>
                             { for equity_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
                             <tr>
                                 <td style="padding-left: 1.5rem">{ "Current Year Earnings" }</td>
@@ -276,7 +277,7 @@ pub fn balance_sheet_page() -> Html {
                                 <td style="text-align: right;"><strong>{ format_currency(&balance_sheet_holder.balance_sheet.total_equity) }</strong></td>
                             </tr>
 
-                            <tr class="report-total-row">
+                            <tr class="report__total-row">
                                 <td><strong>{ "Total Liabilities & Equity" }</strong></td>
                                 <td style="text-align: right;"><strong>{ format_currency(&(balance_sheet_holder.balance_sheet.total_liabilities + balance_sheet_holder.balance_sheet.total_equity)) }</strong></td>
                             </tr>

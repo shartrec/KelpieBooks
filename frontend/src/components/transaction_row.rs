@@ -121,20 +121,20 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                 </td>
             </tr>
             if *expanded {
-                <tr class="transaction-detail-row">
+                <tr class="transaction-detail__row">
                     <td colspan="6">
-                        <div class="transaction-detail-content">
+                        <div class="transaction-detail__content">
                             if *loading_details {
                                 <p>{ "Loading details..." }</p>
                             } else if let Some(detail) = &*transaction_detail {
-                                <div class="journal-entry-header">
+                                <div class="journal-entry__header">
                                     <span>{ "Details for trans" }</span>
                                     <span>{ &detail.transaction.id.to_string()[0..8] }</span>
                                     <span class="amount">{ "Debit" }</span>
                                     <span class="amount">{ "Credit" }</span>
                                 </div>
                                 { for detail.entries.iter().map(|entry| html! {
-                                    <div class="journal-entry-line">
+                                    <div class="journal-entry__line">
                                         <span>{ &entry.account_name }</span>
                                         <span>{ entry.description.clone().unwrap_or_default() }</span>
                                         <span class="amount">{ format_currency(&entry.debit) }</span>

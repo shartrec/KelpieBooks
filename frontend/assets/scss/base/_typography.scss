@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2026-2026. Trevor Campbell and others.
+/*!
+ * Copyright (c) 2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -22,14 +22,36 @@
  *
  */
 
-pub mod account_ledger;
-pub mod balance_sheet;
-pub mod dashboard;
-pub mod ledger;
-pub mod login;
-pub mod new_transaction;
-pub mod profit_loss;
-pub mod profile;
-pub mod register;
-pub mod trial_balance;
-pub mod style_guide;
+@use '../abstracts/variables' as *;
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: $text-main;
+}
+
+h1, h2, h3, h4 {
+  margin-bottom: $space-md;
+  font-weight: 600;
+  color: $brand-dark;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+
+a {
+  color: #20207f; // From your link-color variable
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Accounting specific text helpers
+.text-amount {
+  font-family: 'Courier New', Courier, monospace; // Fixed width for numbers
+  text-align: right;
+}
+
+.is-balanced { color: $color-success; }
+.is-unbalanced { color: $color-error; }

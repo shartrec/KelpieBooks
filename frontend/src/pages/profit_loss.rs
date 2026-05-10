@@ -23,6 +23,7 @@
  */
 
 use crate::components::layout::Layout;
+use crate::components::report_options::ReportOptions;
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
@@ -170,7 +171,7 @@ pub fn profit_loss_page() -> Html {
     fn render_report_row(node: &AccountNode, depth: usize, collapsed: &UseStateHandle<HashSet<Uuid>>) -> Html {
         let is_parent = !node.children.is_empty();
         let is_collapsed = collapsed.contains(&node.account.id);
-        let name_style = format!("padding-left: {}rem;", depth as f64 * 1.5);
+        let indent_class = format!("report__indent__level_{}", depth);
         
         let display_balance = if node.account.category == AccountCategory::Revenue {
             -node.account.balance
@@ -204,8 +205,8 @@ pub fn profit_loss_page() -> Html {
 
         html! {
             <>
-                <tr class={if is_parent { "parent-account" } else { "" }}>
-                    <td style={name_style}>
+                <tr class={format!{"{} {}", indent_class, if is_parent { "parent-account "} else { "" }}}>
+                    <td>
                         if is_parent {
                             <button onclick={on_toggle} class="collapse-toggle">
                                 if is_collapsed {
@@ -237,17 +238,16 @@ pub fn profit_loss_page() -> Html {
     html! {
         <Layout>
             <div class="report-page">
-                <h3>{ "Profit & Loss" }</h3>
-                <p class="report-period">
-                    { format!("Period: {} to {}", report_ctx.date_range.start_date, report_ctx.date_range.end_date) }
-                </p>
-
+                <div class="report-header">
+                    <h3>{ "Profit & Loss" }</h3>
+                    <ReportOptions show_start_date={true} show_end_date={true} />
+                </div>
                 if *loading {
                     <p>{ "Loading..." }</p>
                 } else if let Some(err) = &*error {
                     <div class="error">{ err }</div>
                 } else {
-                    <table class="table report-table">
+                    <table class="report-table">
                         <thead>
                             <tr>
                                 <th>{ "Account" }</th>
@@ -256,12 +256,12 @@ pub fn profit_loss_page() -> Html {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="report-section-header"><td colspan="2">{ "Revenue" }</td><td></td></tr>
+                            <tr class="report__section-header"><td colspan="2">{ "Revenue" }</td><td></td></tr>
                             { for revenue_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
-                            <tr class="report-section-header"><td colspan="2">{ "Expenses" }</td><td></td></tr>
+                            <tr class="report__section-header"><td colspan="2">{ "Expenses" }</td><td></td></tr>
                             { for expense_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
 
-                            <tr class="report-total-row">
+                            <tr class="report__total-row">
                                 <td><strong>{ "Net Income" }</strong></td>
                                 <td />
                                 <td style="text-align: right;">

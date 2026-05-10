@@ -10,3 +10,4 @@ pub mod layout;
 pub mod sidebar;
 pub mod transaction_row;
 mod currency_input;
+pub mod report_options;

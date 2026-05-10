@@ -1,0 +1,84 @@
+/*!
+ * Copyright (c) 2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+
+@use '../abstracts/variables' as *;
+
+.user-menu {
+  position: relative; // Needed so the dropdown can absolute-position itself relative to this container
+  display: flex;
+  align-items: center;
+
+  &-trigger {
+    height: 32px; // Explicit height to match date inputs
+    padding: 0 $space-sm;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: $dropdown-hover-bg; // Use variable from dashboard.css
+    }
+
+    .username {
+      color: $text-main;
+    }
+  }
+
+  &-dropdown {
+    position: absolute;
+    top: 100%; // Places it directly below the trigger
+    right: 0;
+    background-color: #fff;
+    border: 1px solid $border-color;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 200px;
+    z-index: 100;
+    padding: $space-sm 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  // This handles the individual links inside the dropdown
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    color: $text-main;
+    text-decoration: none;
+    font-size: 0.95rem;
+
+    &:hover {
+      background-color: $dropdown-hover-bg;
+    }
+  }
+}

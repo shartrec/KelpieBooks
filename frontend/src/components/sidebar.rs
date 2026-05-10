@@ -40,15 +40,15 @@ pub fn sidebar() -> Html {
 
     html! {
         <aside class="sidebar">
-            <div class="sidebar-header">
+            <div class="sidebar__header">
                 <h2>{ "KelpieBooks" }</h2>
             </div>
-            <nav class="sidebar-nav">
+            <nav class="sidebar__nav">
                 <ul>
                     <li><Link<Route> to={Route::Dashboard}>{ "Dashboard" }</Link<Route>></li>
                     <li><Link<Route> to={Route::Ledger}>{ "Accounts" }</Link<Route>></li>
-                    <li class="sidebar-group">
-                        <div class="sidebar-group-header" onclick={toggle_reports}>
+                    <li class="sidebar__group">
+                        <div class="sidebar__group-header" onclick={toggle_reports}>
                             <span>{ "Reports" }</span>
                             <img 
                                 src="/images/chevron-right.svg" 
@@ -57,7 +57,7 @@ pub fn sidebar() -> Html {
                             />
                         </div>
                         if *reports_open {
-                            <ul class="sidebar-sub-nav">
+                            <ul class="sidebar__sub-nav">
                                 <li><Link<Route> to={Route::TrialBalance}>{ "Trial Balance" }</Link<Route>></li>
                                 <li><Link<Route> to={Route::ProfitLoss}>{ "Profit & Loss" }</Link<Route>></li>
                                 <li><Link<Route> to={Route::BalanceSheet}>{ "Balance Sheet" }</Link<Route>></li>

@@ -1,0 +1,111 @@
+@use '../abstracts/variables' as *;
+
+.report {
+
+  // The main header
+  &-header {
+    display: flex;
+    justify-content: space-between; // Pushes Left and Right to the edges
+    width: 100%; // Usually better than max-width for responsive tables
+    max-width: 100%;
+    margin-top: 0;
+    border-collapse: collapse;
+  }
+
+  &__action_bar {
+    display: flex;
+    align-items: center; /* Vertically centers children */
+    gap: 15px;
+    height: 100%; /* Fill the header height for better centering */
+  }
+
+  &__options {
+    background-color: var(--main-bg-color);
+    display: flex;
+    align-items: center; /* Vertically centers children */
+    border-bottom: 1px solid var(--header-border-color);
+  }
+
+  /* Force the date range group to align its internal labels and inputs */
+  &__date-range-selector {
+    display: flex;
+    align-items: center; /* This is the key for "From: [date]" alignment */
+    gap: 8px;
+    line-height: 1; /* Prevents text descenders from pushing the label down */
+
+    /* Standardize the input height to match the user menu trigger */
+    input[type="date"] {
+      padding: 6px 8px; /* Slightly more padding for a modern look */
+      border: 1px solid var(--header-border-color);
+      border-radius: 4px;
+      height: 32px; /* Explicit height ensures it matches buttons exactly */
+      box-sizing: border-box; /* Includes padding/border in the height calculation */
+    }
+
+    /* Ensure labels are vertically centered relative to the inputs */
+    label {
+      font-size: 0.9rem;
+      color: var(--text-color); /* Fixed from variable 'text-muted' which wasn't in root */
+      display: flex;
+      align-items: center;
+    }
+  }
+
+
+
+
+  // The Container
+  &-table {
+    width: 100%; // Usually better than max-width for responsive tables
+    max-width: 800px;
+    margin-top: 1rem;
+    border-collapse: collapse;
+    td {
+      padding: 0 0.5rem !important;
+    }
+    tr {
+      background-color: $table-row-background;
+      padding: 1.5rem;
+    }
+    tr:nth-child(even) {
+      background-color: $alt-row-color;
+    }
+  }
+  // The Sub-header (e.g., "Current Assets")
+  &__section-header {
+    td {
+      border-top: 2px solid $brand-dark; // Use your variable
+      font-weight: bold;
+      padding-top: 0.5rem !important;
+      padding-bottom: 0.25rem !important;
+      color: $brand-dark;
+    }
+  }
+
+  // The Total Row (e.g., "Total Cash")
+  &__total-row {
+    td {
+      border-top: 2px solid $brand-dark;
+      padding-top: 0.5rem !important;
+      padding-bottom: 0.5rem !important;
+      font-weight: bold;
+    }
+  }
+
+  // Metadata (e.g., "For period ending...")
+  &__period {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  // Define how much each level should indent
+  $indent-step: 1.5rem;
+
+  // Generate 6 levels of indentation automatically
+  @for $i from 1 through 6 {
+    &__indent__level_#{$i} td:first-child {
+      padding-left: #{$i * $indent-step} !important;
+    }
+  }
+}

@@ -216,8 +216,8 @@ pub fn profile_page() -> Html {
     html! {
         <Layout>
             <h1>{ "Edit Profile" }</h1>
-            <div class="profile-forms-container">
-                <form onsubmit={on_submit_details} class="auth-form">
+            <div class="profile__forms-container">
+                <form onsubmit={on_submit_details} class="profile__form">
                     <h2>{ "Your Details" }</h2>
                     <label>{"Email:"}</label>
                     <input type="email" value={user_update.email.clone()} oninput={on_email_input} required=true />
@@ -228,7 +228,7 @@ pub fn profile_page() -> Html {
                     <label>{"Display Name:"}</label>
                     <input type="text" value={user_update.display_name.clone().unwrap_or_default()} oninput={on_display_name_input} />
 
-                    <div class="form-actions">
+                    <div class="Method…-actions">
                         <button type="submit">{"Save Details"}</button>
                     </div>
                     if *details_success {
@@ -239,7 +239,7 @@ pub fn profile_page() -> Html {
                     }
                 </form>
 
-                <form onsubmit={on_submit_password} class="auth-form">
+                <form onsubmit={on_submit_password} class="profile__form">
                     <h2>{ "Change Password" }</h2>
                     <label>{"Old Password:"}</label>
                     <input type="password" oninput={on_old_password_input} required=true />
@@ -255,7 +255,7 @@ pub fn profile_page() -> Html {
                         class={if !confirm_password.is_empty() { if passwords_match { "input-success" } else { "input-error" } } else { "" }}
                     />
 
-                    <div class="form-actions">
+                    <div class="profile__form-actions">
                         <button type="submit" disabled={!can_submit_password}>{"Change Password"}</button>
                     </div>
                     if *password_success {

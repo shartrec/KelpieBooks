@@ -39,6 +39,7 @@ use gloo_net::http::Request;
 use shared_core::dtos::user_detail::UserDetail;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use frontend::pages::style_guide::StyleGuide;
 
 /// The component that contains the router and switches between pages.
 #[function_component(AppRouter)]
@@ -95,6 +96,7 @@ fn switch(routes: Route) -> Html {
         Route::AccountLedger { id } => html! { <AccountLedgerPage account_id={id} /> },
         Route::NewTransaction => html! { <NewTransactionPage /> },
         Route::Home => html! { <LoginPage /> },
+        Route::StyleGuide => html! {<StyleGuide />}
     }
 }
 

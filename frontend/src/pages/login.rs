@@ -87,7 +87,7 @@ pub fn login_page() -> Html {
     };
 
     html! {
-        <div class="page-container">
+        <div class="login__page-contianer">
             <h1>{"Please login"}</h1>
             if !*is_login_success {
                 <LoginForm
@@ -145,16 +145,16 @@ pub fn login_form(props: &LoginFormProps) -> Html {
     };
 
     html! {
-        <form onsubmit={on_submit} class="auth-form">
+        <form onsubmit={on_submit} class="login__form">
             <label>{"User Email: "}</label>
             <input type="text" value={(*user_email).clone()} oninput={on_user_email_input} required=true autocomplete="username" />
             <label>{"Password: "}</label>
             <input type="password" value={(*password).clone()} oninput={on_password_input} required=true autocomplete="current-password" />
-            <div class="form-actions">
+            <div class="login__form__form-actions">
                 <button type="submit">{"Login"}</button>
             </div>
             if let Some(err) = error {
-                <div class="error">{err}</div>
+                <div class="login__form__error">{err}</div>
             }
         </form>
     }

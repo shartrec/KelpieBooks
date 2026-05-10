@@ -125,7 +125,7 @@ pub fn add_account_modal(props: &AddAccountModalProps) -> Html {
         <div class="modal-overlay" onclick={on_overlay_click}>
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
                 <h2>{ "Add New Account" }</h2>
-                <form onsubmit={on_form_submit} class="modal-form">
+                <form onsubmit={on_form_submit} class="modal__form">
                     <label>{"Code:"}</label>
                     <input type="text" oninput={on_code_input} required=true />
 
@@ -152,7 +152,7 @@ pub fn add_account_modal(props: &AddAccountModalProps) -> Html {
                     <label>{"Is Group:"}</label>
                     <input type="checkbox" onchange={on_is_group_change} />
 
-                    <div class="form-actions">
+                    <div class="modal__form__actions">
                         <button type="button" onclick={on_cancel_click} class="button-secondary">{ "Cancel" }</button>
                         <button type="submit">{ "Add Account" }</button>
                     </div>

@@ -1,0 +1,86 @@
+/*!
+ * Copyright (c) 2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.journal-entry {
+  &__header {
+    @include journal-grid-layout;
+    font-weight: 600;
+    border-bottom: 2px solid $border-color;
+    padding-bottom: $space-sm;
+    color: #576574;
+  }
+
+  &__row {
+    @include journal-grid-layout;
+    margin-bottom: $space-sm;
+
+    input, select {
+      width: 100%;
+      padding: 6px 8px;
+      margin-bottom: 0; // Overriding your base input margin
+    }
+  }
+}
+
+.totals-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  padding: $space-md;
+  background-color: $bg-main;
+  font-weight: bold;
+
+  .is-balanced { color: $color-success; }
+  .is-unbalanced { color: $color-error; }
+}
+
+.transaction-detail {
+  &__row {
+    td {
+      padding: 0;
+      border-top: none;
+    }
+  }
+  &__content {
+    padding: 1rem 1.5rem;
+    background-color: #f9fafb;
+
+    .journal-entry {
+      &__header {
+        grid-template-columns: 25% 1fr 120px 120px;
+      }
+
+      &__line {
+        display: grid;
+        grid-template-columns: 25% 1fr 120px 120px;
+        gap: 0.5rem 1rem;
+        padding: 4px 0;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}

@@ -1,0 +1,99 @@
+/*!
+ * Copyright (c) 2026-2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+
+@use '../abstracts/variables' as *;
+
+.app-shell {
+  display: flex;         // This is the magic line! It puts children side-by-side
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;      // Prevents the whole app from scrolling (we want internal scroll)
+}
+
+.sidebar {
+  width: 250px;          // Your fixed sidebar width
+  flex-shrink: 0;        // Prevents the sidebar from squishing on small screens
+  height: 100%;
+  overflow-y: auto;      // Sidebar can scroll if nav is long
+}
+
+.header {
+  height: 60px;
+  background-color: $brand-primary;
+  border-left: 1px solid $border-color;
+  border-bottom: 1px solid $border-color;
+  padding: 0 $space-lg;
+
+  &__content {
+    margin-top: 1.0rem; // Overriding the default typography margin
+    display: flex;
+    justify-content: space-between; // Pushes Left and Right to the edges
+    align-items: center;            // Centers items vertically
+    height: 100%;
+    width: 100%;
+  }
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: $space-md;
+
+    h1, h2 {
+      font-size: 1.5rem;
+    }
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: $space-md;
+  }
+}
+
+// Optional: The Breadcrumb separator if you use them later
+.breadcrumb-separator {
+  color: $border-color;
+  font-weight: 300;
+}
+
+.main-content {
+  flex: 1;               // Tells this section to take up ALL remaining horizontal space
+  display: flex;
+  flex-direction: column; // Top-to-bottom: Header then Page Body
+  height: 100%;
+  overflow: hidden;
+}
+
+.page-body {
+  flex: 1;               // Take up remaining vertical space below header
+  overflow-y: auto;      // This is where the actual scrolling happens
+  padding: $space-lg;
+  background-color: $bg-main;
+}
+
+// Utility for centering things
+.container-fluid {
+  width: 100%;
+  padding: $space-md;
+}
