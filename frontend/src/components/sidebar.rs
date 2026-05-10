@@ -41,6 +41,7 @@ pub fn sidebar() -> Html {
     html! {
         <aside class="sidebar">
             <div class="sidebar__header">
+                <img src="/images/kelpiedog_120x120_transparent.png" alt="Logo" class="sidebar__logo" />
                 <h2>{ "KelpieBooks" }</h2>
             </div>
             <nav class="sidebar__nav">

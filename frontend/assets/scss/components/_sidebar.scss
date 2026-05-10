@@ -33,14 +33,22 @@
   height: 100vh;
 
   &__header {
-    padding: $space-lg;
+    padding: $space-sm;
     background-color: $brand-primary;
     text-align: center;
+    align-content: start;
+    display: flex;
+    gap: 0.5rem;
 
     h2 {
       margin: 0;
       font-size: 1.5rem;
     }
+  }
+
+  &__logo {
+    width: 32px;
+    height: auto;
   }
 
   &__nav {
