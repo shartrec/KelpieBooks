@@ -197,7 +197,7 @@ pub fn new_transaction_page() -> Html {
     let page_header = if let Some(acc) = &*from_account {
         html! {
             <div class="page-subheader">
-                <h3>{ "New Transaction for Account: " }<Link<Route> to={Route::AccountLedger { id: acc.id }}>{ &acc.name }</Link<Route>></h3>
+                <h3>{ "For: " }<Link<Route> to={Route::AccountLedger { id: acc.id }}>{ &acc.name }</Link<Route>></h3>
             </div>
         }
     } else {
@@ -220,16 +220,16 @@ pub fn new_transaction_page() -> Html {
         <Layout>
             <h1>{ "New Journal Transaction" }</h1>
             { page_header }
-            <form onsubmit={on_submit} class="transaction-form">
-                <div class="transaction-header">
+            <form onsubmit={on_submit} class="transaction__form">
+                <div class="transaction__form__header">
                     <label>
                         { "Date:" }
-                        <input type="date" value={request.date.to_string()} onchange={on_date_change} />
                     </label>
+                        <input type="date" value={request.date.to_string()} onchange={on_date_change} />
                 </div>
 
-                <div class="journal-entries">
-                    <div class="journal-entry-header">
+                <div class="journal__entries">
+                    <div class="journal__entry-header">
                         <span>{ "Account" }</span>
                         <span>{ "Description" }</span>
                         <span>{ "Debit" }</span>
@@ -251,18 +251,18 @@ pub fn new_transaction_page() -> Html {
                         }
                     })}
                 </div>
-                <div class="form-actions">
+                <div class="modal__form__actions">
                     <button type="button" onclick={add_line} class="button-add-row">{ "Add Line" }</button>
                 </div>
-                <div class="totals">
+                <div class="transaction__form__totals">
                     <div>{ format!("Debits: {:.2}", total_debits as f64 / 100.0) }</div>
                     <div>{ format!("Credits: {:.2}", total_credits as f64 / 100.0) }</div>
-                    <div class={if is_balanced { "balanced" } else { "unbalanced" }}>
+                    <div class={if is_balanced { "transaction__form__balanced" } else { "transaction__form__unbalanced" }}>
                         { if is_balanced { "Balanced" } else { "Unbalanced" } }
                     </div>
                 </div>
 
-                <div class="form-actions">
+                <div class="modal__form__actions">
                     <button type="button" onclick={on_cancel} class="button-secondary">{ "Cancel" }</button>
                     <button type="submit" disabled={!is_balanced}>{ "Save Transaction" }</button>
                 </div>

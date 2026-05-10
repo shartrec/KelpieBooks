@@ -60,7 +60,7 @@ pub fn delete_confirmation_modal(props: &DeleteConfirmationModalProps) -> Html {
                 <p class="warning-text">
                     { "This action cannot be undone. You can only delete accounts with no transactions." }
                 </p>
-                <div class="form-actions">
+                <div class="modal__form__actions">
                     <button type="button" onclick={on_cancel} class="button-secondary">{ "Cancel" }</button>
                     <button type="button" onclick={on_confirm_delete} class="button-danger">{ "Confirm Delete" }</button>
                 </div>

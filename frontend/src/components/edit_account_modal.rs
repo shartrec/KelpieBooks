@@ -108,7 +108,7 @@ pub fn edit_account_modal(props: &EditAccountModalProps) -> Html {
         <div class="modal-overlay" onclick={on_cancel.clone()}>
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
                 <h2>{ "Edit Account" }</h2>
-                <form onsubmit={on_form_submit} class="modal-form">
+                <form onsubmit={on_form_submit} class="modal__form">
                     <label>{"Code:"}</label>
                     <input type="text" value={request.code.clone()} oninput={on_code_input} required=true />
 
@@ -127,7 +127,7 @@ pub fn edit_account_modal(props: &EditAccountModalProps) -> Html {
                     <label>{"Is Group:"}</label>
                     <input type="checkbox" checked={request.is_group} onchange={on_is_group_change} />
 
-                    <div class="form-actions">
+                    <div class="modal__form__actions">
                         <button type="button" onclick={on_cancel} class="button-secondary">{ "Cancel" }</button>
                         <button type="submit">{ "Save Changes" }</button>
                     </div>

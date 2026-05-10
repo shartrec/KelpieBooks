@@ -123,7 +123,7 @@ button {
     }
 
     input {
-      text-align: right;
+      text-align: left;
     }
 
     input[type="checkbox"] {
@@ -139,3 +139,117 @@ button {
     }
   }
 }
+
+.actions-cell {
+  display: flex;
+  gap: 0.5rem;
+  text-align: center;
+  white-space: nowrap; /* Prevents buttons from wrapping */
+}
+
+/* Buttons */
+button {
+  background-color: #f0f0f7;
+  color: $brand-dark;
+  border: 1px solid #d1d5db;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  margin: 5px;
+  &:hover {
+    background-color: #e0e0e7;
+  }
+  &:disabled {
+    background-color: #e0e0e0;
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+  &-secondary {
+    background-color: #bdc3c7;
+    color: #2c3e50;
+    &:hover {
+      background-color: #95a5a6;
+    }
+  }
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  input[type="radio"] {
+    display: none;
+  }
+
+  label {
+    padding: 0.5rem 1rem;
+    background: #e0e0e0;
+    border: 3px solid #aaa;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: inset 0 -2px 2px rgba(0,0,0,0.2);
+    user-select: none;
+    transition: background 0.2s, box-shadow 0.2s;
+    width: 12rem;
+    text-align: center;
+    &:hover {
+      background: #d0d0d0;
+    }
+  }
+
+  input[type="radio"]:checked + label {
+    background: #e0ffe0;
+    border: 3px solid #0a0;
+    font-weight: bold;
+  }
+
+}
+
+
+.icon {
+  width: 24px;
+  height: 24px;
+  &-button {
+    background: none;
+    border: none;
+    padding: 2px 4px; /* Reduced padding for compactness */
+    margin: 0 2px; /* Add a little space between buttons */
+    cursor: pointer;
+    border-radius: 4px;
+    color: #576574;
+    display: inline-flex; /* Helps with alignment */
+    vertical-align: middle;
+
+    :hover {
+      background-color: #e0e0e0;
+      color: #2c3e50;
+    }
+  }
+}
+
+
+.key-button {
+  color: var(--custom-color);
+  background-color: #f0f0f0;
+  border: none;
+  padding: 0;
+  :hover {
+    background-color: #e0e0e0;
+  }
+}
+
+.button-row {
+  display: flex;
+  gap: 16px;  /* space between buttons */
+}
+
+.collapse-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 8px 0 0;
+  margin: 0;
+  vertical-align: middle;
+}
+

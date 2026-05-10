@@ -113,7 +113,7 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
     };
 
     html! {
-        <div class="journal-entry-row">
+        <div class="journal__entry-row">
             <select ref={select_ref} onchange={on_account_change}>
                 <option value="" disabled=true selected={props.entry.account_id.is_nil()}>{ "Select Account" }</option>
                 { for props.accounts.iter().map(|(id, name)| html! {
