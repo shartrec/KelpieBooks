@@ -109,6 +109,37 @@ input, select, textarea {
     }
   }
 }
+/* Modal Styles */
+.data-form {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 1rem;
+  align-items: center;
+
+  label {
+    text-align: right;
+  }
+
+  input {
+    text-align: left;
+  }
+
+  input[type="checkbox"] {
+    justify-self: start;
+    text-align: right;
+  }
+
+  select {
+    width: fit-content;
+  }
+
+  &__actions {
+    grid-column: 2;
+    justify-self: end;
+    display: flex;
+    gap: 1rem;
+  }
+}
 
 .actions-cell {
   display: flex;

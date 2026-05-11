@@ -30,6 +30,8 @@ use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use std::collections::{HashMap, VecDeque};
 use uuid::Uuid;
 use chrono::NaiveDate;
+use sqlx::Acquire;
+use shared_core::models::SystemTag;
 
 pub async fn get_accounts_with_balances(
     pool: &mut PgConnection,
@@ -137,4 +139,25 @@ pub async fn get_journal_entries_with_running_balance(
     }
 
     Ok(result)
+}
+
+pub async fn get_system_accounts(
+        pool: &mut PgConnection,
+        organization_id: Uuid,
+    ) -> Result<HashMap<SystemTag, Uuid>, ApiError> {
+    Ok(db::account::get_system_accounts(pool, organization_id).await?)
+}
+
+pub async fn update_system_accounts(
+        pool: &mut PgConnection,
+        organization_id: Uuid,
+        system_accounts: HashMap<SystemTag, Uuid>,
+    ) -> Result<HashMap<SystemTag, Uuid>, ApiError> {
+
+    let mut tx = pool.begin().await?;
+    db::account::update_system_accounts(&mut tx, organization_id, system_accounts).await?;
+    let resp = (db::account::get_system_accounts(&mut tx, organization_id).await?);
+    tx.commit().await?;
+
+    Ok(resp)
 }

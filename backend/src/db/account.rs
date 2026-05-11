@@ -26,6 +26,7 @@ use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use shared_core::models::Account;
 use shared_core::models::{AccountCategory, SystemTag};
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
+use std::collections::HashMap;
 use std::str::FromStr;
 use uuid::Uuid;
 use chrono::NaiveDate;
@@ -192,7 +193,7 @@ pub(crate) async fn get_balance_for_category(
         FROM journal_entries je
         JOIN transactions t ON je.transaction_id = t.id
         JOIN accounts a ON je.account_id = a.id
-        WHERE t.organization_id = $1 AND a.category = $2 AND t.date <= $3
+        WHERE t.organization_id = $1 AND a.category::TEXT = $2 AND t.date <= $3
         "#,
     )
     .bind(organization_id)
@@ -258,4 +259,67 @@ pub(crate) async fn get_by_system_tag(
     .fetch_optional(pool)
     .await
     .map(|row| row.map(|r| from_row_to_account(&r)))
+}
+
+pub(crate) async fn get_system_accounts(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+) -> Result<HashMap<SystemTag, Uuid>, sqlx::Error> {
+    let rows = sqlx::query(
+        r#"
+        SELECT system_tag::TEXT, id
+        FROM accounts
+        WHERE organization_id = $1 AND system_tag IS NOT NULL
+        "#,
+    )
+    .bind(organization_id)
+    .fetch_all(pool)
+    .await?;
+
+    let mut map = HashMap::new();
+    for row in rows {
+        let tag_str: String = row.get(0);
+        let id: Uuid = row.get(1);
+        if let Ok(tag) = SystemTag::from_str(&tag_str) {
+            map.insert(tag, id);
+        }
+    }
+    Ok(map)
+}
+
+pub(crate) async fn update_system_accounts(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    system_accounts: HashMap<SystemTag, Uuid>,
+) -> Result<(), sqlx::Error> {
+
+    // Clear all existing system tags for the organization
+    sqlx::query(
+        r#"
+        UPDATE accounts
+        SET system_tag = NULL
+        WHERE organization_id = $1 AND system_tag IS NOT NULL
+        "#,
+    )
+    .bind(organization_id)
+    .execute(&mut *pool)
+    .await?;
+
+    // Set the new system tags
+    for (tag, account_id) in system_accounts {
+        sqlx::query(
+            r#"
+            UPDATE accounts
+            SET system_tag = $1::system_tag
+            WHERE id = $2 AND organization_id = $3
+            "#,
+        )
+        .bind(tag.to_string())
+        .bind(account_id)
+        .bind(organization_id)
+        .execute(&mut *pool)
+        .await?;
+    }
+
+    Ok(())
 }

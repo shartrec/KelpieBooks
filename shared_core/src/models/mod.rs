@@ -26,10 +26,9 @@ pub mod user_with_org;
 
 pub use user_with_org::UserWithOrg;
 
-
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumString};
+use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -62,7 +61,7 @@ pub enum AccountCategory {
     Expense,
 }
 
-#[derive(Debug, Display, EnumString, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy, Hash)]
 #[strum(serialize_all = "PascalCase")]
 pub enum SystemTag {
     CashAtBank,
@@ -75,7 +74,11 @@ pub enum SystemTag {
     CostOfGoodsSold,
 }
 
-impl SystemTag {}
+impl SystemTag {
+    pub fn iterator() -> impl Iterator<Item = Self> {
+        Self::iter()
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Account {

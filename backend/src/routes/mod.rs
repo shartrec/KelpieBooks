@@ -29,6 +29,7 @@ pub(crate) mod security;
 pub(crate) mod transactions;
 pub(crate) mod users;
 pub(crate) mod period_end;
+pub(crate) mod configurations;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Role {

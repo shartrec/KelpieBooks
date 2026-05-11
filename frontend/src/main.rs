@@ -26,6 +26,8 @@ use frontend::auth::{UserContext, UserContextHandle};
 use frontend::contexts::report_context::ReportContextProvider;
 use frontend::pages::account_ledger::AccountLedgerPage;
 use frontend::pages::balance_sheet::BalanceSheetPage;
+use frontend::pages::close_year::CloseYearPage;
+use frontend::pages::configuration::ConfigurationPage;
 use frontend::pages::dashboard::DashboardPage;
 use frontend::pages::ledger::LedgerPage;
 use frontend::pages::login::LoginPage;
@@ -95,6 +97,8 @@ fn switch(routes: Route) -> Html {
         Route::BalanceSheet => html! { <BalanceSheetPage /> },
         Route::AccountLedger { id } => html! { <AccountLedgerPage account_id={id} /> },
         Route::NewTransaction => html! { <NewTransactionPage /> },
+        Route::CloseYear => html! { <CloseYearPage /> },
+        Route::Configuration => html! { <ConfigurationPage /> },
         Route::Home => html! { <LoginPage /> },
         Route::StyleGuide => html! {<StyleGuide />}
     }

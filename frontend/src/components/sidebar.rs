@@ -30,11 +30,19 @@ use yew_router::prelude::*;
 #[function_component(Sidebar)]
 pub fn sidebar() -> Html {
     let reports_open = use_state(|| false);
+    let tasks_open = use_state(|| false);
 
     let toggle_reports = {
         let reports_open = reports_open.clone();
         Callback::from(move |_| {
             reports_open.set(!*reports_open);
+        })
+    };
+
+    let toggle_tasks = {
+        let tasks_open = tasks_open.clone();
+        Callback::from(move |_| {
+            tasks_open.set(!*tasks_open);
         })
     };
 
@@ -51,9 +59,9 @@ pub fn sidebar() -> Html {
                     <li class="sidebar__group">
                         <div class="sidebar__group-header" onclick={toggle_reports}>
                             <span>{ "Reports" }</span>
-                            <img 
-                                src="/images/chevron-right.svg" 
-                                alt="Toggle" 
+                            <img
+                                src="/images/chevron-right.svg"
+                                alt="Toggle"
                                 class={if *reports_open { "rotated" } else { "" }}
                             />
                         </div>
@@ -62,6 +70,22 @@ pub fn sidebar() -> Html {
                                 <li><Link<Route> to={Route::TrialBalance}>{ "Trial Balance" }</Link<Route>></li>
                                 <li><Link<Route> to={Route::ProfitLoss}>{ "Profit & Loss" }</Link<Route>></li>
                                 <li><Link<Route> to={Route::BalanceSheet}>{ "Balance Sheet" }</Link<Route>></li>
+                            </ul>
+                        }
+                    </li>
+                    <li class="sidebar__group">
+                        <div class="sidebar__group-header" onclick={toggle_tasks}>
+                            <span>{ "Tasks" }</span>
+                            <img
+                                src="/images/chevron-right.svg"
+                                alt="Toggle"
+                                class={if *tasks_open { "rotated" } else { "" }}
+                            />
+                        </div>
+                        if *tasks_open {
+                            <ul class="sidebar__sub-nav">
+                                <li><Link<Route> to={Route::CloseYear}>{ "Close Year" }</Link<Route>></li>
+                                <li><Link<Route> to={Route::Configuration}>{ "Configuration" }</Link<Route>></li>
                             </ul>
                         }
                     </li>

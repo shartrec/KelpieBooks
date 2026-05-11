@@ -53,6 +53,10 @@ pub enum Route {
     AccountLedger { id: Uuid },
     #[at("/transactions/new")]
     NewTransaction,
+    #[at("/tasks/close-year")]
+    CloseYear,
+    #[at("/tasks/configuration")]
+    Configuration,
     #[at("/")]
     Home,
 

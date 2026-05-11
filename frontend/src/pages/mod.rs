@@ -33,3 +33,5 @@ pub mod profile;
 pub mod register;
 pub mod trial_balance;
 pub mod style_guide;
+pub mod close_year;
+pub mod configuration;
