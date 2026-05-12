@@ -63,7 +63,7 @@ pub async fn close_financial_year(
     db::journal_entry::insert(pool, closing_tx, retained_earnings_account.id, debit, credit, Some("Closing Net Income".to_string())).await?;
 
     // 5. Update Organization Record to lock the period
-    db::organization::set_locked_until(pool, organization_id, year_end).await?;
+    db::organization::set_lock_date(pool, organization_id, Some(year_end)).await?;
 
     Ok(())
 }

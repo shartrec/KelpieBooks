@@ -4,3 +4,4 @@ pub mod journal_entry_with_balance;
 pub mod transaction_detail;
 pub mod user_detail;
 pub mod organization;
+pub mod lock_date_request;

@@ -14,10 +14,10 @@ pub(crate) async fn get(
         .map(|row| row.map(|r| from_row_to_org(&r)))
 }
 
-pub(crate) async fn set_locked_until(
+pub(crate) async fn set_lock_date(
     pool: &mut PgConnection,
     id: Uuid,
-    date: NaiveDate,
+    date: Option<NaiveDate>,
 ) -> Result<(), sqlx::Error> {
     sqlx::query("UPDATE organizations SET locked_until = $1 WHERE id = $2")
         .bind(date)

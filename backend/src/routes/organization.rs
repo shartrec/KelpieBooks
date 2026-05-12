@@ -25,14 +25,17 @@
 use crate::db;
 use crate::routes::security::AuthenticatedUser;
 use crate::DbKelpie;
-use rocket::get;
+use rocket::{get, put};
 use rocket::serde::json::Json;
 use rocket::Route;
 use rocket_db_pools::Connection;
+use shared_core::dtos::lock_date_request::LockDateRequest;
 use shared_core::dtos::organization::OrganizationDto;
+use uuid::Uuid;
+use crate::util::types::PathUuid;
 
 pub fn routes() -> Vec<Route> {
-    rocket::routes![get_organization]
+    rocket::routes![get_organization, set_lock_date]
 }
 
 #[get("/api/organization")]
@@ -50,5 +53,22 @@ async fn get_organization(
         })),
         Ok(None) => Err(rocket::http::Status::NotFound),
         Err(_) => Err(rocket::http::Status::InternalServerError),
+    }
+}
+
+#[put("/api/organizations/<id>/lock", data = "<req>")]
+async fn set_lock_date(
+    mut db: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    id: PathUuid,
+    req: Json<LockDateRequest>,
+) -> rocket::http::Status {
+    if *id != user.organization_id {
+        return rocket::http::Status::Forbidden;
+    }
+
+    match db::organization::set_lock_date(&mut db, *id, req.locked_until).await {
+        Ok(_) => rocket::http::Status::Ok,
+        Err(_) => rocket::http::Status::InternalServerError,
     }
 }
