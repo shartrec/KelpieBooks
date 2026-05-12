@@ -22,31 +22,15 @@
  *
  */
 
-use shared_core::dtos::user_detail::UserDetail;
-use yew::prelude::*;
+use chrono::{DateTime, NaiveDate, Utc};
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
-/// The context that will hold the user's state.
-#[derive(Debug, Clone, PartialEq)]
-pub struct UserContext {
-    pub user: Option<UserDetail>,
-    pub organisation_id: Option<uuid::Uuid>,
+#[derive(Debug, Serialize, Deserialize)]
+pub struct OrganizationDto {
+    pub id: Uuid,
+    pub name: String,
+    pub strict_audit_mode: bool,
+    pub created_at: DateTime<Utc>,
+    pub locked_until: Option<NaiveDate>,
 }
-
-impl Reducible for UserContext {
-    type Action = Option<UserDetail>;
-
-    fn reduce(self: std::rc::Rc<Self>, action: Self::Action) -> std::rc::Rc<Self> {
-        let org_id = action.clone().map(|u| u.organisation_id).clone();
-        UserContext {
-            user: action,
-            organisation_id: org_id
-        }.into()
-    }
-}
-impl Default for UserContext {
-    fn default() -> Self {
-        Self { user: None, organisation_id: None}
-    }
-}
-
-pub type UserContextHandle = UseReducerHandle<UserContext>;

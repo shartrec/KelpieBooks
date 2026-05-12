@@ -26,6 +26,5 @@ pub(crate) mod account;
 pub(crate) mod chart_of_accounts;
 pub(crate) mod journal_entry;
 pub(crate) mod organization;
-pub(crate) mod security;
 pub(crate) mod transaction;
 pub(crate) mod user;

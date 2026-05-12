@@ -32,16 +32,20 @@ use frontend::pages::dashboard::DashboardPage;
 use frontend::pages::ledger::LedgerPage;
 use frontend::pages::login::LoginPage;
 use frontend::pages::new_transaction::NewTransactionPage;
+use frontend::pages::period_settings::PeriodSettings;
 use frontend::pages::profit_loss::ProfitLossPage;
 use frontend::pages::profile::ProfilePage;
 use frontend::pages::register::RegisterPage;
 use frontend::pages::trial_balance::TrialBalancePage;
 use frontend::Route;
 use gloo_net::http::Request;
+use log::info;
 use shared_core::dtos::user_detail::UserDetail;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use frontend::org::{OrgAction, OrgContextHandle, OrgState};
 use frontend::pages::style_guide::StyleGuide;
+use shared_core::models::Organization;
 
 /// The component that contains the router and switches between pages.
 #[function_component(AppRouter)]
@@ -57,6 +61,7 @@ fn app_router() -> Html {
 #[function_component(App)]
 fn app() -> Html {
     let user_ctx = use_reducer(UserContext::default);
+    let org_ctx = use_reducer(OrgState::default);
 
     {
         let user_ctx = user_ctx.clone();
@@ -66,6 +71,8 @@ fn app() -> Html {
                     if resp.ok() {
                         if let Ok(user) = resp.json::<UserDetail>().await {
                             user_ctx.dispatch(Some(user));
+                        } else {
+                            return;
                         }
                     }
                 }
@@ -74,11 +81,37 @@ fn app() -> Html {
         });
     }
 
+    {
+        let org_ctx = org_ctx.clone();
+        // let user_org_id = user_ctx.organisation_id.clone();
+        use_effect_with(user_ctx.clone(), move |_| {
+            wasm_bindgen_futures::spawn_local(async move {
+                if let Ok(resp) = Request::get("/api/organization").send().await {
+                    if resp.ok() {
+                        if let Ok(org) = resp.json::<Organization>().await {
+                            info!("Org: {:?}", org);
+                            org_ctx.dispatch(OrgAction::SetOrg(OrgState {
+                                id: org.id,
+                                name: org.name,
+                                strict_audit_mode: org.strict_audit_mode,
+                                locked_until: org.locked_until,
+                            }));
+                        } else {
+                            return;
+                        }
+                    }
+                }
+            });
+        });
+    }
+
     html! {
         <ContextProvider<UserContextHandle> context={user_ctx}>
-            <ReportContextProvider>
-                <AppRouter />
-            </ReportContextProvider>
+            <ContextProvider<OrgContextHandle> context={org_ctx}>
+                <ReportContextProvider>
+                    <AppRouter />
+                </ReportContextProvider>
+            </ContextProvider<OrgContextHandle>>
         </ContextProvider<UserContextHandle>>
     }
 }
@@ -98,6 +131,7 @@ fn switch(routes: Route) -> Html {
         Route::AccountLedger { id } => html! { <AccountLedgerPage account_id={id} /> },
         Route::NewTransaction => html! { <NewTransactionPage /> },
         Route::CloseYear => html! { <CloseYearPage /> },
+        Route::PeriodSettings => html! { <PeriodSettings /> },
         Route::Configuration => html! { <ConfigurationPage /> },
         Route::Home => html! { <LoginPage /> },
         Route::StyleGuide => html! {<StyleGuide />}

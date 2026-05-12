@@ -28,6 +28,7 @@ pub mod auth;
 pub mod contexts;
 pub mod components;
 pub mod pages;
+pub mod org;
 
 #[derive(Clone, Routable, PartialEq)]
 pub enum Route {
@@ -55,6 +56,8 @@ pub enum Route {
     NewTransaction,
     #[at("/tasks/close-year")]
     CloseYear,
+    #[at("/tasks/period-settings")]
+    PeriodSettings,
     #[at("/tasks/configuration")]
     Configuration,
     #[at("/")]

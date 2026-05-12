@@ -1,4 +1,3 @@
-use chrono::{Local, NaiveDate};
 use crate::db;
 use crate::routes::security::AuthenticatedUser;
 use crate::util::types::PathUuid;
@@ -100,6 +99,15 @@ async fn create_transaction(
         return Err(ApiError::Invalid(
             "Transaction must be balanced and not zero.".to_string(),
         ));
+    }
+
+    // Check the organization locked date
+    let organization = db::organization::get(&mut pool , user.organization_id).await?;
+
+    if let Some(date) = organization.unwrap().locked_until {
+        if req.date <= date {
+            return Err(ApiError::Forbidden("Period is locked for editing".to_string()));
+        }
     }
 
     let main_description = req.entries.get(0).and_then(|e| e.description.clone());

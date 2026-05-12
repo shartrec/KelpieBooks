@@ -85,6 +85,7 @@ pub fn sidebar() -> Html {
                         if *tasks_open {
                             <ul class="sidebar__sub-nav">
                                 <li><Link<Route> to={Route::CloseYear}>{ "Close Year" }</Link<Route>></li>
+                                <li><Link<Route> to={Route::PeriodSettings}>{ "Period Settings" }</Link<Route>></li>
                                 <li><Link<Route> to={Route::Configuration}>{ "Configuration" }</Link<Route>></li>
                             </ul>
                         }

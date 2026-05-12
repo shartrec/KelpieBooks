@@ -27,10 +27,12 @@ use crate::Route;
 use gloo_net::http::Request;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use crate::org::OrgContextHandle;
 
 #[function_component(Header)]
 pub fn header() -> Html {
     let user_ctx = use_context::<UserContextHandle>();
+    let org_state = use_context::<OrgContextHandle>();
     let navigator = use_navigator().unwrap();
     let dropdown_open = use_state(|| false);
 
@@ -59,12 +61,11 @@ pub fn header() -> Html {
         })
     };
 
-    let mut organisation_name = "".to_string();
-    if let Some(handle) = &user_ctx {
-        if let Some(user) = &handle.user {
-            organisation_name = user.organisation_name.clone();
-        }
-    }
+    let organisation_name = if let Some(org_state) = &org_state {
+        org_state.name.clone()
+    } else {
+        "".to_string()
+    };
 
     let user_display = if let Some(handle) = user_ctx {
         if let Some(user) = &handle.user {

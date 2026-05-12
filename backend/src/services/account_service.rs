@@ -156,7 +156,7 @@ pub async fn update_system_accounts(
 
     let mut tx = pool.begin().await?;
     db::account::update_system_accounts(&mut tx, organization_id, system_accounts).await?;
-    let resp = (db::account::get_system_accounts(&mut tx, organization_id).await?);
+    let resp = db::account::get_system_accounts(&mut tx, organization_id).await?;
     tx.commit().await?;
 
     Ok(resp)

@@ -43,6 +43,7 @@ pub(crate) enum ApiError {
     Invalid(String),
     NotFound(String),
     Internal(String),
+    Forbidden(String),
 }
 
 impl From<sqlx::Error> for ApiError {
@@ -70,6 +71,7 @@ impl<'r> Responder<'r, 'static> for ApiError {
         let (status, msg) = match self {
             ApiError::NotFound(msg) => (Status::NotFound, msg),
             ApiError::Error(msg) => (Status::InternalServerError, msg),
+            ApiError::Forbidden(msg) => (Status::Forbidden, msg),
             ApiError::Invalid(msg) => (Status::BadRequest, msg),
             ApiError::Internal(msg) => (Status::InternalServerError, msg),
             ApiError::Conflict(e) => (Status::Conflict, e.to_string()),

@@ -30,11 +30,12 @@ use gloo_net::http::Request;
 use log::info;
 use serde::{Deserialize, Serialize};
 use shared_core::dtos::account_with_balance::AccountWithBalance;
-use shared_core::models::Account;
+use shared_core::models::{Account, Organization};
 use shared_core::requests::transaction::{CreateTransactionRequest, JournalEntryLine};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use crate::org::OrgContextHandle;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct NewTransactionQuery {
@@ -52,6 +53,7 @@ pub fn new_transaction_page() -> Html {
     let focus_index = use_state(|| None::<usize>);
     let postable_accounts = use_state(Vec::new);
     let from_account = use_state(|| None::<Account>);
+    let org_ctx = use_context::<OrgContextHandle>().expect("OrgContext not found");
     let navigator = use_navigator().unwrap();
     let location = use_location().unwrap();
 
@@ -160,6 +162,10 @@ pub fn new_transaction_page() -> Html {
     let total_credits: i64 = request.entries.iter().map(|e| e.credit).sum();
     let is_balanced = total_debits > 0 && total_debits == total_credits;
 
+    let is_period_locked = org_ctx.locked_until
+        .map(|lock| request.date <= lock)
+        .unwrap_or(false);
+
     let on_submit = {
         let request = request.clone();
         let navigator = navigator.clone();
@@ -264,7 +270,10 @@ pub fn new_transaction_page() -> Html {
 
                 <div class="modal__form__actions">
                     <button type="button" onclick={on_cancel} class="button-secondary">{ "Cancel" }</button>
-                    <button type="submit" disabled={!is_balanced}>{ "Save Transaction" }</button>
+                    <button type="submit" disabled={!is_balanced || is_period_locked}>{
+                           if is_period_locked { "Period Locked" }
+                           else { "Save Transaction" }
+                        }</button>
                 </div>
             </form>
         </Layout>

@@ -28,6 +28,8 @@ use gloo_net::http::Request;
 use serde::Serialize;
 use shared_core::dtos::user_detail::UserDetail;
 use yew::prelude::*;
+use yew_router::prelude::use_navigator;
+use crate::Route;
 
 #[derive(Clone, Serialize, Default, Debug)]
 struct UserUpdate {
@@ -48,6 +50,8 @@ pub fn profile_page() -> Html {
     let user_update = use_state(UserUpdate::default);
     let details_error = use_state(|| None::<String>);
     let details_success = use_state(|| false);
+
+    let navigator = use_navigator().unwrap();
 
     // Password form state
     let password_update = use_state(PasswordUpdate::default);
@@ -102,11 +106,13 @@ pub fn profile_page() -> Html {
         })
     };
 
+    let navigator = navigator.clone();
     let on_submit_details = {
         let user_ctx = user_ctx.clone();
         let user_update = user_update.clone();
         let error_state = details_error.clone();
         let success_state = details_success.clone();
+        let navigator = navigator.clone();
 
         Callback::from(move |e: SubmitEvent| {
             e.prevent_default();
@@ -114,6 +120,7 @@ pub fn profile_page() -> Html {
             let user_update = user_update.clone();
             let error_state = error_state.clone();
             let success_state = success_state.clone();
+            let navigator = navigator.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
                 let resp = Request::put("/api/users/me")
@@ -128,6 +135,7 @@ pub fn profile_page() -> Html {
                             user_ctx.dispatch(Some(updated_user));
                             success_state.set(true);
                             error_state.set(None);
+                            navigator.push(&Route::Dashboard);
                         } else {
                             error_state.set(Some("Failed to parse server response.".to_string()));
                         }
@@ -178,16 +186,19 @@ pub fn profile_page() -> Html {
         && password_update.new_password == *confirm_password;
     let can_submit_password = !password_update.old_password.is_empty() && passwords_match;
 
+    let navigator = navigator.clone();
     let on_submit_password = {
         let password_update = password_update.clone();
         let password_error = password_error.clone();
         let password_success = password_success.clone();
+        let navigator = navigator.clone();
         Callback::from(move |e: SubmitEvent| {
             e.prevent_default();
             if can_submit_password {
                 let password_update = password_update.clone();
                 let password_error = password_error.clone();
                 let password_success = password_success.clone();
+                let navigator = navigator.clone();
                 wasm_bindgen_futures::spawn_local(async move {
                     let resp = Request::put("/api/users/me/password")
                         .json(&(*password_update))
@@ -199,6 +210,7 @@ pub fn profile_page() -> Html {
                         Ok(r) if r.ok() => {
                             password_success.set(true);
                             password_error.set(None);
+                            navigator.push(&Route::Dashboard);
                         }
                         Ok(r) => {
                             password_error

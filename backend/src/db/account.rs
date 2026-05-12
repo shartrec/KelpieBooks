@@ -29,7 +29,6 @@ use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest}
 use std::collections::HashMap;
 use std::str::FromStr;
 use uuid::Uuid;
-use chrono::NaiveDate;
 
 fn from_row_to_account(row: &sqlx::postgres::PgRow) -> Account {
     let category_str: String = row.get("category");
@@ -179,29 +178,6 @@ pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, sql
         .execute(pool)
         .await?;
     Ok(result.rows_affected())
-}
-
-pub(crate) async fn get_balance_for_category(
-    pool: &mut PgConnection,
-    organization_id: Uuid,
-    category: AccountCategory,
-    date: NaiveDate,
-) -> Result<i64, sqlx::Error> {
-    let result = sqlx::query(
-        r#"
-        SELECT COALESCE(SUM(je.debit - je.credit), 0)::BIGINT as balance
-        FROM journal_entries je
-        JOIN transactions t ON je.transaction_id = t.id
-        JOIN accounts a ON je.account_id = a.id
-        WHERE t.organization_id = $1 AND a.category::TEXT = $2 AND t.date <= $3
-        "#,
-    )
-    .bind(organization_id)
-    .bind(category.to_string())
-    .bind(date)
-    .fetch_one(pool)
-    .await?;
-    Ok(result.get("balance"))
 }
 
 pub(crate) async fn get_all_by_category(

@@ -35,5 +35,5 @@ pub struct UserDetail {
     pub full_name: String,
     pub display_name: Option<String>,
     pub role: String,
-    pub organisation_name: String,
+    pub organisation_id: Uuid,
 }
