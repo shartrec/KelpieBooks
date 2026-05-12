@@ -33,6 +33,7 @@
 @import 'base/typography';
 
 // 3. Components (The meat of the app)
+@import 'components/dashboard';
 @import 'components/journal';
 @import 'components/login';
 @import 'components/new_transaction';

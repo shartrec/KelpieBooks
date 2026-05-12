@@ -21,49 +21,8 @@
  *      Trevor Campbell
  *
  */
-use uuid::Uuid;
-use yew_router::Routable;
-
-pub mod auth;
-pub mod contexts;
 pub mod components;
+pub mod contexts;
 pub mod pages;
-pub mod org;
-
-#[derive(Clone, Routable, PartialEq)]
-pub enum Route {
-    #[at("/register")]
-    Register,
-    #[at("/login")]
-    Login,
-    #[at("/onboard")]
-    Onboard,
-    #[at("/dashboard")]
-    Dashboard,
-    #[at("/profile")]
-    Profile,
-    #[at("/ledger")]
-    Ledger,
-    #[at("/reports/trial-balance")]
-    TrialBalance,
-    #[at("/reports/profit-loss")]
-    ProfitLoss,
-    #[at("/reports/balance-sheet")]
-    BalanceSheet,
-    #[at("/accounts/:id")]
-    AccountLedger { id: Uuid },
-    #[at("/transactions/new")]
-    NewTransaction,
-    #[at("/tasks/close-year")]
-    CloseYear,
-    #[at("/tasks/period-settings")]
-    PeriodSettings,
-    #[at("/tasks/configuration")]
-    Configuration,
-    #[at("/")]
-    Home,
-
-    // Not really a page, but it's a good example of a page that doesn't have a route
-    #[at("/style-guide")]
-    StyleGuide,
-}
+pub mod services;
+pub mod router;

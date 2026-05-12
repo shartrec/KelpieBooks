@@ -22,14 +22,14 @@
  *
  */
 
-use crate::auth::UserContextHandle;
 use crate::components::layout::Layout;
 use gloo_net::http::Request;
 use serde::Serialize;
 use shared_core::dtos::user_detail::UserDetail;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use crate::Route;
+use crate::contexts::auth_context::UserContextHandle;
+use crate::router::Route;
 
 #[derive(Clone, Serialize, Default, Debug)]
 struct UserUpdate {

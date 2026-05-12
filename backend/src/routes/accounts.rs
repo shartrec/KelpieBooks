@@ -10,16 +10,17 @@ use rocket::{delete, get, post, put, routes, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
-use shared_core::models::Account;
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 use crate::export::DownloadFile;
 use crate::export::account_ledger_export::{generate_ledger_csv, generate_ledger_typst};
 use rocket::http::ContentType;
+use shared_core::models::Account;
 use crate::export::utils::compile_typst_to_pdf;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
         get_accounts,
+        get_accounts_with_balances,
         get_account,
         get_account_entries,
         create_account,
@@ -31,6 +32,16 @@ pub(crate) fn routes() -> Vec<Route> {
 
 #[get("/api/accounts")]
 async fn get_accounts(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+) -> Result<Json<Vec<Account>>, ApiError> {
+    let accounts =
+        account_service::get_accounts(&mut pool, user.organization_id).await?;
+    Ok(Json(accounts))
+}
+
+#[get("/api/accounts_with_balances")]
+async fn get_accounts_with_balances(
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
 ) -> Result<Json<Vec<AccountWithBalance>>, ApiError> {

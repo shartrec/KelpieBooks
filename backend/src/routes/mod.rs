@@ -31,6 +31,7 @@ pub(crate) mod users;
 pub(crate) mod period_end;
 pub(crate) mod configurations;
 pub(crate) mod organization;
+pub(crate) mod dashboard;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Role {

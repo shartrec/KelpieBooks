@@ -78,7 +78,21 @@ impl SystemTag {
     pub fn iterator() -> impl Iterator<Item = Self> {
         Self::iter()
     }
+
+    pub fn display_name(&self) -> String {
+        match self {
+            SystemTag::CashAtBank => "Cash at Bank".to_string(),
+            SystemTag::AccountsReceivable => "Accounts Receivable".to_string(),
+            SystemTag::AccountsPayable => "Accounts Payable".to_string(),
+            SystemTag::RetainedEarnings => "Retained Earnings".to_string(),
+            SystemTag::SalesTaxPayable => "Sales Tax Payable".to_string(),
+            SystemTag::Revenue => "Revenue".to_string(),
+            SystemTag::Expense => "Expense".to_string(),
+            SystemTag::CostOfGoodsSold => "Cost of Goods Sold".to_string(),
+        }
+    }
 }
+
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Account {

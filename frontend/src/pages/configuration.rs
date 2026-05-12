@@ -141,7 +141,7 @@ pub fn configuration_page() -> Html {
                             let selected_account_id = system_accounts.get(&tag).map(|id| id.to_string());
                             html! {
                                 <>
-                                    <label for={format!("select-{:?}", tag)}>{ format!("{}", tag) }</label>
+                                    <label for={format!("select-{:?}", tag)}>{ format!("{}", tag.display_name()) }</label>
                                     <select
                                         id={format!("select-{:?}", tag)}
                                         onchange={

@@ -22,7 +22,7 @@
  *
  */
 
-use frontend::auth::{UserContext, UserContextHandle};
+use frontend::contexts::auth_context::{UserContext, UserContextHandle};
 use frontend::contexts::report_context::ReportContextProvider;
 use frontend::pages::account_ledger::AccountLedgerPage;
 use frontend::pages::balance_sheet::BalanceSheetPage;
@@ -37,13 +37,13 @@ use frontend::pages::profit_loss::ProfitLossPage;
 use frontend::pages::profile::ProfilePage;
 use frontend::pages::register::RegisterPage;
 use frontend::pages::trial_balance::TrialBalancePage;
-use frontend::Route;
+use frontend::router::Route;
 use gloo_net::http::Request;
 use log::info;
 use shared_core::dtos::user_detail::UserDetail;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use frontend::org::{OrgAction, OrgContextHandle, OrgState};
+use frontend::contexts::org_context::{OrgAction, OrgContextHandle, OrgState};
 use frontend::pages::style_guide::StyleGuide;
 use shared_core::models::Organization;
 
@@ -102,6 +102,7 @@ fn app() -> Html {
                     }
                 }
             });
+            || ()
         });
     }
 
@@ -121,7 +122,6 @@ fn switch(routes: Route) -> Html {
     match routes {
         Route::Register => html! { <RegisterPage /> },
         Route::Login => html! { <LoginPage /> },
-        Route::Onboard => html! { <h1>{ "Onboarding" }</h1> },
         Route::Dashboard => html! { <DashboardPage /> },
         Route::Profile => html! { <ProfilePage /> },
         Route::Ledger => html! { <LedgerPage /> },

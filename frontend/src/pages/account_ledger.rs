@@ -26,7 +26,7 @@ use crate::components::layout::Layout;
 use crate::components::transaction_row::{TransactionGroup, TransactionRow};
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::pages::new_transaction::NewTransactionQuery;
-use crate::Route;
+use crate::router::Route;
 use gloo_net::http::Request;
 use log::info;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;

@@ -1,4 +1,4 @@
-use crate::Route;
+use crate::router::Route;
 use crate::pages::new_transaction::NewTransactionQuery;
 use gloo_net::http::Request;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
@@ -135,7 +135,14 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                                 </div>
                                 { for detail.entries.iter().map(|entry| html! {
                                     <div class="journal-entry__line">
-                                        <span>{ &entry.account_name }</span>
+                                        <span>
+                                            <Link<Route>
+                                                to={Route::AccountLedger { id: entry.account_id }}
+                                                classes={classes!("account-link")}
+                                            >
+                                                { &entry.account_name }
+                                            </Link<Route>>
+                                        </span>
                                         <span>{ entry.description.clone().unwrap_or_default() }</span>
                                         <span class="amount">{ format_currency(&entry.debit) }</span>
                                         <span class="amount">{ format_currency(&entry.credit) }</span>

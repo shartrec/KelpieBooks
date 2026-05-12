@@ -49,6 +49,19 @@ pub(crate) async fn get(
         .map(|row| row.map(|r| from_row_to_transaction(&r)))
 }
 
+pub(crate) async fn get_recent_transactions(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    limit: i64,
+) -> Result<Vec<Transaction>, sqlx::Error> {
+    sqlx::query("SELECT * FROM transactions WHERE organization_id = $1 ORDER BY date DESC, created_at DESC LIMIT $2")
+        .bind(organization_id)
+        .bind(limit)
+        .fetch_all(pool)
+        .await
+        .map(|rows| rows.iter().map(from_row_to_transaction).collect())
+}
+
 pub(crate) async fn insert(
     pool: &mut PgConnection,
     organization_id: Uuid,

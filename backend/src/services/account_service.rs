@@ -29,9 +29,41 @@ use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use std::collections::{HashMap, VecDeque};
 use uuid::Uuid;
-use chrono::NaiveDate;
+use chrono::{Local, NaiveDate};
 use sqlx::Acquire;
-use shared_core::models::SystemTag;
+use shared_core::models::{Account, SystemTag};
+
+pub async fn get_accounts(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+) -> Result<Vec<Account>, ApiError> {
+    let accounts = db::account::get_all_by_org(pool, organization_id).await?;
+
+    Ok(accounts)
+}
+
+pub async fn get_account_with_balance(
+    pool: &mut PgConnection,
+    account_id: Uuid,
+) -> Result<AccountWithBalance, ApiError> {
+    let account = db::account::get(pool, account_id).await?
+        .ok_or_else(|| ApiError::NotFound("Account not found".to_string()))?;
+
+    let balance = db::journal_entry::get_balance_up_to_date(pool, account_id, Local::now().date_naive()).await?;
+
+    Ok(AccountWithBalance {
+        balance,
+        id: account.id,
+        organization_id: account.organization_id,
+        parent_id: account.parent_id,
+        code: account.code,
+        name: account.name,
+        category: account.category,
+        is_group: account.is_group,
+        system_tag: account.system_tag,
+        created_at: account.created_at,
+    })
+}
 
 pub async fn get_accounts_with_balances(
     pool: &mut PgConnection,

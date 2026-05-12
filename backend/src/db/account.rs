@@ -103,7 +103,7 @@ pub(crate) async fn get_all_by_org(
             created_at
         FROM accounts
         WHERE organization_id = $1
-        ORDER BY code
+        ORDER BY name
         "#,
     )
     .bind(organization_id)

@@ -21,11 +21,11 @@
  *      Trevor Campbell
  *
  */
-
+use std::ops::Add;
 use crate::components::journal_entry_row::JournalEntryRow;
 use crate::components::layout::Layout;
-use crate::Route;
-use chrono::NaiveDate;
+use crate::router::Route;
+use chrono::{Days, Duration, NaiveDate};
 use gloo_net::http::Request;
 use log::info;
 use serde::{Deserialize, Serialize};
@@ -35,7 +35,7 @@ use shared_core::requests::transaction::{CreateTransactionRequest, JournalEntryL
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::org::OrgContextHandle;
+use crate::contexts::org_context::OrgContextHandle;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct NewTransactionQuery {
@@ -70,7 +70,7 @@ pub fn new_transaction_page() -> Html {
 
             wasm_bindgen_futures::spawn_local(async move {
                 if let Ok(response) = Request::get("/api/accounts").send().await {
-                    if let Ok(accounts) = response.json::<Vec<AccountWithBalance>>().await {
+                    if let Ok(accounts) = response.json::<Vec<Account>>().await {
                         let postable = accounts
                             .into_iter()
                             .filter(|a| !a.is_group)
@@ -161,6 +161,7 @@ pub fn new_transaction_page() -> Html {
     let total_debits: i64 = request.entries.iter().map(|e| e.debit).sum();
     let total_credits: i64 = request.entries.iter().map(|e| e.credit).sum();
     let is_balanced = total_debits > 0 && total_debits == total_credits;
+    let earliest_date = org_ctx.locked_until.unwrap_or(NaiveDate::default()) + Duration::days(1);
 
     let is_period_locked = org_ctx.locked_until
         .map(|lock| request.date <= lock)
@@ -231,7 +232,9 @@ pub fn new_transaction_page() -> Html {
                     <label>
                         { "Date:" }
                     </label>
-                        <input type="date" value={request.date.to_string()} onchange={on_date_change} />
+                        <input type="date" value={request.date.to_string()} onchange={on_date_change}
+                            min={ earliest_date.format("%Y-%m-%d").to_string() }
+                        />
                 </div>
 
                 <div class="journal__entries">

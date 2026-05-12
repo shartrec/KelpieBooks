@@ -55,7 +55,7 @@ pub fn chart_of_accounts_table() -> Html {
             let loading = loading.clone();
             loading.set(true);
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_accounts = Request::get("/api/accounts").send().await;
+                let fetched_accounts = Request::get("/api/accounts_with_balances").send().await;
                 loading.set(false);
                 match fetched_accounts {
                     Ok(response) if response.ok() => {

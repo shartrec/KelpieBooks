@@ -22,7 +22,7 @@
  *
  */
 
-use crate::Route;
+use crate::router::Route;
 use gloo_net::http::Request;
 use shared_core::requests::onboard::OnboardingRequest;
 use yew::function_component;

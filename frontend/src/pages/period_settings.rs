@@ -29,8 +29,8 @@ use web_sys::{Event, HtmlInputElement};
 use yew::{function_component, html, use_context, use_state, Callback, Html, TargetCast};
 use yew_router::prelude::use_navigator;
 use crate::components::layout::Layout;
-use crate::org::{OrgAction, OrgContextHandle};
-use crate::Route;
+use crate::contexts::org_context::{OrgAction, OrgContextHandle};
+use crate::router::Route;
 
 #[function_component(PeriodSettings)]
 pub fn period_settings() -> Html {

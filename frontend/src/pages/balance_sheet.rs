@@ -24,7 +24,7 @@
 
 use crate::components::layout::Layout;
 use crate::contexts::report_context::{use_report_context, ReportAction};
-use crate::Route;
+use crate::router::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::reports::balance_sheet::BalanceSheet;
 use std::collections::{HashMap, HashSet};

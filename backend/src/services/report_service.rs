@@ -117,6 +117,86 @@ pub async fn get_profit_loss(
     Ok(result)
 }
 
+pub async fn get_expense_breakdown(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    start_date: NaiveDate,
+    end_date: NaiveDate,
+) -> Result<Vec<AccountWithBalance>, ApiError> {
+    let accounts = db::account::get_all_by_org(pool, organization_id).await?;
+
+    let entries = sqlx::query!(
+        r#"
+        SELECT je.account_id, je.debit, je.credit
+        FROM journal_entries je
+        JOIN transactions t ON je.transaction_id = t.id
+        WHERE t.organization_id = $1 AND t.date >= $2 AND t.date <= $3
+        "#,
+        organization_id,
+        start_date,
+        end_date
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::Internal(e.to_string()))?;
+
+    let mut balances: HashMap<Uuid, i64> = HashMap::new();
+
+    for entry in &entries {
+        *balances.entry(entry.account_id).or_insert(0) += entry.debit - entry.credit;
+    }
+
+    let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
+    let mut child_count: HashMap<Uuid, usize> = HashMap::new();
+
+    for account in &accounts {
+        child_count.entry(account.id).or_insert(0);
+        if let Some(parent_id) = account.parent_id {
+            parent_map.insert(account.id, parent_id);
+            *child_count.entry(parent_id).or_insert(0) += 1;
+        }
+    }
+
+    let mut queue: VecDeque<Uuid> = child_count
+        .iter()
+        .filter(|(_, &count)| count == 0)
+        .map(|(&id, _)| id)
+        .collect();
+
+    while let Some(account_id) = queue.pop_front() {
+        if let Some(&parent_id) = parent_map.get(&account_id) {
+            let balance = *balances.get(&account_id).unwrap_or(&0);
+            *balances.entry(parent_id).or_insert(0) += balance;
+
+            if let Some(count) = child_count.get_mut(&parent_id) {
+                *count -= 1;
+                if *count == 0 {
+                    queue.push_back(parent_id);
+                }
+            }
+        }
+    }
+
+    let result = accounts
+        .into_iter()
+        .filter(|acc| acc.category == AccountCategory::Expense && acc.parent_id.is_none())
+        .map(|acc| AccountWithBalance {
+            balance: *balances.get(&acc.id).unwrap_or(&0),
+            id: acc.id,
+            organization_id: acc.organization_id,
+            parent_id: acc.parent_id,
+            code: acc.code,
+            name: acc.name,
+            category: acc.category,
+            is_group: acc.is_group,
+            system_tag: acc.system_tag,
+            created_at: acc.created_at,
+        })
+        .collect();
+
+    Ok(result)
+}
+
 pub async fn get_balance_sheet(
     pool: &mut PgConnection,
     organization_id: Uuid,

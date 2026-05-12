@@ -22,12 +22,12 @@
  *
  */
 
-use crate::auth::UserContextHandle;
-use crate::Route;
 use gloo_net::http::Request;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::org::OrgContextHandle;
+use crate::contexts::auth_context::UserContextHandle;
+use crate::contexts::org_context::OrgContextHandle;
+use crate::router::Route;
 
 #[function_component(Header)]
 pub fn header() -> Html {
