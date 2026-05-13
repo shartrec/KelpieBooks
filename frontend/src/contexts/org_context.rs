@@ -2,7 +2,6 @@ use std::rc::Rc;
 use chrono::NaiveDate;
 use uuid::Uuid;
 use yew::prelude::*;
-use shared_core::models::Organization;
 
 pub type OrgContextHandle = UseReducerHandle<OrgState>;
 
@@ -17,6 +16,7 @@ pub struct OrgState {
 pub enum OrgAction {
     SetOrg(OrgState),
     UpdateLockDate(Option<NaiveDate>),
+    UpdateAuditMode(bool),
 }
 
 impl Reducible for OrgState {
@@ -28,6 +28,11 @@ impl Reducible for OrgState {
             OrgAction::UpdateLockDate(new_date) => {
                 let mut current = (*self).clone();
                 current.locked_until = new_date;
+                Rc::new(current)
+            }
+            OrgAction::UpdateAuditMode(new_mode) => {
+                let mut current = (*self).clone();
+                current.strict_audit_mode = new_mode;
                 Rc::new(current)
             }
         }

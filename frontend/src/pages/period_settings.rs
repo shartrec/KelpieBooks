@@ -22,7 +22,6 @@
  *
  */
 use chrono::NaiveDate;
-use futures::SinkExt;
 use gloo_net::http::Request;
 use serde_json::json;
 use web_sys::{Event, HtmlInputElement};

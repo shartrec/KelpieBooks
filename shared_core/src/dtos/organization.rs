@@ -34,3 +34,11 @@ pub struct OrganizationDto {
     pub created_at: DateTime<Utc>,
     pub locked_until: Option<NaiveDate>,
 }
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LockDateRequest {
+    pub locked_until: Option<NaiveDate>,
+}
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AuditModeRequest {
+    pub strict_audit_mode: bool,
+}

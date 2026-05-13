@@ -21,17 +21,14 @@
  *      Trevor Campbell
  *
  */
-use std::ops::Add;
 use crate::components::journal_entry_row::JournalEntryRow;
 use crate::components::layout::Layout;
 use crate::router::Route;
-use chrono::{Days, Duration, NaiveDate};
+use chrono::{Duration, NaiveDate};
 use gloo_net::http::Request;
-use log::info;
 use serde::{Deserialize, Serialize};
-use shared_core::dtos::account_with_balance::AccountWithBalance;
-use shared_core::models::{Account, Organization};
-use shared_core::requests::transaction::{CreateTransactionRequest, JournalEntryLine};
+use shared_core::models::Account;
+use shared_core::requests::transaction::{CreateTransactionRequest, JournalEntryLine, UpdateTransactionRequest};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
@@ -45,11 +42,15 @@ pub struct NewTransactionQuery {
     #[serde(default)]
     #[serde(rename = "duplicate_from")]
     pub duplicate_from: Option<Uuid>,
+    #[serde(default)]
+    #[serde(rename = "edit_id")]
+    pub edit_id: Option<Uuid>,
 }
 
 #[function_component(NewTransactionPage)]
 pub fn new_transaction_page() -> Html {
     let request = use_state(CreateTransactionRequest::default);
+    let edit_id = use_state(|| None::<Uuid>);
     let focus_index = use_state(|| None::<usize>);
     let postable_accounts = use_state(Vec::new);
     let from_account = use_state(|| None::<Account>);
@@ -59,6 +60,7 @@ pub fn new_transaction_page() -> Html {
 
     {
         let request = request.clone();
+        let edit_id_state = edit_id.clone();
         let postable_accounts = postable_accounts.clone();
         let from_account = from_account.clone();
 
@@ -66,7 +68,8 @@ pub fn new_transaction_page() -> Html {
             let query = location.query::<NewTransactionQuery>().ok();
             let from_account_id = query.as_ref().and_then(|q| q.from_account);
             let duplicate_from_id = query.as_ref().and_then(|q| q.duplicate_from);
-            info!("Parsed IDs from URL: from_account={:?}, duplicate_from={:?}", from_account_id, duplicate_from_id);
+            let edit_id = query.as_ref().and_then(|q| q.edit_id);
+            edit_id_state.set(edit_id);
 
             wasm_bindgen_futures::spawn_local(async move {
                 if let Ok(response) = Request::get("/api/accounts").send().await {
@@ -91,11 +94,12 @@ pub fn new_transaction_page() -> Html {
                 }
 
                 let mut new_req = CreateTransactionRequest::default();
+                let transaction_id_to_load = edit_id.or(duplicate_from_id);
 
-                if let Some(id) = duplicate_from_id {
+                if let Some(id) = transaction_id_to_load {
                     if let Ok(response) = Request::get(&format!("/api/transactions/{}", id)).send().await {
                         if let Ok(detail) = response.json::<shared_core::dtos::transaction_detail::TransactionDetail>().await {
-                            new_req.description = detail.transaction.description;
+                            new_req.date = detail.transaction.date;
                             new_req.reference = detail.transaction.reference;
                             new_req.entries = detail.entries.into_iter().map(|e| JournalEntryLine {
                                 line_id: Uuid::new_v4(),
@@ -125,9 +129,6 @@ pub fn new_transaction_page() -> Html {
             let mut new_req = (*request).clone();
             if let Some(entry) = new_req.entries.get_mut(index) {
                 *entry = updated_entry;
-
-                let total_debits: i64 = new_req.entries.iter().map(|e| e.debit).sum();
-                let total_credits: i64 = new_req.entries.iter().map(|e| e.credit).sum();
             }
             request.set(new_req);
         })
@@ -170,6 +171,7 @@ pub fn new_transaction_page() -> Html {
     let on_submit = {
         let request = request.clone();
         let navigator = navigator.clone();
+        let edit_id = *edit_id;
         Callback::from(move |e: SubmitEvent| {
             e.prevent_default();
             if is_balanced {
@@ -178,18 +180,42 @@ pub fn new_transaction_page() -> Html {
                     !entry.account_id.is_nil() && (entry.debit != 0 || entry.credit != 0)
                 });
                 let navigator = navigator.clone();
-                wasm_bindgen_futures::spawn_local(async move {
-                    let resp = Request::post("/api/transactions")
-                        .json(&req)
-                        .unwrap()
-                        .send()
-                        .await;
-                    if resp.is_ok() {
-                        navigator.back();
-                    } else {
-                        // TODO: Handle error
-                    }
-                });
+
+                if let Some(id) = edit_id {
+                    // Update existing transaction
+                    let update_req = UpdateTransactionRequest {
+                        date: req.date,
+                        description: req.description,
+                        reference: req.reference,
+                        entries: req.entries.into_iter().map(|e| e.into()).collect(),
+                    };
+                    wasm_bindgen_futures::spawn_local(async move {
+                        let resp = Request::put(&format!("/api/transactions/{}", id))
+                            .json(&update_req)
+                            .unwrap()
+                            .send()
+                            .await;
+                        if resp.is_ok() {
+                            navigator.back();
+                        } else {
+                            // TODO: Handle error
+                        }
+                    });
+                } else {
+                    // Create new transaction
+                    wasm_bindgen_futures::spawn_local(async move {
+                        let resp = Request::post("/api/transactions")
+                            .json(&req)
+                            .unwrap()
+                            .send()
+                            .await;
+                        if resp.is_ok() {
+                            navigator.back();
+                        } else {
+                            // TODO: Handle error
+                        }
+                    });
+                }
             }
         })
     };
@@ -200,6 +226,10 @@ pub fn new_transaction_page() -> Html {
             navigator.back();
         })
     };
+
+    let is_edit_mode = edit_id.is_some();
+    let page_title = if is_edit_mode { "Edit Journal Transaction" } else { "New Journal Transaction" };
+    let save_button_text = if is_edit_mode { "Update Transaction" } else { "Save Transaction" };
 
     let page_header = if let Some(acc) = &*from_account {
         html! {
@@ -225,7 +255,7 @@ pub fn new_transaction_page() -> Html {
 
     html! {
         <Layout>
-            <h1>{ "New Journal Transaction" }</h1>
+            <h1>{ page_title }</h1>
             { page_header }
             <form onsubmit={on_submit} class="transaction__form">
                 <div class="transaction__form__header">
@@ -275,7 +305,7 @@ pub fn new_transaction_page() -> Html {
                     <button type="button" onclick={on_cancel} class="button-secondary">{ "Cancel" }</button>
                     <button type="submit" disabled={!is_balanced || is_period_locked}>{
                            if is_period_locked { "Period Locked" }
-                           else { "Save Transaction" }
+                           else { save_button_text }
                         }</button>
                 </div>
             </form>

@@ -28,10 +28,9 @@ use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::pages::new_transaction::NewTransactionQuery;
 use crate::router::Route;
 use gloo_net::http::Request;
-use log::info;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::requests::transaction::ReverseTransactionRequest;
-use shared_core::models::{Account, AccountCategory};
+use shared_core::models::Account;
 use std::collections::HashMap;
 use std::rc::Rc;
 use uuid::Uuid;
@@ -39,7 +38,9 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 use shared_core::util::format_currency;
 use crate::components::je_reversal_confirmation_modal::ReversalConfirmationModal;
+use crate::components::je_delete_confirmation_modal::DeleteConfirmationModal;
 use crate::components::report_options::ReportOptions;
+use crate::contexts::org_context::use_org_context;
 
 #[derive(Debug, Properties, PartialEq)]
 pub struct AccountLedgerPageProps {
@@ -49,11 +50,14 @@ pub struct AccountLedgerPageProps {
 #[function_component(AccountLedgerPage)]
 pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
     let report_ctx = use_report_context();
+    let org_ctx = use_org_context();
+    let navigator = use_navigator().unwrap();
     let entries = use_state(|| Rc::new(Vec::<JournalEntryWithBalance>::new()));
     let account = use_state(|| None::<Account>);
     let error = use_state(|| None::<String>);
     let loading = use_state(|| true);
     let transaction_to_reverse = use_state(|| None::<JournalEntryWithBalance>);
+    let transaction_to_delete = use_state(|| None::<JournalEntryWithBalance>);
 
     {
         let report_ctx = report_ctx.clone();
@@ -110,10 +114,17 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         })
     };
 
-    let on_modal_close = {
+    let on_reverse_modal_close = {
         let transaction_to_reverse = transaction_to_reverse.clone();
         Callback::from(move |_: ()| {
             transaction_to_reverse.set(None);
+        })
+    };
+
+    let on_delete_modal_close = {
+        let transaction_to_delete = transaction_to_delete.clone();
+        Callback::from(move |_: ()| {
+            transaction_to_delete.set(None);
         })
     };
 
@@ -138,7 +149,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
     }
 
     let on_reverse_confirm = {
-        let on_modal_close = on_modal_close.clone();
+        let on_modal_close = on_reverse_modal_close.clone();
         let fetch_entries = fetch_entries.clone();
         let error = error.clone();
         let transaction_id = transaction_to_reverse.as_ref().map(|t| t.transaction_id);
@@ -174,11 +185,57 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
             }
         })
     };
+
+    let on_delete_confirm = {
+        let on_modal_close = on_delete_modal_close.clone();
+        let fetch_entries = fetch_entries.clone();
+        let error = error.clone();
+        let transaction_id = transaction_to_delete.as_ref().map(|t| t.transaction_id);
+        Callback::from(move |()| {
+            if let Some(id) = transaction_id {
+                let on_modal_close = on_modal_close.clone();
+                let fetch_entries = fetch_entries.clone();
+                let error = error.clone();
+                wasm_bindgen_futures::spawn_local(async move {
+                    let url = format!("/api/transactions/{}", id);
+                    let resp = Request::delete(&url).send().await;
+                    match resp {
+                        Ok(r) if r.ok() => {
+                            on_modal_close.emit(());
+                            fetch_entries.emit(());
+                        }
+                        Ok(r) => {
+                            error.set(Some(format!("Failed to delete transaction: {}", r.status())))
+                        }
+                        Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    }
+                });
+            }
+        })
+    };
+
     let on_reverse_click = {
         let transaction_to_reverse = transaction_to_reverse.clone();
         Callback::from(move |t| transaction_to_reverse.set(Some(t)))
     };
 
+    let on_edit_click = {
+        let navigator = navigator.clone();
+        Callback::from(move |id: Uuid| {
+            let query = NewTransactionQuery {
+                edit_id: Some(id),
+                ..Default::default()
+            };
+            navigator.push_with_query(&Route::NewTransaction, &query).unwrap();
+        })
+    };
+
+    let on_delete_click = {
+        let transaction_to_delete = transaction_to_delete.clone();
+        Callback::from(move |t: JournalEntryWithBalance| {
+            transaction_to_delete.set(Some(t));
+        })
+    };
 
     let account_name = account.as_ref().map(|a| a.name.clone()).unwrap_or_default();
     let query = NewTransactionQuery {
@@ -225,7 +282,8 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                 <div class="error">{ err }</div>
             } else {
 
-            if let Some(jeb) = &*transaction_to_reverse { <ReversalConfirmationModal jeb={jeb.clone()} on_close={on_modal_close.clone()} on_confirm={on_reverse_confirm.clone()} /> }
+            if let Some(jeb) = &*transaction_to_reverse { <ReversalConfirmationModal jeb={jeb.clone()} on_close={on_reverse_modal_close.clone()} on_confirm={on_reverse_confirm.clone()} /> }
+            if let Some(jeb) = &*transaction_to_delete { <DeleteConfirmationModal jeb={jeb.clone()} on_close={on_delete_modal_close.clone()} on_confirm={on_delete_confirm.clone()} /> }
 
                 <table class="report-table">
                     <thead>
@@ -254,6 +312,9 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                                 key={group.transaction_id.to_string()}
                                 transaction_group={group.clone()}
                                 on_reverse={on_reverse_click.clone()}
+                                on_edit={on_edit_click.clone()}
+                                on_delete={on_delete_click.clone()}
+                                org_ctx={org_ctx.clone()}
                             />
                         })}
                     </tbody>

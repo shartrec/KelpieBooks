@@ -72,3 +72,12 @@ impl Default for CreateTransactionRequest {
 pub struct ReverseTransactionRequest {
     pub description: String,
 }
+
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct UpdateTransactionRequest {
+    pub date: NaiveDate,
+    pub description: Option<String>,
+    pub reference: Option<String>,
+    pub entries: Vec<JournalEntryLine>,
+}

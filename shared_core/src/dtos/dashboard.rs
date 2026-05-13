@@ -29,4 +29,5 @@ pub struct FinancialHealth {
     pub net_profit_ytd: i64,
     pub bank_balance: i64,
     pub accounts_receivable: i64,
+    pub accounts_payable: i64,
 }

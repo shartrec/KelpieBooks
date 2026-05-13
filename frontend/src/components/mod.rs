@@ -11,4 +11,5 @@ pub mod edit_account_modal;
 pub mod chart_of_accounts_table;
 pub mod delete_confirmation_modal;
 pub mod je_reversal_confirmation_modal;
+pub mod je_delete_confirmation_modal;
 pub mod bar_chart;

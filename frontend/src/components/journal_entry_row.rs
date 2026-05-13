@@ -21,7 +21,6 @@
  *      Trevor Campbell
  *
  */
-use log::info;
 use shared_core::requests::transaction::JournalEntryLine;
 use uuid::Uuid;
 use web_sys::HtmlSelectElement;

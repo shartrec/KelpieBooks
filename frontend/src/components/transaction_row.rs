@@ -7,6 +7,7 @@ use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
 use shared_core::util::format_currency;
+use crate::contexts::org_context::OrgContextHandle;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TransactionGroup {
@@ -20,6 +21,9 @@ pub struct TransactionGroup {
 pub struct TransactionRowProps {
     pub transaction_group: TransactionGroup,
     pub on_reverse: Callback<JournalEntryWithBalance>,
+    pub on_edit: Callback<Uuid>,
+    pub on_delete: Callback<JournalEntryWithBalance>,
+    pub org_ctx: OrgContextHandle,
 }
 
 #[function_component(TransactionRow)]
@@ -66,6 +70,26 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
         })
     };
 
+    let on_edit_click = {
+        let on_edit = props.on_edit.clone();
+        let transaction_id = props.transaction_group.transaction_id;
+        let dropdown_open = dropdown_open.clone();
+        Callback::from(move |_| {
+            dropdown_open.set(false);
+            on_edit.emit(transaction_id);
+        })
+    };
+
+    let on_delete_click = {
+        let on_delete = props.on_delete.clone();
+        let transaction_detail = props.transaction_group.primary_entry.clone();
+        let dropdown_open = dropdown_open.clone();
+        Callback::from(move |_| {
+            dropdown_open.set(false);
+            on_delete.emit(transaction_detail.clone());
+        })
+    };
+
     let on_toggle_dropdown = {
         let dropdown_open = dropdown_open.clone();
         Callback::from(move |_| {
@@ -78,6 +102,9 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
         duplicate_from: Some(props.transaction_group.transaction_id),
         ..Default::default()
     };
+
+    let strict_audit_mode = props.org_ctx.strict_audit_mode;
+    let is_locked = props.org_ctx.locked_until.map_or(false, |lock_date| primary_entry.date <= lock_date);
 
     html! {
         <>
@@ -99,14 +126,25 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                 <td class="actions-cell">
                     <div class="actions-dropdown">
                         <button class="icon-button" onclick={on_toggle_dropdown} title="Actions">
-                            <img src="/images/more-vertical.svg" alt="Actions" />
+                            <img src="/images/more-vertical.svg" alt="Actions" class="dropdown-trigger-icon" />
                         </button>
                         if *dropdown_open {
-                            <div class="actions-dropdown-content">
-                                <button class="dropdown-item" onclick={on_reverse_click}>
-                                    <img src="/images/reverse.svg" alt="Reverse" />
-                                    <span>{ "Reverse" }</span>
-                                </button>
+                            <div class="actions-dropdown__content">
+                                if strict_audit_mode {
+                                    <button class="dropdown-item" onclick={on_reverse_click} disabled={is_locked}>
+                                        <img src="/images/reverse.svg" alt="Reverse" />
+                                        <span>{ "Reverse" }</span>
+                                    </button>
+                                } else {
+                                    <button class="dropdown-item" onclick={on_edit_click} disabled={is_locked}>
+                                        <img src="/images/edit.svg" alt="Edit" />
+                                        <span>{ "Edit" }</span>
+                                    </button>
+                                    <button class="dropdown-item" onclick={on_delete_click} disabled={is_locked}>
+                                        <img src="/images/delete.svg" alt="Delete" />
+                                        <span>{ "Delete" }</span>
+                                    </button>
+                                }
                                 <Link<Route, NewTransactionQuery>
                                     to={Route::NewTransaction}
                                     query={duplicate_query}

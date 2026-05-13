@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026. Trevor Campbell and others.
+ * Copyright (c) 2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -22,38 +22,30 @@
  *
  */
 
-use crate::db;
-use crate::routes::security::AuthenticatedUser;
-use crate::DbKelpie;
-use rocket::{get, put};
 use rocket::serde::json::Json;
-use rocket::Route;
+use rocket::{get, put, Route};
 use rocket_db_pools::Connection;
-use shared_core::dtos::lock_date_request::LockDateRequest;
-use shared_core::dtos::organization::OrganizationDto;
-use uuid::Uuid;
+use shared_core::dtos::organization::{AuditModeRequest, LockDateRequest};
+use shared_core::models::Organization;
+use crate::db;
+use crate::util::ApiError;
+use crate::DbKelpie;
+use crate::routes::security::AuthenticatedUser;
 use crate::util::types::PathUuid;
 
 pub fn routes() -> Vec<Route> {
-    rocket::routes![get_organization, set_lock_date]
+    rocket::routes![get_organization, set_lock_date, set_audit_mode]
 }
 
 #[get("/api/organization")]
-async fn get_organization(
-    mut db: Connection<DbKelpie>,
+pub async fn get_organization(
+    mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
-) -> Result<Json<OrganizationDto>, rocket::http::Status> {
-    match db::organization::get(&mut db, user.organization_id).await {
-        Ok(Some(org)) => Ok(Json(OrganizationDto {
-            id: org.id,
-            name: org.name,
-            strict_audit_mode: org.strict_audit_mode,
-            created_at: org.created_at,
-            locked_until: org.locked_until,
-        })),
-        Ok(None) => Err(rocket::http::Status::NotFound),
-        Err(_) => Err(rocket::http::Status::InternalServerError),
-    }
+) -> Result<Json<Organization>, ApiError> {
+    let org = db::organization::get(&mut *pool, user.organization_id)
+        .await?
+        .ok_or_else(|| ApiError::NotFound("Organization not found".to_string()))?;
+    Ok(Json(org))
 }
 
 #[put("/api/organizations/<id>/lock", data = "<req>")]
@@ -68,6 +60,22 @@ async fn set_lock_date(
     }
 
     match db::organization::set_lock_date(&mut db, *id, req.locked_until).await {
+        Ok(_) => rocket::http::Status::Ok,
+        Err(_) => rocket::http::Status::InternalServerError,
+    }
+}
+#[put("/api/organizations/<id>/audit_mode", data = "<req>")]
+async fn set_audit_mode(
+    mut db: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    id: PathUuid,
+    req: Json<AuditModeRequest>,
+) -> rocket::http::Status {
+    if *id != user.organization_id {
+        return rocket::http::Status::Forbidden;
+    }
+
+    match db::organization::set_audit_mode(&mut db, *id, req.strict_audit_mode).await {
         Ok(_) => rocket::http::Status::Ok,
         Err(_) => rocket::http::Status::InternalServerError,
     }

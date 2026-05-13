@@ -1,4 +1,4 @@
-use rocket::{get, routes, Route, State};
+use rocket::{get, routes, Route};
 use rocket::serde::json::Json;
 use shared_core::dtos::dashboard::FinancialHealth;
 use shared_core::dtos::recent_transaction::RecentTransaction;
@@ -26,9 +26,15 @@ async fn get_financial_health(mut db: Connection<DbKelpie>, user: AuthenticatedU
     let system_accounts = get_system_accounts(&mut db, org_id).await.unwrap_or_default();
 
     let ar_account_id = system_accounts.get(&SystemTag::AccountsReceivable).cloned();
+    let ap_account_id = system_accounts.get(&SystemTag::AccountsPayable).cloned();
     let bank_account_id = system_accounts.get(&SystemTag::CashAtBank).cloned();
 
     let accounts_receivable_balance = if let Some(id) = ar_account_id {
+        get_account_with_balance(&mut db, id).await.map(|a| a.balance).unwrap_or(-999)
+    } else {
+        0
+    };
+    let accounts_payable_balance = if let Some(id) = ap_account_id {
         get_account_with_balance(&mut db, id).await.map(|a| a.balance).unwrap_or(-999)
     } else {
         0
@@ -58,6 +64,7 @@ async fn get_financial_health(mut db: Connection<DbKelpie>, user: AuthenticatedU
         net_profit_ytd: net_profit_ytd,
         bank_balance: bank_balance,
         accounts_receivable: accounts_receivable_balance,
+        accounts_payable: accounts_payable_balance,
     }))
 }
 

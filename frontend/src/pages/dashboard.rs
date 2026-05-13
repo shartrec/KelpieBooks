@@ -7,9 +7,7 @@ use shared_core::dtos::expense_breakdown::ExpenseBreakdown;
 use yew_router::prelude::*;
 use crate::router::Route;
 use crate::contexts::org_context::use_org_context;
-use std::ops::Deref;
 use shared_core::util::format_currency;
-use crate::components::bar_chart::BarChart;
 
 #[function_component(DashboardPage)]
 pub fn dashboard_page() -> Html {
@@ -52,8 +50,6 @@ pub fn dashboard_page() -> Html {
         });
     }
 
-    let locked_until_display = org_context.locked_until;
-
     html! {
         <Layout>
             <div class="dashboard-container">
@@ -73,6 +69,7 @@ pub fn dashboard_page() -> Html {
                         <FinancialCard title="Net Profit (YTD)" value={&health.net_profit_ytd} />
                         <FinancialCard title="Operating Bank" value={&health.bank_balance} />
                         <FinancialCard title="Receivables" value={&health.accounts_receivable} />
+                        <FinancialCard title="Payables" value={&health.accounts_payable} />
                     }
                 </section>
 

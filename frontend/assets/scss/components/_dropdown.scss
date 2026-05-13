@@ -1,0 +1,90 @@
+/*!
+ * Copyright (c) 2026-2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+
+@use '../abstracts/variables' as *;
+
+.actions-dropdown {
+  position: relative;
+  display: inline-flex; // Changed from inline-block for better centering
+  align-items: center;
+
+  .icon-button {
+    // Reset background/border if _base.scss added them back
+    background: transparent;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 18px; // Force a consistent small size for the trigger
+      height: 18px;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+
+    &:hover img {
+      opacity: 1;
+    }
+  }
+
+  &__content {
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 100%; // Ensure it appears below the button
+    background-color: white;
+    min-width: 140px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+    z-index: 100; // Ensure it stays above other rows
+    border-radius: 6px;
+    border: 1px solid $border-color;
+    padding: 4px 0;
+
+    .dropdown-item {
+      width: 100%;
+      text-align: left;
+      border: none;
+      border-radius: 0px;
+      background: none;
+      padding: 8px 12px;
+      margin: 0;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+
+      img {
+        width: 14px;
+        height: 14px;
+      }
+
+      &:hover {
+        background-color: lighten($color-success, 45%);
+        color: darken($color-success, 20%);
+      }
+    }
+  }
+}

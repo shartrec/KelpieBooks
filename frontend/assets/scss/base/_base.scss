@@ -139,6 +139,10 @@ input, select, textarea {
     display: flex;
     gap: 1rem;
   }
+
+  &__full-width {
+    grid-column: 1 / span 2;
+  }
 }
 
 .actions-cell {
