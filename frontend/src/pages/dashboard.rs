@@ -8,10 +8,13 @@ use yew_router::prelude::*;
 use crate::router::Route;
 use crate::contexts::org_context::use_org_context;
 use shared_core::util::format_currency;
+use crate::contexts::auth_context::use_user_context;
 
 #[function_component(DashboardPage)]
 pub fn dashboard_page() -> Html {
+    let user_ctx = use_user_context();
     let org_context = use_org_context();
+    let navigator = use_navigator().unwrap();
 
     let financial_health_state = use_state(|| None::<FinancialHealth>);
     let recent_transactions_state = use_state(|| None::<Vec<RecentTransaction>>);
@@ -23,25 +26,33 @@ pub fn dashboard_page() -> Html {
         let recent_transactions_state = recent_transactions_state.clone();
         let expense_breakdown_state = expense_breakdown_state.clone();
         let error_state = error_state.clone();
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
 
         use_effect_with((), move |_| {
             let error_state1 = error_state.clone();
+            let user_ctx1 = user_ctx.clone();
+            let navigator1 = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                match get_financial_health().await {
+                match get_financial_health(user_ctx1, navigator1).await {
                     Ok(data) => financial_health_state.set(Some(data)),
                     Err(e) => error_state1.set(Some(e.clone())),
                 }
             });
             let error_state2 = error_state.clone();
+            let user_ctx2 = user_ctx.clone();
+            let navigator2 = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                match get_recent_transactions().await {
+                match get_recent_transactions(user_ctx2, navigator2).await {
                     Ok(data) => recent_transactions_state.set(Some(data)),
                     Err(e) => error_state2.set(Some(e.clone())),
                 }
             });
             let error_state3 = error_state.clone();
+            let user_ctx3 = user_ctx.clone();
+            let navigator3 = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                match get_expense_breakdown().await {
+                match get_expense_breakdown(user_ctx3, navigator3).await {
                     Ok(data) => expense_breakdown_state.set(Some(data)),
                     Err(e) => error_state3.set(Some(e)),
                 }

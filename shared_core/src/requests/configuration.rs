@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026. Trevor Campbell and others.
+ * Copyright (c) 2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -21,9 +21,14 @@
  *      Trevor Campbell
  *
  */
-pub mod api;
-pub mod components;
-pub mod contexts;
-pub mod pages;
-pub mod services;
-pub mod router;
+
+use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+use crate::models::SystemTag;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UpdateConfigurationRequest {
+    pub system_accounts: HashMap<SystemTag, Uuid>,
+    pub strict_audit_mode: bool,
+}

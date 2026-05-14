@@ -24,11 +24,15 @@
 
 use crate::components::layout::Layout;
 use chrono::{Datelike, NaiveDate, Utc};
-use gloo_net::http::Request;
 use yew::prelude::*;
+use yew_router::prelude::use_navigator;
+use crate::api::Api;
+use crate::contexts::auth_context::use_user_context;
 
 #[function_component(CloseYearPage)]
 pub fn close_year_page() -> Html {
+    let user_ctx = use_user_context();
+    let navigator = use_navigator().unwrap();
     let year_end_date = use_state(|| {
         let today = Utc::now().date_naive();
         NaiveDate::from_ymd_opt(today.year(), 12, 31).unwrap_or(today)
@@ -61,6 +65,8 @@ pub fn close_year_page() -> Html {
         let error = error.clone();
         let success = success.clone();
         let show_confirmation = show_confirmation.clone();
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
 
         Callback::from(move |_| {
             let year_end_str = year_end_date.format("%Y-%m-%d").to_string();
@@ -68,6 +74,8 @@ pub fn close_year_page() -> Html {
             let error = error.clone();
             let success = success.clone();
             let show_confirmation = show_confirmation.clone();
+            let user_ctx = user_ctx.clone();
+            let navigator = navigator.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
                 loading.set(true);
@@ -76,7 +84,7 @@ pub fn close_year_page() -> Html {
                 success.set(None);
 
                 let url = format!("/api/period-end/close-year?year_end={}", year_end_str);
-                let response = Request::post(&url).send().await;
+                let response = Api::post(&url, &(), user_ctx, navigator).await;
 
                 match response {
                     Ok(resp) if resp.ok() => {

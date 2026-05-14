@@ -32,9 +32,20 @@ pub mod dashboard;
 use gloo_net::Error;
 use gloo_net::http::Response;
 use serde::de::DeserializeOwned;
+use yew_router::prelude::Navigator;
+use crate::contexts::auth_context::UserContextHandle;
 
-pub async fn handle_response<T: DeserializeOwned>(response: Result<Response, Error>) -> Result<T, String> {
+pub async fn handle_response<T: DeserializeOwned>(
+    response: Result<Response, Error>,
+    user_ctx: UserContextHandle,
+    navigator: Navigator,
+) -> Result<T, String> {
     match response {
+        Ok(response) if response.status() == 401 => {
+            user_ctx.dispatch(None);
+            navigator.push(&crate::router::Route::Login);
+            Err("Unauthorized".to_string())
+        }
         Ok(response) if response.ok() => {
             response.json::<T>().await.map_err(|e| e.to_string())
         }

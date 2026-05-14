@@ -26,16 +26,20 @@ use crate::components::account_row::{AccountNode, AccountRow};
 use crate::components::add_account_modal::AddAccountModal;
 use crate::components::delete_confirmation_modal::DeleteConfirmationModal;
 use crate::components::edit_account_modal::EditAccountModal;
-use gloo_net::http::Request;
 use log::info;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 use yew::prelude::*;
+use yew_router::prelude::use_navigator;
+use crate::api::Api;
+use crate::contexts::auth_context::use_user_context;
 
 #[function_component(ChartOfAccountsTable)]
 pub fn chart_of_accounts_table() -> Html {
+    let user_ctx = use_user_context();
+    let navigator = use_navigator().unwrap();
     let accounts = use_state(|| Vec::<AccountWithBalance>::new());
     let error = use_state(|| None::<String>);
     let loading = use_state(|| true);
@@ -49,13 +53,17 @@ pub fn chart_of_accounts_table() -> Html {
         let accounts = accounts.clone();
         let error = error.clone();
         let loading = loading.clone();
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
         Callback::from(move |_: ()| {
             let accounts = accounts.clone();
             let error = error.clone();
             let loading = loading.clone();
+            let user_ctx = user_ctx.clone();
+            let navigator = navigator.clone();
             loading.set(true);
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_accounts = Request::get("/api/accounts_with_balances").send().await;
+                let fetched_accounts = Api::get("/api/accounts_with_balances", user_ctx, navigator).await;
                 loading.set(false);
                 match fetched_accounts {
                     Ok(response) if response.ok() => {
@@ -92,16 +100,16 @@ pub fn chart_of_accounts_table() -> Html {
         let on_modal_close = on_modal_close.clone();
         let error = error.clone();
         let fetch_accounts = fetch_accounts.clone();
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
         Callback::from(move |req: CreateAccountRequest| {
             let on_modal_close = on_modal_close.clone();
             let error = error.clone();
             let fetch_accounts = fetch_accounts.clone();
+            let user_ctx = user_ctx.clone();
+            let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let resp = Request::post("/api/accounts")
-                    .json(&req)
-                    .unwrap()
-                    .send()
-                    .await;
+                let resp = Api::post("/api/accounts", &req, user_ctx, navigator).await;
                 match resp {
                     Ok(r) if r.ok() => {
                         on_modal_close.emit(());
@@ -118,17 +126,17 @@ pub fn chart_of_accounts_table() -> Html {
         let error = error.clone();
         let fetch_accounts = fetch_accounts.clone();
         let account_id = account_to_edit.as_ref().map(|a| a.id);
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
         Callback::from(move |req: UpdateAccountRequest| {
             if let Some(id) = account_id {
                 let on_modal_close = on_modal_close.clone();
                 let error = error.clone();
                 let fetch_accounts = fetch_accounts.clone();
+                let user_ctx = user_ctx.clone();
+                let navigator = navigator.clone();
                 wasm_bindgen_futures::spawn_local(async move {
-                    let resp = Request::put(&format!("/api/accounts/{}", id))
-                        .json(&req)
-                        .unwrap()
-                        .send()
-                        .await;
+                    let resp = Api::put(&format!("/api/accounts/{}", id), &req, user_ctx, navigator).await;
                     match resp {
                         Ok(r) if r.ok() => {
                             on_modal_close.emit(());
@@ -148,15 +156,17 @@ pub fn chart_of_accounts_table() -> Html {
         let error = error.clone();
         let fetch_accounts = fetch_accounts.clone();
         let account_id = account_to_delete.as_ref().map(|a| a.id);
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
         Callback::from(move |_: ()| {
             if let Some(id) = account_id {
                 let on_modal_close = on_modal_close.clone();
                 let error = error.clone();
                 let fetch_accounts = fetch_accounts.clone();
+                let user_ctx = user_ctx.clone();
+                let navigator = navigator.clone();
                 wasm_bindgen_futures::spawn_local(async move {
-                    let resp = Request::delete(&format!("/api/accounts/{}", id))
-                        .send()
-                        .await;
+                    let resp = Api::delete(&format!("/api/accounts/{}", id), user_ctx, navigator).await;
                     match resp {
                         Ok(r) if r.ok() => {
                             on_modal_close.emit(());

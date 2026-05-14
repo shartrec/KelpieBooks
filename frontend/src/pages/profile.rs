@@ -23,12 +23,12 @@
  */
 
 use crate::components::layout::Layout;
-use gloo_net::http::Request;
 use serde::Serialize;
 use shared_core::dtos::user_detail::UserDetail;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use crate::contexts::auth_context::UserContextHandle;
+use crate::api::Api;
+use crate::contexts::auth_context::{use_user_context, UserContextHandle};
 use crate::router::Route;
 
 #[derive(Clone, Serialize, Default, Debug)]
@@ -46,7 +46,7 @@ struct PasswordUpdate {
 
 #[function_component(ProfilePage)]
 pub fn profile_page() -> Html {
-    let user_ctx = use_context::<UserContextHandle>().expect("User context not found");
+    let user_ctx = use_user_context();
     let user_update = use_state(UserUpdate::default);
     let details_error = use_state(|| None::<String>);
     let details_success = use_state(|| false);
@@ -106,7 +106,6 @@ pub fn profile_page() -> Html {
         })
     };
 
-    let navigator = navigator.clone();
     let on_submit_details = {
         let user_ctx = user_ctx.clone();
         let user_update = user_update.clone();
@@ -123,11 +122,7 @@ pub fn profile_page() -> Html {
             let navigator = navigator.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                let resp = Request::put("/api/users/me")
-                    .json(&(*user_update))
-                    .unwrap()
-                    .send()
-                    .await;
+                let resp = Api::put("/api/users/me", &*user_update, user_ctx.clone(), navigator.clone()).await;
 
                 match resp {
                     Ok(r) if r.ok() => {
@@ -186,12 +181,12 @@ pub fn profile_page() -> Html {
         && password_update.new_password == *confirm_password;
     let can_submit_password = !password_update.old_password.is_empty() && passwords_match;
 
-    let navigator = navigator.clone();
     let on_submit_password = {
         let password_update = password_update.clone();
         let password_error = password_error.clone();
         let password_success = password_success.clone();
         let navigator = navigator.clone();
+        let user_ctx = user_ctx.clone();
         Callback::from(move |e: SubmitEvent| {
             e.prevent_default();
             if can_submit_password {
@@ -199,12 +194,9 @@ pub fn profile_page() -> Html {
                 let password_error = password_error.clone();
                 let password_success = password_success.clone();
                 let navigator = navigator.clone();
+                let user_ctx = user_ctx.clone();
                 wasm_bindgen_futures::spawn_local(async move {
-                    let resp = Request::put("/api/users/me/password")
-                        .json(&(*password_update))
-                        .unwrap()
-                        .send()
-                        .await;
+                    let resp = Api::put("/api/users/me/password", &*password_update, user_ctx, navigator.clone()).await;
 
                     match resp {
                         Ok(r) if r.ok() => {

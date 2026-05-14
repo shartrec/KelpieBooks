@@ -22,17 +22,19 @@
  *
  */
 use chrono::NaiveDate;
-use gloo_net::http::Request;
 use serde_json::json;
 use web_sys::{Event, HtmlInputElement};
 use yew::{function_component, html, use_context, use_state, Callback, Html, TargetCast};
 use yew_router::prelude::use_navigator;
+use crate::api::Api;
 use crate::components::layout::Layout;
+use crate::contexts::auth_context::use_user_context;
 use crate::contexts::org_context::{OrgAction, OrgContextHandle};
 use crate::router::Route;
 
 #[function_component(PeriodSettings)]
 pub fn period_settings() -> Html {
+    let user_ctx = use_user_context();
     let org_ctx = use_context::<OrgContextHandle>().expect("OrgContext not found");
 
     let navigator = use_navigator().unwrap();
@@ -59,19 +61,22 @@ pub fn period_settings() -> Html {
     let on_save_lock = {
         let org_ctx = org_ctx.clone();
         let local_date = *local_date;
-        let org_id = org_ctx.id;
         let navigator = navigator.clone();
+        let user_ctx = user_ctx.clone();
 
         Callback::from(move |_| {
             let org_ctx = org_ctx.clone();
             let navigator = navigator.clone();
+            let user_ctx = user_ctx.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 // Construct the update request
-                let res = Request::put(&format!("/api/organizations/{}/lock", org_id))
-                    .json(&json!({ "locked_until": local_date }))
-                    .unwrap()
-                    .send()
-                    .await;
+                let res = Api::put(
+                    "/api/organization/lock",
+                    &json!({ "locked_until": local_date }),
+                    user_ctx,
+                    navigator.clone(),
+                )
+                .await;
 
                 if res.is_ok() {
                     // Update global state so the rest of the app reacts

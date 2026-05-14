@@ -31,10 +31,11 @@ use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
-use gloo_net::http::Request;
-use yew_router::prelude::Link;
+use yew_router::prelude::{Link, use_navigator};
 use shared_core::util::format_currency;
+use crate::api::Api;
 use crate::components::report_options::ReportOptions;
+use crate::contexts::auth_context::use_user_context;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
@@ -85,6 +86,8 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
 
 #[function_component(TrialBalancePage)]
 pub fn trial_balance_page() -> Html {
+    let user_ctx = use_user_context();
+    let navigator = use_navigator().unwrap();
     let report_ctx = use_report_context();
     let accounts = use_state(|| Rc::new(Vec::<AccountWithBalance>::new()));
     let loading = use_state(|| true);
@@ -126,16 +129,20 @@ pub fn trial_balance_page() -> Html {
         let loading = loading.clone();
         let error = error.clone();
         let report_date = report_ctx.date_range.end_date;
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
 
         use_effect_with(report_date, move |&report_date| {
             let accounts = accounts.clone();
             let loading = loading.clone();
             let error = error.clone();
+            let user_ctx = user_ctx.clone();
+            let navigator = navigator.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
                 loading.set(true);
                 let url = format!("/api/reports/trial-balance?date={}", report_date);
-                match Request::get(&url).send().await {
+                match Api::get(&url, user_ctx, navigator).await {
                     Ok(resp) => {
                         if resp.ok() {
                             match resp.json::<Vec<AccountWithBalance>>().await {

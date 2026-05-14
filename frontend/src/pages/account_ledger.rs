@@ -27,7 +27,6 @@ use crate::components::transaction_row::{TransactionGroup, TransactionRow};
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::pages::new_transaction::NewTransactionQuery;
 use crate::router::Route;
-use gloo_net::http::Request;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::requests::transaction::ReverseTransactionRequest;
 use shared_core::models::Account;
@@ -37,10 +36,12 @@ use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
 use shared_core::util::format_currency;
+use crate::api::Api;
 use crate::components::je_reversal_confirmation_modal::ReversalConfirmationModal;
 use crate::components::je_delete_confirmation_modal::DeleteConfirmationModal;
 use crate::components::report_options::ReportOptions;
 use crate::contexts::org_context::use_org_context;
+use crate::contexts::auth_context::use_user_context;
 
 #[derive(Debug, Properties, PartialEq)]
 pub struct AccountLedgerPageProps {
@@ -49,6 +50,7 @@ pub struct AccountLedgerPageProps {
 
 #[function_component(AccountLedgerPage)]
 pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
+    let user_ctx = use_user_context();
     let report_ctx = use_report_context();
     let org_ctx = use_org_context();
     let navigator = use_navigator().unwrap();
@@ -86,16 +88,20 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         let loading = loading.clone();
         let account_id = props.account_id;
         let report_ctx = use_report_context();
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
         Callback::from(move |()| {
             let entries = entries.clone();
             let error = error.clone();
             let loading = loading.clone();
             let start_date = report_ctx.date_range.start_date;
             let end_date = report_ctx.date_range.end_date;
+            let user_ctx = user_ctx.clone();
+            let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 loading.set(true);
                 let entries_url = format!("/api/accounts/{}/entries?start={}&end={}", account_id, start_date, end_date);
-                let fetched_entries = Request::get(&entries_url).send().await;
+                let fetched_entries = Api::get(&entries_url, user_ctx, navigator).await;
                 loading.set(false);
                 match fetched_entries {
                     Ok(response) if response.ok() => {
@@ -133,11 +139,15 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         let account_id = props.account_id;
         let fetch_entries = fetch_entries.clone();
         let report_ctx = use_report_context();
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
         use_effect_with((account_id, report_ctx.date_range.clone()), move |(account_id, _)| {
             let account_id = *account_id;
+            let user_ctx = user_ctx.clone();
+            let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 let acc_url = format!("/api/accounts/{}", account_id);
-                if let Ok(response) = Request::get(&acc_url).send().await {
+                if let Ok(response) = Api::get(&acc_url, user_ctx, navigator).await {
                     if let Ok(acc_data) = response.json::<Account>().await {
                         account.set(Some(acc_data));
                     }
@@ -153,33 +163,29 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         let fetch_entries = fetch_entries.clone();
         let error = error.clone();
         let transaction_id = transaction_to_reverse.as_ref().map(|t| t.transaction_id);
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
         Callback::from(move |description: String| {
             if let Some(id) = transaction_id {
                 let on_modal_close = on_modal_close.clone();
                 let fetch_entries = fetch_entries.clone();
                 let error = error.clone();
+                let user_ctx = user_ctx.clone();
+                let navigator = navigator.clone();
                 wasm_bindgen_futures::spawn_local(async move {
                     let url = format!("/api/transactions/{}/reverse", id);
                     let req_body = ReverseTransactionRequest { description };
-                    let resp = Request::post(&url)
-                        .json(&req_body)
-                        .map_err(|e| e.to_string());
+                    let resp = Api::post(&url, &req_body, user_ctx, navigator).await;
 
                     match resp {
-                        Ok(req) => {
-                            let resp = req.send().await;
-                            match resp {
-                                Ok(r) if r.ok() => {
-                                    on_modal_close.emit(());
-                                    fetch_entries.emit(());
-                                }
-                                Ok(r) => {
-                                    error.set(Some(format!("Failed to reverse transaction: {}", r.status())))
-                                }
-                                Err(e) => error.set(Some(format!("Network error: {}", e))),
-                            }
+                        Ok(r) if r.ok() => {
+                            on_modal_close.emit(());
+                            fetch_entries.emit(());
                         }
-                        Err(e) => error.set(Some(format!("Serialization error: {}", e))),
+                        Ok(r) => {
+                            error.set(Some(format!("Failed to reverse transaction: {}", r.status())))
+                        }
+                        Err(e) => error.set(Some(format!("Network error: {}", e))),
                     }
                 });
             }
@@ -191,14 +197,18 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         let fetch_entries = fetch_entries.clone();
         let error = error.clone();
         let transaction_id = transaction_to_delete.as_ref().map(|t| t.transaction_id);
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
         Callback::from(move |()| {
             if let Some(id) = transaction_id {
                 let on_modal_close = on_modal_close.clone();
                 let fetch_entries = fetch_entries.clone();
                 let error = error.clone();
+                let user_ctx = user_ctx.clone();
+                let navigator = navigator.clone();
                 wasm_bindgen_futures::spawn_local(async move {
                     let url = format!("/api/transactions/{}", id);
-                    let resp = Request::delete(&url).send().await;
+                    let resp = Api::delete(&url, user_ctx, navigator).await;
                     match resp {
                         Ok(r) if r.ok() => {
                             on_modal_close.emit(());

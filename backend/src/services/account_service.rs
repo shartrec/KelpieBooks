@@ -32,6 +32,7 @@ use uuid::Uuid;
 use chrono::{Local, NaiveDate};
 use sqlx::Acquire;
 use shared_core::models::{Account, SystemTag};
+use shared_core::requests::configuration::UpdateConfigurationRequest;
 
 pub async fn get_accounts(
     pool: &mut PgConnection,
@@ -192,4 +193,19 @@ pub async fn update_system_accounts(
     tx.commit().await?;
 
     Ok(resp)
+}
+
+pub async fn update_configuration(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    req: UpdateConfigurationRequest,
+) -> Result<(), ApiError> {
+    let mut tx = pool.begin().await?;
+
+    db::account::update_system_accounts(&mut tx, organization_id, req.system_accounts).await?;
+    db::organization::set_audit_mode(&mut tx, organization_id, req.strict_audit_mode).await?;
+
+    tx.commit().await?;
+
+    Ok(())
 }

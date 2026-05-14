@@ -23,18 +23,20 @@
  */
 
 use crate::components::layout::Layout;
-use gloo_net::http::Request;
-use shared_core::models::{Account, SystemTag};
+use shared_core::models::{Account, Organization, SystemTag};
 use std::collections::HashMap;
-use serde_json::json;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use crate::contexts::org_context::{OrgAction, OrgContextHandle};
+use crate::api::Api;
+use crate::contexts::auth_context::use_user_context;
+use crate::contexts::org_context::{OrgAction, OrgContextHandle, OrgState};
 use crate::router::Route;
+use shared_core::requests::configuration::UpdateConfigurationRequest;
 
 #[function_component(ConfigurationPage)]
 pub fn configuration_page() -> Html {
+    let user_ctx = use_user_context();
     let accounts = use_state(Vec::new);
     let system_accounts = use_state(HashMap::new);
     let org_ctx = use_context::<OrgContextHandle>().expect("OrgContext not found");
@@ -49,29 +51,42 @@ pub fn configuration_page() -> Html {
         let system_accounts = system_accounts.clone();
         let loading = loading.clone();
         let details_error = details_error.clone();
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
+        let org_ctx = org_ctx.clone();
 
         use_effect_with((), move |_| {
             let accounts = accounts.clone();
             let system_accounts = system_accounts.clone();
             let loading = loading.clone();
             let details_error = details_error.clone();
+            let user_ctx = user_ctx.clone();
+            let navigator = navigator.clone();
+            let org_ctx = org_ctx.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
                 loading.set(true);
-                let accounts_req = Request::get("/api/accounts").send();
-                let system_accounts_req = Request::get("/api/configurations/system-accounts").send();
-                let org_req = Request::get("/api/organization").send();
+                let accounts_req = Api::get("/api/accounts", user_ctx.clone(), navigator.clone()).await;
+                let system_accounts_req = Api::get("/api/configurations/system-accounts", user_ctx.clone(), navigator.clone()).await;
+                let org_req = Api::get("/api/organization", user_ctx, navigator).await;
 
-                match futures::join!(accounts_req, system_accounts_req, org_req) {
+                match (accounts_req, system_accounts_req, org_req) {
                     (Ok(acc_resp), Ok(sys_resp), Ok(org_resp)) => {
                         if acc_resp.ok() && sys_resp.ok() && org_resp.ok() {
                             let acc_data = acc_resp.json::<Vec<Account>>().await;
                             let sys_data = sys_resp.json::<HashMap<SystemTag, Uuid>>().await;
+                            let org_data = org_resp.json::<Organization>().await;
 
-                            match (acc_data, sys_data) {
-                                (Ok(acc), Ok(sys)) => {
+                            match (acc_data, sys_data, org_data) {
+                                (Ok(acc), Ok(sys), Ok(org)) => {
                                     accounts.set(acc);
                                     system_accounts.set(sys);
+                                    org_ctx.dispatch(OrgAction::SetOrg(OrgState {
+                                        id: org.id,
+                                        name: org.name,
+                                        strict_audit_mode: org.strict_audit_mode,
+                                        locked_until: org.locked_until,
+                                    }));
                                     details_error.set(None);
                                 }
                                 _ => details_error.set(Some("Failed to parse data".to_string())),
@@ -94,64 +109,39 @@ pub fn configuration_page() -> Html {
         let strict_audit_mode = strict_audit_mode.clone();
         let error_state = details_error.clone();
         let success_state = details_success.clone();
-        let org_id = org_ctx.id;
         let navigator = navigator.clone();
-
+        let user_ctx = user_ctx.clone();
 
         Callback::from(move |_| {
-            let system_accounts = system_accounts.clone();
+            let system_accounts = (*system_accounts).clone();
             let org_ctx = org_ctx.clone();
-            let strict_audit_mode = strict_audit_mode.clone();
+            let strict_audit_mode = *strict_audit_mode;
             let error_state = error_state.clone();
             let success_state = success_state.clone();
             let navigator = navigator.clone();
+            let user_ctx = user_ctx.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                let mut errors = vec![];
+                let req = UpdateConfigurationRequest {
+                    system_accounts,
+                    strict_audit_mode,
+                };
 
-                // Save system accounts
-                let sys_resp = Request::post("/api/configurations/system-accounts")
-                    .json(&*system_accounts)
-                    .unwrap()
-                    .send()
-                    .await;
+                let resp = Api::put("/api/configurations", &req, user_ctx, navigator.clone()).await;
 
-                match sys_resp {
+                match resp {
                     Ok(r) if r.ok() => {
-                        if let Ok(sys) = r.json::<HashMap<SystemTag, Uuid>>().await {
-                            system_accounts.set(sys);
-                        } else {
-                            errors.push("Failed to parse system accounts response.".to_string());
-                        }
+                        org_ctx.dispatch(OrgAction::UpdateAuditMode(strict_audit_mode));
+                        success_state.set(true);
+                        error_state.set(None);
+                        navigator.push(&Route::Dashboard);
                     }
                     Ok(r) => {
-                        errors.push(format!("Error saving system accounts: {}", r.status()));
+                        error_state.set(Some(format!("Error saving configuration: {}", r.status())));
                     }
                     Err(e) => {
-                        errors.push(format!("Network error saving system accounts: {}", e));
+                        error_state.set(Some(format!("Network error: {}", e)));
                     }
-                }
-
-                // Construct the update request
-                let res = Request::put(&format!("/api/organizations/{}/audit_mode", org_id))
-                    .json(&json!({ "strict_audit_mode": *strict_audit_mode }))
-                    .unwrap()
-                    .send()
-                    .await;
-
-                if res.is_ok() {
-                    // Update global state so the rest of the app reacts
-                    org_ctx.dispatch(OrgAction::UpdateAuditMode(*strict_audit_mode));
-                    navigator.push(&Route::Dashboard);
-                    // Optional: Add a "Saved!" notification logic here
-                }
-
-                if errors.is_empty() {
-                    success_state.set(true);
-                    error_state.set(None);
-                } else {
-                    success_state.set(false);
-                    error_state.set(Some(errors.join("\n")));
                 }
             });
         })

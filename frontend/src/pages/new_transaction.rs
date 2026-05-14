@@ -25,13 +25,14 @@ use crate::components::journal_entry_row::JournalEntryRow;
 use crate::components::layout::Layout;
 use crate::router::Route;
 use chrono::{Duration, NaiveDate};
-use gloo_net::http::Request;
 use serde::{Deserialize, Serialize};
 use shared_core::models::Account;
 use shared_core::requests::transaction::{CreateTransactionRequest, JournalEntryLine, UpdateTransactionRequest};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use crate::api::Api;
+use crate::contexts::auth_context::use_user_context;
 use crate::contexts::org_context::OrgContextHandle;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
@@ -49,6 +50,7 @@ pub struct NewTransactionQuery {
 
 #[function_component(NewTransactionPage)]
 pub fn new_transaction_page() -> Html {
+    let user_ctx = use_user_context();
     let request = use_state(CreateTransactionRequest::default);
     let edit_id = use_state(|| None::<Uuid>);
     let focus_index = use_state(|| None::<usize>);
@@ -63,6 +65,8 @@ pub fn new_transaction_page() -> Html {
         let edit_id_state = edit_id.clone();
         let postable_accounts = postable_accounts.clone();
         let from_account = from_account.clone();
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
 
         use_effect_with((), move |_| {
             let query = location.query::<NewTransactionQuery>().ok();
@@ -70,9 +74,11 @@ pub fn new_transaction_page() -> Html {
             let duplicate_from_id = query.as_ref().and_then(|q| q.duplicate_from);
             let edit_id = query.as_ref().and_then(|q| q.edit_id);
             edit_id_state.set(edit_id);
+            let user_ctx = user_ctx.clone();
+            let navigator = navigator.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                if let Ok(response) = Request::get("/api/accounts").send().await {
+                if let Ok(response) = Api::get("/api/accounts", user_ctx.clone(), navigator.clone()).await {
                     if let Ok(accounts) = response.json::<Vec<Account>>().await {
                         let postable = accounts
                             .into_iter()
@@ -85,7 +91,7 @@ pub fn new_transaction_page() -> Html {
 
                 if let Some(id) = from_account_id {
                     if let Ok(response) =
-                        Request::get(&format!("/api/accounts/{}", id)).send().await
+                        Api::get(&format!("/api/accounts/{}", id), user_ctx.clone(), navigator.clone()).await
                     {
                         if let Ok(acc) = response.json::<Account>().await {
                             from_account.set(Some(acc));
@@ -97,7 +103,7 @@ pub fn new_transaction_page() -> Html {
                 let transaction_id_to_load = edit_id.or(duplicate_from_id);
 
                 if let Some(id) = transaction_id_to_load {
-                    if let Ok(response) = Request::get(&format!("/api/transactions/{}", id)).send().await {
+                    if let Ok(response) = Api::get(&format!("/api/transactions/{}", id), user_ctx, navigator).await {
                         if let Ok(detail) = response.json::<shared_core::dtos::transaction_detail::TransactionDetail>().await {
                             new_req.date = detail.transaction.date;
                             new_req.reference = detail.transaction.reference;
@@ -172,6 +178,7 @@ pub fn new_transaction_page() -> Html {
         let request = request.clone();
         let navigator = navigator.clone();
         let edit_id = *edit_id;
+        let user_ctx = user_ctx.clone();
         Callback::from(move |e: SubmitEvent| {
             e.prevent_default();
             if is_balanced {
@@ -180,6 +187,7 @@ pub fn new_transaction_page() -> Html {
                     !entry.account_id.is_nil() && (entry.debit != 0 || entry.credit != 0)
                 });
                 let navigator = navigator.clone();
+                let user_ctx = user_ctx.clone();
 
                 if let Some(id) = edit_id {
                     // Update existing transaction
@@ -190,11 +198,7 @@ pub fn new_transaction_page() -> Html {
                         entries: req.entries.into_iter().map(|e| e.into()).collect(),
                     };
                     wasm_bindgen_futures::spawn_local(async move {
-                        let resp = Request::put(&format!("/api/transactions/{}", id))
-                            .json(&update_req)
-                            .unwrap()
-                            .send()
-                            .await;
+                        let resp = Api::put(&format!("/api/transactions/{}", id), &update_req, user_ctx, navigator.clone()).await;
                         if resp.is_ok() {
                             navigator.back();
                         } else {
@@ -204,11 +208,7 @@ pub fn new_transaction_page() -> Html {
                 } else {
                     // Create new transaction
                     wasm_bindgen_futures::spawn_local(async move {
-                        let resp = Request::post("/api/transactions")
-                            .json(&req)
-                            .unwrap()
-                            .send()
-                            .await;
+                        let resp = Api::post("/api/transactions", &req, user_ctx, navigator.clone()).await;
                         if resp.is_ok() {
                             navigator.back();
                         } else {

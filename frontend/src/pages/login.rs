@@ -87,18 +87,22 @@ pub fn login_page() -> Html {
     };
 
     html! {
-        <div class="login__page-contianer">
-            <h1>{"Please login"}</h1>
-            if !*is_login_success {
-                <LoginForm
-                    on_login={on_login_submit}
-                    error={(*error_state).clone()}
-                />
-            } else {
-                <div class="card">
-                    <p>{"Login successful, redirecting to your dashboard..."}</p>
+        <div class="login-wrapper">
+            <div class="login-card">
+                <div class="login-brand">
+                    // Pulling in your brand asset to establish identity
+                    <img src="/images/kelpiedog_120x120_transparent.png" alt="KelpieBooks Logo" class="login-logo" />
+                    <h1>{ "KelpieBooks" }</h1>
+                    <p class="subtitle">{ "SME Accounting Engine" }</p>
                 </div>
-            }
+                <LoginForm
+                        on_login={on_login_submit}
+                        error={(*error_state).clone()}
+                    />
+                <div class="login-footer">
+                    <p>{ "Need help? Contact your administrator." }</p>
+                </div>
+            </div>
         </div>
     }
 }
@@ -145,14 +149,18 @@ pub fn login_form(props: &LoginFormProps) -> Html {
     };
 
     html! {
-        <form onsubmit={on_submit} class="login__form">
-            <label>{"User Email: "}</label>
-            <input type="text" value={(*user_email).clone()} oninput={on_user_email_input} required=true autocomplete="username" />
-            <label>{"Password: "}</label>
-            <input type="password" value={(*password).clone()} oninput={on_password_input} required=true autocomplete="current-password" />
-            <div class="login__form__form-actions">
-                <button type="submit">{"Login"}</button>
+        <form onsubmit={on_submit} class="login-form">
+            <div class="input-field-group">
+                <label>{"User Email: "}</label>
+                <input type="text" value={(*user_email).clone()} oninput={on_user_email_input} required=true autocomplete="username" />
             </div>
+            <div class="input-field-group">
+                <label>{"Password: "}</label>
+                <input type="password" value={(*password).clone()} oninput={on_password_input} required=true autocomplete="current-password" />
+            </div>
+            <button type="submit" class="button-primary login-btn">
+                    { "Sign In" }
+            </button>
             if let Some(err) = error {
                 <div class="login__form__error">{err}</div>
             }
