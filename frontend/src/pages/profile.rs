@@ -28,7 +28,7 @@ use shared_core::dtos::user_detail::UserDetail;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 use crate::api::Api;
-use crate::contexts::auth_context::{use_user_context, UserContextHandle};
+use crate::contexts::auth_context::use_user_context;
 use crate::router::Route;
 
 #[derive(Clone, Serialize, Default, Debug)]

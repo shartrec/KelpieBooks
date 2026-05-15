@@ -29,6 +29,7 @@ use frontend::pages::balance_sheet::BalanceSheetPage;
 use frontend::pages::close_year::CloseYearPage;
 use frontend::pages::configuration::ConfigurationPage;
 use frontend::pages::dashboard::DashboardPage;
+use frontend::pages::general_ledger_report::GeneralLedgerReportPage;
 use frontend::pages::ledger::LedgerPage;
 use frontend::pages::login::LoginPage;
 use frontend::pages::new_transaction::NewTransactionPage;
@@ -128,6 +129,7 @@ fn switch(routes: Route) -> Html {
         Route::TrialBalance => html! { <TrialBalancePage /> },
         Route::ProfitLoss => html! { <ProfitLossPage /> },
         Route::BalanceSheet => html! { <BalanceSheetPage /> },
+        Route::GeneralLedger => html! { <GeneralLedgerReportPage /> },
         Route::AccountLedger { id } => html! { <AccountLedgerPage account_id={id} /> },
         Route::NewTransaction => html! { <NewTransactionPage /> },
         Route::CloseYear => html! { <CloseYearPage /> },

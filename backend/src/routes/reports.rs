@@ -31,6 +31,7 @@ use rocket::serde::json::Json;
 use rocket::{get, routes, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
 use shared_core::reports::balance_sheet::BalanceSheet;
 use crate::export::trial_balance_export::{generate_trial_balance_csv, generate_trial_balance_typst};
 use crate::export::profit_loss_export::{generate_profit_loss_csv, generate_profit_loss_typst};
@@ -38,9 +39,10 @@ use crate::export::balance_sheet_export::{generate_balance_sheet_csv, generate_b
 use crate::export::DownloadFile;
 use crate::export::utils::compile_typst_to_pdf;
 use rocket::http::ContentType;
+use uuid::Uuid;
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![get_profit_loss, get_balance_sheet, get_trial_balance, export_trial_balance, export_profit_loss, export_balance_sheet]
+    routes![get_profit_loss, get_balance_sheet, get_trial_balance, get_general_ledger, export_trial_balance, export_profit_loss, export_balance_sheet]
 }
 
 #[get("/api/reports/profit-loss?<start>&<end>")]
@@ -82,6 +84,28 @@ async fn get_trial_balance(
         .map_err(|_| ApiError::Invalid("Invalid date".to_string()))?;
 
     let report = report_service::get_trial_balance(&mut pool, user.organization_id, report_date).await?;
+    Ok(Json(report))
+}
+
+#[get("/api/reports/general-ledger?<start>&<end>&<accounts>&<min_amount>")]
+async fn get_general_ledger(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    start: String,
+    end: String,
+    accounts: Option<String>,
+    min_amount: Option<i64>,
+) -> Result<Json<Vec<GeneralLedgerLine>>, ApiError> {
+    let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
+        .map_err(|_| ApiError::Invalid("Invalid start date".to_string()))?;
+    let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
+        .map_err(|_| ApiError::Invalid("Invalid end date".to_string()))?;
+
+    let account_ids: Option<Vec<Uuid>> = accounts.map(|s| {
+        s.split(',').filter_map(|id| id.parse::<Uuid>().ok()).collect()
+    });
+
+    let report = report_service::get_general_ledger(&mut pool, user.organization_id, start_date, end_date, account_ids, min_amount).await?;
     Ok(Json(report))
 }
 

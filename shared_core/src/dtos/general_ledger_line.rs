@@ -22,18 +22,19 @@
  *
  */
 
-pub mod account_ledger;
-pub mod balance_sheet;
-pub mod dashboard;
-pub mod ledger;
-pub mod login;
-pub mod new_transaction;
-pub mod profit_loss;
-pub mod profile;
-pub mod register;
-pub mod trial_balance;
-pub mod style_guide;
-pub mod close_year;
-pub mod configuration;
-pub mod period_settings;
-pub mod general_ledger_report;
+use chrono::NaiveDate;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct GeneralLedgerLine {
+    pub transaction_id: Uuid,
+    pub journal_entry_id: Uuid,
+    pub date: NaiveDate,
+    pub account_id: Uuid,
+    pub account_name: String,
+    pub description: Option<String>,
+    pub debit: i64,
+    pub credit: i64,
+    pub balance: i64,
+}

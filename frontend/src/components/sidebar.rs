@@ -70,6 +70,7 @@ pub fn sidebar() -> Html {
                                 <li><Link<Route> to={Route::TrialBalance}>{ "Trial Balance" }</Link<Route>></li>
                                 <li><Link<Route> to={Route::ProfitLoss}>{ "Profit & Loss" }</Link<Route>></li>
                                 <li><Link<Route> to={Route::BalanceSheet}>{ "Balance Sheet" }</Link<Route>></li>
+                                <li><Link<Route> to={Route::GeneralLedger}>{ "General Ledger" }</Link<Route>></li>
                             </ul>
                         }
                     </li>

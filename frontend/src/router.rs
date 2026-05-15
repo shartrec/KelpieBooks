@@ -43,6 +43,8 @@ pub enum Route {
     ProfitLoss,
     #[at("/reports/balance-sheet")]
     BalanceSheet,
+    #[at("/reports/general-ledger")]
+    GeneralLedger,
     #[at("/accounts/:id")]
     AccountLedger { id: Uuid },
     #[at("/transactions/new")]

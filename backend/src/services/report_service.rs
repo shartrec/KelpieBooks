@@ -27,6 +27,7 @@ use crate::util::ApiError;
 use chrono::NaiveDate;
 use rocket_db_pools::sqlx::PgConnection;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
 use shared_core::models::AccountCategory;
 use shared_core::reports::balance_sheet::BalanceSheet;
 use std::collections::{HashMap, VecDeque};
@@ -357,6 +358,72 @@ pub async fn get_trial_balance(
             created_at: acc.created_at,
         })
         .collect();
+
+    Ok(result)
+}
+
+pub async fn get_general_ledger(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    start_date: NaiveDate,
+    end_date: NaiveDate,
+    account_ids: Option<Vec<Uuid>>,
+    min_amount: Option<i64>,
+) -> Result<Vec<GeneralLedgerLine>, ApiError> {
+    let account_ids = account_ids.unwrap_or_default();
+    let min_amount = min_amount.unwrap_or(0);
+
+    let rows = sqlx::query!(
+        r#"
+        SELECT
+            t.id as transaction_id,
+            je.id as journal_entry_id,
+            t.date,
+            a.id as account_id,
+            a.name as account_name,
+            je.description,
+            je.debit,
+            je.credit
+        FROM journal_entries je
+        JOIN transactions t ON je.transaction_id = t.id
+        JOIN accounts a ON je.account_id = a.id
+        WHERE t.organization_id = $1
+          AND t.date >= $2
+          AND t.date <= $3
+          AND a.category IN ('Revenue', 'Expense')
+          AND (CARDINALITY($4::uuid[]) = 0 OR a.id = ANY($4))
+          AND (je.debit >= $5 OR je.credit >= $5)
+        ORDER BY a.code ASC, t.date ASC
+        "#,
+        organization_id,
+        start_date,
+        end_date,
+        &account_ids,
+        min_amount
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::Internal(e.to_string()))?;
+
+    let mut result = Vec::new();
+    let mut balances: HashMap<Uuid, i64> = HashMap::new();
+
+    for row in rows {
+        let balance = balances.entry(row.account_id).or_insert(0);
+        *balance += row.debit - row.credit;
+
+        result.push(GeneralLedgerLine {
+            transaction_id: row.transaction_id,
+            journal_entry_id: row.journal_entry_id,
+            date: row.date,
+            account_id: row.account_id,
+            account_name: row.account_name,
+            description: row.description,
+            debit: row.debit,
+            credit: row.credit,
+            balance: *balance,
+        });
+    }
 
     Ok(result)
 }

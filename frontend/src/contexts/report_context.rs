@@ -25,6 +25,8 @@
 use yew::prelude::*;
 use chrono::{NaiveDate, Datelike};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+use std::collections::HashSet;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DateRange {
@@ -46,8 +48,11 @@ impl Default for DateRange {
 #[derive(Clone, Debug, PartialEq)]
 pub enum ReportAction {
     SetDateRange(DateRange),
+    SetSelectedAccounts(HashSet<Uuid>),
+    SetMinAmount(Option<i64>),
     SetOnExportCsv(Option<Callback<()>>),
     SetOnExportTypst(Option<Callback<()>>),
+    ToggleAccount(Uuid),
 }
 
 pub type ReportState = ReportContextData;
@@ -55,6 +60,8 @@ pub type ReportState = ReportContextData;
 #[derive(Clone, Debug, PartialEq)]
 pub struct ReportContextData {
     pub date_range: DateRange,
+    pub selected_accounts: HashSet<Uuid>,
+    pub min_amount: Option<i64>,
     pub on_export_csv: Option<Callback<()>>,
     pub on_export_pdf: Option<Callback<()>>,
 }
@@ -68,6 +75,8 @@ impl Default for ReportContextData {
             .unwrap_or_default();
         Self {
             date_range,
+            selected_accounts: HashSet::new(),
+            min_amount: None,
             on_export_csv: None,
             on_export_pdf: None,
         }
@@ -84,6 +93,30 @@ impl Reducible for ReportContextData {
                 let _ = storage.set_item("report_date_range", &serde_json::to_string(&date_range).unwrap());
                 Self {
                     date_range,
+                    ..(*self).clone()
+                }.into()
+            }
+            ReportAction::SetSelectedAccounts(selected_accounts) => {
+                Self {
+                    selected_accounts,
+                    ..(*self).clone()
+                }.into()
+            }
+            ReportAction::ToggleAccount(id) => {
+                let mut selected_accounts = (*self).selected_accounts.clone();
+                if selected_accounts.contains(&id) {
+                    selected_accounts.remove(&id);
+                } else {
+                    selected_accounts.insert(id);
+                }
+                Self {
+                    selected_accounts,
+                    ..(*self).clone()
+                }.into()
+            }
+            ReportAction::SetMinAmount(min_amount) => {
+                Self {
+                    min_amount,
                     ..(*self).clone()
                 }.into()
             }

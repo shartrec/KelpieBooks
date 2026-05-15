@@ -94,7 +94,7 @@ impl SystemTag {
 }
 
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct Account {
     pub id: Uuid,
     pub organization_id: Uuid,
