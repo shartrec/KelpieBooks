@@ -8,6 +8,12 @@ KelpieBooks is a modern, open-source accounting application designed for small t
 - **Frontend**: Rust, [Yew](https://yew.rs/), [WebAssembly](https://webassembly.org/)
 - **Database**: [PostgreSQL](https://www.postgresql.org/)
 
+## Why
+
+There is an ongoing need for good modern accounting systems in the *open source* eco-system. The mainstays of open source accounting, such as GnuCash, are starting to look old and tired, even though they still work well, although were very much single user systems.
+
+I feel it is time for something new built on today's technologies. Something that will fresh and modern and be designed from the ground up as **multi-user**.  
+
 ## Getting Started: A Guide for New Developers
 
 This guide will walk you through setting up your local development environment to build, run, and contribute to KelpieBooks.
