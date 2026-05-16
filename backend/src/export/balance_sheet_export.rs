@@ -27,6 +27,7 @@ use shared_core::reports::balance_sheet::BalanceSheet;
 use std::collections::HashMap;
 use chrono::NaiveDate;
 use uuid::Uuid;
+use shared_core::models::Organization;
 use shared_core::util::format_currency_typ;
 use crate::export::utils::{build_table_header, wrap_report_layout};
 
@@ -113,7 +114,7 @@ pub fn generate_balance_sheet_csv(balance_sheet: &BalanceSheet) -> String {
     csv_content
 }
 
-pub fn generate_balance_sheet_typst(balance_sheet: &BalanceSheet, report_date: NaiveDate) -> String {
+pub fn generate_balance_sheet_typst(balance_sheet: &BalanceSheet, report_date: &NaiveDate, org: &Option<Organization>) -> String {
     let asset_nodes = build_account_nodes(&balance_sheet.assets);
     let liability_nodes = build_account_nodes(&balance_sheet.liabilities);
     let equity_nodes = build_account_nodes(&balance_sheet.equity);
@@ -153,7 +154,8 @@ pub fn generate_balance_sheet_typst(balance_sheet: &BalanceSheet, report_date: N
 
     typst_content.push_str(")\n");
 
+    let name = org.as_ref().map(|o| o.name.as_str());
     let report_qual = format!("As at {}", report_date.format("%d %b %Y").to_string().as_str());
-    wrap_report_layout("Alice St", "Balance Sheet", &*report_qual, typst_content.as_str() )
+    wrap_report_layout(name, "Balance Sheet", &*report_qual, typst_content.as_str() )
 
 }

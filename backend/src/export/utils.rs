@@ -110,7 +110,7 @@ fn get_template() -> String
 
     // Header section inside the layout
     grid(
-        columns: (1fr, 1fr),
+        columns: (1fr, auto),
         text(size: 18pt, weight: "bold")[#title - #org_name],
         align(right + bottom)[#text(size: 10pt, style: "italic")[#report_qualifier]]
     )
@@ -123,7 +123,7 @@ template.to_string()
 }
 
 
-pub fn wrap_report_layout(org_name: &str, report_title: &str,  report_qualifier: &str,  body: &str) -> String {
+pub fn wrap_report_layout(org_name: Option<&str>, report_title: &str,  report_qualifier: &str,  body: &str) -> String {
 
 
     format!(
@@ -143,7 +143,7 @@ pub fn wrap_report_layout(org_name: &str, report_title: &str,  report_qualifier:
         {body}
         "#,
         template = get_template(),
-        org_name = org_name,
+        org_name = org_name.unwrap_or(""),
         report_title = report_title,
         report_qualifier = report_qualifier,
         body = body
@@ -161,13 +161,17 @@ pub fn compile_typst_to_pdf(source: String) -> Result<Vec<u8>, String> {
     // Run it
     let doc = template
         .compile()
-        .output
-        .expect("typst::compile() returned an error!");
-
-    // Create pdf
-    let options = Default::default();
-    let pdf = typst_pdf::pdf(&doc, &options)
-        .expect("Could not generate pdf.");
-    Ok(pdf)
+        .output;
+    match doc {
+        Ok(doc) => {
+            let options = Default::default();
+            let pdf = typst_pdf::pdf(&doc, &options)
+                .expect("Could not generate pdf.");
+            Ok(pdf)
+        }
+        Err(e) => {
+            Err(format!("typst::compile() returned an error!: {}", e))
+        }
+    }
 
 }

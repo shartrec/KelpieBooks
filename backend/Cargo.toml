@@ -25,6 +25,7 @@ typst-pdf = "0.14.2"
 typst = "0.14.2"
 derive_typst_intoval = "0.6"
 uuid = { workspace = true }
+csv = "1.4.0"
 
 
 [dependencies.rocket_db_pools]

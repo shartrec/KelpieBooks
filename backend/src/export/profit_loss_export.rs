@@ -23,7 +23,7 @@
  */
 
 use shared_core::dtos::account_with_balance::AccountWithBalance;
-use shared_core::models::AccountCategory;
+use shared_core::models::{AccountCategory, Organization};
 use std::collections::HashMap;
 use chrono::NaiveDate;
 use uuid::Uuid;
@@ -119,7 +119,7 @@ pub fn generate_profit_loss_csv(accounts: &[AccountWithBalance]) -> String {
     csv_content
 }
 
-pub fn generate_profit_loss_typst(accounts: &[AccountWithBalance], start_date: NaiveDate, end_date: NaiveDate) -> String {
+pub fn generate_profit_loss_typst(accounts: &[AccountWithBalance], start_date: &NaiveDate, end_date: &NaiveDate, org: &Option<Organization>) -> String {
     let (revenue_nodes, expense_nodes, net_income) = build_account_nodes(accounts);
     let mut typst_content = String::new();
     typst_content.push_str(&*build_table_header(&["Account", "", ""], &vec![false, true, true]));
@@ -152,6 +152,7 @@ pub fn generate_profit_loss_typst(accounts: &[AccountWithBalance], start_date: N
     typst_content.push_str(&format!("[*Net Income*], [], align(right)[{}]\n", format_currency_typ(&net_income)));
     typst_content.push_str(")\n");
 
+    let name = org.as_ref().map(|o| o.name.as_str());
     let report_qual = format!("Period {} - {}", start_date.format("%d %b %Y").to_string().as_str(), end_date.format("%d %b %Y").to_string().as_str());
-    wrap_report_layout("Alice St", "Profit & Loss", &*report_qual, typst_content.as_str() )
+    wrap_report_layout(name, "Profit & Loss", &*report_qual, typst_content.as_str() )
 }

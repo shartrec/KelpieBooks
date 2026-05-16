@@ -198,6 +198,7 @@ dependencies = [
  "base64 0.22.1",
  "bcrypt",
  "chrono",
+ "csv",
  "derive_typst_intoval",
  "jsonwebtoken",
  "log",

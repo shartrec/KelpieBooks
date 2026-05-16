@@ -140,6 +140,7 @@ async fn delete_account(
 #[get("/api/accounts/<id>/export/<format>?<start>&<end>")]
 async fn export_account_ledger(
     mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
     id: PathUuid,
     format: String,
     start: String,
@@ -153,6 +154,7 @@ async fn export_account_ledger(
     let account = account_db::get(&mut pool, *id).await?;
     if let Some(account) = account {
         let entries = account_service::get_journal_entries_with_running_balance(&mut pool, *id, start_date, end_date).await?;
+        let org = crate::db::organization::get(&mut pool, user.organization_id).await?;
 
         let (content, content_type, filename) = match format.as_str() {
             "csv" => {
@@ -160,7 +162,7 @@ async fn export_account_ledger(
                 (csv_data.into_bytes(), ContentType::CSV, "account_ledger.csv".to_string())
             }
             "pdf" => {
-                let typst_data = generate_ledger_typst(&entries, account.name.as_str(), start_date, end_date);
+                let typst_data = generate_ledger_typst(&entries, account.name.as_str(),  &start_date, &end_date, &org);
                 match compile_typst_to_pdf(typst_data) {
                     Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
                     Err(e) => return Err(ApiError::Internal(e)),

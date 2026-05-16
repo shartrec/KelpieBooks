@@ -23,38 +23,39 @@
  */
 use chrono::NaiveDate;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
+use shared_core::models::Organization;
+use shared_core::util::{format_currency_typ};
 use crate::export::utils::{build_table_header, wrap_report_layout};
 
-fn format_currency(amount: &i64) -> String {
-    format!("{:.2}", (*amount as f64) / 100.0)
-}
 
 pub fn generate_ledger_csv(entries: &[JournalEntryWithBalance]) -> String {
     let mut csv_content = String::new();
     csv_content.push_str("Date,Description,Debit,Credit,Balance\n");
     for entry in entries.iter() {
-        let debit = if entry.debit > 0 { format_currency(&entry.debit) } else { "".to_string() };
-        let credit = if entry.credit > 0 { format_currency(&entry.credit) } else { "".to_string() };
-        let balance = format_currency(&(entry.debit - entry.credit));
+        let debit = if entry.debit > 0 { format_currency_typ(&entry.debit) } else { "".to_string() };
+        let credit = if entry.credit > 0 { format_currency_typ(&entry.credit) } else { "".to_string() };
+        let balance = format_currency_typ(&(entry.debit - entry.credit));
         csv_content.push_str(&format!("{},\"{}\",{},{},{}\n", entry.date, entry.description.clone().unwrap_or_default(), debit, credit, balance));
     }
     csv_content
 }
 
-pub fn generate_ledger_typst(entries: &[JournalEntryWithBalance], account_name: &str, start_date: NaiveDate, end_date: NaiveDate) -> String {
+pub fn generate_ledger_typst(entries: &[JournalEntryWithBalance], account_name: &str, start_date: &NaiveDate, end_date: &NaiveDate, org: &Option<Organization>) -> String {
     let mut typst_content = String::new();
 
     typst_content.push_str(&*build_table_header(&["Date", "Description", "Debit", "Credit", "Balance"], &[false, false, true, true, true]));
 
     for entry in entries.iter() {
-        let debit = if entry.debit > 0 { format_currency(&entry.debit) } else { "".to_string() };
-        let credit = if entry.credit > 0 { format_currency(&entry.credit) } else { "".to_string() };
-        let balance = format_currency(&(entry.debit - entry.credit));
+        let debit = if entry.debit > 0 { format_currency_typ(&entry.debit) } else { "".to_string() };
+        let credit = if entry.credit > 0 { format_currency_typ(&entry.credit) } else { "".to_string() };
+        let balance = format_currency_typ(&(entry.debit - entry.credit));
         typst_content.push_str(&format!("[{}], [{}], align(right)[{}], align(right)[{}], align(right)[{}],\n", entry.date, entry.description.clone().unwrap_or_default(), debit, credit, balance));
     }
     typst_content.push_str(")\n");
+    let name = org.as_ref().map(|o| o.name.as_str());
+
     let report_qual = format!("Account {} for Period {} - {}",
         account_name,
         start_date.format("%d %b %Y").to_string().as_str(), end_date.format("%d %b %Y").to_string().as_str());
-    wrap_report_layout("Alice St", "Journal Entries", &*report_qual, typst_content.as_str() )
+    wrap_report_layout(name, "Journal Entries", &*report_qual, typst_content.as_str() )
 }

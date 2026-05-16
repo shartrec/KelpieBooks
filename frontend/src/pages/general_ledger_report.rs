@@ -24,7 +24,7 @@
 
 use crate::components::layout::Layout;
 use crate::components::report_options::ReportOptions;
-use crate::contexts::report_context::use_report_context;
+use crate::contexts::report_context::{use_report_context, ReportAction};
 use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
 use yew::prelude::*;
 use crate::api::Api;
@@ -41,6 +41,40 @@ pub fn general_ledger_report_page() -> Html {
     let report_data = use_state(|| Vec::<GeneralLedgerLine>::new());
     let loading = use_state(|| true);
     let error = use_state(|| None::<String>);
+
+    {
+        let report_ctx = report_ctx.clone();
+        use_effect_with((), move |_| {
+            let start_date = report_ctx.date_range.start_date;
+            let end_date = report_ctx.date_range.end_date;
+            let selected_accounts = report_ctx.selected_accounts.clone();
+            let min_amount = report_ctx.min_amount;
+
+            let mut url_params = format!("start={}&end={}", start_date, end_date);
+            if !selected_accounts.is_empty() {
+                let account_ids = selected_accounts.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(",");
+                url_params.push_str(&format!("&accounts={}", account_ids));
+            }
+            if let Some(amount) = min_amount {
+                url_params.push_str(&format!("&min_amount={}", amount));
+            }
+
+            let csv_url = format!("/api/reports/general-ledger/export/csv?{}", url_params);
+            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(move |_| {
+                web_sys::window().unwrap().location().set_href(&csv_url).unwrap();
+            }))));
+
+            let pdf_url = format!("/api/reports/general-ledger/export/pdf?{}", url_params);
+            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(move |_| {
+                web_sys::window().unwrap().location().set_href(&pdf_url).unwrap();
+            }))));
+
+            move || {
+                report_ctx.dispatch(ReportAction::SetOnExportCsv(None));
+                report_ctx.dispatch(ReportAction::SetOnExportTypst(None));
+            }
+        });
+    }
 
     {
         let report_data = report_data.clone();

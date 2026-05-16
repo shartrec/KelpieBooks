@@ -23,7 +23,7 @@
  */
 
 use shared_core::dtos::account_with_balance::AccountWithBalance;
-use shared_core::models::AccountCategory;
+use shared_core::models::{AccountCategory, Organization};
 use std::collections::HashMap;
 use chrono::NaiveDate;
 use uuid::Uuid;
@@ -116,7 +116,7 @@ pub fn generate_trial_balance_csv(accounts: &[AccountWithBalance]) -> String {
     csv_content
 }
 
-pub fn generate_trial_balance_typst(accounts: &[AccountWithBalance], report_date: NaiveDate) -> String {
+pub fn generate_trial_balance_typst(accounts: &[AccountWithBalance], report_date: &NaiveDate, org: &Option<Organization>) -> String {
     let account_nodes = build_account_nodes(accounts);
     let (total_debit, total_credit) = AccountWithBalance::calculate_totals(accounts);
 
@@ -153,7 +153,8 @@ pub fn generate_trial_balance_typst(accounts: &[AccountWithBalance], report_date
     typst_content.push_str(&format!("  [*Total*], align(right)[*{}*], align(right)[*{}*],\n", (total_debit as f64) / 100.0, (total_credit as f64) / 100.0));
     typst_content.push_str(")\n");
 
+    let name = org.as_ref().map(|o| o.name.as_str());
     let report_qual = format!("As at {}", report_date.format("%d %b %Y").to_string().as_str());
-    wrap_report_layout("Alice St", "Trial Balance", &*report_qual, typst_content.as_str() )
+    wrap_report_layout(name, "Trial Balance", &*report_qual, typst_content.as_str() )
 
 }
