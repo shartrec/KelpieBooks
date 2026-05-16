@@ -23,12 +23,13 @@
  */
 
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::models::Account;
-use shared_core::models::{AccountCategory, SystemTag};
+use shared_core::models::account::Account;
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 use std::collections::HashMap;
 use std::str::FromStr;
 use uuid::Uuid;
+use shared_core::models::account_category::AccountCategory;
+use shared_core::models::system_tag::SystemTag;
 
 fn from_row_to_account(row: &sqlx::postgres::PgRow) -> Account {
     let category_str: String = row.get("category");

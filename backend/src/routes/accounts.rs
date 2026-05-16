@@ -14,7 +14,7 @@ use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest}
 use crate::export::DownloadFile;
 use crate::export::account_ledger_export::{generate_ledger_csv, generate_ledger_typst};
 use rocket::http::ContentType;
-use shared_core::models::Account;
+use shared_core::models::account::Account;
 use crate::export::utils::compile_typst_to_pdf;
 
 pub(crate) fn routes() -> Vec<Route> {

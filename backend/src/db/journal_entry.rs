@@ -25,8 +25,8 @@
 use chrono::{DateTime, NaiveDate, Utc};
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use shared_core::dtos::journal_entry_detail::JournalEntryDetail;
-use shared_core::models::JournalEntry;
 use uuid::Uuid;
+use shared_core::models::journal_entry::JournalEntry;
 
 pub(crate) struct JournalEntryWithDate {
     pub id: Uuid,

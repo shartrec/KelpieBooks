@@ -28,7 +28,7 @@ use chrono::NaiveDate;
 use rocket_db_pools::sqlx::PgConnection;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
-use shared_core::models::AccountCategory;
+use shared_core::models::account_category::AccountCategory;
 use shared_core::reports::balance_sheet::BalanceSheet;
 use std::collections::{HashMap, VecDeque};
 use uuid::Uuid;

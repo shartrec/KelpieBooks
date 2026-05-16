@@ -24,10 +24,11 @@
 
 use rocket_db_pools::sqlx::{self, PgConnection};
 use serde::Deserialize;
-use shared_core::models::{AccountCategory, SystemTag};
 use sqlx::Row;
 use std::collections::HashMap;
 use uuid::Uuid;
+use shared_core::models::account_category::AccountCategory;
+use shared_core::models::system_tag::SystemTag;
 
 /// Represents the top-level structure of a TOML template file.
 #[derive(Debug, Deserialize)]

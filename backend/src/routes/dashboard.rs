@@ -8,7 +8,7 @@ use chrono::{Datelike, Local, NaiveDate};
 use rocket_db_pools::Connection;
 use crate::routes::security::AuthenticatedUser;
 use crate::DbKelpie;
-use shared_core::models::{AccountCategory, SystemTag};
+use shared_core::models::{account_category::AccountCategory, system_tag::SystemTag};
 use crate::db::transaction::get_recent_transactions as get_recent_transactions_from_db;
 use crate::db::journal_entry::get_all_by_transaction;
 use crate::services::report_service::{get_profit_loss, get_expense_breakdown as get_expense_breakdown_from_service};

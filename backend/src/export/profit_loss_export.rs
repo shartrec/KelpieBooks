@@ -23,7 +23,7 @@
  */
 
 use shared_core::dtos::account_with_balance::AccountWithBalance;
-use shared_core::models::{AccountCategory, Organization};
+use shared_core::models::{account_category::AccountCategory, organization::Organization};
 use std::collections::HashMap;
 use chrono::NaiveDate;
 use uuid::Uuid;

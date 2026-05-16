@@ -26,7 +26,7 @@ use crate::components::layout::Layout;
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::router::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
-use shared_core::models::AccountCategory;
+use shared_core::models::account_category::AccountCategory;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use uuid::Uuid;

@@ -27,7 +27,7 @@ use shared_core::reports::balance_sheet::BalanceSheet;
 use std::collections::HashMap;
 use chrono::NaiveDate;
 use uuid::Uuid;
-use shared_core::models::Organization;
+use shared_core::models::organization::Organization;
 use shared_core::util::format_currency_typ;
 use crate::export::utils::{build_table_header, wrap_report_layout};
 

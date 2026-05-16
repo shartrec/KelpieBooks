@@ -24,7 +24,7 @@
 
 use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
 use chrono::NaiveDate;
-use shared_core::models::Organization;
+use shared_core::models::organization::Organization;
 use shared_core::util::format_currency_typ;
 use crate::export::utils::{build_table_header, wrap_report_layout};
 

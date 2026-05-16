@@ -46,7 +46,7 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 use frontend::contexts::org_context::{OrgAction, OrgContextHandle, OrgState};
 use frontend::pages::style_guide::StyleGuide;
-use shared_core::models::Organization;
+use shared_core::models::organization::Organization;
 
 /// The component that contains the router and switches between pages.
 #[function_component(AppRouter)]

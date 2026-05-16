@@ -23,7 +23,7 @@
  */
 use chrono::NaiveDate;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
-use shared_core::models::Organization;
+use shared_core::models::organization::Organization;
 use shared_core::util::{format_currency_typ};
 use crate::export::utils::{build_table_header, wrap_report_layout};
 

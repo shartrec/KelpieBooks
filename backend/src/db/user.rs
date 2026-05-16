@@ -22,8 +22,9 @@
  *
  */
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::models::{User, UserWithOrg};
 use uuid::Uuid;
+use shared_core::models::user::User;
+use shared_core::models::user_with_org::UserWithOrg;
 
 fn from_row_to_user_with_org(row: &sqlx::postgres::PgRow) -> UserWithOrg {
     UserWithOrg {

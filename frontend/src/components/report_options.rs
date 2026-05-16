@@ -26,11 +26,12 @@
 use yew::prelude::*;
 use chrono::NaiveDate;
 use crate::contexts::report_context::{ReportContext, ReportAction};
-use shared_core::models::{Account, AccountCategory};
 use uuid::Uuid;
 use crate::api::Api;
 use crate::contexts::auth_context::use_user_context;
 use yew_router::prelude::use_navigator;
+use shared_core::models::account::Account;
+use shared_core::models::account_category::AccountCategory;
 use crate::components::currency_input::CurrencyInput;
 
 #[derive(Properties, PartialEq)]

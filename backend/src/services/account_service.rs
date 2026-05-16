@@ -31,7 +31,7 @@ use std::collections::{HashMap, VecDeque};
 use uuid::Uuid;
 use chrono::{Local, NaiveDate};
 use sqlx::Acquire;
-use shared_core::models::{Account, SystemTag};
+use shared_core::models::{account::Account, system_tag::SystemTag};
 use shared_core::requests::configuration::UpdateConfigurationRequest;
 
 pub async fn get_accounts(

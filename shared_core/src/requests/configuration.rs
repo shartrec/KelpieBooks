@@ -25,7 +25,7 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::models::SystemTag;
+use crate::models::system_tag::SystemTag;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateConfigurationRequest {

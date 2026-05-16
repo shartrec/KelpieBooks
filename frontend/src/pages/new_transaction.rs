@@ -26,7 +26,7 @@ use crate::components::layout::Layout;
 use crate::router::Route;
 use chrono::{Duration, NaiveDate};
 use serde::{Deserialize, Serialize};
-use shared_core::models::Account;
+use shared_core::models::account::Account;
 use shared_core::requests::transaction::{CreateTransactionRequest, JournalEntryLine, UpdateTransactionRequest};
 use uuid::Uuid;
 use yew::prelude::*;

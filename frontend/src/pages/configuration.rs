@@ -23,11 +23,13 @@
  */
 
 use crate::components::layout::Layout;
-use shared_core::models::{Account, Organization, SystemTag};
 use std::collections::HashMap;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
+use shared_core::models::account::Account;
+use shared_core::models::organization::Organization;
+use shared_core::models::system_tag::SystemTag;
 use crate::api::Api;
 use crate::contexts::auth_context::use_user_context;
 use crate::contexts::org_context::{OrgAction, OrgContextHandle, OrgState};

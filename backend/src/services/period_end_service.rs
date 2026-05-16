@@ -26,7 +26,7 @@ use crate::db;
 use crate::util::ApiError;
 use chrono::NaiveDate;
 use rocket_db_pools::sqlx::PgConnection;
-use shared_core::models::AccountCategory;
+use shared_core::models::account_category::AccountCategory;
 use uuid::Uuid;
 
 pub async fn close_financial_year(

@@ -26,7 +26,7 @@ use rocket::serde::json::Json;
 use rocket::{get, put, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::organization::{AuditModeRequest, LockDateRequest};
-use shared_core::models::Organization;
+use shared_core::models::organization::Organization;
 use crate::db;
 use crate::util::ApiError;
 use crate::DbKelpie;
