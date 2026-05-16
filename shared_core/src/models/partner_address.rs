@@ -22,18 +22,24 @@
  *
  */
 
-pub mod user_with_org;
-pub mod invoice_status;
-pub mod patner;
-pub mod vendor_invoice;
-pub mod vendor_payment;
-pub mod organization;
-pub mod user;
-pub mod account_category;
-pub mod system_tag;
-pub mod account;
-pub mod transaction;
-pub mod journal_entry;
-pub mod address_type;
-pub mod partner_address;
-pub mod partner_contact;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+use crate::models::address_type::AddressType;
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+pub struct PartnerAddress {
+    pub id: Uuid,
+    pub organization_id: Uuid,
+    pub partner_id: Uuid,
+    pub address_type: AddressType,
+    pub is_primary: bool,
+    pub address_line1: String,
+    pub address_line2: Option<String>,
+    pub city: String,
+    pub state_province: Option<String>,
+    pub postal_code: Option<String>,
+    pub country: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}

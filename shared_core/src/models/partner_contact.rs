@@ -22,18 +22,21 @@
  *
  */
 
-pub mod user_with_org;
-pub mod invoice_status;
-pub mod patner;
-pub mod vendor_invoice;
-pub mod vendor_payment;
-pub mod organization;
-pub mod user;
-pub mod account_category;
-pub mod system_tag;
-pub mod account;
-pub mod transaction;
-pub mod journal_entry;
-pub mod address_type;
-pub mod partner_address;
-pub mod partner_contact;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+pub struct PartnerContact {
+    pub id: Uuid,
+    pub organization_id: Uuid,
+    pub partner_id: Uuid,
+    pub is_primary: bool,
+    pub first_name: String,
+    pub last_name: String,
+    pub email: Option<String>,
+    pub phone: Option<String>,
+    pub role_title: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}

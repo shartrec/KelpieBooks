@@ -22,18 +22,26 @@
  *
  */
 
-pub mod user_with_org;
-pub mod invoice_status;
-pub mod patner;
-pub mod vendor_invoice;
-pub mod vendor_payment;
-pub mod organization;
-pub mod user;
-pub mod account_category;
-pub mod system_tag;
-pub mod account;
-pub mod transaction;
-pub mod journal_entry;
-pub mod address_type;
-pub mod partner_address;
-pub mod partner_contact;
+use serde::{Deserialize, Serialize};
+use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
+
+#[derive(Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
+#[strum(serialize_all = "PascalCase")]
+pub enum AddressType {
+    Billing,
+    Shipping,
+    General,
+}
+
+impl AddressType {
+    pub fn iterator() -> impl Iterator<Item = Self> {
+        Self::iter()
+    }
+    pub fn DisplayName(&self) -> String {
+        match self {
+            AddressType::Billing => "Billing".to_string(),
+            AddressType::Shipping => "Shipping".to_string(),
+            AddressType::General => "General".to_string(),
+        }
+    }
+}
