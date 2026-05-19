@@ -3,6 +3,8 @@ pub mod general_view;
 pub mod address_edit_card;
 pub mod contact_edit_card;
 pub mod contacts_view;
+pub mod delete_address_confirmation_modal;
+pub mod delete_contact_confirmation_modal;
 
 use yew::prelude::*;
 use shared_core::models::partner::Partner;
@@ -13,6 +15,9 @@ use crate::components::partner_drawer::contacts_view::ContactsView;
 use crate::components::partner_drawer::general_view::GeneralView;
 use shared_core::requests::partner::UpdatePartnerRequest;
 use uuid::Uuid;
+use crate::api::Api;
+use crate::contexts::auth_context::use_user_context;
+use yew_router::prelude::use_navigator;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DrawerTab {
@@ -27,47 +32,17 @@ pub struct PartnerDrawerProps {
     pub partner_addresses: Vec<PartnerAddress>,
     pub partner_contacts: Vec<PartnerContact>,
     pub on_close: Callback<()>,
-    pub on_submit: Callback<UpdatePartnerRequest>,
+    pub on_change: Callback<()>,
     pub ap_accounts: Vec<(Uuid, String)>,
     pub ar_accounts: Vec<(Uuid, String)>,
 }
 
 #[function_component(PartnerDrawer)]
 pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
+    let user_ctx = use_user_context();
+    let navigator = use_navigator().unwrap();
     let active_tab = use_state(|| DrawerTab::General);
-    let request = use_state(|| UpdatePartnerRequest {
-        legal_name: props.partner.legal_name.clone(),
-        trade_name: props.partner.trade_name.clone(),
-        tax_identifier: props.partner.tax_identifier.clone(),
-        is_vendor: props.partner.is_vendor,
-        is_customer: props.partner.is_customer,
-        default_ap_account_id: props.partner.default_ap_account_id,
-        default_ar_account_id: props.partner.default_ar_account_id,
-        addresses: props.partner_addresses.clone(),
-        contacts: props.partner_contacts.clone(),
-    });
-
-    {
-        let request = request.clone();
-        let props_partner = props.partner.clone();
-        let props_addresses = props.partner_addresses.clone();
-        let props_contacts = props.partner_contacts.clone();
-
-        use_effect_with((props_partner, props_addresses, props_contacts), move |(partner, addresses, contacts)| {
-            request.set(UpdatePartnerRequest {
-                legal_name: partner.legal_name.clone(),
-                trade_name: partner.trade_name.clone(),
-                tax_identifier: partner.tax_identifier.clone(),
-                is_vendor: partner.is_vendor,
-                is_customer: partner.is_customer,
-                default_ap_account_id: partner.default_ap_account_id,
-                default_ar_account_id: partner.default_ar_account_id,
-                addresses: addresses.clone(),
-                contacts: contacts.clone(),
-            });
-            || ()
-        });
-    }
+    let error = use_state(|| None::<String>);
 
     let set_tab = {
         let active_tab = active_tab.clone();
@@ -83,36 +58,27 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
         })
     };
 
-    let on_change = {
-        let request = request.clone();
+    let on_general_submit = {
+        let on_change = props.on_change.clone();
+        let partner_id = props.partner.id;
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
+        let error = error.clone();
         Callback::from(move |req: UpdatePartnerRequest| {
-            request.set(req);
-        })
-    };
-
-    let on_addresses_change = {
-        let request = request.clone();
-        Callback::from(move |addresses: Vec<PartnerAddress>| {
-            let mut req = (*request).clone();
-            req.addresses = addresses;
-            request.set(req);
-        })
-    };
-
-    let on_contacts_change = {
-        let request = request.clone();
-        Callback::from(move |contacts: Vec<PartnerContact>| {
-            let mut req = (*request).clone();
-            req.contacts = contacts;
-            request.set(req);
-        })
-    };
-
-    let on_submit = {
-        let on_submit = props.on_submit.clone();
-        let request = request.clone();
-        Callback::from(move |_| {
-            on_submit.emit((*request).clone());
+            let on_change = on_change.clone();
+            let user_ctx = user_ctx.clone();
+            let navigator = navigator.clone();
+            let error = error.clone();
+            wasm_bindgen_futures::spawn_local(async move {
+                let resp = Api::put(&format!("/api/partners/{}", partner_id), &req, user_ctx, navigator).await;
+                match resp {
+                    Ok(r) if r.ok() => {
+                        on_change.emit(());
+                    }
+                    Ok(r) => error.set(Some(format!("Failed to save partner: {}", r.status()))),
+                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                }
+            });
         })
     };
 
@@ -144,24 +110,36 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
                     </button>
                 </div>
                 <div class="partner-drawer__content">
+                    if let Some(e) = &*error {
+                        <div class="error">{e}</div>
+                    }
                     {
                         match *active_tab {
                             DrawerTab::General => html! {
                                 <GeneralView
-                                    request={(*request).clone()}
-                                    on_change={on_change}
+                                    partner={props.partner.clone()}
+                                    on_submit={on_general_submit}
                                     ap_accounts={props.ap_accounts.clone()}
                                     ar_accounts={props.ar_accounts.clone()}
                                 />
                             },
-                            DrawerTab::Addresses => html! { <AddressesView addresses={request.addresses.clone()} on_addresses_change={on_addresses_change} /> },
-                            DrawerTab::Contacts => html! { <ContactsView contacts={request.contacts.clone()} on_contacts_change={on_contacts_change} /> },
+                            DrawerTab::Addresses => html! { <AddressesView
+                                addresses={props.partner_addresses.clone()}
+                                on_change={props.on_change.clone()}
+                                partner_id={props.partner.id}
+                                />
+                            },
+                            DrawerTab::Contacts => html! { <ContactsView
+                                contacts={props.partner_contacts.clone()}
+                                on_change={props.on_change.clone()}
+                                partner_id={props.partner.id}
+                                />
+                            },
                         }
                     }
                 </div>
                 <footer class="partner-drawer__footer">
-                    <button class="button-secondary" onclick={on_close.clone()}>{ "Cancel" }</button>
-                    <button class="button-primary" onclick={on_submit}>{ "Save Partner" }</button>
+                    <button class="button-secondary" onclick={on_close.clone()}>{ "Close" }</button>
                 </footer>
             </div>
         </div>

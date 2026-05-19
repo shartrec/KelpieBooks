@@ -31,7 +31,7 @@ use yew_router::prelude::use_navigator;
 use crate::components::add_partner_modal::AddPartnerModal;
 use crate::components::delete_partner_confirmation_modal::DeletePartnerConfirmationModal;
 use crate::components::partner_drawer::PartnerDrawer;
-use shared_core::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
+use shared_core::requests::partner::CreatePartnerRequest;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::models::account_category::AccountCategory;
 use uuid::Uuid;
@@ -204,31 +204,12 @@ pub fn partner_list_table() -> Html {
         })
     };
 
-    let on_edit_submit = {
-        let on_modal_close = on_modal_close.clone();
-        let error = error.clone();
-        let fetch_data = fetch_data.clone();
+    let on_partner_change = {
         let partner_id = partner_to_edit.as_ref().map(|p| p.id);
-        let user_ctx = user_ctx.clone();
-        let navigator = navigator.clone();
-        Callback::from(move |req: UpdatePartnerRequest| {
+        let on_edit_click = on_edit_click.clone();
+        Callback::from(move |()| {
             if let Some(id) = partner_id {
-                let on_modal_close = on_modal_close.clone();
-                let error = error.clone();
-                let fetch_data = fetch_data.clone();
-                let user_ctx = user_ctx.clone();
-                let navigator = navigator.clone();
-                wasm_bindgen_futures::spawn_local(async move {
-                    let resp = Api::put(&format!("/api/partners/{}", id), &req, user_ctx, navigator).await;
-                    match resp {
-                        Ok(r) if r.ok() => {
-                            on_modal_close.emit(());
-                            fetch_data.emit(());
-                        }
-                        Ok(r) => error.set(Some(format!("Failed to update partner: {}", r.status()))),
-                        Err(e) => error.set(Some(format!("Network error: {}", e))),
-                    }
-                });
+                on_edit_click.emit(id);
             }
         })
     };
@@ -292,7 +273,7 @@ pub fn partner_list_table() -> Html {
                     partner_addresses={(*partner_addresses).clone()}
                     partner_contacts={(*partner_contacts).clone()}
                     on_close={on_modal_close.clone()}
-                    on_submit={on_edit_submit}
+                    on_change={on_partner_change}
                     ap_accounts={ap_accounts.clone()}
                     ar_accounts={ar_accounts.clone()}
                 />

@@ -11,6 +11,7 @@ use shared_core::models::partner_address::PartnerAddress;
 use shared_core::models::partner_contact::PartnerContact;
 use shared_core::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
 use crate::services::partner_service;
+use uuid::Uuid;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -21,6 +22,12 @@ pub(crate) fn routes() -> Vec<Route> {
         create_partner,
         update_partner,
         delete_partner,
+        create_address,
+        update_address,
+        delete_address,
+        create_contact,
+        update_contact,
+        delete_contact,
     ]
 }
 
@@ -95,4 +102,76 @@ async fn delete_partner(
     }
 
     Ok("Partner deleted successfully.")
+}
+
+#[post("/api/partners/<partner_id>/addresses", data = "<address>")]
+async fn create_address(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    partner_id: PathUuid,
+    address: Json<PartnerAddress>,
+) -> Result<Json<PartnerAddress>, ApiError> {
+    let new_address = partner_service::create_address(&mut pool, user.organization_id, *partner_id, &address).await?;
+    Ok(Json(new_address))
+}
+
+#[put("/api/partners/<_partner_id>/addresses/<address_id>", data = "<address>")]
+async fn update_address(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    _partner_id: PathUuid,
+    address_id: PathUuid,
+    address: Json<PartnerAddress>,
+) -> Result<Json<PartnerAddress>, ApiError> {
+    let updated_address = partner_service::update_address(&mut pool, user.organization_id, *address_id, &address).await?;
+    Ok(Json(updated_address))
+}
+
+#[delete("/api/partners/<_partner_id>/addresses/<address_id>")]
+async fn delete_address(
+    mut pool: Connection<DbKelpie>,
+    _partner_id: PathUuid,
+    address_id: PathUuid,
+) -> Result<&'static str, ApiError> {
+    let rows_affected = partner_service::delete_address(&mut pool, *address_id).await?;
+    if rows_affected == 0 {
+        return Err(ApiError::NotFound("Address not found.".to_string()));
+    }
+    Ok("Address deleted successfully.")
+}
+
+#[post("/api/partners/<partner_id>/contacts", data = "<contact>")]
+async fn create_contact(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    partner_id: PathUuid,
+    contact: Json<PartnerContact>,
+) -> Result<Json<PartnerContact>, ApiError> {
+    let new_contact = partner_service::create_contact(&mut pool, user.organization_id, *partner_id, &contact).await?;
+    Ok(Json(new_contact))
+}
+
+#[put("/api/partners/<_partner_id>/contacts/<contact_id>", data = "<contact>")]
+async fn update_contact(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    _partner_id: PathUuid,
+    contact_id: PathUuid,
+    contact: Json<PartnerContact>,
+) -> Result<Json<PartnerContact>, ApiError> {
+    let updated_contact = partner_service::update_contact(&mut pool, user.organization_id, *contact_id, &contact).await?;
+    Ok(Json(updated_contact))
+}
+
+#[delete("/api/partners/<_partner_id>/contacts/<contact_id>")]
+async fn delete_contact(
+    mut pool: Connection<DbKelpie>,
+    _partner_id: PathUuid,
+    contact_id: PathUuid,
+) -> Result<&'static str, ApiError> {
+    let rows_affected = partner_service::delete_contact(&mut pool, *contact_id).await?;
+    if rows_affected == 0 {
+        return Err(ApiError::NotFound("Contact not found.".to_string()));
+    }
+    Ok("Contact deleted successfully.")
 }

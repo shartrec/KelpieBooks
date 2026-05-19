@@ -58,14 +58,6 @@ pub async fn update_partner(
 ) -> Result<Partner, ApiError> {
     let mut tx = pool.begin().await?;
     let updated_partner = partner_db::update(&mut tx, partner_id, req).await?;
-    partner_db::delete_addresses(&mut tx, partner_id).await?;
-    for address in &req.addresses {
-        partner_db::insert_address(&mut tx, organization_id, partner_id, address).await?;
-    }
-    partner_db::delete_contacts(&mut tx, partner_id).await?;
-    for contact in &req.contacts {
-        partner_db::insert_contact(&mut tx, organization_id, partner_id, contact).await?;
-    }
     tx.commit().await?;
     Ok(updated_partner)
 }
@@ -75,5 +67,61 @@ pub async fn delete_partner(
     partner_id: Uuid,
 ) -> Result<u64, ApiError> {
     let rows_affected = partner_db::delete(pool, partner_id).await?;
+    Ok(rows_affected)
+}
+
+pub async fn create_address(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    partner_id: Uuid,
+    address: &PartnerAddress,
+) -> Result<PartnerAddress, ApiError> {
+    let new_address = partner_db::insert_address(pool, organization_id, partner_id, address).await?;
+    Ok(new_address)
+}
+
+pub async fn update_address(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    address_id: Uuid,
+    address: &PartnerAddress,
+) -> Result<PartnerAddress, ApiError> {
+    let updated_address = partner_db::update_address(pool, organization_id, address_id, address).await?;
+    Ok(updated_address)
+}
+
+pub async fn delete_address(
+    pool: &mut PgConnection,
+    address_id: Uuid,
+) -> Result<u64, ApiError> {
+    let rows_affected = partner_db::delete_address(pool, address_id).await?;
+    Ok(rows_affected)
+}
+
+pub async fn create_contact(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    partner_id: Uuid,
+    contact: &PartnerContact,
+) -> Result<PartnerContact, ApiError> {
+    let new_contact = partner_db::insert_contact(pool, organization_id, partner_id, contact).await?;
+    Ok(new_contact)
+}
+
+pub async fn update_contact(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    contact_id: Uuid,
+    contact: &PartnerContact,
+) -> Result<PartnerContact, ApiError> {
+    let updated_contact = partner_db::update_contact(pool, organization_id, contact_id, contact).await?;
+    Ok(updated_contact)
+}
+
+pub async fn delete_contact(
+    pool: &mut PgConnection,
+    contact_id: Uuid,
+) -> Result<u64, ApiError> {
+    let rows_affected = partner_db::delete_contact(pool, contact_id).await?;
     Ok(rows_affected)
 }

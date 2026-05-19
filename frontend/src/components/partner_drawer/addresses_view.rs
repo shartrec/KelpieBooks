@@ -27,6 +27,10 @@ use shared_core::models::partner_address::PartnerAddress;
 use shared_core::models::address_type::AddressType;
 use uuid::Uuid;
 use crate::components::partner_drawer::address_edit_card::AddressEditCard;
+use crate::components::partner_drawer::delete_address_confirmation_modal::DeleteAddressConfirmationModal;
+use crate::api::Api;
+use crate::contexts::auth_context::use_user_context;
+use yew_router::prelude::use_navigator;
 
 #[derive(Clone, Debug, PartialEq)]
 enum EditState {
@@ -38,22 +42,17 @@ enum EditState {
 #[derive(Properties, PartialEq)]
 pub struct AddressesViewProps {
     pub addresses: Vec<PartnerAddress>,
-    pub on_addresses_change: Callback<Vec<PartnerAddress>>,
+    pub partner_id: Uuid,
+    pub on_change: Callback<()>,
 }
 
 #[function_component(AddressesView)]
 pub fn addresses_view(props: &AddressesViewProps) -> Html {
+    let user_ctx = use_user_context();
+    let navigator = use_navigator().unwrap();
     let editing_state = use_state(|| EditState::None);
-    let local_addresses = use_state(|| props.addresses.clone());
-
-    {
-        let local_addresses = local_addresses.clone();
-        let props_addresses = props.addresses.clone();
-        use_effect_with(props_addresses, move |props_addresses| {
-            local_addresses.set(props_addresses.clone());
-            || ()
-        });
-    }
+    let address_to_delete = use_state(|| None::<PartnerAddress>);
+    let error = use_state(|| None::<String>);
 
     let on_add_click = {
         let editing_state = editing_state.clone();
@@ -72,29 +71,70 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
 
     let on_save = {
         let editing_state = editing_state.clone();
-        let local_addresses = local_addresses.clone();
-        let on_addresses_change = props.on_addresses_change.clone();
+        let on_change = props.on_change.clone();
+        let partner_id = props.partner_id;
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
+        let error = error.clone();
         Callback::from(move |address: PartnerAddress| {
-            let mut addresses = (*local_addresses).clone();
-            if let Some(pos) = addresses.iter().position(|a| a.id == address.id) {
-                addresses[pos] = address;
-            } else {
-                addresses.push(address);
-            }
-            local_addresses.set(addresses.clone());
-            on_addresses_change.emit(addresses);
-            editing_state.set(EditState::None);
+            let on_change = on_change.clone();
+            let editing_state = editing_state.clone();
+            let user_ctx = user_ctx.clone();
+            let navigator = navigator.clone();
+            let error = error.clone();
+            let is_new = *editing_state == EditState::Adding;
+            wasm_bindgen_futures::spawn_local(async move {
+                let resp = if is_new {
+                    Api::post(&format!("/api/partners/{}/addresses", partner_id), &address, user_ctx, navigator).await
+                } else {
+                    Api::put(&format!("/api/partners/{}/addresses/{}", partner_id, address.id), &address, user_ctx, navigator).await
+                };
+                match resp {
+                    Ok(r) if r.ok() => {
+                        on_change.emit(());
+                        editing_state.set(EditState::None);
+                    }
+                    Ok(r) => error.set(Some(format!("Failed to save address: {}", r.status()))),
+                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                }
+            });
         })
     };
 
-    let on_delete = |id: Uuid| {
-        let local_addresses = local_addresses.clone();
-        let on_addresses_change = props.on_addresses_change.clone();
+    let on_delete_click = |address: PartnerAddress| {
+        let address_to_delete = address_to_delete.clone();
         Callback::from(move |_| {
-            let mut addresses = (*local_addresses).clone();
-            addresses.retain(|a| a.id != id);
-            local_addresses.set(addresses.clone());
-            on_addresses_change.emit(addresses);
+            address_to_delete.set(Some(address.clone()));
+        })
+    };
+
+    let on_delete_confirm = {
+        let address_to_delete = address_to_delete.clone();
+        let on_change = props.on_change.clone();
+        let partner_id = props.partner_id;
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
+        let error = error.clone();
+        Callback::from(move |_: ()| {
+            if let Some(address) = &*address_to_delete {
+                let on_change = on_change.clone();
+                let address_to_delete = address_to_delete.clone();
+                let user_ctx = user_ctx.clone();
+                let navigator = navigator.clone();
+                let error = error.clone();
+                let address_id = address.id;
+                wasm_bindgen_futures::spawn_local(async move {
+                    let resp = Api::delete(&format!("/api/partners/{}/addresses/{}", partner_id, address_id), user_ctx, navigator).await;
+                    match resp {
+                        Ok(r) if r.ok() => {
+                            on_change.emit(());
+                            address_to_delete.set(None);
+                        }
+                        Ok(r) => error.set(Some(format!("Failed to delete address: {}", r.status()))),
+                        Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    }
+                });
+            }
         })
     };
 
@@ -104,72 +144,62 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
                 <button class="button-primary" onclick={on_add_click} disabled={*editing_state != EditState::None}>{ "Add Address" }</button>
             </div>
 
+            if let Some(e) = &*error {
+                <div class="error">{e}</div>
+            }
+
             { if *editing_state == EditState::Adding {
                 html!{ <AddressEditCard address={None} on_save={on_save.clone()} on_cancel={on_cancel.clone()} /> }
             } else { html!{} }}
 
             <div class="card-grid">
-                { for (*local_addresses).iter().map(|address| {
+                { for props.addresses.iter().map(|address| {
                     if *editing_state == EditState::Editing(address.id) {
                         html!{ <AddressEditCard address={address.clone()} on_save={on_save.clone()} on_cancel={on_cancel.clone()} /> }
                     } else {
-
-                        let mut card_classes = vec!["card"];
-                        if address.is_primary && address.address_type == AddressType::Billing {
-                            card_classes.push("card--primary-billing");
-                        } else if address.is_primary && address.address_type == AddressType::Shipping {
-                            card_classes.push("card--primary-shipping");
+                        let mut card_class = classes!("card");
+                        if address.is_primary {
+                            match address.address_type {
+                                AddressType::Billing => card_class.push("card--primary-billing"),
+                                AddressType::Shipping => card_class.push("card--primary-shipping"),
+                                _ => {}
+                            }
                         }
 
-                        let badge_class = match address.address_type {
-                            AddressType::Billing => "badge badge--billing",
-                            AddressType::Shipping => "badge badge--shipping",
-                            AddressType::General => "badge",
-                        };
-
                         html! {
-                            <div class={classes!(card_classes)}>
-                                <div class="card__content-wrapper">
-
-                                    // Meta Row houses Type, Primary Flag, and Actions side-by-side
-                                    <div class="card__meta-line">
-                                        <div class="card__title">
-                                            <span class={badge_class}>{ address.address_type.to_string() }</span>
-                                            if address.is_primary {
-                                                <span class="badge" style="background-color: #333; color: white;">{ "Primary" }</span>
-                                            }
-                                        </div>
-
-                                        // Actions sit tightly pinned on the top right
-                                        <div class="card__actions">
-                                            <button class="icon-button" onclick={on_edit_click(address.id)} disabled={*editing_state != EditState::None}>
-                                                <img src="/images/edit.svg" alt="Edit" />
-                                            </button>
-                                            <button class="icon-button" onclick={on_delete(address.id)} disabled={*editing_state != EditState::None}>
-                                                <img src="/images/delete.svg" alt="Delete" />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    // Consolidated address body values
-                                    <p class="card__address-text"><strong>{ &address.address_line1 }</strong></p>
+                            <div class={card_class}>
+                                <div class="card__header">
+                                    <h5>{ address.address_type.to_string() }</h5>
+                                    if address.is_primary {
+                                        <span class="badge badge--primary">{ "Primary" }</span>
+                                    }
+                                </div>
+                                <div class="card__body">
+                                    <p>{ &address.address_line1 }</p>
                                     if let Some(line2) = &address.address_line2 {
                                         if !line2.is_empty() {
-                                            <p class="card__address-text">{ line2 }</p>
+                                            <p>{ line2 }</p>
                                         }
                                     }
-                                    <p class="card__address-text">
-                                        { format!("{}, {} {}", address.city, address.state_province.as_deref().unwrap_or(""), address.postal_code.as_deref().unwrap_or("")) }
-                                    </p>
-                                    <p class="card__address-text" style="font-size: 0.75rem; color: var(--text-color-light);">
-                                        { &address.country }
-                                    </p>
+                                    <p>{ format!("{}, {} {}", address.city, address.state_province.as_deref().unwrap_or(""), address.postal_code.as_deref().unwrap_or("")) }</p>
+                                    <p>{ &address.country }</p>
+                                </div>
+                                <div class="card__footer">
+                                    <button class="icon-button" onclick={on_edit_click(address.id)} disabled={*editing_state != EditState::None}>
+                                        <img src="/images/edit.svg" alt="Edit" />
+                                    </button>
+                                    <button class="icon-button" onclick={on_delete_click(address.clone())} disabled={*editing_state != EditState::None}>
+                                        <img src="/images/delete.svg" alt="Delete" />
+                                    </button>
                                 </div>
                             </div>
                         }
                     }
                 })}
             </div>
+            if let Some(address) = &*address_to_delete {
+                <DeleteAddressConfirmationModal address={address.clone()} on_close={Callback::from(move |_| address_to_delete.set(None))} on_confirm={on_delete_confirm} />
+            }
         </div>
     }
 }

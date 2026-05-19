@@ -26,6 +26,10 @@ use yew::prelude::*;
 use shared_core::models::partner_contact::PartnerContact;
 use uuid::Uuid;
 use crate::components::partner_drawer::contact_edit_card::ContactEditCard;
+use crate::components::partner_drawer::delete_contact_confirmation_modal::DeleteContactConfirmationModal;
+use crate::api::Api;
+use crate::contexts::auth_context::use_user_context;
+use yew_router::prelude::use_navigator;
 
 #[derive(Clone, Debug, PartialEq)]
 enum EditState {
@@ -37,22 +41,17 @@ enum EditState {
 #[derive(Properties, PartialEq)]
 pub struct ContactsViewProps {
     pub contacts: Vec<PartnerContact>,
-    pub on_contacts_change: Callback<Vec<PartnerContact>>,
+    pub partner_id: Uuid,
+    pub on_change: Callback<()>,
 }
 
 #[function_component(ContactsView)]
 pub fn contacts_view(props: &ContactsViewProps) -> Html {
+    let user_ctx = use_user_context();
+    let navigator = use_navigator().unwrap();
     let editing_state = use_state(|| EditState::None);
-    let local_contacts = use_state(|| props.contacts.clone());
-
-    {
-        let local_contacts = local_contacts.clone();
-        let props_contacts = props.contacts.clone();
-        use_effect_with(props_contacts, move |props_contacts| {
-            local_contacts.set(props_contacts.clone());
-            || ()
-        });
-    }
+    let contact_to_delete = use_state(|| None::<PartnerContact>);
+    let error = use_state(|| None::<String>);
 
     let on_add_click = {
         let editing_state = editing_state.clone();
@@ -71,29 +70,70 @@ pub fn contacts_view(props: &ContactsViewProps) -> Html {
 
     let on_save = {
         let editing_state = editing_state.clone();
-        let local_contacts = local_contacts.clone();
-        let on_contacts_change = props.on_contacts_change.clone();
+        let on_change = props.on_change.clone();
+        let partner_id = props.partner_id;
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
+        let error = error.clone();
         Callback::from(move |contact: PartnerContact| {
-            let mut contacts = (*local_contacts).clone();
-            if let Some(pos) = contacts.iter().position(|c| c.id == contact.id) {
-                contacts[pos] = contact;
-            } else {
-                contacts.push(contact);
-            }
-            local_contacts.set(contacts.clone());
-            on_contacts_change.emit(contacts);
-            editing_state.set(EditState::None);
+            let on_change = on_change.clone();
+            let editing_state = editing_state.clone();
+            let user_ctx = user_ctx.clone();
+            let navigator = navigator.clone();
+            let error = error.clone();
+            let is_new = *editing_state == EditState::Adding;
+            wasm_bindgen_futures::spawn_local(async move {
+                let resp = if is_new {
+                    Api::post(&format!("/api/partners/{}/contacts", partner_id), &contact, user_ctx, navigator).await
+                } else {
+                    Api::put(&format!("/api/partners/{}/contacts/{}", partner_id, contact.id), &contact, user_ctx, navigator).await
+                };
+                match resp {
+                    Ok(r) if r.ok() => {
+                        on_change.emit(());
+                        editing_state.set(EditState::None);
+                    }
+                    Ok(r) => error.set(Some(format!("Failed to save contact: {}", r.status()))),
+                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                }
+            });
         })
     };
 
-    let on_delete = |id: Uuid| {
-        let local_contacts = local_contacts.clone();
-        let on_contacts_change = props.on_contacts_change.clone();
+    let on_delete_click = |contact: PartnerContact| {
+        let contact_to_delete = contact_to_delete.clone();
         Callback::from(move |_| {
-            let mut contacts = (*local_contacts).clone();
-            contacts.retain(|c| c.id != id);
-            local_contacts.set(contacts.clone());
-            on_contacts_change.emit(contacts);
+            contact_to_delete.set(Some(contact.clone()));
+        })
+    };
+
+    let on_delete_confirm = {
+        let contact_to_delete = contact_to_delete.clone();
+        let on_change = props.on_change.clone();
+        let partner_id = props.partner_id;
+        let user_ctx = user_ctx.clone();
+        let navigator = navigator.clone();
+        let error = error.clone();
+        Callback::from(move |_: ()| {
+            if let Some(contact) = &*contact_to_delete {
+                let on_change = on_change.clone();
+                let contact_to_delete = contact_to_delete.clone();
+                let user_ctx = user_ctx.clone();
+                let navigator = navigator.clone();
+                let error = error.clone();
+                let contact_id = contact.id;
+                wasm_bindgen_futures::spawn_local(async move {
+                    let resp = Api::delete(&format!("/api/partners/{}/contacts/{}", partner_id, contact_id), user_ctx, navigator).await;
+                    match resp {
+                        Ok(r) if r.ok() => {
+                            on_change.emit(());
+                            contact_to_delete.set(None);
+                        }
+                        Ok(r) => error.set(Some(format!("Failed to delete contact: {}", r.status()))),
+                        Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    }
+                });
+            }
         })
     };
 
@@ -103,12 +143,16 @@ pub fn contacts_view(props: &ContactsViewProps) -> Html {
                 <button class="button-primary" onclick={on_add_click} disabled={*editing_state != EditState::None}>{ "Add Contact" }</button>
             </div>
 
+            if let Some(e) = &*error {
+                <div class="error">{e}</div>
+            }
+
             { if *editing_state == EditState::Adding {
                 html!{ <ContactEditCard contact={None} on_save={on_save.clone()} on_cancel={on_cancel.clone()} /> }
             } else { html!{} }}
 
             <div class="card-grid">
-                { for (*local_contacts).iter().map(|contact| {
+                { for props.contacts.iter().map(|contact| {
                     if *editing_state == EditState::Editing(contact.id) {
                         html!{ <ContactEditCard contact={contact.clone()} on_save={on_save.clone()} on_cancel={on_cancel.clone()} /> }
                     } else {
@@ -119,37 +163,33 @@ pub fn contacts_view(props: &ContactsViewProps) -> Html {
 
                         html! {
                             <div class={card_class}>
-                                <div class="card__content-wrapper">
-
-                                    // Meta Row houses Type, Primary Flag, and Actions side-by-side
-                                    <div class="card__meta-line">
-                                        <div class="card__title">
-                                            if contact.is_primary {
-                                                <span class="badge" style="background-color: #333; color: white;">{ "Primary" }</span>
-                                            }
-                                        </div>
-
-                                        // Actions sit tightly pinned on the top right
-                                        <div class="card__actions">
-                                            <button class="icon-button" onclick={on_edit_click(contact.id)} disabled={*editing_state != EditState::None}>
-                                                <img src="/images/edit.svg" alt="Edit" />
-                                            </button>
-                                            <button class="icon-button" onclick={on_delete(contact.id)} disabled={*editing_state != EditState::None}>
-                                                <img src="/images/delete.svg" alt="Delete" />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <h5>{ format!("{} - ( {} )", contact.first_name, contact.last_name) }</h5>
+                                <div class="card__header">
+                                    <h5>{ format!("{} {}", contact.first_name, contact.last_name) }</h5>
+                                    if contact.is_primary {
+                                        <span class="badge badge--contact">{ "Primary" }</span>
+                                    }
                                 </div>
-                                <p class="card__address-text">{ contact.role_title.as_deref().unwrap_or("No role specified") }</p>
-                                <p class="card__address-text">{ contact.email.as_deref().unwrap_or("") }</p>
-                                <p class="card__address-text">{ contact.phone.as_deref().unwrap_or("") }</p>
+                                <div class="card__body">
+                                    <p>{ contact.role_title.as_deref().unwrap_or("No role specified") }</p>
+                                    <p>{ contact.email.as_deref().unwrap_or("") }</p>
+                                    <p>{ contact.phone.as_deref().unwrap_or("") }</p>
+                                </div>
+                                <div class="card__footer">
+                                    <button class="icon-button" onclick={on_edit_click(contact.id)} disabled={*editing_state != EditState::None}>
+                                        <img src="/images/edit.svg" alt="Edit" />
+                                    </button>
+                                    <button class="icon-button" onclick={on_delete_click(contact.clone())} disabled={*editing_state != EditState::None}>
+                                        <img src="/images/delete.svg" alt="Delete" />
+                                    </button>
+                                </div>
                             </div>
                         }
                     }
                 })}
             </div>
+            if let Some(contact) = &*contact_to_delete {
+                <DeleteContactConfirmationModal contact={contact.clone()} on_close={Callback::from(move |_| contact_to_delete.set(None))} on_confirm={on_delete_confirm} />
+            }
         </div>
     }
 }

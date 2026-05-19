@@ -1,4 +1,4 @@
-use rocket_db_pools::sqlx::{self, PgConnection, Row, Acquire};
+use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use shared_core::models::partner::Partner;
 use shared_core::models::partner_address::PartnerAddress;
 use shared_core::models::partner_contact::PartnerContact;
@@ -197,14 +197,14 @@ pub(crate) async fn delete_addresses(pool: &mut PgConnection, partner_id: Uuid) 
     Ok(())
 }
 
-pub(crate) async fn insert_address(pool: &mut PgConnection, organization_id: Uuid, partner_id: Uuid, address: &PartnerAddress) -> Result<(), sqlx::Error> {
-    sqlx::query(
+pub(crate) async fn insert_address(pool: &mut PgConnection, organization_id: Uuid, partner_id: Uuid, address: &PartnerAddress) -> Result<PartnerAddress, sqlx::Error> {
+    let row = sqlx::query(
         r#"
-        INSERT INTO partner_addresses (id, organization_id, partner_id, address_type, is_primary, address_line1, address_line2, city, state_province, postal_code, country)
-        VALUES ($1, $2, $3, $4::address_type, $5, $6, $7, $8, $9, $10, $11)
+        INSERT INTO partner_addresses (organization_id, partner_id, address_type, is_primary, address_line1, address_line2, city, state_province, postal_code, country)
+        VALUES ($1, $2, $3::address_type, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING id, organization_id, partner_id, address_type::TEXT, is_primary, address_line1, address_line2, city, state_province, postal_code, country, created_at, updated_at
         "#,
     )
-    .bind(address.id)
     .bind(organization_id)
     .bind(partner_id)
     .bind(address.address_type.to_string())
@@ -215,9 +215,41 @@ pub(crate) async fn insert_address(pool: &mut PgConnection, organization_id: Uui
     .bind(&address.state_province)
     .bind(&address.postal_code)
     .bind(&address.country)
-    .execute(pool)
+    .fetch_one(pool)
     .await?;
-    Ok(())
+    Ok(from_row_to_partner_address(&row))
+}
+
+pub(crate) async fn update_address(pool: &mut PgConnection, organization_id: Uuid, address_id: Uuid, address: &PartnerAddress) -> Result<PartnerAddress, sqlx::Error> {
+    let row = sqlx::query(
+        r#"
+        UPDATE partner_addresses
+        SET address_type = $1::address_type, is_primary = $2, address_line1 = $3, address_line2 = $4, city = $5, state_province = $6, postal_code = $7, country = $8
+        WHERE id = $9 AND organization_id = $10
+        RETURNING id, organization_id, partner_id, address_type::TEXT, is_primary, address_line1, address_line2, city, state_province, postal_code, country, created_at, updated_at
+        "#,
+    )
+    .bind(address.address_type.to_string())
+    .bind(address.is_primary)
+    .bind(&address.address_line1)
+    .bind(&address.address_line2)
+    .bind(&address.city)
+    .bind(&address.state_province)
+    .bind(&address.postal_code)
+    .bind(&address.country)
+    .bind(address_id)
+    .bind(organization_id)
+    .fetch_one(pool)
+    .await?;
+    Ok(from_row_to_partner_address(&row))
+}
+
+pub(crate) async fn delete_address(pool: &mut PgConnection, id: Uuid) -> Result<u64, sqlx::Error> {
+    let result = sqlx::query("DELETE FROM partner_addresses WHERE id = $1")
+        .bind(id)
+        .execute(pool)
+        .await?;
+    Ok(result.rows_affected())
 }
 
 pub(crate) async fn delete_contacts(pool: &mut PgConnection, partner_id: Uuid) -> Result<(), sqlx::Error> {
@@ -228,14 +260,14 @@ pub(crate) async fn delete_contacts(pool: &mut PgConnection, partner_id: Uuid) -
     Ok(())
 }
 
-pub(crate) async fn insert_contact(pool: &mut PgConnection, organization_id: Uuid, partner_id: Uuid, contact: &PartnerContact) -> Result<(), sqlx::Error> {
-    sqlx::query(
+pub(crate) async fn insert_contact(pool: &mut PgConnection, organization_id: Uuid, partner_id: Uuid, contact: &PartnerContact) -> Result<PartnerContact, sqlx::Error> {
+    let row = sqlx::query(
         r#"
-        INSERT INTO partner_contacts (id, organization_id, partner_id, is_primary, first_name, last_name, email, phone, role_title)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        INSERT INTO partner_contacts (organization_id, partner_id, is_primary, first_name, last_name, email, phone, role_title)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING *
         "#,
     )
-    .bind(contact.id)
     .bind(organization_id)
     .bind(partner_id)
     .bind(contact.is_primary)
@@ -244,7 +276,37 @@ pub(crate) async fn insert_contact(pool: &mut PgConnection, organization_id: Uui
     .bind(&contact.email)
     .bind(&contact.phone)
     .bind(&contact.role_title)
-    .execute(pool)
+    .fetch_one(pool)
     .await?;
-    Ok(())
+    Ok(from_row_to_partner_contact(&row))
+}
+
+pub(crate) async fn update_contact(pool: &mut PgConnection, organization_id: Uuid, contact_id: Uuid, contact: &PartnerContact) -> Result<PartnerContact, sqlx::Error> {
+    let row = sqlx::query(
+        r#"
+        UPDATE partner_contacts
+        SET is_primary = $1, first_name = $2, last_name = $3, email = $4, phone = $5, role_title = $6
+        WHERE id = $7 AND organization_id = $8
+        RETURNING *
+        "#,
+    )
+    .bind(contact.is_primary)
+    .bind(&contact.first_name)
+    .bind(&contact.last_name)
+    .bind(&contact.email)
+    .bind(&contact.phone)
+    .bind(&contact.role_title)
+    .bind(contact_id)
+    .bind(organization_id)
+    .fetch_one(pool)
+    .await?;
+    Ok(from_row_to_partner_contact(&row))
+}
+
+pub(crate) async fn delete_contact(pool: &mut PgConnection, id: Uuid) -> Result<u64, sqlx::Error> {
+    let result = sqlx::query("DELETE FROM partner_contacts WHERE id = $1")
+        .bind(id)
+        .execute(pool)
+        .await?;
+    Ok(result.rows_affected())
 }

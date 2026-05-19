@@ -21,6 +21,7 @@
  *      Trevor Campbell
  *
  */
+@use '../abstracts/variables' as *;
 
 /* Transaction Form Styles */
 .transaction {
@@ -51,7 +52,7 @@
       font-weight: bold;
     }
     &__balanced {
-      color: var(--success-color);
+      color: $color-success;
       padding: 0 1rem;
       border-radius: 4px;
       background-color: #eafaf1;

@@ -37,7 +37,7 @@ pub struct ContactEditCardProps {
 pub fn contact_edit_card(props: &ContactEditCardProps) -> Html {
     let contact_state = use_state(|| {
         props.contact.clone().unwrap_or_else(|| PartnerContact {
-            id: uuid::Uuid::new_v4(),
+            id: Uuid::nil(),
             organization_id: Uuid::nil(),
             partner_id: Uuid::nil(),
             created_at: chrono::Utc::now(),

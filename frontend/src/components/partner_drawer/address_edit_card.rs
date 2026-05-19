@@ -38,7 +38,7 @@ pub struct AddressEditCardProps {
 pub fn address_edit_card(props: &AddressEditCardProps) -> Html {
     let address_state = use_state(|| {
         props.address.clone().unwrap_or_else(|| PartnerAddress {
-            id: uuid::Uuid::new_v4(),
+            id: Uuid::nil(),
             organization_id: Uuid::nil(),
             partner_id: Uuid::nil(),
             created_at: chrono::Utc::now(),
