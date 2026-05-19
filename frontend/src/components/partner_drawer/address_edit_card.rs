@@ -112,42 +112,36 @@ pub fn address_edit_card(props: &AddressEditCardProps) -> Html {
 
             <div class="card-form-compact">
                 // Full-width entry 1
-                <div class="form-group-compact">
-                    <input type="text" placeholder="Address Line 1" value={address_state.address_line1.clone()} oninput={on_input(|a, v| a.address_line1 = v)} />
-                </div>
+                <label>{"Addr line 1:"}</label>
+                <input type="text" placeholder="Address Line 1" value={address_state.address_line1.clone()} oninput={on_input(|a, v| a.address_line1 = v)} />
 
-                // Full-width entry 2
-                <div class="form-group-compact">
-                    <input type="text" placeholder="Address Line 2 (Optional)" value={address_state.address_line2.clone().unwrap_or_default()} oninput={on_input(|a, v| a.address_line2 = Some(v))} />
-                </div>
+                <label>{"Addr line 1:"}</label>
+                <input type="text" placeholder="Address Line 2 (Optional)" value={address_state.address_line2.clone().unwrap_or_default()} oninput={on_input(|a, v| a.address_line2 = Some(v))} />
 
                 // Row split: City & State side-by-side
-                <div class="form-row-compact">
-                    <input type="text" placeholder="City" value={address_state.city.clone()} oninput={on_input(|a, v| a.city = v)} />
-                    <input type="text" placeholder="State" value={address_state.state_province.clone().unwrap_or_default()} oninput={on_input(|a, v| a.state_province = Some(v))} />
-                </div>
+                <label>{"City:"}</label>
+                <input type="text" placeholder="City" value={address_state.city.clone()} oninput={on_input(|a, v| a.city = v)} />
+                <label>{"State:"}</label>
+                <input type="text" placeholder="State" value={address_state.state_province.clone().unwrap_or_default()} oninput={on_input(|a, v| a.state_province = Some(v))} />
 
                 // Row split: Postcode & Country side-by-side
-                <div class="form-row-compact">
-                    <input type="text" placeholder="Postcode" value={address_state.postal_code.clone().unwrap_or_default()} oninput={on_input(|a, v| a.postal_code = Some(v))} />
-                    <input type="text" placeholder="Country" value={address_state.country.clone()} oninput={on_input(|a, v| a.country = v)} />
+                <label>{"Post Code:"}</label>
+                <input type="text" placeholder="Postcode" value={address_state.postal_code.clone().unwrap_or_default()} oninput={on_input(|a, v| a.postal_code = Some(v))} />
+                <label>{"Country:"}</label>
+                <input type="text" placeholder="Country" value={address_state.country.clone()} oninput={on_input(|a, v| a.country = v)} />
+                <label>{"Country:"}</label>
+                <div class="select-wrapper-compact">
+                    <select onchange={on_select_change}>
+                        { for AddressType::iterator().map(|t| html!{
+                            <option value={t.to_string()} selected={address_state.address_type == t}>{t.display_name()}</option>
+                        })}
+                    </select>
                 </div>
 
-                // Controls row configuration
-                <div class="form-row-compact" style="align-items: center; margin-top: 0.25rem;">
-                    <div class="select-wrapper-compact">
-                        <select onchange={on_select_change}>
-                            { for AddressType::iterator().map(|t| html!{
-                                <option value={t.to_string()} selected={address_state.address_type == t}>{t.display_name()}</option>
-                            })}
-                        </select>
-                    </div>
-
-                    <label class="checkbox-label-compact" for="is_primary">
-                        <input type="checkbox" id="is_primary" checked={address_state.is_primary} onchange={on_primary_change} />
-                        <span>{"Primary"}</span>
-                    </label>
-                </div>
+                <label class="checkbox-label-compact" for="is_primary">
+                    <input type="checkbox" id="is_primary" checked={address_state.is_primary} onchange={on_primary_change} />
+                    <span>{"Primary"}</span>
+                </label>
             </div>
 
             // Tightly bundled actionable context footer links

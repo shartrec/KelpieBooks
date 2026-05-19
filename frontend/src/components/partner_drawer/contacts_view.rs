@@ -140,7 +140,7 @@ pub fn contacts_view(props: &ContactsViewProps) -> Html {
                                         </div>
                                     </div>
 
-                                    <h5>{ format!("{} {}", contact.first_name, contact.last_name) }</h5>
+                                    <h5>{ format!("{} - ( {} )", contact.first_name, contact.last_name) }</h5>
                                 </div>
                                 <p class="card__address-text">{ contact.role_title.as_deref().unwrap_or("No role specified") }</p>
                                 <p class="card__address-text">{ contact.email.as_deref().unwrap_or("") }</p>

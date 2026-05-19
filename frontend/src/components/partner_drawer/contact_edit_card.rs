@@ -95,29 +95,20 @@ pub fn contact_edit_card(props: &ContactEditCardProps) -> Html {
                 </div>
             </div>
             <div class="card-form-compact">
-                <div class="form-group-compact">
+                    <label>{"Full Name"}</label>
                     <input type="text" placeholder="Full Name" value={contact_state.first_name.clone()} oninput={on_input(|c, v| c.first_name = v)} />
-                </div>
-                <div class="form-group-compact">
+                    <label>{"Preferred Name"}</label>
                     <input type="text" placeholder="Preferred Name" value={contact_state.last_name.clone()} oninput={on_input(|c, v| c.last_name = v)} />
-                </div>
-                <div class="form-group-compact">
+                    <label>{"Email address"}</label>
                     <input type="email"  placeholder="Email" value={contact_state.email.clone().unwrap_or_default()} oninput={on_input(|c, v| c.email = Some(v))} />
-                </div>
-                <div class="form-group-compact">
+                    <label>{"Phone number"}</label>
                     <input type="tel"  placeholder="Phone" value={contact_state.phone.clone().unwrap_or_default()} oninput={on_input(|c, v| c.phone = Some(v))} />
-                </div>
-                <div class="for-row-compact" style="align-items: center; margin-top: 0.25rem;">
                     <label>{"Role/Title"}</label>
                     <input type="text" value={contact_state.role_title.clone().unwrap_or_default()} oninput={on_input(|c, v| c.role_title = Some(v))} />
-                </div>
-
-                <div class="form-group-compact">
                     <label class="checkbox-label-compact" for="is_primary">
                         <input type="checkbox" id="is_primary_contact" checked={contact_state.is_primary} onchange={on_primary_change} />
                         <span>{"Primary"}</span>
                     </label>
-                </div>
             </div>
             // Tightly bundled actionable context footer links
             <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed rgba(0,0,0,0.05);">

@@ -140,9 +140,18 @@
 
 // Compact inline form fields layout stack
 .card-form-compact {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem; // Tight baseline spacing row gap
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 1rem;
+    align-items: center;
+
+    label {
+        text-align: right;
+    }
+
+    input {
+        text-align: left;
+    }
 
     input[type="text"],
     input[type="tel"],
@@ -150,7 +159,7 @@
     select {
         width: 100%;
         box-sizing: border-box;
-        padding: 5px 8px;
+        padding: 2px 8px;
         //font-size: 0.85rem;
         //border: 1px solid var(--border-color);
         //border-radius: var(--border-radius);
