@@ -22,13 +22,16 @@
  *
  */
 
-pub(crate) mod account;
-pub(crate) mod chart_of_accounts;
-pub(crate) mod journal_entry;
-pub(crate) mod organization;
-pub(crate) mod partner;
-pub(crate) mod transaction;
-pub(crate) mod user;
-pub(crate) mod vendor_invoice;
-pub(crate) mod vendor_payment;
-pub(crate) mod vendor_payment_allocation;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct VendorPaymentAllocation {
+    pub id: Uuid,
+    pub organization_id: Uuid,
+    pub vendor_invoice_id: Uuid,
+    pub vendor_payment_id: Uuid,
+    pub allocated_amount: i64,
+    pub created_at: DateTime<Utc>,
+}

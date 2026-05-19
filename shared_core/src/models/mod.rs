@@ -27,6 +27,7 @@ pub mod invoice_status;
 pub mod partner;
 pub mod vendor_invoice;
 pub mod vendor_payment;
+pub mod vendor_payment_allocation;
 pub mod organization;
 pub mod user;
 pub mod account_category;
