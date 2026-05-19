@@ -1,11 +1,11 @@
 pub mod account_with_balance;
-pub mod journal_entry_detail;
-pub mod journal_entry_with_balance;
-pub mod transaction_detail;
-pub mod user_detail;
-pub mod organization;
 pub mod dashboard;
-pub mod recent_transaction;
 pub mod expense_breakdown;
 pub mod general_ledger_line;
+pub mod journal_entry_detail;
+pub mod journal_entry_with_balance;
+pub mod organization;
 pub mod partner_list_item;
+pub mod recent_transaction;
+pub mod transaction_detail;
+pub mod user_detail;

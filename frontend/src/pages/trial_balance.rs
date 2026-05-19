@@ -22,20 +22,20 @@
  *
  */
 
+use crate::api::Api;
 use crate::components::layout::Layout;
+use crate::components::report_options::ReportOptions;
+use crate::contexts::auth_context::use_user_context;
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::router::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::models::account_category::AccountCategory;
+use shared_core::util::format_currency;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
-use yew_router::prelude::{Link, use_navigator};
-use shared_core::util::format_currency;
-use crate::api::Api;
-use crate::components::report_options::ReportOptions;
-use crate::contexts::auth_context::use_user_context;
+use yew_router::prelude::{use_navigator, Link};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
@@ -61,9 +61,11 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
         pc_map: &HashMap<Uuid, Vec<Uuid>>,
     ) -> AccountNode {
         let acc = acc_map.get(&acc_id).unwrap();
-        let children = pc_map.get(&acc_id)
+        let children = pc_map
+            .get(&acc_id)
             .map(|child_ids| {
-                child_ids.iter()
+                child_ids
+                    .iter()
                     .map(|&cid| build_node(cid, acc_map, pc_map))
                     .collect()
             })
@@ -107,16 +109,28 @@ pub fn trial_balance_page() -> Html {
         use_effect_with((), move |_| {
             let report_ctx1 = report_ctx.clone();
             let date = report_ctx1.date_range.end_date;
-            report_ctx1.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(move |_| {
-                let url = format!("/api/reports/trial-balance/export/csv?date={}", date);
-                web_sys::window().unwrap().location().set_href(&url).unwrap();
-            }))));
+            report_ctx1.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(
+                move |_| {
+                    let url = format!("/api/reports/trial-balance/export/csv?date={}", date);
+                    web_sys::window()
+                        .unwrap()
+                        .location()
+                        .set_href(&url)
+                        .unwrap();
+                },
+            ))));
             let report_ctx1 = report_ctx.clone();
             let date = report_ctx1.date_range.end_date;
-            report_ctx1.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(move |_| {
-                let url = format!("/api/reports/trial-balance/export/pdf?date={}", date);
-                web_sys::window().unwrap().location().set_href(&url).unwrap();
-            }))));
+            report_ctx1.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(
+                move |_| {
+                    let url = format!("/api/reports/trial-balance/export/pdf?date={}", date);
+                    web_sys::window()
+                        .unwrap()
+                        .location()
+                        .set_href(&url)
+                        .unwrap();
+                },
+            ))));
             move || {
                 report_ctx.dispatch(ReportAction::SetOnExportCsv(None));
                 report_ctx.dispatch(ReportAction::SetOnExportTypst(None));
@@ -150,10 +164,16 @@ pub fn trial_balance_page() -> Html {
                                     accounts.set(Rc::new(data));
                                     error.set(None);
                                 }
-                                Err(e) => error.set(Some(format!("Failed to parse Trial Balance data: {}", e))),
+                                Err(e) => error.set(Some(format!(
+                                    "Failed to parse Trial Balance data: {}",
+                                    e
+                                ))),
                             }
                         } else {
-                            error.set(Some(format!("Error fetching Trial Balance: {}", resp.status())));
+                            error.set(Some(format!(
+                                "Error fetching Trial Balance: {}",
+                                resp.status()
+                            )));
                         }
                     }
                     Err(e) => error.set(Some(format!("Network error: {}", e))),
@@ -164,7 +184,11 @@ pub fn trial_balance_page() -> Html {
         });
     }
 
-    fn render_report_row(node: &AccountNode, depth: usize, collapsed: &UseStateHandle<HashSet<Uuid>>) -> Html {
+    fn render_report_row(
+        node: &AccountNode,
+        depth: usize,
+        collapsed: &UseStateHandle<HashSet<Uuid>>,
+    ) -> Html {
         let is_parent = !node.children.is_empty();
         let is_collapsed = collapsed.contains(&node.account.id);
         let indent_class = format!("report__indent__level_{}", depth);
@@ -200,14 +224,14 @@ pub fn trial_balance_page() -> Html {
                 } else {
                     ("".to_string(), format_currency(&node.account.balance.abs()))
                 }
-            },
+            }
             AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
                 if node.account.balance <= 0 {
                     ("".to_string(), format_currency(&node.account.balance.abs()))
                 } else {
                     (format_currency(&node.account.balance), "".to_string())
                 }
-            },
+            }
         };
 
         html! {

@@ -1,4 +1,5 @@
 use crate::routes::security::AuthenticatedUser;
+use crate::services::partner_service;
 use crate::util::types::PathUuid;
 use crate::util::ApiError;
 use crate::DbKelpie;
@@ -10,7 +11,6 @@ use shared_core::models::partner::Partner;
 use shared_core::models::partner_address::PartnerAddress;
 use shared_core::models::partner_contact::PartnerContact;
 use shared_core::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
-use crate::services::partner_service;
 use uuid::Uuid;
 
 pub(crate) fn routes() -> Vec<Route> {
@@ -36,8 +36,7 @@ async fn get_partners(
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
 ) -> Result<Json<Vec<PartnerListItem>>, ApiError> {
-    let partners =
-        partner_service::get_partners(&mut pool, user.organization_id).await?;
+    let partners = partner_service::get_partners(&mut pool, user.organization_id).await?;
     Ok(Json(partners))
 }
 
@@ -76,7 +75,8 @@ async fn create_partner(
     user: AuthenticatedUser,
     req: Json<CreatePartnerRequest>,
 ) -> Result<Json<Partner>, ApiError> {
-    let new_partner = partner_service::create_partner(&mut pool, user.organization_id, &req).await?;
+    let new_partner =
+        partner_service::create_partner(&mut pool, user.organization_id, &req).await?;
     Ok(Json(new_partner))
 }
 
@@ -87,7 +87,8 @@ async fn update_partner(
     id: PathUuid,
     req: Json<UpdatePartnerRequest>,
 ) -> Result<Json<Partner>, ApiError> {
-    let updated_partner = partner_service::update_partner(&mut pool, user.organization_id, *id, &req).await?;
+    let updated_partner =
+        partner_service::update_partner(&mut pool, user.organization_id, *id, &req).await?;
     Ok(Json(updated_partner))
 }
 
@@ -111,11 +112,16 @@ async fn create_address(
     partner_id: PathUuid,
     address: Json<PartnerAddress>,
 ) -> Result<Json<PartnerAddress>, ApiError> {
-    let new_address = partner_service::create_address(&mut pool, user.organization_id, *partner_id, &address).await?;
+    let new_address =
+        partner_service::create_address(&mut pool, user.organization_id, *partner_id, &address)
+            .await?;
     Ok(Json(new_address))
 }
 
-#[put("/api/partners/<_partner_id>/addresses/<address_id>", data = "<address>")]
+#[put(
+    "/api/partners/<_partner_id>/addresses/<address_id>",
+    data = "<address>"
+)]
 async fn update_address(
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
@@ -123,7 +129,9 @@ async fn update_address(
     address_id: PathUuid,
     address: Json<PartnerAddress>,
 ) -> Result<Json<PartnerAddress>, ApiError> {
-    let updated_address = partner_service::update_address(&mut pool, user.organization_id, *address_id, &address).await?;
+    let updated_address =
+        partner_service::update_address(&mut pool, user.organization_id, *address_id, &address)
+            .await?;
     Ok(Json(updated_address))
 }
 
@@ -147,11 +155,16 @@ async fn create_contact(
     partner_id: PathUuid,
     contact: Json<PartnerContact>,
 ) -> Result<Json<PartnerContact>, ApiError> {
-    let new_contact = partner_service::create_contact(&mut pool, user.organization_id, *partner_id, &contact).await?;
+    let new_contact =
+        partner_service::create_contact(&mut pool, user.organization_id, *partner_id, &contact)
+            .await?;
     Ok(Json(new_contact))
 }
 
-#[put("/api/partners/<_partner_id>/contacts/<contact_id>", data = "<contact>")]
+#[put(
+    "/api/partners/<_partner_id>/contacts/<contact_id>",
+    data = "<contact>"
+)]
 async fn update_contact(
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
@@ -159,7 +172,9 @@ async fn update_contact(
     contact_id: PathUuid,
     contact: Json<PartnerContact>,
 ) -> Result<Json<PartnerContact>, ApiError> {
-    let updated_contact = partner_service::update_contact(&mut pool, user.organization_id, *contact_id, &contact).await?;
+    let updated_contact =
+        partner_service::update_contact(&mut pool, user.organization_id, *contact_id, &contact)
+            .await?;
     Ok(Json(updated_contact))
 }
 

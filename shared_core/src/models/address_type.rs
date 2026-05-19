@@ -25,7 +25,9 @@
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
 
-#[derive(Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
+#[derive(
+    Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy,
+)]
 #[strum(serialize_all = "PascalCase")]
 pub enum AddressType {
     Billing,

@@ -21,11 +21,11 @@
  *      Trevor Campbell
  *
  */
-use yew::prelude::*;
+use gloo_net::http::Request;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::dtos::transaction_detail::TransactionDetail;
-use gloo_net::http::Request;
 use web_sys::HtmlInputElement;
+use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct ReversalConfirmationModalProps {
@@ -38,9 +38,8 @@ pub struct ReversalConfirmationModalProps {
 pub fn reversal_confirmation_modal(props: &ReversalConfirmationModalProps) -> Html {
     let transaction_detail = use_state(|| None::<TransactionDetail>);
     let error = use_state(|| None::<String>);
-    let description = use_state(|| {
-        format!("Rev Trans {}", &props.jeb.transaction_id.to_string()[..8])
-    });
+    let description =
+        use_state(|| format!("Rev Trans {}", &props.jeb.transaction_id.to_string()[..8]));
 
     {
         let transaction_detail = transaction_detail.clone();
@@ -51,13 +50,13 @@ pub fn reversal_confirmation_modal(props: &ReversalConfirmationModalProps) -> Ht
                 let url = format!("/api/transactions/{}", id);
                 let resp = Request::get(&url).send().await;
                 match resp {
-                    Ok(r) if r.ok() => {
-                        match r.json::<TransactionDetail>().await {
-                            Ok(detail) => transaction_detail.set(Some(detail)),
-                            Err(e) => error.set(Some(format!("Failed to parse transaction: {}", e))),
-                        }
+                    Ok(r) if r.ok() => match r.json::<TransactionDetail>().await {
+                        Ok(detail) => transaction_detail.set(Some(detail)),
+                        Err(e) => error.set(Some(format!("Failed to parse transaction: {}", e))),
+                    },
+                    Ok(r) => {
+                        error.set(Some(format!("Failed to fetch transaction: {}", r.status())))
                     }
-                    Ok(r) => error.set(Some(format!("Failed to fetch transaction: {}", r.status()))),
                     Err(e) => error.set(Some(format!("Network error: {}", e))),
                 }
             });

@@ -81,10 +81,7 @@ pub(crate) async fn insert(
     Ok(row.get("id"))
 }
 
-pub(crate) async fn delete(
-    pool: &mut PgConnection,
-    id: Uuid,
-) -> Result<(), sqlx::Error> {
+pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<(), sqlx::Error> {
     sqlx::query("DELETE FROM transactions WHERE id = $1")
         .bind(id)
         .execute(pool)

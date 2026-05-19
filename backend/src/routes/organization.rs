@@ -22,16 +22,16 @@
  *
  */
 
+use crate::db;
+use crate::routes::security::AuthenticatedUser;
+use crate::util::types::PathUuid;
+use crate::util::ApiError;
+use crate::DbKelpie;
 use rocket::serde::json::Json;
 use rocket::{get, put, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::organization::{AuditModeRequest, LockDateRequest};
 use shared_core::models::organization::Organization;
-use crate::db;
-use crate::util::ApiError;
-use crate::DbKelpie;
-use crate::routes::security::AuthenticatedUser;
-use crate::util::types::PathUuid;
 
 pub fn routes() -> Vec<Route> {
     rocket::routes![get_organization, set_lock_date, set_audit_mode]

@@ -21,11 +21,11 @@
  *      Trevor Campbell
  *
  */
-use yew::prelude::*;
+use gloo_net::http::Request;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::dtos::transaction_detail::TransactionDetail;
-use gloo_net::http::Request;
 use shared_core::util::format_currency;
+use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct DeleteConfirmationModalProps {
@@ -48,13 +48,13 @@ pub fn delete_confirmation_modal(props: &DeleteConfirmationModalProps) -> Html {
                 let url = format!("/api/transactions/{}", id);
                 let resp = Request::get(&url).send().await;
                 match resp {
-                    Ok(r) if r.ok() => {
-                        match r.json::<TransactionDetail>().await {
-                            Ok(detail) => transaction_detail.set(Some(detail)),
-                            Err(e) => error.set(Some(format!("Failed to parse transaction: {}", e))),
-                        }
+                    Ok(r) if r.ok() => match r.json::<TransactionDetail>().await {
+                        Ok(detail) => transaction_detail.set(Some(detail)),
+                        Err(e) => error.set(Some(format!("Failed to parse transaction: {}", e))),
+                    },
+                    Ok(r) => {
+                        error.set(Some(format!("Failed to fetch transaction: {}", r.status())))
                     }
-                    Ok(r) => error.set(Some(format!("Failed to fetch transaction: {}", r.status()))),
                     Err(e) => error.set(Some(format!("Network error: {}", e))),
                 }
             });

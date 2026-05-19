@@ -54,12 +54,12 @@ async fn login(
     cookies: &CookieJar<'_>,
     login_request: Json<LoginRequest>,
 ) -> Result<Json<UserDetail>, Status> {
-    let db_user =
-        user::get_by_email(&mut pool, &login_request.email).await;
+    let db_user = user::get_by_email(&mut pool, &login_request.email).await;
 
     match db_user {
         Ok(Some(user)) => {
-            let valid = bcrypt::verify(&login_request.password_raw, &user.password_hash).unwrap_or(false);
+            let valid =
+                bcrypt::verify(&login_request.password_raw, &user.password_hash).unwrap_or(false);
             if !valid {
                 return Err(Status::Unauthorized);
             }

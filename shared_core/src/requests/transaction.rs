@@ -73,7 +73,6 @@ pub struct ReverseTransactionRequest {
     pub description: String,
 }
 
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UpdateTransactionRequest {
     pub date: NaiveDate,

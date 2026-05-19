@@ -22,25 +22,25 @@
  *
  */
 
+use crate::api::Api;
 use crate::components::layout::Layout;
+use crate::components::report_options::ReportOptions;
+use crate::contexts::auth_context::use_user_context;
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::router::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::reports::balance_sheet::BalanceSheet;
+use shared_core::util::format_currency;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
-use yew_router::prelude::{Link, use_navigator};
-use shared_core::util::format_currency;
-use crate::api::Api;
-use crate::components::report_options::ReportOptions;
-use crate::contexts::auth_context::use_user_context;
+use yew_router::prelude::{use_navigator, Link};
 
 #[derive(Clone)]
 pub struct BalanceSheetHolder {
     pub balance_sheet: BalanceSheet,
-    pub timestamp: i64 ,
+    pub timestamp: i64,
 }
 
 impl PartialEq for BalanceSheetHolder {
@@ -74,9 +74,11 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
         pc_map: &HashMap<Uuid, Vec<Uuid>>,
     ) -> AccountNode {
         let acc = acc_map.get(&acc_id).unwrap();
-        let children = pc_map.get(&acc_id)
+        let children = pc_map
+            .get(&acc_id)
             .map(|child_ids| {
-                child_ids.iter()
+                child_ids
+                    .iter()
                     .map(|&cid| build_node(cid, acc_map, pc_map))
                     .collect()
             })
@@ -102,10 +104,12 @@ pub fn balance_sheet_page() -> Html {
     let user_ctx = use_user_context();
     let navigator = use_navigator().unwrap();
     let report_ctx = use_report_context();
-    let balance_sheet_holder = use_state(|| Rc::new(BalanceSheetHolder {
-        balance_sheet: BalanceSheet::default(),
-        timestamp: 0,
-    }));
+    let balance_sheet_holder = use_state(|| {
+        Rc::new(BalanceSheetHolder {
+            balance_sheet: BalanceSheet::default(),
+            timestamp: 0,
+        })
+    });
     let loading = use_state(|| true);
     let error = use_state(|| None::<String>);
     let collapsed_nodes = use_state(HashSet::<Uuid>::new);
@@ -124,14 +128,26 @@ pub fn balance_sheet_page() -> Html {
         let report_ctx = report_ctx.clone();
         use_effect_with((), move |_| {
             let date = report_ctx.date_range.end_date;
-            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(move |_| {
-                let url = format!("/api/reports/balance-sheet/export/csv?date={}", date);
-                web_sys::window().unwrap().location().set_href(&url).unwrap();
-            }))));
-            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(move |_| {
-                let url = format!("/api/reports/balance-sheet/export/pdf?date={}", date);
-                web_sys::window().unwrap().location().set_href(&url).unwrap();
-            }))));
+            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(
+                move |_| {
+                    let url = format!("/api/reports/balance-sheet/export/csv?date={}", date);
+                    web_sys::window()
+                        .unwrap()
+                        .location()
+                        .set_href(&url)
+                        .unwrap();
+                },
+            ))));
+            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(
+                move |_| {
+                    let url = format!("/api/reports/balance-sheet/export/pdf?date={}", date);
+                    web_sys::window()
+                        .unwrap()
+                        .location()
+                        .set_href(&url)
+                        .unwrap();
+                },
+            ))));
             move || {
                 report_ctx.dispatch(ReportAction::SetOnExportCsv(None));
                 report_ctx.dispatch(ReportAction::SetOnExportTypst(None));
@@ -169,10 +185,16 @@ pub fn balance_sheet_page() -> Html {
                                     balance_sheet_holder.set(Rc::new(data_holder));
                                     error.set(None);
                                 }
-                                Err(e) => error.set(Some(format!("Failed to parse Balance Sheet data: {}", e))),
+                                Err(e) => error.set(Some(format!(
+                                    "Failed to parse Balance Sheet data: {}",
+                                    e
+                                ))),
                             }
                         } else {
-                            error.set(Some(format!("Error fetching Balance Sheet: {}", resp.status())));
+                            error.set(Some(format!(
+                                "Error fetching Balance Sheet: {}",
+                                resp.status()
+                            )));
                         }
                     }
                     Err(e) => error.set(Some(format!("Network error: {}", e))),
@@ -183,7 +205,11 @@ pub fn balance_sheet_page() -> Html {
         });
     }
 
-    fn render_report_row(node: &AccountNode, depth: usize, collapsed: &UseStateHandle<HashSet<Uuid>>) -> Html {
+    fn render_report_row(
+        node: &AccountNode,
+        depth: usize,
+        collapsed: &UseStateHandle<HashSet<Uuid>>,
+    ) -> Html {
         let is_parent = !node.children.is_empty();
         let is_collapsed = collapsed.contains(&node.account.id);
         let indent_class = format!("report__indent__level_{}", depth);

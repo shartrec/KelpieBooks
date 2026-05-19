@@ -1,14 +1,16 @@
-use yew::prelude::*;
 use crate::components::layout::Layout;
-use crate::services::dashboard::{get_financial_health, get_recent_transactions, get_expense_breakdown};
-use shared_core::dtos::dashboard::FinancialHealth;
-use shared_core::dtos::recent_transaction::RecentTransaction;
-use shared_core::dtos::expense_breakdown::ExpenseBreakdown;
-use yew_router::prelude::*;
-use crate::router::Route;
-use crate::contexts::org_context::use_org_context;
-use shared_core::util::format_currency;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::org_context::use_org_context;
+use crate::router::Route;
+use crate::services::dashboard::{
+    get_expense_breakdown, get_financial_health, get_recent_transactions,
+};
+use shared_core::dtos::dashboard::FinancialHealth;
+use shared_core::dtos::expense_breakdown::ExpenseBreakdown;
+use shared_core::dtos::recent_transaction::RecentTransaction;
+use shared_core::util::format_currency;
+use yew::prelude::*;
+use yew_router::prelude::*;
 
 #[function_component(DashboardPage)]
 pub fn dashboard_page() -> Html {
@@ -126,8 +128,8 @@ struct FinancialCardProps {
 }
 
 #[function_component(FinancialCard)]
-    fn financial_card(props: &FinancialCardProps) -> Html {
-        html! {
+fn financial_card(props: &FinancialCardProps) -> Html {
+    html! {
         <div class="stat-card">
             <span class="stat-label">{ &props.title }</span>
             <div class="stat-value">

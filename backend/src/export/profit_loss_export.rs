@@ -22,13 +22,13 @@
  *
  */
 
+use crate::export::utils::{build_table_header, wrap_report_layout};
+use chrono::NaiveDate;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::models::{account_category::AccountCategory, organization::Organization};
-use std::collections::HashMap;
-use chrono::NaiveDate;
-use uuid::Uuid;
 use shared_core::util::format_currency_typ;
-use crate::export::utils::{build_table_header, wrap_report_layout};
+use std::collections::HashMap;
+use uuid::Uuid;
 
 #[derive(Clone, Debug)]
 pub struct AccountNode {
@@ -36,7 +36,9 @@ pub struct AccountNode {
     pub children: Vec<AccountNode>,
 }
 
-fn build_account_nodes(accounts: &[AccountWithBalance]) -> (Vec<AccountNode>, Vec<AccountNode>, i64) {
+fn build_account_nodes(
+    accounts: &[AccountWithBalance],
+) -> (Vec<AccountNode>, Vec<AccountNode>, i64) {
     let mut revenue_total = 0;
     let mut expense_total = 0;
 
@@ -56,9 +58,11 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> (Vec<AccountNode>, Ve
         pc_map: &HashMap<Uuid, Vec<Uuid>>,
     ) -> AccountNode {
         let acc = acc_map.get(&acc_id).unwrap();
-        let children = pc_map.get(&acc_id)
+        let children = pc_map
+            .get(&acc_id)
             .map(|child_ids| {
-                child_ids.iter()
+                child_ids
+                    .iter()
                     .map(|&cid| build_node(cid, acc_map, pc_map))
                     .collect()
             })
@@ -101,7 +105,12 @@ pub fn generate_profit_loss_csv(accounts: &[AccountWithBalance]) -> String {
         } else {
             node.account.balance
         };
-        content.push_str(&format!("\"{}{}\",\"{}\"\n", indent, node.account.name, format_currency_typ(&display_balance)));
+        content.push_str(&format!(
+            "\"{}{}\",\"{}\"\n",
+            indent,
+            node.account.name,
+            format_currency_typ(&display_balance)
+        ));
         for child in &node.children {
             build_csv_rows(child, depth + 1, content);
         }
@@ -115,14 +124,25 @@ pub fn generate_profit_loss_csv(accounts: &[AccountWithBalance]) -> String {
     for node in &expense_nodes {
         build_csv_rows(node, 0, &mut csv_content);
     }
-    csv_content.push_str(&format!("\"Net Income\",\"{}\"\n", format_currency_typ(&net_income)));
+    csv_content.push_str(&format!(
+        "\"Net Income\",\"{}\"\n",
+        format_currency_typ(&net_income)
+    ));
     csv_content
 }
 
-pub fn generate_profit_loss_typst(accounts: &[AccountWithBalance], start_date: &NaiveDate, end_date: &NaiveDate, org: &Option<Organization>) -> String {
+pub fn generate_profit_loss_typst(
+    accounts: &[AccountWithBalance],
+    start_date: &NaiveDate,
+    end_date: &NaiveDate,
+    org: &Option<Organization>,
+) -> String {
     let (revenue_nodes, expense_nodes, net_income) = build_account_nodes(accounts);
     let mut typst_content = String::new();
-    typst_content.push_str(&*build_table_header(&["Account", "", ""], &vec![false, true, true]));
+    typst_content.push_str(&*build_table_header(
+        &["Account", "", ""],
+        &vec![false, true, true],
+    ));
 
     fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String) {
         let indent = "#h(2.0em)".repeat(depth);
@@ -132,9 +152,19 @@ pub fn generate_profit_loss_typst(accounts: &[AccountWithBalance], start_date: &
             node.account.balance
         };
         if depth == 0 {
-            content.push_str(&format!("[{} {}], [], align(right)[{}],\n", indent, node.account.name, format_currency_typ(&display_balance)));
+            content.push_str(&format!(
+                "[{} {}], [], align(right)[{}],\n",
+                indent,
+                node.account.name,
+                format_currency_typ(&display_balance)
+            ));
         } else {
-            content.push_str(&format!("  [{} {}], align(right)[{}], [],\n", indent, node.account.name, format_currency_typ(&display_balance)));
+            content.push_str(&format!(
+                "  [{} {}], align(right)[{}], [],\n",
+                indent,
+                node.account.name,
+                format_currency_typ(&display_balance)
+            ));
         }
         for child in &node.children {
             build_typst_rows(child, depth + 1, content);
@@ -149,10 +179,17 @@ pub fn generate_profit_loss_typst(accounts: &[AccountWithBalance], start_date: &
     for node in &expense_nodes {
         build_typst_rows(node, 0, &mut typst_content);
     }
-    typst_content.push_str(&format!("[*Net Income*], [], align(right)[{}]\n", format_currency_typ(&net_income)));
+    typst_content.push_str(&format!(
+        "[*Net Income*], [], align(right)[{}]\n",
+        format_currency_typ(&net_income)
+    ));
     typst_content.push_str(")\n");
 
     let name = org.as_ref().map(|o| o.name.as_str());
-    let report_qual = format!("Period {} - {}", start_date.format("%d %b %Y").to_string().as_str(), end_date.format("%d %b %Y").to_string().as_str());
-    wrap_report_layout(name, "Profit & Loss", &*report_qual, typst_content.as_str() )
+    let report_qual = format!(
+        "Period {} - {}",
+        start_date.format("%d %b %Y").to_string().as_str(),
+        end_date.format("%d %b %Y").to_string().as_str()
+    );
+    wrap_report_layout(name, "Profit & Loss", &*report_qual, typst_content.as_str())
 }

@@ -22,14 +22,14 @@
  *
  */
 
-use yew::prelude::*;
-use shared_core::models::partner_address::PartnerAddress;
-use shared_core::models::address_type::AddressType;
-use uuid::Uuid;
+use crate::api::Api;
 use crate::components::partner_drawer::address_edit_card::AddressEditCard;
 use crate::components::partner_drawer::delete_address_confirmation_modal::DeleteAddressConfirmationModal;
-use crate::api::Api;
 use crate::contexts::auth_context::use_user_context;
+use shared_core::models::address_type::AddressType;
+use shared_core::models::partner_address::PartnerAddress;
+use uuid::Uuid;
+use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -85,9 +85,21 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
             let is_new = *editing_state == EditState::Adding;
             wasm_bindgen_futures::spawn_local(async move {
                 let resp = if is_new {
-                    Api::post(&format!("/api/partners/{}/addresses", partner_id), &address, user_ctx, navigator).await
+                    Api::post(
+                        &format!("/api/partners/{}/addresses", partner_id),
+                        &address,
+                        user_ctx,
+                        navigator,
+                    )
+                    .await
                 } else {
-                    Api::put(&format!("/api/partners/{}/addresses/{}", partner_id, address.id), &address, user_ctx, navigator).await
+                    Api::put(
+                        &format!("/api/partners/{}/addresses/{}", partner_id, address.id),
+                        &address,
+                        user_ctx,
+                        navigator,
+                    )
+                    .await
                 };
                 match resp {
                     Ok(r) if r.ok() => {
@@ -124,13 +136,20 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
                 let error = error.clone();
                 let address_id = address.id;
                 wasm_bindgen_futures::spawn_local(async move {
-                    let resp = Api::delete(&format!("/api/partners/{}/addresses/{}", partner_id, address_id), user_ctx, navigator).await;
+                    let resp = Api::delete(
+                        &format!("/api/partners/{}/addresses/{}", partner_id, address_id),
+                        user_ctx,
+                        navigator,
+                    )
+                    .await;
                     match resp {
                         Ok(r) if r.ok() => {
                             on_change.emit(());
                             address_to_delete.set(None);
                         }
-                        Ok(r) => error.set(Some(format!("Failed to delete address: {}", r.status()))),
+                        Ok(r) => {
+                            error.set(Some(format!("Failed to delete address: {}", r.status())))
+                        }
                         Err(e) => error.set(Some(format!("Network error: {}", e))),
                     }
                 });

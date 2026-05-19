@@ -22,18 +22,22 @@
  *
  */
 
+use crate::contexts::auth_context::UserContextHandle;
+use crate::router::Route;
 use gloo_net::http::{Request, Response};
 use gloo_net::Error;
 use log::info;
-use yew_router::prelude::Navigator;
-use crate::router::Route;
-use crate::contexts::auth_context::UserContextHandle;
 use serde::Serialize;
+use yew_router::prelude::Navigator;
 
 pub struct Api;
 
 impl Api {
-    fn check_auth(response: &Result<Response, Error>, user_ctx: &UserContextHandle, navigator: &Navigator) {
+    fn check_auth(
+        response: &Result<Response, Error>,
+        user_ctx: &UserContextHandle,
+        navigator: &Navigator,
+    ) {
         info!("Response: {:?}", response);
         if let Ok(resp) = response {
             if resp.status() == 401 {

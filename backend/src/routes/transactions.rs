@@ -4,14 +4,22 @@ use crate::util::types::PathUuid;
 use crate::util::ApiError;
 use crate::DbKelpie;
 use rocket::serde::json::Json;
-use rocket::{get, post, put, delete, routes, Route};
+use rocket::{delete, get, post, put, routes, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::transaction_detail::TransactionDetail;
-use shared_core::requests::transaction::{CreateTransactionRequest, ReverseTransactionRequest, UpdateTransactionRequest};
+use shared_core::requests::transaction::{
+    CreateTransactionRequest, ReverseTransactionRequest, UpdateTransactionRequest,
+};
 use sqlx::Acquire;
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![create_transaction, get_transaction, reverse_transaction, delete_transaction, update_transaction]
+    routes![
+        create_transaction,
+        get_transaction,
+        reverse_transaction,
+        delete_transaction,
+        update_transaction
+    ]
 }
 
 #[get("/api/transactions/<id>")]
@@ -47,12 +55,16 @@ async fn delete_transaction(
 
     if let Some(locked_until) = organization.locked_until {
         if transaction.date <= locked_until {
-            return Err(ApiError::Forbidden("Period is locked for editing".to_string()));
+            return Err(ApiError::Forbidden(
+                "Period is locked for editing".to_string(),
+            ));
         }
     }
 
     if organization.strict_audit_mode {
-        return Err(ApiError::Forbidden("Cannot delete transactions in strict audit mode.".to_string()));
+        return Err(ApiError::Forbidden(
+            "Cannot delete transactions in strict audit mode.".to_string(),
+        ));
     }
 
     db::transaction::delete(&mut pool, *id).await?;
@@ -86,12 +98,16 @@ async fn update_transaction(
 
     if let Some(locked_until) = organization.locked_until {
         if req.date <= locked_until || original_transaction.date <= locked_until {
-            return Err(ApiError::Forbidden("Period is locked for editing".to_string()));
+            return Err(ApiError::Forbidden(
+                "Period is locked for editing".to_string(),
+            ));
         }
     }
 
     if organization.strict_audit_mode {
-        return Err(ApiError::Forbidden("Cannot edit transactions in strict audit mode.".to_string()));
+        return Err(ApiError::Forbidden(
+            "Cannot edit transactions in strict audit mode.".to_string(),
+        ));
     }
 
     let main_description = req.entries.get(0).and_then(|e| e.description.clone());
@@ -171,7 +187,11 @@ async fn reverse_transaction(
             entry.account_id,
             entry.credit, // Swap debit and credit
             entry.debit,
-            Some(format!("{} - {}", req.description.clone(), entry.description.clone().unwrap_or("".to_string()))),
+            Some(format!(
+                "{} - {}",
+                req.description.clone(),
+                entry.description.clone().unwrap_or("".to_string())
+            )),
         )
         .await?;
     }
@@ -197,11 +217,13 @@ async fn create_transaction(
     }
 
     // Check the organization locked date
-    let organization = db::organization::get(&mut pool , user.organization_id).await?;
+    let organization = db::organization::get(&mut pool, user.organization_id).await?;
 
     if let Some(date) = organization.unwrap().locked_until {
         if req.date <= date {
-            return Err(ApiError::Forbidden("Period is locked for editing".to_string()));
+            return Err(ApiError::Forbidden(
+                "Period is locked for editing".to_string(),
+            ));
         }
     }
 

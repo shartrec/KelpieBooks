@@ -22,14 +22,14 @@
  *
  */
 
+use crate::api::Api;
 use crate::components::layout::Layout;
+use crate::contexts::auth_context::use_user_context;
+use crate::router::Route;
 use serde::Serialize;
 use shared_core::dtos::user_detail::UserDetail;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
-use crate::router::Route;
 
 #[derive(Clone, Serialize, Default, Debug)]
 struct UserUpdate {
@@ -122,7 +122,13 @@ pub fn profile_page() -> Html {
             let navigator = navigator.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                let resp = Api::put("/api/users/me", &*user_update, user_ctx.clone(), navigator.clone()).await;
+                let resp = Api::put(
+                    "/api/users/me",
+                    &*user_update,
+                    user_ctx.clone(),
+                    navigator.clone(),
+                )
+                .await;
 
                 match resp {
                     Ok(r) if r.ok() => {
@@ -196,7 +202,13 @@ pub fn profile_page() -> Html {
                 let navigator = navigator.clone();
                 let user_ctx = user_ctx.clone();
                 wasm_bindgen_futures::spawn_local(async move {
-                    let resp = Api::put("/api/users/me/password", &*password_update, user_ctx, navigator.clone()).await;
+                    let resp = Api::put(
+                        "/api/users/me/password",
+                        &*password_update,
+                        user_ctx,
+                        navigator.clone(),
+                    )
+                    .await;
 
                     match resp {
                         Ok(r) if r.ok() => {

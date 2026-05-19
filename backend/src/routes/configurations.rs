@@ -34,15 +34,18 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 pub fn routes() -> Vec<rocket::Route> {
-    routes![get_system_accounts, set_system_accounts, update_configuration]
+    routes![
+        get_system_accounts,
+        set_system_accounts,
+        update_configuration
+    ]
 }
 
 #[get("/api/configurations/system-accounts")]
 async fn get_system_accounts(
-        mut db: Connection<DbKelpie>,
-        user: AuthenticatedUser,
-    ) -> Result<Json<HashMap<SystemTag, Uuid>>, rocket::http::Status> {
-
+    mut db: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+) -> Result<Json<HashMap<SystemTag, Uuid>>, rocket::http::Status> {
     match account_service::get_system_accounts(&mut db, user.organization_id).await {
         Ok(accounts) => Ok(Json(accounts)),
         Err(_) => Err(rocket::http::Status::InternalServerError),
@@ -51,16 +54,17 @@ async fn get_system_accounts(
 
 #[post("/api/configurations/system-accounts", data = "<system_accounts>")]
 async fn set_system_accounts(
-        mut db: Connection<DbKelpie>,
-        user: AuthenticatedUser,
-        system_accounts: Json<HashMap<SystemTag, Uuid>>,
-    ) -> Result<Json<HashMap<SystemTag, Uuid>>, rocket::http::Status> {
-
-    match  account_service::update_system_accounts(
-            &mut db,
-            user.organization_id,
-            system_accounts.into_inner()
-            ).await {
+    mut db: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    system_accounts: Json<HashMap<SystemTag, Uuid>>,
+) -> Result<Json<HashMap<SystemTag, Uuid>>, rocket::http::Status> {
+    match account_service::update_system_accounts(
+        &mut db,
+        user.organization_id,
+        system_accounts.into_inner(),
+    )
+    .await
+    {
         Ok(accounts) => Ok(Json(accounts)),
         Err(_) => Err(rocket::http::Status::InternalServerError),
     }
@@ -72,7 +76,9 @@ async fn update_configuration(
     user: AuthenticatedUser,
     req: Json<UpdateConfigurationRequest>,
 ) -> Result<(), rocket::http::Status> {
-    match account_service::update_configuration(&mut db, user.organization_id, req.into_inner()).await {
+    match account_service::update_configuration(&mut db, user.organization_id, req.into_inner())
+        .await
+    {
         Ok(_) => Ok(()),
         Err(_) => Err(rocket::http::Status::InternalServerError),
     }

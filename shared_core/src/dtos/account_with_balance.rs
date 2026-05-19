@@ -22,10 +22,10 @@
  *
  */
 
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use crate::models::account_category::AccountCategory;
 use crate::models::system_tag::SystemTag;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 /// A DTO that combines account data with its calculated balance.
 /// This is the structure that will be sent to the frontend.
@@ -44,7 +44,6 @@ pub struct AccountWithBalance {
 }
 
 impl AccountWithBalance {
-
     pub fn calculate_totals(accounts: &[Self]) -> (i64, i64) {
         let mut debit_sum = 0;
         let mut credit_sum = 0;
@@ -59,7 +58,9 @@ impl AccountWithBalance {
                             credit_sum += acc.balance.abs();
                         }
                     }
-                    AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
+                    AccountCategory::Liability
+                    | AccountCategory::Equity
+                    | AccountCategory::Revenue => {
                         if acc.balance <= 0 {
                             credit_sum += acc.balance.abs();
                         } else {

@@ -21,19 +21,21 @@
  *      Trevor Campbell
  *
  */
+use crate::api::Api;
 use crate::components::journal_entry_row::JournalEntryRow;
 use crate::components::layout::Layout;
+use crate::contexts::auth_context::use_user_context;
+use crate::contexts::org_context::OrgContextHandle;
 use crate::router::Route;
 use chrono::{Duration, NaiveDate};
 use serde::{Deserialize, Serialize};
 use shared_core::models::account::Account;
-use shared_core::requests::transaction::{CreateTransactionRequest, JournalEntryLine, UpdateTransactionRequest};
+use shared_core::requests::transaction::{
+    CreateTransactionRequest, JournalEntryLine, UpdateTransactionRequest,
+};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::org_context::OrgContextHandle;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct NewTransactionQuery {
@@ -78,7 +80,9 @@ pub fn new_transaction_page() -> Html {
             let navigator = navigator.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                if let Ok(response) = Api::get("/api/accounts", user_ctx.clone(), navigator.clone()).await {
+                if let Ok(response) =
+                    Api::get("/api/accounts", user_ctx.clone(), navigator.clone()).await
+                {
                     if let Ok(accounts) = response.json::<Vec<Account>>().await {
                         let postable = accounts
                             .into_iter()
@@ -90,8 +94,12 @@ pub fn new_transaction_page() -> Html {
                 }
 
                 if let Some(id) = from_account_id {
-                    if let Ok(response) =
-                        Api::get(&format!("/api/accounts/{}", id), user_ctx.clone(), navigator.clone()).await
+                    if let Ok(response) = Api::get(
+                        &format!("/api/accounts/{}", id),
+                        user_ctx.clone(),
+                        navigator.clone(),
+                    )
+                    .await
                     {
                         if let Ok(acc) = response.json::<Account>().await {
                             from_account.set(Some(acc));
@@ -103,21 +111,31 @@ pub fn new_transaction_page() -> Html {
                 let transaction_id_to_load = edit_id.or(duplicate_from_id);
 
                 if let Some(id) = transaction_id_to_load {
-                    if let Ok(response) = Api::get(&format!("/api/transactions/{}", id), user_ctx, navigator).await {
-                        if let Ok(detail) = response.json::<shared_core::dtos::transaction_detail::TransactionDetail>().await {
+                    if let Ok(response) =
+                        Api::get(&format!("/api/transactions/{}", id), user_ctx, navigator).await
+                    {
+                        if let Ok(detail) = response
+                            .json::<shared_core::dtos::transaction_detail::TransactionDetail>()
+                            .await
+                        {
                             new_req.date = detail.transaction.date;
                             new_req.reference = detail.transaction.reference;
-                            new_req.entries = detail.entries.into_iter().map(|e| JournalEntryLine {
-                                line_id: Uuid::new_v4(),
-                                account_id: e.account_id,
-                                debit: e.debit,
-                                credit: e.credit,
-                                description: e.description,
-                            }).collect();
+                            new_req.entries = detail
+                                .entries
+                                .into_iter()
+                                .map(|e| JournalEntryLine {
+                                    line_id: Uuid::new_v4(),
+                                    account_id: e.account_id,
+                                    debit: e.debit,
+                                    credit: e.credit,
+                                    description: e.description,
+                                })
+                                .collect();
                         }
                     }
                 } else {
-                    let mut entries = vec![JournalEntryLine::default(), JournalEntryLine::default()];
+                    let mut entries =
+                        vec![JournalEntryLine::default(), JournalEntryLine::default()];
                     if let Some(id) = from_account_id {
                         entries[0].account_id = id;
                     }
@@ -170,7 +188,8 @@ pub fn new_transaction_page() -> Html {
     let is_balanced = total_debits > 0 && total_debits == total_credits;
     let earliest_date = org_ctx.locked_until.unwrap_or(NaiveDate::default()) + Duration::days(1);
 
-    let is_period_locked = org_ctx.locked_until
+    let is_period_locked = org_ctx
+        .locked_until
         .map(|lock| request.date <= lock)
         .unwrap_or(false);
 
@@ -198,7 +217,13 @@ pub fn new_transaction_page() -> Html {
                         entries: req.entries.into_iter().map(|e| e.into()).collect(),
                     };
                     wasm_bindgen_futures::spawn_local(async move {
-                        let resp = Api::put(&format!("/api/transactions/{}", id), &update_req, user_ctx, navigator.clone()).await;
+                        let resp = Api::put(
+                            &format!("/api/transactions/{}", id),
+                            &update_req,
+                            user_ctx,
+                            navigator.clone(),
+                        )
+                        .await;
                         if resp.is_ok() {
                             navigator.back();
                         } else {
@@ -208,7 +233,8 @@ pub fn new_transaction_page() -> Html {
                 } else {
                     // Create new transaction
                     wasm_bindgen_futures::spawn_local(async move {
-                        let resp = Api::post("/api/transactions", &req, user_ctx, navigator.clone()).await;
+                        let resp =
+                            Api::post("/api/transactions", &req, user_ctx, navigator.clone()).await;
                         if resp.is_ok() {
                             navigator.back();
                         } else {
@@ -228,8 +254,16 @@ pub fn new_transaction_page() -> Html {
     };
 
     let is_edit_mode = edit_id.is_some();
-    let page_title = if is_edit_mode { "Edit Journal Transaction" } else { "New Journal Transaction" };
-    let save_button_text = if is_edit_mode { "Update Transaction" } else { "Save Transaction" };
+    let page_title = if is_edit_mode {
+        "Edit Journal Transaction"
+    } else {
+        "New Journal Transaction"
+    };
+    let save_button_text = if is_edit_mode {
+        "Update Transaction"
+    } else {
+        "Save Transaction"
+    };
 
     let page_header = if let Some(acc) = &*from_account {
         html! {
@@ -254,61 +288,61 @@ pub fn new_transaction_page() -> Html {
     };
 
     html! {
-        <Layout>
-            <h1>{ page_title }</h1>
-            { page_header }
-            <form onsubmit={on_submit} class="transaction__form">
-                <div class="transaction__form__header">
-                    <label>
-                        { "Date:" }
-                    </label>
-                        <input type="date" value={request.date.to_string()} onchange={on_date_change}
-                            min={ earliest_date.format("%Y-%m-%d").to_string() }
-                        />
-                </div>
+       <Layout>
+           <h1>{ page_title }</h1>
+           { page_header }
+           <form onsubmit={on_submit} class="transaction__form">
+               <div class="transaction__form__header">
+                   <label>
+                       { "Date:" }
+                   </label>
+                       <input type="date" value={request.date.to_string()} onchange={on_date_change}
+                           min={ earliest_date.format("%Y-%m-%d").to_string() }
+                       />
+               </div>
 
-                <div class="journal__entries">
-                    <div class="journal__entry-header">
-                        <span>{ "Account" }</span>
-                        <span>{ "Description" }</span>
-                        <span>{ "Debit" }</span>
-                        <span>{ "Credit" }</span>
-                        <span></span>
-                    </div>
-                    { for request.entries.iter().enumerate().map(|(i, entry)| {
-                        let on_change = { let on_entry_change = on_entry_change.clone(); Callback::from(move |updated_entry| { on_entry_change.emit((i, updated_entry)); }) };
-                        let on_delete = { let on_delete_line = on_delete_line.clone(); Callback::from(move |_| { on_delete_line.emit(i); }) };
-                        html!{
-                            <JournalEntryRow
-                                key={entry.line_id.to_string()}
-                                entry={entry.clone()}
-                                on_change={on_change}
-                                on_delete={on_delete}
-                                accounts={(*postable_accounts).clone()}
-                                should_focus={*focus_index == Some(i)}
-                            />
-                        }
-                    })}
-                </div>
-                <div class="modal__form__actions">
-                    <button type="button" onclick={add_line} class="button-add-row">{ "Add Line" }</button>
-                </div>
-                <div class="transaction__form__totals">
-                    <div>{ format!("Debits: {:.2}", total_debits as f64 / 100.0) }</div>
-                    <div>{ format!("Credits: {:.2}", total_credits as f64 / 100.0) }</div>
-                    <div class={if is_balanced { "transaction__form__balanced" } else { "transaction__form__unbalanced" }}>
-                        { if is_balanced { "Balanced" } else { "Unbalanced" } }
-                    </div>
-                </div>
+               <div class="journal__entries">
+                   <div class="journal__entry-header">
+                       <span>{ "Account" }</span>
+                       <span>{ "Description" }</span>
+                       <span>{ "Debit" }</span>
+                       <span>{ "Credit" }</span>
+                       <span></span>
+                   </div>
+                   { for request.entries.iter().enumerate().map(|(i, entry)| {
+                       let on_change = { let on_entry_change = on_entry_change.clone(); Callback::from(move |updated_entry| { on_entry_change.emit((i, updated_entry)); }) };
+                       let on_delete = { let on_delete_line = on_delete_line.clone(); Callback::from(move |_| { on_delete_line.emit(i); }) };
+                       html!{
+                           <JournalEntryRow
+                               key={entry.line_id.to_string()}
+                               entry={entry.clone()}
+                               on_change={on_change}
+                               on_delete={on_delete}
+                               accounts={(*postable_accounts).clone()}
+                               should_focus={*focus_index == Some(i)}
+                           />
+                       }
+                   })}
+               </div>
+               <div class="modal__form__actions">
+                   <button type="button" onclick={add_line} class="button-add-row">{ "Add Line" }</button>
+               </div>
+               <div class="transaction__form__totals">
+                   <div>{ format!("Debits: {:.2}", total_debits as f64 / 100.0) }</div>
+                   <div>{ format!("Credits: {:.2}", total_credits as f64 / 100.0) }</div>
+                   <div class={if is_balanced { "transaction__form__balanced" } else { "transaction__form__unbalanced" }}>
+                       { if is_balanced { "Balanced" } else { "Unbalanced" } }
+                   </div>
+               </div>
 
-                <div class="modal__form__actions">
-                    <button type="button" onclick={on_cancel} class="button-secondary">{ "Cancel" }</button>
-                    <button type="submit" disabled={!is_balanced || is_period_locked}>{
-                           if is_period_locked { "Period Locked" }
-                           else { save_button_text }
-                        }</button>
-                </div>
-            </form>
-        </Layout>
-     }
+               <div class="modal__form__actions">
+                   <button type="button" onclick={on_cancel} class="button-secondary">{ "Cancel" }</button>
+                   <button type="submit" disabled={!is_balanced || is_period_locked}>{
+                          if is_period_locked { "Period Locked" }
+                          else { save_button_text }
+                       }</button>
+               </div>
+           </form>
+       </Layout>
+    }
 }

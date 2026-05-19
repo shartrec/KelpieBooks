@@ -24,8 +24,8 @@
 
 use shared_core::models::address_type::AddressType;
 use shared_core::models::partner_address::PartnerAddress;
-use yew::prelude::*;
 use uuid::Uuid;
+use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct AddressEditCardProps {
@@ -58,7 +58,9 @@ pub fn address_edit_card(props: &AddressEditCardProps) -> Html {
         let address_state = address_state.clone();
         Callback::from(move |e: InputEvent| {
             let mut address = (*address_state).clone();
-            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
             field_updater(&mut address, value);
             address_state.set(address);
         })
@@ -67,7 +69,9 @@ pub fn address_edit_card(props: &AddressEditCardProps) -> Html {
     let on_select_change = {
         let address_state = address_state.clone();
         Callback::from(move |e: Event| {
-            let value = e.target_unchecked_into::<web_sys::HtmlSelectElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlSelectElement>()
+                .value();
             if let Ok(address_type) = value.parse::<AddressType>() {
                 let mut address = (*address_state).clone();
                 address.address_type = address_type;
@@ -80,7 +84,9 @@ pub fn address_edit_card(props: &AddressEditCardProps) -> Html {
         let address_state = address_state.clone();
         Callback::from(move |e: Event| {
             let mut address = (*address_state).clone();
-            address.is_primary = e.target_unchecked_into::<web_sys::HtmlInputElement>().checked();
+            address.is_primary = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .checked();
             address_state.set(address);
         })
     };

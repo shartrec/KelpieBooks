@@ -22,6 +22,7 @@
  *
  */
 
+use crate::contexts::auth_context::UserContextHandle;
 use crate::router::Route;
 use gloo_net::http::Request;
 use shared_core::dtos::user_detail::UserDetail;
@@ -30,7 +31,6 @@ use yew::function_component;
 use yew::html;
 use yew::prelude::*;
 use yew_router::hooks::use_navigator;
-use crate::contexts::auth_context::UserContextHandle;
 
 #[function_component(LoginPage)]
 pub fn login_page() -> Html {

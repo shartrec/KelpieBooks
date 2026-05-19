@@ -23,16 +23,16 @@
  */
 
 pub(crate) mod accounts;
+pub(crate) mod configurations;
+pub(crate) mod dashboard;
 pub(crate) mod onboarding;
+pub(crate) mod organization;
 pub(crate) mod partners;
+pub(crate) mod period_end;
 pub(crate) mod reports;
 pub(crate) mod security;
 pub(crate) mod transactions;
 pub(crate) mod users;
-pub(crate) mod period_end;
-pub(crate) mod configurations;
-pub(crate) mod organization;
-pub(crate) mod dashboard;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Role {

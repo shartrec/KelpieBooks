@@ -24,15 +24,15 @@
 
 use crate::db;
 use crate::util::ApiError;
+use chrono::{Local, NaiveDate};
 use rocket_db_pools::sqlx::PgConnection;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
-use std::collections::{HashMap, VecDeque};
-use uuid::Uuid;
-use chrono::{Local, NaiveDate};
-use sqlx::Acquire;
 use shared_core::models::{account::Account, system_tag::SystemTag};
 use shared_core::requests::configuration::UpdateConfigurationRequest;
+use sqlx::Acquire;
+use std::collections::{HashMap, VecDeque};
+use uuid::Uuid;
 
 pub async fn get_accounts(
     pool: &mut PgConnection,
@@ -47,10 +47,13 @@ pub async fn get_account_with_balance(
     pool: &mut PgConnection,
     account_id: Uuid,
 ) -> Result<AccountWithBalance, ApiError> {
-    let account = db::account::get(pool, account_id).await?
+    let account = db::account::get(pool, account_id)
+        .await?
         .ok_or_else(|| ApiError::NotFound("Account not found".to_string()))?;
 
-    let balance = db::journal_entry::get_balance_up_to_date(pool, account_id, Local::now().date_naive()).await?;
+    let balance =
+        db::journal_entry::get_balance_up_to_date(pool, account_id, Local::now().date_naive())
+            .await?;
 
     Ok(AccountWithBalance {
         balance,
@@ -139,8 +142,11 @@ pub async fn get_journal_entries_with_running_balance(
     start_date: NaiveDate,
     end_date: NaiveDate,
 ) -> Result<Vec<JournalEntryWithBalance>, ApiError> {
-    let opening_balance = db::journal_entry::get_balance_before_date(pool, account_id, start_date).await?;
-    let entries = db::journal_entry::get_all_by_account_in_date_range(pool, account_id, start_date, end_date).await?;
+    let opening_balance =
+        db::journal_entry::get_balance_before_date(pool, account_id, start_date).await?;
+    let entries =
+        db::journal_entry::get_all_by_account_in_date_range(pool, account_id, start_date, end_date)
+            .await?;
 
     let mut running_balance = opening_balance;
     let mut result = Vec::new();
@@ -152,8 +158,16 @@ pub async fn get_journal_entries_with_running_balance(
         account_id,
         date: start_date,
         description: Some("Opening Balance".to_string()),
-        debit: if opening_balance > 0 { opening_balance } else { 0 },
-        credit: if opening_balance < 0 { -opening_balance } else { 0 },
+        debit: if opening_balance > 0 {
+            opening_balance
+        } else {
+            0
+        },
+        credit: if opening_balance < 0 {
+            -opening_balance
+        } else {
+            0
+        },
         running_balance: opening_balance,
     });
 
@@ -175,18 +189,17 @@ pub async fn get_journal_entries_with_running_balance(
 }
 
 pub async fn get_system_accounts(
-        pool: &mut PgConnection,
-        organization_id: Uuid,
-    ) -> Result<HashMap<SystemTag, Uuid>, ApiError> {
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+) -> Result<HashMap<SystemTag, Uuid>, ApiError> {
     Ok(db::account::get_system_accounts(pool, organization_id).await?)
 }
 
 pub async fn update_system_accounts(
-        pool: &mut PgConnection,
-        organization_id: Uuid,
-        system_accounts: HashMap<SystemTag, Uuid>,
-    ) -> Result<HashMap<SystemTag, Uuid>, ApiError> {
-
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    system_accounts: HashMap<SystemTag, Uuid>,
+) -> Result<HashMap<SystemTag, Uuid>, ApiError> {
     let mut tx = pool.begin().await?;
     db::account::update_system_accounts(&mut tx, organization_id, system_accounts).await?;
     let resp = db::account::get_system_accounts(&mut tx, organization_id).await?;

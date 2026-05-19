@@ -22,20 +22,20 @@
  *
  */
 
+use crate::api::Api;
 use crate::components::layout::Layout;
 use crate::components::report_options::ReportOptions;
+use crate::contexts::auth_context::use_user_context;
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::router::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::models::account_category::AccountCategory;
+use shared_core::util::format_currency;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::util::format_currency;
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
@@ -43,7 +43,9 @@ pub struct AccountNode {
     pub children: Vec<AccountNode>,
 }
 
-fn build_account_nodes(accounts: &[AccountWithBalance]) -> (Vec<AccountNode>, Vec<AccountNode>, i64) {
+fn build_account_nodes(
+    accounts: &[AccountWithBalance],
+) -> (Vec<AccountNode>, Vec<AccountNode>, i64) {
     let mut revenue_total = 0;
     let mut expense_total = 0;
 
@@ -63,9 +65,11 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> (Vec<AccountNode>, Ve
         pc_map: &HashMap<Uuid, Vec<Uuid>>,
     ) -> AccountNode {
         let acc = acc_map.get(&acc_id).unwrap();
-        let children = pc_map.get(&acc_id)
+        let children = pc_map
+            .get(&acc_id)
             .map(|child_ids| {
-                child_ids.iter()
+                child_ids
+                    .iter()
                     .map(|&cid| build_node(cid, acc_map, pc_map))
                     .collect()
             })
@@ -106,9 +110,7 @@ pub fn profit_loss_page() -> Html {
     let error = use_state(|| None::<String>);
     let collapsed_nodes = use_state(HashSet::<Uuid>::new);
 
-    let memoized_data = use_memo(accounts.clone(), |accounts| {
-        build_account_nodes(accounts)
-    });
+    let memoized_data = use_memo(accounts.clone(), |accounts| build_account_nodes(accounts));
 
     let (revenue_nodes, expense_nodes, net_income) = (*memoized_data).clone();
 
@@ -117,14 +119,32 @@ pub fn profit_loss_page() -> Html {
         use_effect_with((), move |_| {
             let start_date = report_ctx.date_range.start_date;
             let end_date = report_ctx.date_range.end_date;
-            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(move |_| {
-                let url = format!("/api/reports/profit-loss/export/csv?start={}&end={}", start_date, end_date);
-                web_sys::window().unwrap().location().set_href(&url).unwrap();
-            }))));
-            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(move |_| {
-                let url = format!("/api/reports/profit-loss/export/pdf?start={}&end={}", start_date, end_date);
-                web_sys::window().unwrap().location().set_href(&url).unwrap();
-            }))));
+            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(
+                move |_| {
+                    let url = format!(
+                        "/api/reports/profit-loss/export/csv?start={}&end={}",
+                        start_date, end_date
+                    );
+                    web_sys::window()
+                        .unwrap()
+                        .location()
+                        .set_href(&url)
+                        .unwrap();
+                },
+            ))));
+            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(
+                move |_| {
+                    let url = format!(
+                        "/api/reports/profit-loss/export/pdf?start={}&end={}",
+                        start_date, end_date
+                    );
+                    web_sys::window()
+                        .unwrap()
+                        .location()
+                        .set_href(&url)
+                        .unwrap();
+                },
+            ))));
             move || {
                 report_ctx.dispatch(ReportAction::SetOnExportCsv(None));
                 report_ctx.dispatch(ReportAction::SetOnExportTypst(None));
@@ -161,7 +181,9 @@ pub fn profit_loss_page() -> Html {
                                     accounts.set(Rc::new(data));
                                     error.set(None);
                                 }
-                                Err(e) => error.set(Some(format!("Failed to parse P&L data: {}", e))),
+                                Err(e) => {
+                                    error.set(Some(format!("Failed to parse P&L data: {}", e)))
+                                }
                             }
                         } else {
                             error.set(Some(format!("Error fetching P&L: {}", resp.status())));
@@ -175,11 +197,15 @@ pub fn profit_loss_page() -> Html {
         });
     }
 
-    fn render_report_row(node: &AccountNode, depth: usize, collapsed: &UseStateHandle<HashSet<Uuid>>) -> Html {
+    fn render_report_row(
+        node: &AccountNode,
+        depth: usize,
+        collapsed: &UseStateHandle<HashSet<Uuid>>,
+    ) -> Html {
         let is_parent = !node.children.is_empty();
         let is_collapsed = collapsed.contains(&node.account.id);
         let indent_class = format!("report__indent__level_{}", depth);
-        
+
         let display_balance = if node.account.category == AccountCategory::Revenue {
             -node.account.balance
         } else {

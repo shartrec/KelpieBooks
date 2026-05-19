@@ -21,9 +21,9 @@
  *      Trevor Campbell
  *
  */
-use yew::prelude::*;
 use crate::components::layout::Layout;
 use crate::components::partner_list_table::PartnerListTable;
+use yew::prelude::*;
 
 #[function_component(PartnerListPage)]
 pub fn partner_list_page() -> Html {

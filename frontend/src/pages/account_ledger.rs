@@ -22,26 +22,26 @@
  *
  */
 
+use crate::api::Api;
+use crate::components::je_delete_confirmation_modal::DeleteConfirmationModal;
+use crate::components::je_reversal_confirmation_modal::ReversalConfirmationModal;
 use crate::components::layout::Layout;
+use crate::components::report_options::ReportOptions;
 use crate::components::transaction_row::{TransactionGroup, TransactionRow};
+use crate::contexts::auth_context::use_user_context;
+use crate::contexts::org_context::use_org_context;
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::pages::new_transaction::NewTransactionQuery;
 use crate::router::Route;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
+use shared_core::models::account::Account;
 use shared_core::requests::transaction::ReverseTransactionRequest;
+use shared_core::util::format_currency;
 use std::collections::HashMap;
 use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::models::account::Account;
-use shared_core::util::format_currency;
-use crate::api::Api;
-use crate::components::je_reversal_confirmation_modal::ReversalConfirmationModal;
-use crate::components::je_delete_confirmation_modal::DeleteConfirmationModal;
-use crate::components::report_options::ReportOptions;
-use crate::contexts::org_context::use_org_context;
-use crate::contexts::auth_context::use_user_context;
 
 #[derive(Debug, Properties, PartialEq)]
 pub struct AccountLedgerPageProps {
@@ -67,14 +67,32 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         use_effect_with((report_ctx.date_range.clone(),), move |_| {
             let start_date = report_ctx.date_range.start_date;
             let end_date = report_ctx.date_range.end_date;
-            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(move |_| {
-                let url = format!("/api/accounts/{}/export/csv?start={}&end={}", account_id, start_date, end_date);
-                web_sys::window().unwrap().location().set_href(&url).unwrap();
-            }))));
-            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(move |_| {
-                let url = format!("/api/accounts/{}/export/pdf?start={}&end={}", account_id, start_date, end_date);
-                web_sys::window().unwrap().location().set_href(&url).unwrap();
-            }))));
+            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(
+                move |_| {
+                    let url = format!(
+                        "/api/accounts/{}/export/csv?start={}&end={}",
+                        account_id, start_date, end_date
+                    );
+                    web_sys::window()
+                        .unwrap()
+                        .location()
+                        .set_href(&url)
+                        .unwrap();
+                },
+            ))));
+            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(
+                move |_| {
+                    let url = format!(
+                        "/api/accounts/{}/export/pdf?start={}&end={}",
+                        account_id, start_date, end_date
+                    );
+                    web_sys::window()
+                        .unwrap()
+                        .location()
+                        .set_href(&url)
+                        .unwrap();
+                },
+            ))));
             move || {
                 report_ctx.dispatch(ReportAction::SetOnExportCsv(None));
                 report_ctx.dispatch(ReportAction::SetOnExportTypst(None));
@@ -100,7 +118,10 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 loading.set(true);
-                let entries_url = format!("/api/accounts/{}/entries?start={}&end={}", account_id, start_date, end_date);
+                let entries_url = format!(
+                    "/api/accounts/{}/entries?start={}&end={}",
+                    account_id, start_date, end_date
+                );
                 let fetched_entries = Api::get(&entries_url, user_ctx, navigator).await;
                 loading.set(false);
                 match fetched_entries {
@@ -141,21 +162,24 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         let report_ctx = use_report_context();
         let user_ctx = user_ctx.clone();
         let navigator = navigator.clone();
-        use_effect_with((account_id, report_ctx.date_range.clone()), move |(account_id, _)| {
-            let account_id = *account_id;
-            let user_ctx = user_ctx.clone();
-            let navigator = navigator.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                let acc_url = format!("/api/accounts/{}", account_id);
-                if let Ok(response) = Api::get(&acc_url, user_ctx, navigator).await {
-                    if let Ok(acc_data) = response.json::<Account>().await {
-                        account.set(Some(acc_data));
+        use_effect_with(
+            (account_id, report_ctx.date_range.clone()),
+            move |(account_id, _)| {
+                let account_id = *account_id;
+                let user_ctx = user_ctx.clone();
+                let navigator = navigator.clone();
+                wasm_bindgen_futures::spawn_local(async move {
+                    let acc_url = format!("/api/accounts/{}", account_id);
+                    if let Ok(response) = Api::get(&acc_url, user_ctx, navigator).await {
+                        if let Ok(acc_data) = response.json::<Account>().await {
+                            account.set(Some(acc_data));
+                        }
                     }
-                }
-            });
-            fetch_entries.emit(());
-            || ()
-        });
+                });
+                fetch_entries.emit(());
+                || ()
+            },
+        );
     }
 
     let on_reverse_confirm = {
@@ -182,9 +206,10 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                             on_modal_close.emit(());
                             fetch_entries.emit(());
                         }
-                        Ok(r) => {
-                            error.set(Some(format!("Failed to reverse transaction: {}", r.status())))
-                        }
+                        Ok(r) => error.set(Some(format!(
+                            "Failed to reverse transaction: {}",
+                            r.status()
+                        ))),
                         Err(e) => error.set(Some(format!("Network error: {}", e))),
                     }
                 });
@@ -214,9 +239,10 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                             on_modal_close.emit(());
                             fetch_entries.emit(());
                         }
-                        Ok(r) => {
-                            error.set(Some(format!("Failed to delete transaction: {}", r.status())))
-                        }
+                        Ok(r) => error.set(Some(format!(
+                            "Failed to delete transaction: {}",
+                            r.status()
+                        ))),
                         Err(e) => error.set(Some(format!("Network error: {}", e))),
                     }
                 });
@@ -236,7 +262,9 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                 edit_id: Some(id),
                 ..Default::default()
             };
-            navigator.push_with_query(&Route::NewTransaction, &query).unwrap();
+            navigator
+                .push_with_query(&Route::NewTransaction, &query)
+                .unwrap();
         })
     };
 
@@ -273,7 +301,9 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         sorted_groups
     });
 
-    let opening_balance_entry = entries.iter().find(|e| e.description == Some("Opening Balance".to_string()));
+    let opening_balance_entry = entries
+        .iter()
+        .find(|e| e.description == Some("Opening Balance".to_string()));
 
     html! {
         <Layout>

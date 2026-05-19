@@ -22,8 +22,8 @@
  *
  */
 
-use yew::prelude::*;
 use web_sys::HtmlInputElement;
+use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct CurrencyProps {
@@ -63,7 +63,8 @@ pub fn currency_input(props: &CurrencyProps) -> Html {
             let val = input.value();
 
             // Allow only digits and a single decimal point
-            let filtered: String = val.chars()
+            let filtered: String = val
+                .chars()
                 .filter(|c| c.is_ascii_digit() || *c == '.')
                 .collect();
 
@@ -94,7 +95,9 @@ fn format_cents(cents: i64) -> String {
 }
 
 fn parse_to_cents(s: &str) -> Option<i64> {
-    if s.is_empty() { return Some(0); }
+    if s.is_empty() {
+        return Some(0);
+    }
     let parts: Vec<&str> = s.split('.').collect();
     match parts.as_slice() {
         [d] => d.parse::<i64>().ok().map(|v| v * 100),

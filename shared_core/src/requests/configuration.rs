@@ -22,10 +22,10 @@
  *
  */
 
-use std::collections::HashMap;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use crate::models::system_tag::SystemTag;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateConfigurationRequest {

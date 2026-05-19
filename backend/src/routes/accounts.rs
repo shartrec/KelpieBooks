@@ -1,21 +1,21 @@
-use chrono::NaiveDate;
 use crate::db::account as account_db;
+use crate::export::account_ledger_export::{generate_ledger_csv, generate_ledger_typst};
+use crate::export::utils::compile_typst_to_pdf;
+use crate::export::DownloadFile;
 use crate::routes::security::AuthenticatedUser;
 use crate::services::account_service;
 use crate::util::types::PathUuid;
 use crate::util::ApiError;
 use crate::DbKelpie;
+use chrono::NaiveDate;
+use rocket::http::ContentType;
 use rocket::serde::json::Json;
 use rocket::{delete, get, post, put, routes, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
-use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
-use crate::export::DownloadFile;
-use crate::export::account_ledger_export::{generate_ledger_csv, generate_ledger_typst};
-use rocket::http::ContentType;
 use shared_core::models::account::Account;
-use crate::export::utils::compile_typst_to_pdf;
+use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -35,8 +35,7 @@ async fn get_accounts(
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
 ) -> Result<Json<Vec<Account>>, ApiError> {
-    let accounts =
-        account_service::get_accounts(&mut pool, user.organization_id).await?;
+    let accounts = account_service::get_accounts(&mut pool, user.organization_id).await?;
     Ok(Json(accounts))
 }
 
@@ -72,7 +71,10 @@ async fn get_account_entries(
         .map_err(|_| ApiError::Invalid("Invalid start date".to_string()))?;
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid end date".to_string()))?;
-    let entries = account_service::get_journal_entries_with_running_balance(&mut pool, *id, start_date, end_date).await?;
+    let entries = account_service::get_journal_entries_with_running_balance(
+        &mut pool, *id, start_date, end_date,
+    )
+    .await?;
     Ok(Json(entries))
 }
 
@@ -153,16 +155,29 @@ async fn export_account_ledger(
 
     let account = account_db::get(&mut pool, *id).await?;
     if let Some(account) = account {
-        let entries = account_service::get_journal_entries_with_running_balance(&mut pool, *id, start_date, end_date).await?;
+        let entries = account_service::get_journal_entries_with_running_balance(
+            &mut pool, *id, start_date, end_date,
+        )
+        .await?;
         let org = crate::db::organization::get(&mut pool, user.organization_id).await?;
 
         let (content, content_type, filename) = match format.as_str() {
             "csv" => {
                 let csv_data = generate_ledger_csv(&entries);
-                (csv_data.into_bytes(), ContentType::CSV, "account_ledger.csv".to_string())
+                (
+                    csv_data.into_bytes(),
+                    ContentType::CSV,
+                    "account_ledger.csv".to_string(),
+                )
             }
             "pdf" => {
-                let typst_data = generate_ledger_typst(&entries, account.name.as_str(),  &start_date, &end_date, &org);
+                let typst_data = generate_ledger_typst(
+                    &entries,
+                    account.name.as_str(),
+                    &start_date,
+                    &end_date,
+                    &org,
+                );
                 match compile_typst_to_pdf(typst_data) {
                     Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
                     Err(e) => return Err(ApiError::Internal(e)),

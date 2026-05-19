@@ -40,7 +40,7 @@ pub async fn get_profit_loss(
     end_date: NaiveDate,
 ) -> Result<Vec<AccountWithBalance>, ApiError> {
     let accounts = db::account::get_all_by_org(pool, organization_id).await?;
-    
+
     // We need to fetch journal entries within the date range
     let entries = sqlx::query!(
         r#"
@@ -100,7 +100,9 @@ pub async fn get_profit_loss(
     // 4. Map to the final DTO, filtering for Revenue and Expense.
     let result = accounts
         .into_iter()
-        .filter(|acc| acc.category == AccountCategory::Revenue || acc.category == AccountCategory::Expense)
+        .filter(|acc| {
+            acc.category == AccountCategory::Revenue || acc.category == AccountCategory::Expense
+        })
         .map(|acc| AccountWithBalance {
             balance: *balances.get(&acc.id).unwrap_or(&0),
             id: acc.id,

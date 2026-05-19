@@ -45,7 +45,6 @@ pub fn format_currency_typ(amount: &i64) -> String {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -62,7 +61,6 @@ mod tests {
 
     #[test]
     fn test_parse() {
-
         let value = "2220.20";
         if let Ok(amount) = value.parse::<f64>() {
             assert_eq!(amount, 2220.20);

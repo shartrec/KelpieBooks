@@ -22,9 +22,9 @@
  *
  */
 
-use yew::prelude::*;
 use shared_core::dtos::expense_breakdown::ExpenseBreakdown;
 use shared_core::util::format_currency;
+use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct BarChartProps {

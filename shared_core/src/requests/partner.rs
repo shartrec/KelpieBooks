@@ -1,7 +1,7 @@
-use serde::{Serialize, Deserialize};
-use uuid::Uuid;
 use crate::models::partner_address::PartnerAddress;
 use crate::models::partner_contact::PartnerContact;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct CreatePartnerRequest {

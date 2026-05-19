@@ -22,13 +22,13 @@
  *
  */
 
+use crate::export::utils::{build_table_header, wrap_report_layout};
+use chrono::NaiveDate;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::models::{account_category::AccountCategory, organization::Organization};
-use std::collections::HashMap;
-use chrono::NaiveDate;
-use uuid::Uuid;
 use shared_core::util::format_currency_typ;
-use crate::export::utils::{build_table_header, wrap_report_layout};
+use std::collections::HashMap;
+use uuid::Uuid;
 
 #[derive(Clone, Debug)]
 pub struct AccountNode {
@@ -53,9 +53,11 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
         pc_map: &HashMap<Uuid, Vec<Uuid>>,
     ) -> AccountNode {
         let acc = acc_map.get(&acc_id).unwrap();
-        let children = pc_map.get(&acc_id)
+        let children = pc_map
+            .get(&acc_id)
             .map(|child_ids| {
-                child_ids.iter()
+                child_ids
+                    .iter()
                     .map(|&cid| build_node(cid, acc_map, pc_map))
                     .collect()
             })
@@ -90,18 +92,27 @@ pub fn generate_trial_balance_csv(accounts: &[AccountWithBalance]) -> String {
                 if node.account.balance >= 0 {
                     (format_currency_typ(&node.account.balance), "".to_string())
                 } else {
-                    ("".to_string(), format_currency_typ(&node.account.balance.abs()))
+                    (
+                        "".to_string(),
+                        format_currency_typ(&node.account.balance.abs()),
+                    )
                 }
-            },
+            }
             AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
                 if node.account.balance <= 0 {
-                    ("".to_string(), format_currency_typ(&node.account.balance.abs()))
+                    (
+                        "".to_string(),
+                        format_currency_typ(&node.account.balance.abs()),
+                    )
                 } else {
                     (format_currency_typ(&node.account.balance), "".to_string())
                 }
-            },
+            }
         };
-        content.push_str(&format!("\"{}{}\",\"{}\",\"{}\"\n", indent, node.account.name, debit_display, credit_display));
+        content.push_str(&format!(
+            "\"{}{}\",\"{}\",\"{}\"\n",
+            indent, node.account.name, debit_display, credit_display
+        ));
         for child in &node.children {
             build_csv_rows(child, depth + 1, content);
         }
@@ -116,12 +127,19 @@ pub fn generate_trial_balance_csv(accounts: &[AccountWithBalance]) -> String {
     csv_content
 }
 
-pub fn generate_trial_balance_typst(accounts: &[AccountWithBalance], report_date: &NaiveDate, org: &Option<Organization>) -> String {
+pub fn generate_trial_balance_typst(
+    accounts: &[AccountWithBalance],
+    report_date: &NaiveDate,
+    org: &Option<Organization>,
+) -> String {
     let account_nodes = build_account_nodes(accounts);
     let (total_debit, total_credit) = AccountWithBalance::calculate_totals(accounts);
 
     let mut typst_content = String::new();
-    typst_content.push_str(&*build_table_header(&["Account", "Debit", "Credit"], &[false, true, true]));
+    typst_content.push_str(&*build_table_header(
+        &["Account", "Debit", "Credit"],
+        &[false, true, true],
+    ));
 
     fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String) {
         let indent = "#h(2.0em)".repeat(depth);
@@ -130,18 +148,27 @@ pub fn generate_trial_balance_typst(accounts: &[AccountWithBalance], report_date
                 if node.account.balance >= 0 {
                     (format_currency_typ(&node.account.balance), "".to_string())
                 } else {
-                    ("".to_string(), format_currency_typ(&node.account.balance.abs()))
+                    (
+                        "".to_string(),
+                        format_currency_typ(&node.account.balance.abs()),
+                    )
                 }
-            },
+            }
             AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
                 if node.account.balance <= 0 {
-                    ("".to_string(), format_currency_typ(&node.account.balance.abs()))
+                    (
+                        "".to_string(),
+                        format_currency_typ(&node.account.balance.abs()),
+                    )
                 } else {
                     (format_currency_typ(&node.account.balance), "".to_string())
                 }
-            },
+            }
         };
-        content.push_str(&format!("  [{} {}], align(right)[{}], align(right)[{}],\n", indent, node.account.name, debit_display, credit_display));
+        content.push_str(&format!(
+            "  [{} {}], align(right)[{}], align(right)[{}],\n",
+            indent, node.account.name, debit_display, credit_display
+        ));
         for child in &node.children {
             build_typst_rows(child, depth + 1, content);
         }
@@ -150,11 +177,17 @@ pub fn generate_trial_balance_typst(accounts: &[AccountWithBalance], report_date
     for node in &account_nodes {
         build_typst_rows(node, 0, &mut typst_content);
     }
-    typst_content.push_str(&format!("  [*Total*], align(right)[*{}*], align(right)[*{}*],\n", (total_debit as f64) / 100.0, (total_credit as f64) / 100.0));
+    typst_content.push_str(&format!(
+        "  [*Total*], align(right)[*{}*], align(right)[*{}*],\n",
+        (total_debit as f64) / 100.0,
+        (total_credit as f64) / 100.0
+    ));
     typst_content.push_str(")\n");
 
     let name = org.as_ref().map(|o| o.name.as_str());
-    let report_qual = format!("As at {}", report_date.format("%d %b %Y").to_string().as_str());
-    wrap_report_layout(name, "Trial Balance", &*report_qual, typst_content.as_str() )
-
+    let report_qual = format!(
+        "As at {}",
+        report_date.format("%d %b %Y").to_string().as_str()
+    );
+    wrap_report_layout(name, "Trial Balance", &*report_qual, typst_content.as_str())
 }

@@ -22,9 +22,9 @@
  *
  */
 
+use shared_core::dtos::user_detail::UserDetail;
 use std::rc::Rc;
 use yew::prelude::*;
-use shared_core::dtos::user_detail::UserDetail;
 
 pub type UserContextHandle = UseReducerHandle<UserContext>;
 

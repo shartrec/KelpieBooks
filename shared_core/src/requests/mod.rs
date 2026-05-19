@@ -1,6 +1,6 @@
 pub mod account;
 pub mod auth;
-pub mod onboard;
-pub mod transaction;
 pub mod configuration;
+pub mod onboard;
 pub mod partner;
+pub mod transaction;

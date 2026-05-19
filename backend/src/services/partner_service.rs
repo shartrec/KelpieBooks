@@ -1,12 +1,12 @@
 use crate::db::partner as partner_db;
 use crate::util::ApiError;
 use rocket_db_pools::sqlx::{self, PgConnection};
-use sqlx::Acquire;
 use shared_core::dtos::partner_list_item::PartnerListItem;
 use shared_core::models::partner::Partner;
 use shared_core::models::partner_address::PartnerAddress;
 use shared_core::models::partner_contact::PartnerContact;
 use shared_core::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
+use sqlx::Acquire;
 use uuid::Uuid;
 
 pub async fn get_partners(
@@ -62,10 +62,7 @@ pub async fn update_partner(
     Ok(updated_partner)
 }
 
-pub async fn delete_partner(
-    pool: &mut PgConnection,
-    partner_id: Uuid,
-) -> Result<u64, ApiError> {
+pub async fn delete_partner(pool: &mut PgConnection, partner_id: Uuid) -> Result<u64, ApiError> {
     let rows_affected = partner_db::delete(pool, partner_id).await?;
     Ok(rows_affected)
 }
@@ -76,7 +73,8 @@ pub async fn create_address(
     partner_id: Uuid,
     address: &PartnerAddress,
 ) -> Result<PartnerAddress, ApiError> {
-    let new_address = partner_db::insert_address(pool, organization_id, partner_id, address).await?;
+    let new_address =
+        partner_db::insert_address(pool, organization_id, partner_id, address).await?;
     Ok(new_address)
 }
 
@@ -86,14 +84,12 @@ pub async fn update_address(
     address_id: Uuid,
     address: &PartnerAddress,
 ) -> Result<PartnerAddress, ApiError> {
-    let updated_address = partner_db::update_address(pool, organization_id, address_id, address).await?;
+    let updated_address =
+        partner_db::update_address(pool, organization_id, address_id, address).await?;
     Ok(updated_address)
 }
 
-pub async fn delete_address(
-    pool: &mut PgConnection,
-    address_id: Uuid,
-) -> Result<u64, ApiError> {
+pub async fn delete_address(pool: &mut PgConnection, address_id: Uuid) -> Result<u64, ApiError> {
     let rows_affected = partner_db::delete_address(pool, address_id).await?;
     Ok(rows_affected)
 }
@@ -104,7 +100,8 @@ pub async fn create_contact(
     partner_id: Uuid,
     contact: &PartnerContact,
 ) -> Result<PartnerContact, ApiError> {
-    let new_contact = partner_db::insert_contact(pool, organization_id, partner_id, contact).await?;
+    let new_contact =
+        partner_db::insert_contact(pool, organization_id, partner_id, contact).await?;
     Ok(new_contact)
 }
 
@@ -114,14 +111,12 @@ pub async fn update_contact(
     contact_id: Uuid,
     contact: &PartnerContact,
 ) -> Result<PartnerContact, ApiError> {
-    let updated_contact = partner_db::update_contact(pool, organization_id, contact_id, contact).await?;
+    let updated_contact =
+        partner_db::update_contact(pool, organization_id, contact_id, contact).await?;
     Ok(updated_contact)
 }
 
-pub async fn delete_contact(
-    pool: &mut PgConnection,
-    contact_id: Uuid,
-) -> Result<u64, ApiError> {
+pub async fn delete_contact(pool: &mut PgConnection, contact_id: Uuid) -> Result<u64, ApiError> {
     let rows_affected = partner_db::delete_contact(pool, contact_id).await?;
     Ok(rows_affected)
 }

@@ -23,8 +23,8 @@
  */
 
 use shared_core::requests::partner::CreatePartnerRequest;
-use yew::prelude::*;
 use uuid::Uuid;
+use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct AddPartnerModalProps {
@@ -43,7 +43,9 @@ pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: InputEvent| {
             let mut info = (*state).clone();
-            info.legal_name = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            info.legal_name = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
             state.set(info);
         })
     };
@@ -52,7 +54,10 @@ pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: InputEvent| {
             let mut info = (*state).clone();
-            info.trade_name = Some(e.target_unchecked_into::<web_sys::HtmlInputElement>().value());
+            info.trade_name = Some(
+                e.target_unchecked_into::<web_sys::HtmlInputElement>()
+                    .value(),
+            );
             state.set(info);
         })
     };
@@ -61,7 +66,10 @@ pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: InputEvent| {
             let mut info = (*state).clone();
-            info.tax_identifier = Some(e.target_unchecked_into::<web_sys::HtmlInputElement>().value());
+            info.tax_identifier = Some(
+                e.target_unchecked_into::<web_sys::HtmlInputElement>()
+                    .value(),
+            );
             state.set(info);
         })
     };
@@ -70,7 +78,9 @@ pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: Event| {
             let mut info = (*state).clone();
-            info.is_vendor = e.target_unchecked_into::<web_sys::HtmlInputElement>().checked();
+            info.is_vendor = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .checked();
             state.set(info);
         })
     };
@@ -79,7 +89,9 @@ pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: Event| {
             let mut info = (*state).clone();
-            info.is_customer = e.target_unchecked_into::<web_sys::HtmlInputElement>().checked();
+            info.is_customer = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .checked();
             state.set(info);
         })
     };
@@ -88,7 +100,9 @@ pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: Event| {
             let mut info = (*state).clone();
-            let value = e.target_unchecked_into::<web_sys::HtmlSelectElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlSelectElement>()
+                .value();
             info.default_ap_account_id = Uuid::parse_str(&value).ok();
             state.set(info);
         })
@@ -98,7 +112,9 @@ pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: Event| {
             let mut info = (*state).clone();
-            let value = e.target_unchecked_into::<web_sys::HtmlSelectElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlSelectElement>()
+                .value();
             info.default_ar_account_id = Uuid::parse_str(&value).ok();
             state.set(info);
         })

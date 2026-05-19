@@ -24,11 +24,11 @@
 
 use crate::router::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::util::format_currency;
 use std::collections::HashSet;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::util::format_currency;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {

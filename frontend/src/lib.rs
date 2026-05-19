@@ -25,5 +25,5 @@ pub mod api;
 pub mod components;
 pub mod contexts;
 pub mod pages;
-pub mod services;
 pub mod router;
+pub mod services;

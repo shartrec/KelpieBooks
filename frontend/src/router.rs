@@ -22,8 +22,8 @@
  *
  */
 
-use yew_router::Routable;
 use uuid::Uuid;
+use yew_router::Routable;
 
 #[derive(Clone, Routable, PartialEq)]
 pub enum Route {

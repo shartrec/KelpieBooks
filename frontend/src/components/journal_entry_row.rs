@@ -21,11 +21,11 @@
  *      Trevor Campbell
  *
  */
+use crate::components::currency_input::CurrencyInput;
 use shared_core::requests::transaction::JournalEntryLine;
 use uuid::Uuid;
 use web_sys::HtmlSelectElement;
 use yew::prelude::*;
-use crate::components::currency_input::CurrencyInput;
 
 #[derive(Properties, PartialEq)]
 pub struct JournalEntryRowProps {
@@ -39,7 +39,6 @@ pub struct JournalEntryRowProps {
 
 #[function_component(JournalEntryRow)]
 pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
-
     let select_ref = use_node_ref(); // Create the reference
 
     // Effect that runs when 'should_focus' changes

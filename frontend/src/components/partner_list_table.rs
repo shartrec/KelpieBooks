@@ -22,22 +22,22 @@
  *
  */
 
-use yew::prelude::*;
-use shared_core::dtos::partner_list_item::PartnerListItem;
-use crate::components::partner_row::PartnerRow;
 use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
-use yew_router::prelude::use_navigator;
 use crate::components::add_partner_modal::AddPartnerModal;
 use crate::components::delete_partner_confirmation_modal::DeletePartnerConfirmationModal;
 use crate::components::partner_drawer::PartnerDrawer;
-use shared_core::requests::partner::CreatePartnerRequest;
+use crate::components::partner_row::PartnerRow;
+use crate::contexts::auth_context::use_user_context;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::dtos::partner_list_item::PartnerListItem;
 use shared_core::models::account_category::AccountCategory;
-use uuid::Uuid;
 use shared_core::models::partner::Partner;
 use shared_core::models::partner_address::PartnerAddress;
 use shared_core::models::partner_contact::PartnerContact;
+use shared_core::requests::partner::CreatePartnerRequest;
+use uuid::Uuid;
+use yew::prelude::*;
+use yew_router::prelude::use_navigator;
 
 #[function_component(PartnerListTable)]
 pub fn partner_list_table() -> Html {
@@ -69,7 +69,8 @@ pub fn partner_list_table() -> Html {
             let navigator = navigator.clone();
             loading.set(true);
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_partners = Api::get("/api/partners", user_ctx.clone(), navigator.clone()).await;
+                let fetched_partners =
+                    Api::get("/api/partners", user_ctx.clone(), navigator.clone()).await;
                 match fetched_partners {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<PartnerListItem>>().await {
@@ -77,11 +78,15 @@ pub fn partner_list_table() -> Html {
                             Err(e) => error.set(Some(format!("Failed to parse partners: {}", e))),
                         }
                     }
-                    Ok(response) => error.set(Some(format!("Failed to fetch partners: {}", response.status()))),
+                    Ok(response) => error.set(Some(format!(
+                        "Failed to fetch partners: {}",
+                        response.status()
+                    ))),
                     Err(e) => error.set(Some(format!("Network error: {}", e))),
                 }
 
-                let fetched_accounts = Api::get("/api/accounts_with_balances", user_ctx, navigator).await;
+                let fetched_accounts =
+                    Api::get("/api/accounts_with_balances", user_ctx, navigator).await;
                 match fetched_accounts {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<AccountWithBalance>>().await {
@@ -89,7 +94,10 @@ pub fn partner_list_table() -> Html {
                             Err(e) => error.set(Some(format!("Failed to parse accounts: {}", e))),
                         }
                     }
-                    Ok(response) => error.set(Some(format!("Failed to fetch accounts: {}", response.status()))),
+                    Ok(response) => error.set(Some(format!(
+                        "Failed to fetch accounts: {}",
+                        response.status()
+                    ))),
                     Err(e) => error.set(Some(format!("Network error: {}", e))),
                 }
                 loading.set(false);
@@ -134,38 +142,47 @@ pub fn partner_list_table() -> Html {
             let user_ctx = user_ctx.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let resp = Api::get(&format!("/api/partners/{}", id), user_ctx.clone(), navigator.clone()).await;
+                let resp = Api::get(
+                    &format!("/api/partners/{}", id),
+                    user_ctx.clone(),
+                    navigator.clone(),
+                )
+                .await;
                 match resp {
-                    Ok(r) if r.ok() => {
-                        match r.json::<Partner>().await {
-                            Ok(partner) => partner_to_edit.set(Some(partner)),
-                            Err(e) => error.set(Some(format!("Failed to parse partner: {}", e))),
-                        }
-                    }
+                    Ok(r) if r.ok() => match r.json::<Partner>().await {
+                        Ok(partner) => partner_to_edit.set(Some(partner)),
+                        Err(e) => error.set(Some(format!("Failed to parse partner: {}", e))),
+                    },
                     Ok(r) => error.set(Some(format!("Failed to fetch partner: {}", r.status()))),
                     Err(e) => error.set(Some(format!("Network error: {}", e))),
                 }
 
-                let resp = Api::get(&format!("/api/partners/{}/addresses", id), user_ctx.clone(), navigator.clone()).await;
+                let resp = Api::get(
+                    &format!("/api/partners/{}/addresses", id),
+                    user_ctx.clone(),
+                    navigator.clone(),
+                )
+                .await;
                 match resp {
-                    Ok(r) if r.ok() => {
-                        match r.json::<Vec<PartnerAddress>>().await {
-                            Ok(addresses) => partner_addresses.set(addresses),
-                            Err(e) => error.set(Some(format!("Failed to parse addresses: {}", e))),
-                        }
-                    }
+                    Ok(r) if r.ok() => match r.json::<Vec<PartnerAddress>>().await {
+                        Ok(addresses) => partner_addresses.set(addresses),
+                        Err(e) => error.set(Some(format!("Failed to parse addresses: {}", e))),
+                    },
                     Ok(r) => error.set(Some(format!("Failed to fetch addresses: {}", r.status()))),
                     Err(e) => error.set(Some(format!("Network error: {}", e))),
                 }
 
-                let resp = Api::get(&format!("/api/partners/{}/contacts", id), user_ctx, navigator).await;
+                let resp = Api::get(
+                    &format!("/api/partners/{}/contacts", id),
+                    user_ctx,
+                    navigator,
+                )
+                .await;
                 match resp {
-                    Ok(r) if r.ok() => {
-                        match r.json::<Vec<PartnerContact>>().await {
-                            Ok(contacts) => partner_contacts.set(contacts),
-                            Err(e) => error.set(Some(format!("Failed to parse contacts: {}", e))),
-                        }
-                    }
+                    Ok(r) if r.ok() => match r.json::<Vec<PartnerContact>>().await {
+                        Ok(contacts) => partner_contacts.set(contacts),
+                        Err(e) => error.set(Some(format!("Failed to parse contacts: {}", e))),
+                    },
                     Ok(r) => error.set(Some(format!("Failed to fetch contacts: {}", r.status()))),
                     Err(e) => error.set(Some(format!("Network error: {}", e))),
                 }
@@ -229,13 +246,16 @@ pub fn partner_list_table() -> Html {
                 let user_ctx = user_ctx.clone();
                 let navigator = navigator.clone();
                 wasm_bindgen_futures::spawn_local(async move {
-                    let resp = Api::delete(&format!("/api/partners/{}", id), user_ctx, navigator).await;
+                    let resp =
+                        Api::delete(&format!("/api/partners/{}", id), user_ctx, navigator).await;
                     match resp {
                         Ok(r) if r.ok() => {
                             on_modal_close.emit(());
                             fetch_data.emit(());
                         }
-                        Ok(r) => error.set(Some(format!("Failed to delete partner: {}", r.status()))),
+                        Ok(r) => {
+                            error.set(Some(format!("Failed to delete partner: {}", r.status())))
+                        }
                         Err(e) => error.set(Some(format!("Network error: {}", e))),
                     }
                 });
@@ -243,8 +263,16 @@ pub fn partner_list_table() -> Html {
         })
     };
 
-    let ap_accounts: Vec<(Uuid, String)> = (*accounts).iter().filter(|a| a.category == AccountCategory::Liability).map(|a| (a.id, a.name.clone())).collect();
-    let ar_accounts: Vec<(Uuid, String)> = (*accounts).iter().filter(|a| a.category == AccountCategory::Asset).map(|a| (a.id, a.name.clone())).collect();
+    let ap_accounts: Vec<(Uuid, String)> = (*accounts)
+        .iter()
+        .filter(|a| a.category == AccountCategory::Liability)
+        .map(|a| (a.id, a.name.clone()))
+        .collect();
+    let ar_accounts: Vec<(Uuid, String)> = (*accounts)
+        .iter()
+        .filter(|a| a.category == AccountCategory::Asset)
+        .map(|a| (a.id, a.name.clone()))
+        .collect();
 
     if *loading {
         return html! { <p>{ "Loading..." }</p> };

@@ -22,9 +22,9 @@
  *
  */
 
-use yew::prelude::*;
 use shared_core::dtos::partner_list_item::PartnerListItem;
 use uuid::Uuid;
+use yew::prelude::*;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct PartnerRowProps {

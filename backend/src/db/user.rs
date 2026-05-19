@@ -22,9 +22,9 @@
  *
  */
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use uuid::Uuid;
 use shared_core::models::user::User;
 use shared_core::models::user_with_org::UserWithOrg;
+use uuid::Uuid;
 
 fn from_row_to_user_with_org(row: &sqlx::postgres::PgRow) -> UserWithOrg {
     UserWithOrg {
@@ -106,7 +106,10 @@ pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, sql
     Ok(result.rows_affected())
 }
 
-pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<UserWithOrg>, sqlx::Error> {
+pub(crate) async fn get(
+    pool: &mut PgConnection,
+    id: Uuid,
+) -> Result<Option<UserWithOrg>, sqlx::Error> {
     sqlx::query("SELECT u.*, o.name as organisation_name, o.strict_audit_mode FROM users u JOIN organizations o ON u.organization_id = o.id WHERE u.id = $1")
         .bind(id)
         .fetch_optional(pool)

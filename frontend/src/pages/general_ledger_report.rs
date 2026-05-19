@@ -22,16 +22,16 @@
  *
  */
 
+use crate::api::Api;
 use crate::components::layout::Layout;
 use crate::components::report_options::ReportOptions;
-use crate::contexts::report_context::{use_report_context, ReportAction};
-use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
-use yew::prelude::*;
-use crate::api::Api;
 use crate::contexts::auth_context::use_user_context;
-use yew_router::prelude::*;
-use shared_core::util::format_currency;
+use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::router::Route;
+use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
+use shared_core::util::format_currency;
+use yew::prelude::*;
+use yew_router::prelude::*;
 
 #[function_component(GeneralLedgerReportPage)]
 pub fn general_ledger_report_page() -> Html {
@@ -52,7 +52,11 @@ pub fn general_ledger_report_page() -> Html {
 
             let mut url_params = format!("start={}&end={}", start_date, end_date);
             if !selected_accounts.is_empty() {
-                let account_ids = selected_accounts.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(",");
+                let account_ids = selected_accounts
+                    .iter()
+                    .map(|id| id.to_string())
+                    .collect::<Vec<String>>()
+                    .join(",");
                 url_params.push_str(&format!("&accounts={}", account_ids));
             }
             if let Some(amount) = min_amount {
@@ -60,14 +64,26 @@ pub fn general_ledger_report_page() -> Html {
             }
 
             let csv_url = format!("/api/reports/general-ledger/export/csv?{}", url_params);
-            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(move |_| {
-                web_sys::window().unwrap().location().set_href(&csv_url).unwrap();
-            }))));
+            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(
+                move |_| {
+                    web_sys::window()
+                        .unwrap()
+                        .location()
+                        .set_href(&csv_url)
+                        .unwrap();
+                },
+            ))));
 
             let pdf_url = format!("/api/reports/general-ledger/export/pdf?{}", url_params);
-            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(move |_| {
-                web_sys::window().unwrap().location().set_href(&pdf_url).unwrap();
-            }))));
+            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(
+                move |_| {
+                    web_sys::window()
+                        .unwrap()
+                        .location()
+                        .set_href(&pdf_url)
+                        .unwrap();
+                },
+            ))));
 
             move || {
                 report_ctx.dispatch(ReportAction::SetOnExportCsv(None));
@@ -87,54 +103,67 @@ pub fn general_ledger_report_page() -> Html {
         let user_ctx = user_ctx.clone();
         let navigator = navigator.clone();
 
-        use_effect_with((start_date, end_date, selected_accounts.clone(), min_amount), move |(start, end, accounts, min_amount)| {
-            let report_data = report_data.clone();
-            let loading = loading.clone();
-            let error = error.clone();
-            let start = *start;
-            let end = *end;
-            let accounts = accounts.clone();
-            let min_amount = *min_amount;
-            let user_ctx = user_ctx.clone();
-            let navigator = navigator.clone();
+        use_effect_with(
+            (start_date, end_date, selected_accounts.clone(), min_amount),
+            move |(start, end, accounts, min_amount)| {
+                let report_data = report_data.clone();
+                let loading = loading.clone();
+                let error = error.clone();
+                let start = *start;
+                let end = *end;
+                let accounts = accounts.clone();
+                let min_amount = *min_amount;
+                let user_ctx = user_ctx.clone();
+                let navigator = navigator.clone();
 
-            wasm_bindgen_futures::spawn_local(async move {
-                loading.set(true);
-                let mut url = format!("/api/reports/general-ledger?start={}&end={}", start, end);
-                if !accounts.is_empty() {
-                    let account_ids = accounts.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(",");
-                    url.push_str(&format!("&accounts={}", account_ids));
-                }
-                if let Some(amount) = min_amount {
-                    url.push_str(&format!("&min_amount={}", amount));
-                }
-
-                match Api::get(&url, user_ctx, navigator).await {
-                    Ok(resp) => {
-                        if resp.ok() {
-                            match resp.json::<Vec<GeneralLedgerLine>>().await {
-                                Ok(data) => {
-                                    report_data.set(data);
-                                    error.set(None);
-                                }
-                                Err(e) => error.set(Some(format!("Failed to parse report data: {}", e))),
-                            }
-                        } else {
-                            error.set(Some(format!("Error fetching report: {}", resp.status())));
-                        }
+                wasm_bindgen_futures::spawn_local(async move {
+                    loading.set(true);
+                    let mut url =
+                        format!("/api/reports/general-ledger?start={}&end={}", start, end);
+                    if !accounts.is_empty() {
+                        let account_ids = accounts
+                            .iter()
+                            .map(|id| id.to_string())
+                            .collect::<Vec<String>>()
+                            .join(",");
+                        url.push_str(&format!("&accounts={}", account_ids));
                     }
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
-                }
-                loading.set(false);
-            });
-            || ()
-        });
+                    if let Some(amount) = min_amount {
+                        url.push_str(&format!("&min_amount={}", amount));
+                    }
+
+                    match Api::get(&url, user_ctx, navigator).await {
+                        Ok(resp) => {
+                            if resp.ok() {
+                                match resp.json::<Vec<GeneralLedgerLine>>().await {
+                                    Ok(data) => {
+                                        report_data.set(data);
+                                        error.set(None);
+                                    }
+                                    Err(e) => error
+                                        .set(Some(format!("Failed to parse report data: {}", e))),
+                                }
+                            } else {
+                                error
+                                    .set(Some(format!("Error fetching report: {}", resp.status())));
+                            }
+                        }
+                        Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    }
+                    loading.set(false);
+                });
+                || ()
+            },
+        );
     }
 
     let grouped_data = use_memo(report_data.clone(), |data| {
         let mut grouped = std::collections::BTreeMap::new();
         for line in data.iter() {
-            grouped.entry(line.account_name.clone()).or_insert_with(Vec::new).push(line.clone());
+            grouped
+                .entry(line.account_name.clone())
+                .or_insert_with(Vec::new)
+                .push(line.clone());
         }
         grouped
     });

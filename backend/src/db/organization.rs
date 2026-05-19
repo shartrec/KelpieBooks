@@ -23,8 +23,8 @@
  */
 use chrono::NaiveDate;
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use uuid::Uuid;
 use shared_core::models::organization::Organization;
+use uuid::Uuid;
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
@@ -33,7 +33,7 @@ pub(crate) async fn get(
     sqlx::query("SELECT * FROM organizations WHERE id = $1")
         .bind(id)
         .fetch_optional(pool)
-    .await
+        .await
         .map(|row| row.map(|r| from_row_to_org(&r)))
 }
 
@@ -46,7 +46,7 @@ pub(crate) async fn set_lock_date(
         .bind(date)
         .bind(id)
         .execute(pool)
-    .await?;
+        .await?;
     Ok(())
 }
 pub(crate) async fn set_audit_mode(
@@ -58,7 +58,7 @@ pub(crate) async fn set_audit_mode(
         .bind(mode)
         .bind(id)
         .execute(pool)
-    .await?;
+        .await?;
     Ok(())
 }
 

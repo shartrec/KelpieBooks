@@ -22,17 +22,16 @@
  *
  */
 
-
-use yew::prelude::*;
-use chrono::NaiveDate;
-use crate::contexts::report_context::{ReportContext, ReportAction};
-use uuid::Uuid;
 use crate::api::Api;
+use crate::components::currency_input::CurrencyInput;
 use crate::contexts::auth_context::use_user_context;
-use yew_router::prelude::use_navigator;
+use crate::contexts::report_context::{ReportAction, ReportContext};
+use chrono::NaiveDate;
 use shared_core::models::account::Account;
 use shared_core::models::account_category::AccountCategory;
-use crate::components::currency_input::CurrencyInput;
+use uuid::Uuid;
+use yew::prelude::*;
+use yew_router::prelude::use_navigator;
 
 #[derive(Properties, PartialEq)]
 pub struct ReportOptionsProps {
@@ -64,9 +63,14 @@ pub fn report_options(props: &ReportOptionsProps) -> Html {
                 wasm_bindgen_futures::spawn_local(async move {
                     if let Ok(response) = Api::get("/api/accounts", user_ctx, navigator).await {
                         if let Ok(data) = response.json::<Vec<Account>>().await {
-                            accounts.set(data.into_iter().filter(|acc| {
-                                acc.category == AccountCategory::Expense || acc.category == AccountCategory::Revenue
-                            }).collect());
+                            accounts.set(
+                                data.into_iter()
+                                    .filter(|acc| {
+                                        acc.category == AccountCategory::Expense
+                                            || acc.category == AccountCategory::Revenue
+                                    })
+                                    .collect(),
+                            );
                         }
                     }
                 });

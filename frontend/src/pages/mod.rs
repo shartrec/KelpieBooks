@@ -24,17 +24,17 @@
 
 pub mod account_ledger;
 pub mod balance_sheet;
+pub mod close_year;
+pub mod configuration;
 pub mod dashboard;
+pub mod general_ledger_report;
 pub mod ledger;
 pub mod login;
 pub mod new_transaction;
 pub mod partner_list_page;
-pub mod profit_loss;
-pub mod profile;
-pub mod register;
-pub mod trial_balance;
-pub mod style_guide;
-pub mod close_year;
-pub mod configuration;
 pub mod period_settings;
-pub mod general_ledger_report;
+pub mod profile;
+pub mod profit_loss;
+pub mod register;
+pub mod style_guide;
+pub mod trial_balance;

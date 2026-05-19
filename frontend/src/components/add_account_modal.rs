@@ -22,11 +22,11 @@
  *
  */
 
+use shared_core::models::account_category::AccountCategory;
 use shared_core::requests::account::CreateAccountRequest;
 use std::str::FromStr;
 use uuid::Uuid;
 use yew::prelude::*;
-use shared_core::models::account_category::AccountCategory;
 
 #[derive(Properties, PartialEq)]
 pub struct AddAccountModalProps {

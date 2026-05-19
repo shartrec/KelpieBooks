@@ -22,11 +22,11 @@
  *
  */
 
+use crate::models::account_category::AccountCategory;
+use crate::models::system_tag::SystemTag;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::models::account_category::AccountCategory;
-use crate::models::system_tag::SystemTag;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct Account {

@@ -22,13 +22,13 @@
  *
  */
 
-use yew::prelude::*;
-use shared_core::models::partner_contact::PartnerContact;
-use uuid::Uuid;
+use crate::api::Api;
 use crate::components::partner_drawer::contact_edit_card::ContactEditCard;
 use crate::components::partner_drawer::delete_contact_confirmation_modal::DeleteContactConfirmationModal;
-use crate::api::Api;
 use crate::contexts::auth_context::use_user_context;
+use shared_core::models::partner_contact::PartnerContact;
+use uuid::Uuid;
+use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -84,9 +84,21 @@ pub fn contacts_view(props: &ContactsViewProps) -> Html {
             let is_new = *editing_state == EditState::Adding;
             wasm_bindgen_futures::spawn_local(async move {
                 let resp = if is_new {
-                    Api::post(&format!("/api/partners/{}/contacts", partner_id), &contact, user_ctx, navigator).await
+                    Api::post(
+                        &format!("/api/partners/{}/contacts", partner_id),
+                        &contact,
+                        user_ctx,
+                        navigator,
+                    )
+                    .await
                 } else {
-                    Api::put(&format!("/api/partners/{}/contacts/{}", partner_id, contact.id), &contact, user_ctx, navigator).await
+                    Api::put(
+                        &format!("/api/partners/{}/contacts/{}", partner_id, contact.id),
+                        &contact,
+                        user_ctx,
+                        navigator,
+                    )
+                    .await
                 };
                 match resp {
                     Ok(r) if r.ok() => {
@@ -123,13 +135,20 @@ pub fn contacts_view(props: &ContactsViewProps) -> Html {
                 let error = error.clone();
                 let contact_id = contact.id;
                 wasm_bindgen_futures::spawn_local(async move {
-                    let resp = Api::delete(&format!("/api/partners/{}/contacts/{}", partner_id, contact_id), user_ctx, navigator).await;
+                    let resp = Api::delete(
+                        &format!("/api/partners/{}/contacts/{}", partner_id, contact_id),
+                        user_ctx,
+                        navigator,
+                    )
+                    .await;
                     match resp {
                         Ok(r) if r.ok() => {
                             on_change.emit(());
                             contact_to_delete.set(None);
                         }
-                        Ok(r) => error.set(Some(format!("Failed to delete contact: {}", r.status()))),
+                        Ok(r) => {
+                            error.set(Some(format!("Failed to delete contact: {}", r.status())))
+                        }
                         Err(e) => error.set(Some(format!("Network error: {}", e))),
                     }
                 });

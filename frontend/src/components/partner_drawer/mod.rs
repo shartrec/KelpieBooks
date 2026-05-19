@@ -1,22 +1,22 @@
-pub mod addresses_view;
-pub mod general_view;
 pub mod address_edit_card;
+pub mod addresses_view;
 pub mod contact_edit_card;
 pub mod contacts_view;
 pub mod delete_address_confirmation_modal;
 pub mod delete_contact_confirmation_modal;
+pub mod general_view;
 
-use yew::prelude::*;
-use shared_core::models::partner::Partner;
-use shared_core::models::partner_address::PartnerAddress;
-use shared_core::models::partner_contact::PartnerContact;
+use crate::api::Api;
 use crate::components::partner_drawer::addresses_view::AddressesView;
 use crate::components::partner_drawer::contacts_view::ContactsView;
 use crate::components::partner_drawer::general_view::GeneralView;
+use crate::contexts::auth_context::use_user_context;
+use shared_core::models::partner::Partner;
+use shared_core::models::partner_address::PartnerAddress;
+use shared_core::models::partner_contact::PartnerContact;
 use shared_core::requests::partner::UpdatePartnerRequest;
 use uuid::Uuid;
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
+use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -70,7 +70,13 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
             let navigator = navigator.clone();
             let error = error.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let resp = Api::put(&format!("/api/partners/{}", partner_id), &req, user_ctx, navigator).await;
+                let resp = Api::put(
+                    &format!("/api/partners/{}", partner_id),
+                    &req,
+                    user_ctx,
+                    navigator,
+                )
+                .await;
                 match resp {
                     Ok(r) if r.ok() => {
                         on_change.emit(());

@@ -1,13 +1,13 @@
-use crate::router::Route;
+use crate::contexts::org_context::OrgContextHandle;
 use crate::pages::new_transaction::NewTransactionQuery;
+use crate::router::Route;
 use gloo_net::http::Request;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::dtos::transaction_detail::TransactionDetail;
+use shared_core::util::format_currency;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::util::format_currency;
-use crate::contexts::org_context::OrgContextHandle;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TransactionGroup {
@@ -104,7 +104,10 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
     };
 
     let strict_audit_mode = props.org_ctx.strict_audit_mode;
-    let is_locked = props.org_ctx.locked_until.map_or(false, |lock_date| primary_entry.date <= lock_date);
+    let is_locked = props
+        .org_ctx
+        .locked_until
+        .map_or(false, |lock_date| primary_entry.date <= lock_date);
 
     html! {
         <>

@@ -22,19 +22,19 @@
  *
  */
 
+use crate::api::Api;
 use crate::components::layout::Layout;
+use crate::contexts::auth_context::use_user_context;
+use crate::contexts::org_context::{OrgAction, OrgContextHandle, OrgState};
+use crate::router::Route;
+use shared_core::models::account::Account;
+use shared_core::models::organization::Organization;
+use shared_core::models::system_tag::SystemTag;
+use shared_core::requests::configuration::UpdateConfigurationRequest;
 use std::collections::HashMap;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::models::account::Account;
-use shared_core::models::organization::Organization;
-use shared_core::models::system_tag::SystemTag;
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::org_context::{OrgAction, OrgContextHandle, OrgState};
-use crate::router::Route;
-use shared_core::requests::configuration::UpdateConfigurationRequest;
 
 #[function_component(ConfigurationPage)]
 pub fn configuration_page() -> Html {
@@ -68,8 +68,14 @@ pub fn configuration_page() -> Html {
 
             wasm_bindgen_futures::spawn_local(async move {
                 loading.set(true);
-                let accounts_req = Api::get("/api/accounts", user_ctx.clone(), navigator.clone()).await;
-                let system_accounts_req = Api::get("/api/configurations/system-accounts", user_ctx.clone(), navigator.clone()).await;
+                let accounts_req =
+                    Api::get("/api/accounts", user_ctx.clone(), navigator.clone()).await;
+                let system_accounts_req = Api::get(
+                    "/api/configurations/system-accounts",
+                    user_ctx.clone(),
+                    navigator.clone(),
+                )
+                .await;
                 let org_req = Api::get("/api/organization", user_ctx, navigator).await;
 
                 match (accounts_req, system_accounts_req, org_req) {
@@ -139,7 +145,8 @@ pub fn configuration_page() -> Html {
                         navigator.push(&Route::Dashboard);
                     }
                     Ok(r) => {
-                        error_state.set(Some(format!("Error saving configuration: {}", r.status())));
+                        error_state
+                            .set(Some(format!("Error saving configuration: {}", r.status())));
                     }
                     Err(e) => {
                         error_state.set(Some(format!("Network error: {}", e)));

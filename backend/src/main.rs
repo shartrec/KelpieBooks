@@ -23,17 +23,20 @@
  */
 #![forbid(unsafe_code)]
 
-use crate::routes::{accounts, configurations, dashboard, onboarding, organization, partners, period_end, reports, security, transactions, users};
+use crate::routes::{
+    accounts, configurations, dashboard, onboarding, organization, partners, period_end, reports,
+    security, transactions, users,
+};
 use crate::util::logging::setup_logging;
 use rocket::fs::{relative, FileServer, NamedFile};
 use rocket::{get, routes};
 use rocket_db_pools::Database;
 
 mod db;
+mod export;
 mod routes;
 mod services;
 mod util;
-mod export;
 
 #[derive(Database)]
 #[database("kelpie_db")]

@@ -22,10 +22,12 @@
  *
  */
 
+use crate::api::Api;
 use crate::components::account_row::{AccountNode, AccountRow};
 use crate::components::add_account_modal::AddAccountModal;
 use crate::components::delete_confirmation_modal::DeleteConfirmationModal;
 use crate::components::edit_account_modal::EditAccountModal;
+use crate::contexts::auth_context::use_user_context;
 use log::info;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
@@ -33,8 +35,6 @@ use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
 
 #[function_component(ChartOfAccountsTable)]
 pub fn chart_of_accounts_table() -> Html {
@@ -63,7 +63,8 @@ pub fn chart_of_accounts_table() -> Html {
             let navigator = navigator.clone();
             loading.set(true);
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_accounts = Api::get("/api/accounts_with_balances", user_ctx, navigator).await;
+                let fetched_accounts =
+                    Api::get("/api/accounts_with_balances", user_ctx, navigator).await;
                 loading.set(false);
                 match fetched_accounts {
                     Ok(response) if response.ok() => {
@@ -136,7 +137,8 @@ pub fn chart_of_accounts_table() -> Html {
                 let user_ctx = user_ctx.clone();
                 let navigator = navigator.clone();
                 wasm_bindgen_futures::spawn_local(async move {
-                    let resp = Api::put(&format!("/api/accounts/{}", id), &req, user_ctx, navigator).await;
+                    let resp =
+                        Api::put(&format!("/api/accounts/{}", id), &req, user_ctx, navigator).await;
                     match resp {
                         Ok(r) if r.ok() => {
                             on_modal_close.emit(());
@@ -166,7 +168,8 @@ pub fn chart_of_accounts_table() -> Html {
                 let user_ctx = user_ctx.clone();
                 let navigator = navigator.clone();
                 wasm_bindgen_futures::spawn_local(async move {
-                    let resp = Api::delete(&format!("/api/accounts/{}", id), user_ctx, navigator).await;
+                    let resp =
+                        Api::delete(&format!("/api/accounts/{}", id), user_ctx, navigator).await;
                     match resp {
                         Ok(r) if r.ok() => {
                             on_modal_close.emit(());

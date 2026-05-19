@@ -31,4 +31,3 @@ pub const AUTHOR: &str = "Trevor Campbell";
 pub const WEBSITE: &str = "https://github.com/shartrec/kelpie-books";
 pub const DOCSITE: &str = "https://shartrec.github.io/kelpie-flight-planner/";
 pub const LICENSE_TYPE: &str = "GPLv3";
-

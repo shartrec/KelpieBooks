@@ -1,12 +1,12 @@
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
+use shared_core::dtos::partner_list_item::PartnerListItem;
+use shared_core::models::address_type::AddressType;
 use shared_core::models::partner::Partner;
 use shared_core::models::partner_address::PartnerAddress;
 use shared_core::models::partner_contact::PartnerContact;
-use shared_core::models::address_type::AddressType;
-use shared_core::dtos::partner_list_item::PartnerListItem;
 use shared_core::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
-use uuid::Uuid;
 use std::str::FromStr;
+use uuid::Uuid;
 
 fn from_row_to_partner(row: &sqlx::postgres::PgRow) -> Partner {
     Partner {
@@ -84,7 +84,10 @@ pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<Part
     .map(|row| row.map(|r| from_row_to_partner(&r)))
 }
 
-pub(crate) async fn get_addresses(pool: &mut PgConnection, partner_id: Uuid) -> Result<Vec<PartnerAddress>, sqlx::Error> {
+pub(crate) async fn get_addresses(
+    pool: &mut PgConnection,
+    partner_id: Uuid,
+) -> Result<Vec<PartnerAddress>, sqlx::Error> {
     sqlx::query(
         r#"
         SELECT id, organization_id, partner_id, address_type::TEXT, is_primary, address_line1, address_line2, city, state_province, postal_code, country, created_at, updated_at
@@ -98,7 +101,10 @@ pub(crate) async fn get_addresses(pool: &mut PgConnection, partner_id: Uuid) -> 
     .map(|rows| rows.iter().map(from_row_to_partner_address).collect())
 }
 
-pub(crate) async fn get_contacts(pool: &mut PgConnection, partner_id: Uuid) -> Result<Vec<PartnerContact>, sqlx::Error> {
+pub(crate) async fn get_contacts(
+    pool: &mut PgConnection,
+    partner_id: Uuid,
+) -> Result<Vec<PartnerContact>, sqlx::Error> {
     sqlx::query(
         r#"
         SELECT *
@@ -189,7 +195,10 @@ pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, sql
     Ok(result.rows_affected())
 }
 
-pub(crate) async fn delete_addresses(pool: &mut PgConnection, partner_id: Uuid) -> Result<(), sqlx::Error> {
+pub(crate) async fn delete_addresses(
+    pool: &mut PgConnection,
+    partner_id: Uuid,
+) -> Result<(), sqlx::Error> {
     sqlx::query("DELETE FROM partner_addresses WHERE partner_id = $1")
         .bind(partner_id)
         .execute(pool)
@@ -197,7 +206,12 @@ pub(crate) async fn delete_addresses(pool: &mut PgConnection, partner_id: Uuid) 
     Ok(())
 }
 
-pub(crate) async fn insert_address(pool: &mut PgConnection, organization_id: Uuid, partner_id: Uuid, address: &PartnerAddress) -> Result<PartnerAddress, sqlx::Error> {
+pub(crate) async fn insert_address(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    partner_id: Uuid,
+    address: &PartnerAddress,
+) -> Result<PartnerAddress, sqlx::Error> {
     let row = sqlx::query(
         r#"
         INSERT INTO partner_addresses (organization_id, partner_id, address_type, is_primary, address_line1, address_line2, city, state_province, postal_code, country)
@@ -220,7 +234,12 @@ pub(crate) async fn insert_address(pool: &mut PgConnection, organization_id: Uui
     Ok(from_row_to_partner_address(&row))
 }
 
-pub(crate) async fn update_address(pool: &mut PgConnection, organization_id: Uuid, address_id: Uuid, address: &PartnerAddress) -> Result<PartnerAddress, sqlx::Error> {
+pub(crate) async fn update_address(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    address_id: Uuid,
+    address: &PartnerAddress,
+) -> Result<PartnerAddress, sqlx::Error> {
     let row = sqlx::query(
         r#"
         UPDATE partner_addresses
@@ -252,7 +271,10 @@ pub(crate) async fn delete_address(pool: &mut PgConnection, id: Uuid) -> Result<
     Ok(result.rows_affected())
 }
 
-pub(crate) async fn delete_contacts(pool: &mut PgConnection, partner_id: Uuid) -> Result<(), sqlx::Error> {
+pub(crate) async fn delete_contacts(
+    pool: &mut PgConnection,
+    partner_id: Uuid,
+) -> Result<(), sqlx::Error> {
     sqlx::query("DELETE FROM partner_contacts WHERE partner_id = $1")
         .bind(partner_id)
         .execute(pool)
@@ -260,7 +282,12 @@ pub(crate) async fn delete_contacts(pool: &mut PgConnection, partner_id: Uuid) -
     Ok(())
 }
 
-pub(crate) async fn insert_contact(pool: &mut PgConnection, organization_id: Uuid, partner_id: Uuid, contact: &PartnerContact) -> Result<PartnerContact, sqlx::Error> {
+pub(crate) async fn insert_contact(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    partner_id: Uuid,
+    contact: &PartnerContact,
+) -> Result<PartnerContact, sqlx::Error> {
     let row = sqlx::query(
         r#"
         INSERT INTO partner_contacts (organization_id, partner_id, is_primary, first_name, last_name, email, phone, role_title)
@@ -281,7 +308,12 @@ pub(crate) async fn insert_contact(pool: &mut PgConnection, organization_id: Uui
     Ok(from_row_to_partner_contact(&row))
 }
 
-pub(crate) async fn update_contact(pool: &mut PgConnection, organization_id: Uuid, contact_id: Uuid, contact: &PartnerContact) -> Result<PartnerContact, sqlx::Error> {
+pub(crate) async fn update_contact(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    contact_id: Uuid,
+    contact: &PartnerContact,
+) -> Result<PartnerContact, sqlx::Error> {
     let row = sqlx::query(
         r#"
         UPDATE partner_contacts

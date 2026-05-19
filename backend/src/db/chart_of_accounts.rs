@@ -24,11 +24,11 @@
 
 use rocket_db_pools::sqlx::{self, PgConnection};
 use serde::Deserialize;
+use shared_core::models::account_category::AccountCategory;
+use shared_core::models::system_tag::SystemTag;
 use sqlx::Row;
 use std::collections::HashMap;
 use uuid::Uuid;
-use shared_core::models::account_category::AccountCategory;
-use shared_core::models::system_tag::SystemTag;
 
 /// Represents the top-level structure of a TOML template file.
 #[derive(Debug, Deserialize)]
@@ -57,12 +57,11 @@ pub async fn import_default_accounts(
     let mut remaining_accounts = accounts;
 
     while !remaining_accounts.is_empty() {
-        let (ready_to_import, next_remaining): (Vec<_>, Vec<_>) =
-            remaining_accounts.into_iter().partition(|a| {
-                match &a.parent_code {
-                    None => true,
-                    Some(parent_code) => code_to_id_map.contains_key(parent_code),
-                }
+        let (ready_to_import, next_remaining): (Vec<_>, Vec<_>) = remaining_accounts
+            .into_iter()
+            .partition(|a| match &a.parent_code {
+                None => true,
+                Some(parent_code) => code_to_id_map.contains_key(parent_code),
             });
 
         if ready_to_import.is_empty() {

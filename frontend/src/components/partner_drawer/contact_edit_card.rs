@@ -23,8 +23,8 @@
  */
 
 use shared_core::models::partner_contact::PartnerContact;
-use yew::prelude::*;
 use uuid::Uuid;
+use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct ContactEditCardProps {
@@ -55,7 +55,9 @@ pub fn contact_edit_card(props: &ContactEditCardProps) -> Html {
         let contact_state = contact_state.clone();
         Callback::from(move |e: InputEvent| {
             let mut contact = (*contact_state).clone();
-            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
             field_updater(&mut contact, value);
             contact_state.set(contact);
         })
@@ -65,7 +67,9 @@ pub fn contact_edit_card(props: &ContactEditCardProps) -> Html {
         let contact_state = contact_state.clone();
         Callback::from(move |e: Event| {
             let mut contact = (*contact_state).clone();
-            contact.is_primary = e.target_unchecked_into::<web_sys::HtmlInputElement>().checked();
+            contact.is_primary = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .checked();
             contact_state.set(contact);
         })
     };

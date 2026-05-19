@@ -22,12 +22,12 @@
  *
  */
 
+use crate::api::Api;
 use crate::components::layout::Layout;
+use crate::contexts::auth_context::use_user_context;
 use chrono::{Datelike, NaiveDate, Utc};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
 
 #[function_component(CloseYearPage)]
 pub fn close_year_page() -> Html {

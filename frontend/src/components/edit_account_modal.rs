@@ -23,10 +23,10 @@
  */
 
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::models::account_category::AccountCategory;
 use shared_core::requests::account::UpdateAccountRequest;
 use std::str::FromStr;
 use yew::prelude::*;
-use shared_core::models::account_category::AccountCategory;
 
 #[derive(Properties, PartialEq)]
 pub struct EditAccountModalProps {

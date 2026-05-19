@@ -22,18 +22,18 @@
  *
  */
 
-pub mod auth;
 pub mod accounts;
-pub mod transactions;
-pub mod reports;
-pub mod organization;
+pub mod auth;
 pub mod dashboard;
+pub mod organization;
+pub mod reports;
+pub mod transactions;
 
-use gloo_net::Error;
+use crate::contexts::auth_context::UserContextHandle;
 use gloo_net::http::Response;
+use gloo_net::Error;
 use serde::de::DeserializeOwned;
 use yew_router::prelude::Navigator;
-use crate::contexts::auth_context::UserContextHandle;
 
 pub async fn handle_response<T: DeserializeOwned>(
     response: Result<Response, Error>,
@@ -46,9 +46,7 @@ pub async fn handle_response<T: DeserializeOwned>(
             navigator.push(&crate::router::Route::Login);
             Err("Unauthorized".to_string())
         }
-        Ok(response) if response.ok() => {
-            response.json::<T>().await.map_err(|e| e.to_string())
-        }
+        Ok(response) if response.ok() => response.json::<T>().await.map_err(|e| e.to_string()),
         Ok(response) => {
             let status = response.status();
             let err_body = response.text().await.unwrap_or_default();

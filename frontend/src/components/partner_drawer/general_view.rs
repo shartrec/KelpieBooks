@@ -22,11 +22,11 @@
  *
  */
 
-use shared_core::requests::partner::UpdatePartnerRequest;
-use yew::prelude::*;
-use uuid::Uuid;
-use shared_core::models::partner::Partner;
 use gloo_timers::callback::Timeout;
+use shared_core::models::partner::Partner;
+use shared_core::requests::partner::UpdatePartnerRequest;
+use uuid::Uuid;
+use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct GeneralViewProps {
@@ -55,7 +55,9 @@ pub fn general_view(props: &GeneralViewProps) -> Html {
         let request = request.clone();
         Callback::from(move |e: InputEvent| {
             let mut req = (*request).clone();
-            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
             field_updater(&mut req, value);
             request.set(req);
         })
@@ -65,7 +67,9 @@ pub fn general_view(props: &GeneralViewProps) -> Html {
         let request = request.clone();
         Callback::from(move |e: Event| {
             let mut req = (*request).clone();
-            let checked = e.target_unchecked_into::<web_sys::HtmlInputElement>().checked();
+            let checked = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .checked();
             field_updater(&mut req, checked);
             request.set(req);
         })
@@ -75,8 +79,14 @@ pub fn general_view(props: &GeneralViewProps) -> Html {
         let request = request.clone();
         Callback::from(move |e: Event| {
             let mut req = (*request).clone();
-            let value = e.target_unchecked_into::<web_sys::HtmlSelectElement>().value();
-            let uuid = if value.is_empty() { None } else { Uuid::parse_str(&value).ok() };
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlSelectElement>()
+                .value();
+            let uuid = if value.is_empty() {
+                None
+            } else {
+                Uuid::parse_str(&value).ok()
+            };
             field_updater(&mut req, uuid);
             request.set(req);
         })

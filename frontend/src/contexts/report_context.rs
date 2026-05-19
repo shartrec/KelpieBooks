@@ -22,11 +22,11 @@
  *
  */
 
-use yew::prelude::*;
-use chrono::{NaiveDate, Datelike};
+use chrono::{Datelike, NaiveDate};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use std::collections::HashSet;
+use uuid::Uuid;
+use yew::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DateRange {
@@ -69,7 +69,8 @@ pub struct ReportContextData {
 impl Default for ReportContextData {
     fn default() -> Self {
         let storage = web_sys::window().unwrap().local_storage().unwrap().unwrap();
-        let date_range = storage.get_item("report_date_range")
+        let date_range = storage
+            .get_item("report_date_range")
             .unwrap_or_default()
             .and_then(|s| serde_json::from_str::<DateRange>(&s).ok())
             .unwrap_or_default();
@@ -90,18 +91,21 @@ impl Reducible for ReportContextData {
         match action {
             ReportAction::SetDateRange(date_range) => {
                 let storage = web_sys::window().unwrap().local_storage().unwrap().unwrap();
-                let _ = storage.set_item("report_date_range", &serde_json::to_string(&date_range).unwrap());
+                let _ = storage.set_item(
+                    "report_date_range",
+                    &serde_json::to_string(&date_range).unwrap(),
+                );
                 Self {
                     date_range,
                     ..(*self).clone()
-                }.into()
+                }
+                .into()
             }
-            ReportAction::SetSelectedAccounts(selected_accounts) => {
-                Self {
-                    selected_accounts,
-                    ..(*self).clone()
-                }.into()
+            ReportAction::SetSelectedAccounts(selected_accounts) => Self {
+                selected_accounts,
+                ..(*self).clone()
             }
+            .into(),
             ReportAction::ToggleAccount(id) => {
                 let mut selected_accounts = (*self).selected_accounts.clone();
                 if selected_accounts.contains(&id) {
@@ -112,14 +116,14 @@ impl Reducible for ReportContextData {
                 Self {
                     selected_accounts,
                     ..(*self).clone()
-                }.into()
+                }
+                .into()
             }
-            ReportAction::SetMinAmount(min_amount) => {
-                Self {
-                    min_amount,
-                    ..(*self).clone()
-                }.into()
+            ReportAction::SetMinAmount(min_amount) => Self {
+                min_amount,
+                ..(*self).clone()
             }
+            .into(),
             ReportAction::SetOnExportCsv(on_export_csv) => {
                 if self.on_export_csv == on_export_csv {
                     self
@@ -127,7 +131,8 @@ impl Reducible for ReportContextData {
                     Self {
                         on_export_csv,
                         ..(*self).clone()
-                    }.into()
+                    }
+                    .into()
                 }
             }
             ReportAction::SetOnExportTypst(on_export_pdf) => {
@@ -137,7 +142,8 @@ impl Reducible for ReportContextData {
                     Self {
                         on_export_pdf,
                         ..(*self).clone()
-                    }.into()
+                    }
+                    .into()
                 }
             }
         }

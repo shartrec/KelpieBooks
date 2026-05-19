@@ -24,12 +24,12 @@
 
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use shared_core::models::account::Account;
+use shared_core::models::account_category::AccountCategory;
+use shared_core::models::system_tag::SystemTag;
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 use std::collections::HashMap;
 use std::str::FromStr;
 use uuid::Uuid;
-use shared_core::models::account_category::AccountCategory;
-use shared_core::models::system_tag::SystemTag;
 
 fn from_row_to_account(row: &sqlx::postgres::PgRow) -> Account {
     let category_str: String = row.get("category");
@@ -269,7 +269,6 @@ pub(crate) async fn update_system_accounts(
     organization_id: Uuid,
     system_accounts: HashMap<SystemTag, Uuid>,
 ) -> Result<(), sqlx::Error> {
-
     // Clear all existing system tags for the organization
     sqlx::query(
         r#"

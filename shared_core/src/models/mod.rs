@@ -22,19 +22,19 @@
  *
  */
 
-pub mod user_with_org;
+pub mod account;
+pub mod account_category;
+pub mod address_type;
 pub mod invoice_status;
+pub mod journal_entry;
+pub mod organization;
 pub mod partner;
+pub mod partner_address;
+pub mod partner_contact;
+pub mod system_tag;
+pub mod transaction;
+pub mod user;
+pub mod user_with_org;
 pub mod vendor_invoice;
 pub mod vendor_payment;
 pub mod vendor_payment_allocation;
-pub mod organization;
-pub mod user;
-pub mod account_category;
-pub mod system_tag;
-pub mod account;
-pub mod transaction;
-pub mod journal_entry;
-pub mod address_type;
-pub mod partner_address;
-pub mod partner_contact;

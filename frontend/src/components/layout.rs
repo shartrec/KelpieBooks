@@ -36,13 +36,14 @@ pub struct LayoutProps {
 #[function_component(Layout)]
 pub fn layout(props: &LayoutProps) -> Html {
     html! {
-    <div class="app-shell">
-        <Sidebar /> // Your sidebar component
-        <main class="main-content">
-            <Header /> // Your top bar with the user menu
-                <main class="page-body">
-                    { for props.children.iter() }
-                </main>
-        </main>
-    </div>
-}}
+        <div class="app-shell">
+            <Sidebar /> // Your sidebar component
+            <main class="main-content">
+                <Header /> // Your top bar with the user menu
+                    <main class="page-body">
+                        { for props.children.iter() }
+                    </main>
+            </main>
+        </div>
+    }
+}

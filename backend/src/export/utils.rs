@@ -37,7 +37,13 @@ pub fn build_table_header(headings: &[&str], align_right: &[bool]) -> String {
     let col_headings = headings
         .iter()
         .enumerate()
-        .map(|(i, s)| format!("{}[*{}*]", if align_right[i] { "align(right)" } else { "" }, s))
+        .map(|(i, s)| {
+            format!(
+                "{}[*{}*]",
+                if align_right[i] { "align(right)" } else { "" },
+                s
+            )
+        })
         .collect::<Vec<_>>()
         .join(", ");
 
@@ -60,8 +66,7 @@ pub fn build_table_header(headings: &[&str], align_right: &[bool]) -> String {
     )
 }
 
-fn get_template() -> String
-{
+fn get_template() -> String {
     let template = r###"
 
 #let tab_h_color = "#f4f7f6"
@@ -119,13 +124,15 @@ fn get_template() -> String
 }
 "###;
 
-template.to_string()
+    template.to_string()
 }
 
-
-pub fn wrap_report_layout(org_name: Option<&str>, report_title: &str,  report_qualifier: &str,  body: &str) -> String {
-
-
+pub fn wrap_report_layout(
+    org_name: Option<&str>,
+    report_title: &str,
+    report_qualifier: &str,
+    body: &str,
+) -> String {
     format!(
         r#"
         {template}
@@ -151,7 +158,6 @@ pub fn wrap_report_layout(org_name: Option<&str>, report_title: &str,  report_qu
 }
 
 pub fn compile_typst_to_pdf(source: String) -> Result<Vec<u8>, String> {
-
     let template = TypstEngine::builder()
         .main_file(source)
         .fonts(fonts())
@@ -159,19 +165,13 @@ pub fn compile_typst_to_pdf(source: String) -> Result<Vec<u8>, String> {
         .build();
 
     // Run it
-    let doc = template
-        .compile()
-        .output;
+    let doc = template.compile().output;
     match doc {
         Ok(doc) => {
             let options = Default::default();
-            let pdf = typst_pdf::pdf(&doc, &options)
-                .expect("Could not generate pdf.");
+            let pdf = typst_pdf::pdf(&doc, &options).expect("Could not generate pdf.");
             Ok(pdf)
         }
-        Err(e) => {
-            Err(format!("typst::compile() returned an error!: {}", e))
-        }
+        Err(e) => Err(format!("typst::compile() returned an error!: {}", e)),
     }
-
 }

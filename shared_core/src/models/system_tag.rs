@@ -25,7 +25,9 @@
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter, EnumString, IntoEnumIterator};
 
-#[derive(Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy, Hash)]
+#[derive(
+    Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy, Hash,
+)]
 #[strum(serialize_all = "PascalCase")]
 pub enum SystemTag {
     CashAtBank,

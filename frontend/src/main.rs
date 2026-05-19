@@ -23,6 +23,7 @@
  */
 
 use frontend::contexts::auth_context::{UserContext, UserContextHandle};
+use frontend::contexts::org_context::{OrgAction, OrgContextHandle, OrgState};
 use frontend::contexts::report_context::ReportContextProvider;
 use frontend::pages::account_ledger::AccountLedgerPage;
 use frontend::pages::balance_sheet::BalanceSheetPage;
@@ -35,19 +36,18 @@ use frontend::pages::login::LoginPage;
 use frontend::pages::new_transaction::NewTransactionPage;
 use frontend::pages::partner_list_page::PartnerListPage;
 use frontend::pages::period_settings::PeriodSettings;
-use frontend::pages::profit_loss::ProfitLossPage;
 use frontend::pages::profile::ProfilePage;
+use frontend::pages::profit_loss::ProfitLossPage;
 use frontend::pages::register::RegisterPage;
+use frontend::pages::style_guide::StyleGuide;
 use frontend::pages::trial_balance::TrialBalancePage;
 use frontend::router::Route;
 use gloo_net::http::Request;
 use log::info;
 use shared_core::dtos::user_detail::UserDetail;
+use shared_core::models::organization::Organization;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use frontend::contexts::org_context::{OrgAction, OrgContextHandle, OrgState};
-use frontend::pages::style_guide::StyleGuide;
-use shared_core::models::organization::Organization;
 
 /// The component that contains the router and switches between pages.
 #[function_component(AppRouter)]
@@ -138,7 +138,7 @@ fn switch(routes: Route) -> Html {
         Route::PeriodSettings => html! { <PeriodSettings /> },
         Route::Configuration => html! { <ConfigurationPage /> },
         Route::Home => html! { <LoginPage /> },
-        Route::StyleGuide => html! {<StyleGuide />}
+        Route::StyleGuide => html! {<StyleGuide />},
     }
 }
 
