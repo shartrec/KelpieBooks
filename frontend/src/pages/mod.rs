@@ -28,6 +28,7 @@ pub mod dashboard;
 pub mod ledger;
 pub mod login;
 pub mod new_transaction;
+pub mod partner_list_page;
 pub mod profit_loss;
 pub mod profile;
 pub mod register;

@@ -23,7 +23,7 @@
  */
 #![forbid(unsafe_code)]
 
-use crate::routes::{accounts, configurations, dashboard, onboarding, organization, period_end, reports, security, transactions, users};
+use crate::routes::{accounts, configurations, dashboard, onboarding, organization, partners, period_end, reports, security, transactions, users};
 use crate::util::logging::setup_logging;
 use rocket::fs::{relative, FileServer, NamedFile};
 use rocket::{get, routes};
@@ -56,6 +56,7 @@ fn rocket() -> _ {
         .mount("/", onboarding::routes())
         .mount("/", users::routes())
         .mount("/", accounts::routes())
+        .mount("/", partners::routes())
         .mount("/", reports::routes())
         .mount("/", transactions::routes())
         .mount("/", period_end::routes())

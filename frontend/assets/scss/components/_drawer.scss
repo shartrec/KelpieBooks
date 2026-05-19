@@ -1,0 +1,109 @@
+/*!
+ * Copyright (c) 2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+
+@use '../abstracts/variables' as *;
+
+// The backdrop layer that darkens the underlying grid screen
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end; // Anchors child drawer to the right wall
+}
+
+// The core sliding drawer container
+.partner-drawer {
+  width: 500px;
+  max-width: 90vw;
+  height: 100vh;
+  background-color: white;
+  box-shadow: -4px 0 15px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.25s ease-out;
+
+  &__header {
+    padding: 1.5rem;
+    border-bottom: 1px solid $brand-dark;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: $table-row-background;
+
+    h3 { margin: 0; color: $brand-dark; font-size: 1.25rem; }
+    .btn-close { background: none; border: none; cursor: pointer; font-size: 1.2rem; }
+  }
+
+  // The Tab Strip Layout
+  &__tabs {
+    display: flex;
+    background-color: $alt-row-color;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+    .tab-trigger {
+      flex: 1;
+      padding: 10px 0;
+      text-align: center;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-weight: 600;
+      cursor: pointer;
+      color: #666;
+      font-size: 0.9rem;
+
+      &--active {
+        color: $brand-dark;
+        border-bottom-color: $brand-dark;
+        background-color: white;
+      }
+    }
+  }
+
+  // Content viewport area with scroll isolation
+  &__content {
+    flex: 1;
+    overflow-y: auto; // Isolated scrolling prevents background list from shifting
+    padding: 1.5rem;
+  }
+
+  &__footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    background-color: $table-row-background;
+  }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}

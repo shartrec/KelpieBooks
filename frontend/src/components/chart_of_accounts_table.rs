@@ -290,11 +290,11 @@ pub fn chart_of_accounts_table() -> Html {
             <table class="table coa-table">
                 <thead>
                     <tr>
-                        <th class="code-col">{ "Code" }</th>
-                        <th class="name-col">{ "Name" }</th>
-                        <th class="category-col">{ "Category" }</th>
-                        <th class="balance-col">{ "Balance" }</th>
-                        <th class="actions-col">{ "Actions" }</th>
+                        <th class="table__text-col">{ "Code" }</th>
+                        <th class="table__text-col">{ "Name" }</th>
+                        <th class="table__text-col">{ "Category" }</th>
+                        <th class="table__value-col">{ "Balance" }</th>
+                        <th class="table__col-actions">{ "Actions" }</th>
                     </tr>
                 </thead>
                 <tbody>

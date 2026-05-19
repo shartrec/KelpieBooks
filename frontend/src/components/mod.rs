@@ -13,3 +13,8 @@ pub mod delete_confirmation_modal;
 pub mod je_reversal_confirmation_modal;
 pub mod je_delete_confirmation_modal;
 pub mod bar_chart;
+pub mod partner_list_table;
+pub mod partner_row;
+pub mod add_partner_modal;
+pub mod delete_partner_confirmation_modal;
+pub mod partner_drawer;

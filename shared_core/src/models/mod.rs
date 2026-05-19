@@ -24,7 +24,7 @@
 
 pub mod user_with_org;
 pub mod invoice_status;
-pub mod patner;
+pub mod partner;
 pub mod vendor_invoice;
 pub mod vendor_payment;
 pub mod organization;

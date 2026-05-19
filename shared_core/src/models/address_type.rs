@@ -37,11 +37,16 @@ impl AddressType {
     pub fn iterator() -> impl Iterator<Item = Self> {
         Self::iter()
     }
-    pub fn DisplayName(&self) -> String {
+    pub fn display_name(&self) -> String {
         match self {
             AddressType::Billing => "Billing".to_string(),
             AddressType::Shipping => "Shipping".to_string(),
             AddressType::General => "General".to_string(),
         }
+    }
+}
+impl Default for AddressType {
+    fn default() -> Self {
+        Self::General
     }
 }

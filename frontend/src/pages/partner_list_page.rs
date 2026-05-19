@@ -21,11 +21,21 @@
  *      Trevor Campbell
  *
  */
+use yew::prelude::*;
+use crate::components::layout::Layout;
+use crate::components::partner_list_table::PartnerListTable;
 
-pub(crate) mod account;
-pub(crate) mod chart_of_accounts;
-pub(crate) mod journal_entry;
-pub(crate) mod organization;
-pub(crate) mod partner;
-pub(crate) mod transaction;
-pub(crate) mod user;
+#[function_component(PartnerListPage)]
+pub fn partner_list_page() -> Html {
+    html! {
+        <Layout>
+            <div class="partner-list-container">
+                <header class="partner-list-header-flex">
+                    <h1>{ "Partners" }</h1>
+                </header>
+                <p>{ "This is a list of all partners in your organization." }</p>
+                <PartnerListTable />
+            </div>
+        </Layout>
+    }
+}

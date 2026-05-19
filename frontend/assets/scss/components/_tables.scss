@@ -29,6 +29,42 @@
   border-collapse: collapse;
   background-color: #fff;
 
+  &__text-col {
+      text-align: left;
+  }
+  &__value-col {
+      text-align: right;
+  }
+
+  &__col-actions {
+    width: 1%;               // Forces the browser to allocate the bare minimum width
+    white-space: nowrap;     // Prevents buttons/icons from stacking vertically
+    text-align: left;       // Traditional accounting alignment for actions
+    padding-left: 1rem !important;
+
+    // Layout container for the action icons/buttons
+    .actions-wrapper {
+      display: inline-flex;  // Wraps tightly around children elements
+      align-items: center;
+      gap: 5px;             // Gives clear, compact breathing room between actions
+    }
+
+    .btn-action,
+    i,
+    svg,
+    a {
+      flex-shrink: 0;        // <-- THE FIX: Prevents flex container from squishing children
+      width: auto;           // Ensures they retain their natural native layout size
+    }
+
+    .btn-action {
+      padding: 4px 4px;
+      font-size: 0.85rem;
+      // Ensure button elements don't introduce unexpected margin bloat
+      margin: 0;
+    }
+  }
+
   th, td {
     padding: 4px 12px;
     border-bottom: 1px solid #e5e7eb;

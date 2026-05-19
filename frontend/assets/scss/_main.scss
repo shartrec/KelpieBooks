@@ -33,7 +33,9 @@
 @import 'base/typography';
 
 // 3. Components (The meat of the app)
+@import 'components/cards';
 @import 'components/dashboard';
+@import 'components/drawer';
 @import 'components/dropdown';
 @import 'components/journal';
 @import 'components/login';

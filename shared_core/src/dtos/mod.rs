@@ -8,3 +8,4 @@ pub mod dashboard;
 pub mod recent_transaction;
 pub mod expense_breakdown;
 pub mod general_ledger_line;
+pub mod partner_list_item;

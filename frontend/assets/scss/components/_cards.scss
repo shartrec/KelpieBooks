@@ -1,0 +1,197 @@
+/*!
+ * Copyright (c) 2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+@use '../abstracts/variables' as *;
+
+.card-grid {
+    display: flex;
+    flex-direction: column; // Force clean vertical stacking inside narrow drawers
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.card {
+    border: 1px solid $border-color;
+    border-radius: 6px;
+    background-color: var(--background-color);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    padding: 0.75rem 1rem; // Unified padding around the entire block
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+        border-color: var(--brand-dark);
+
+        // Reveals actions smoothly on hover if you want a ultra-clean baseline look
+        .card__actions { opacity: 1; }
+    }
+
+    // Single unified layout wrapper
+    &__content-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem; // Tight spacing between text components
+    }
+
+    &__meta-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.25rem;
+        padding-bottom: 0.25rem;
+        border-bottom: 1px dashed rgba(0, 0, 0, 0.05); // Subtle structural separation
+    }
+
+    &__title {
+        margin: 0;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase; // Sharp, micro-accounting typography label
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    &__address-text {
+        margin: 0;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        color: var(--text-color);
+    }
+
+    // Top-Right pinned button bar
+    &__actions {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        opacity: 0.85; // Keeps them accessible, bumps to 1 on hover
+    }
+
+    &--primary-billing {
+        border-left: 3px solid var(--info-color);
+    }
+
+    &--primary-shipping {
+        border-left: 3px solid var(--success-color);
+    }
+}
+
+// Low-footprint badges
+.badge {
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    color: #444;
+
+    &--billing {
+        background-color: rgba(0, 123, 255, 0.1);
+        color: var(--info-color);
+    }
+    &--shipping {
+        background-color: rgba(40, 167, 69, 0.1);
+        color: var(--success-color);
+    }
+}
+
+// Hyper-compact micro action icons
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover:not(:disabled) {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    img {
+        width: 14px; // Downsized from 16px to prevent vertical bloat
+        height: 14px;
+    }
+}
+
+// Compact inline form fields layout stack
+.card-form-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; // Tight baseline spacing row gap
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="email"],
+    select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 5px 8px;
+        //font-size: 0.85rem;
+        //border: 1px solid var(--border-color);
+        //border-radius: var(--border-radius);
+        background-color: #fff;
+
+        &:focus {
+            border-color: var(--brand-dark);
+            outline: none;
+        }
+    }
+
+    .form-group-compact {
+        width: 100%;
+    }
+
+    .form-row-compact {
+        display: grid;
+        grid-template-columns: 1fr 1fr; // Splits space evenly side-by-side
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .select-wrapper-compact {
+        width: 100%;
+    }
+
+    .checkbox-label-compact {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-color);
+        cursor: pointer;
+        user-select: none;
+
+        input[type="checkbox"] {
+            margin: 0;
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+    }
+}

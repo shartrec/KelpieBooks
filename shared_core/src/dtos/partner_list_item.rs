@@ -24,19 +24,12 @@
 
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct Partner {
+pub struct PartnerListItem {
     pub id: Uuid,
-    pub organization_id: Uuid,
     pub legal_name: String,
     pub trade_name: Option<String>,
-    pub tax_identifier: Option<String>,
     pub is_vendor: bool,
     pub is_customer: bool,
-    pub default_ap_account_id: Option<Uuid>,
-    pub default_ar_account_id: Option<Uuid>,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
 }

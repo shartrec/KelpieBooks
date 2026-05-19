@@ -56,6 +56,7 @@ pub fn sidebar() -> Html {
                 <ul>
                     <li><Link<Route> to={Route::Dashboard}>{ "Dashboard" }</Link<Route>></li>
                     <li><Link<Route> to={Route::Ledger}>{ "Accounts" }</Link<Route>></li>
+                    <li><Link<Route> to={Route::PartnerList}>{ "Partners" }</Link<Route>></li>
                     <li class="sidebar__group">
                         <div class="sidebar__group-header" onclick={toggle_reports}>
                             <span>{ "Reports" }</span>

@@ -109,15 +109,17 @@ pub fn account_row(props: &AccountRowProps) -> Html {
                 </td>
                 <td>{ props.node.account.category.to_string() }</td>
                 <td style="text-align: right;">{ format_currency(&props.node.account.balance) }</td>
-                <td class="actions-cell">
-                    <button class="icon-button" onclick={on_edit_click}>
-                        <img src="/images/edit.svg" alt="Edit" />
-                    </button>
-                    if !is_parent && props.node.account.balance == 0 {
-                        <button class="icon-button" onclick={on_delete_click}>
-                            <img src="/images/delete.svg" alt="Delete" />
+                <td class="table__col-actions">
+                    <div class="actions-wrapper">
+                        <button class="icon-button btn-action" onclick={on_edit_click}>
+                            <img src="/images/edit.svg" alt="Edit" />
                         </button>
-                    }
+                        if !is_parent && props.node.account.balance == 0 {
+                            <button class="icon-button btn-action" onclick={on_delete_click}>
+                                <img src="/images/delete.svg" alt="Delete" />
+                            </button>
+                        }
+                    </div>
                 </td>
             </tr>
             if is_parent && !is_collapsed {

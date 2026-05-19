@@ -33,6 +33,7 @@ use frontend::pages::general_ledger_report::GeneralLedgerReportPage;
 use frontend::pages::ledger::LedgerPage;
 use frontend::pages::login::LoginPage;
 use frontend::pages::new_transaction::NewTransactionPage;
+use frontend::pages::partner_list_page::PartnerListPage;
 use frontend::pages::period_settings::PeriodSettings;
 use frontend::pages::profit_loss::ProfitLossPage;
 use frontend::pages::profile::ProfilePage;
@@ -126,6 +127,7 @@ fn switch(routes: Route) -> Html {
         Route::Dashboard => html! { <DashboardPage /> },
         Route::Profile => html! { <ProfilePage /> },
         Route::Ledger => html! { <LedgerPage /> },
+        Route::PartnerList => html! { <PartnerListPage /> },
         Route::TrialBalance => html! { <TrialBalancePage /> },
         Route::ProfitLoss => html! { <ProfitLossPage /> },
         Route::BalanceSheet => html! { <BalanceSheetPage /> },

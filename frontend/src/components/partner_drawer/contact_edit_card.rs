@@ -1,0 +1,129 @@
+/*
+ * Copyright (c) 2026-2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+
+use shared_core::models::partner_contact::PartnerContact;
+use yew::prelude::*;
+use uuid::Uuid;
+
+#[derive(Properties, PartialEq)]
+pub struct ContactEditCardProps {
+    pub contact: Option<PartnerContact>,
+    pub on_save: Callback<PartnerContact>,
+    pub on_cancel: Callback<()>,
+}
+
+#[function_component(ContactEditCard)]
+pub fn contact_edit_card(props: &ContactEditCardProps) -> Html {
+    let contact_state = use_state(|| {
+        props.contact.clone().unwrap_or_else(|| PartnerContact {
+            id: uuid::Uuid::new_v4(),
+            organization_id: Uuid::nil(),
+            partner_id: Uuid::nil(),
+            created_at: chrono::Utc::now(),
+            updated_at: chrono::Utc::now(),
+            is_primary: false,
+            first_name: String::new(),
+            last_name: String::new(),
+            email: None,
+            phone: None,
+            role_title: None,
+        })
+    });
+
+    let on_input = |field_updater: fn(&mut PartnerContact, String)| {
+        let contact_state = contact_state.clone();
+        Callback::from(move |e: InputEvent| {
+            let mut contact = (*contact_state).clone();
+            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            field_updater(&mut contact, value);
+            contact_state.set(contact);
+        })
+    };
+
+    let on_primary_change = {
+        let contact_state = contact_state.clone();
+        Callback::from(move |e: Event| {
+            let mut contact = (*contact_state).clone();
+            contact.is_primary = e.target_unchecked_into::<web_sys::HtmlInputElement>().checked();
+            contact_state.set(contact);
+        })
+    };
+
+    let on_save_click = {
+        let on_save = props.on_save.clone();
+        let contact_state = contact_state.clone();
+        Callback::from(move |_| {
+            on_save.emit((*contact_state).clone());
+        })
+    };
+
+    let on_cancel_click = {
+        let on_cancel = props.on_cancel.clone();
+        Callback::from(move |_| {
+            on_cancel.emit(());
+        })
+    };
+
+    html! {
+        <div class="card card--editing" style="padding: 1rem; margin-bottom: 1rem;">
+            <div class="card__meta-line" style="margin-bottom: 0.75rem;">
+                <div class="card__title">
+                    <strong style="font-size: 0.85rem; text-transform: uppercase; color: var(--brand-dark);">
+                        { if props.contact.is_some() { "Edit Contact" } else { "Add Contact" } }
+                                </strong>
+                </div>
+            </div>
+            <div class="card-form-compact">
+                <div class="form-group-compact">
+                    <input type="text" placeholder="Full Name" value={contact_state.first_name.clone()} oninput={on_input(|c, v| c.first_name = v)} />
+                </div>
+                <div class="form-group-compact">
+                    <input type="text" placeholder="Preferred Name" value={contact_state.last_name.clone()} oninput={on_input(|c, v| c.last_name = v)} />
+                </div>
+                <div class="form-group-compact">
+                    <input type="email"  placeholder="Email" value={contact_state.email.clone().unwrap_or_default()} oninput={on_input(|c, v| c.email = Some(v))} />
+                </div>
+                <div class="form-group-compact">
+                    <input type="tel"  placeholder="Phone" value={contact_state.phone.clone().unwrap_or_default()} oninput={on_input(|c, v| c.phone = Some(v))} />
+                </div>
+                <div class="for-row-compact" style="align-items: center; margin-top: 0.25rem;">
+                    <label>{"Role/Title"}</label>
+                    <input type="text" value={contact_state.role_title.clone().unwrap_or_default()} oninput={on_input(|c, v| c.role_title = Some(v))} />
+                </div>
+
+                <div class="form-group-compact">
+                    <label class="checkbox-label-compact" for="is_primary">
+                        <input type="checkbox" id="is_primary_contact" checked={contact_state.is_primary} onchange={on_primary_change} />
+                        <span>{"Primary"}</span>
+                    </label>
+                </div>
+            </div>
+            // Tightly bundled actionable context footer links
+            <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed rgba(0,0,0,0.05);">
+                <button class="button-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick={on_cancel_click}>{ "Cancel" }</button>
+                <button class="button-primary" style="padding: 4px 10px; font-size: 0.8rem;" onclick={on_save_click}>{ "Save Contact" }</button>
+            </div>
+        </div>
+    }
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026. Trevor Campbell and others.
+ * Copyright (c) 2026-2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -22,10 +22,21 @@
  *
  */
 
-pub(crate) mod account;
-pub(crate) mod chart_of_accounts;
-pub(crate) mod journal_entry;
-pub(crate) mod organization;
-pub(crate) mod partner;
-pub(crate) mod transaction;
-pub(crate) mod user;
+use serde::{Serialize, Deserialize};
+use uuid::Uuid;
+use chrono::{DateTime, Utc};
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct Partner {
+    pub id: Uuid,
+    pub organization_id: Uuid,
+    pub legal_name: String,
+    pub trade_name: Option<String>,
+    pub tax_identifier: Option<String>,
+    pub is_vendor: bool,
+    pub is_customer: bool,
+    pub default_ap_account_id: Option<Uuid>,
+    pub default_ar_account_id: Option<Uuid>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}

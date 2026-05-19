@@ -33,7 +33,7 @@ CREATE TABLE partner_addresses
     organization_id UUID            NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
     partner_id      UUID            NOT NULL REFERENCES partners (id) ON DELETE CASCADE,
 
-    type            address_type    NOT NULL DEFAULT 'General',
+    address_type    address_type    NOT NULL DEFAULT 'General',
     is_primary      BOOLEAN         NOT NULL DEFAULT FALSE,
 
     address_line1   TEXT            NOT NULL,

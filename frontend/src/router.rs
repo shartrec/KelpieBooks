@@ -37,6 +37,8 @@ pub enum Route {
     Profile,
     #[at("/ledger")]
     Ledger,
+    #[at("/partners")]
+    PartnerList,
     #[at("/reports/trial-balance")]
     TrialBalance,
     #[at("/reports/profit-loss")]
