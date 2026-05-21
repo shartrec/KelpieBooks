@@ -18,3 +18,6 @@ pub mod partner_row;
 pub mod report_options;
 pub mod sidebar;
 pub mod transaction_row;
+pub mod vendor_invoice_item_row;
+pub mod vendor_invoice_table;
+pub mod vendor_invoice_drawer;

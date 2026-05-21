@@ -32,4 +32,5 @@ pub struct PartnerListItem {
     pub trade_name: Option<String>,
     pub is_vendor: bool,
     pub is_customer: bool,
+    pub can_delete: bool,
 }

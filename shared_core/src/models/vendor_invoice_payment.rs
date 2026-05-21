@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026. Trevor Campbell and others.
+ * Copyright (c) 2026-2026. Trevor Campbell and others.
  *
  * This file is part of KelpieBooks.
  *
@@ -23,34 +23,18 @@
  */
 
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumIter, EnumString};
+use uuid::Uuid;
+use chrono::{DateTime, Utc, NaiveDate};
 
-#[derive(
-    Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy,
-)]
-#[strum(serialize_all = "PascalCase")]
-pub enum InvoiceStatus {
-    Draft,
-    Open,
-    Paid,
-    PartiallyPaid,
-    Void,
-}
-
-impl InvoiceStatus {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::Draft => "Draft",
-            Self::Open => "Open",
-            Self::Paid => "Paid",
-            Self::PartiallyPaid => "PartiallyPaid",
-            Self::Void => "Void",
-        }
-    }
-}
-
-impl Default for InvoiceStatus {
-    fn default() -> Self {
-        Self::Draft
-    }
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct VendorInvoicePayment {
+    pub id: Uuid,
+    pub organization_id: Uuid,
+    pub vendor_invoice_id: Uuid,
+    pub transaction_id: Uuid,
+    pub payment_date: NaiveDate,
+    pub amount: i64,
+    pub reference: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }

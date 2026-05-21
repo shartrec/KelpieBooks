@@ -192,7 +192,11 @@ pub fn partner_list_table() -> Html {
 
     let on_delete_click = {
         let partner_to_delete = partner_to_delete.clone();
-        Callback::from(move |partner: PartnerListItem| partner_to_delete.set(Some(partner)))
+        Callback::from(move |partner: PartnerListItem| {
+            if partner.can_delete {
+                partner_to_delete.set(Some(partner));
+            }
+        })
     };
 
     let on_add_submit = {

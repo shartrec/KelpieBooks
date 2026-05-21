@@ -1,5 +1,6 @@
 use crate::db;
 use crate::routes::security::AuthenticatedUser;
+use crate::services::account_service;
 use crate::util::types::PathUuid;
 use crate::util::ApiError;
 use crate::DbKelpie;
@@ -207,52 +208,6 @@ async fn create_transaction(
     user: AuthenticatedUser,
     req: Json<CreateTransactionRequest>,
 ) -> Result<&'static str, ApiError> {
-    let total_debits: i64 = req.entries.iter().map(|e| e.debit).sum();
-    let total_credits: i64 = req.entries.iter().map(|e| e.credit).sum();
-
-    if total_debits == 0 || total_credits == 0 || total_debits != total_credits {
-        return Err(ApiError::Invalid(
-            "Transaction must be balanced and not zero.".to_string(),
-        ));
-    }
-
-    // Check the organization locked date
-    let organization = db::organization::get(&mut pool, user.organization_id).await?;
-
-    if let Some(date) = organization.unwrap().locked_until {
-        if req.date <= date {
-            return Err(ApiError::Forbidden(
-                "Period is locked for editing".to_string(),
-            ));
-        }
-    }
-
-    let main_description = req.entries.get(0).and_then(|e| e.description.clone());
-
-    let mut tx = pool.begin().await?;
-
-    let transaction_id = db::transaction::insert(
-        &mut tx,
-        user.organization_id,
-        req.date,
-        main_description,
-        req.reference.clone(),
-    )
-    .await?;
-
-    for entry in &req.entries {
-        db::journal_entry::insert(
-            &mut tx,
-            transaction_id,
-            entry.account_id,
-            entry.debit,
-            entry.credit,
-            entry.description.clone(),
-        )
-        .await?;
-    }
-
-    tx.commit().await?;
-
+    account_service::create_transaction(&mut pool, user.organization_id, req.into_inner()).await?;
     Ok("Transaction created successfully.")
 }

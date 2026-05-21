@@ -39,6 +39,10 @@ pub enum Route {
     Ledger,
     #[at("/partners")]
     PartnerList,
+    #[at("/payables")]
+    Payables,
+    #[at("/payables/new")]
+    NewVendorInvoice,
     #[at("/reports/trial-balance")]
     TrialBalance,
     #[at("/reports/profit-loss")]

@@ -9,3 +9,4 @@ pub mod partner_list_item;
 pub mod recent_transaction;
 pub mod transaction_detail;
 pub mod user_detail;
+pub mod vendor_invoice_list_item;

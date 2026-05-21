@@ -22,35 +22,21 @@
  *
  */
 
-use serde::{Deserialize, Serialize};
-use strum::{Display, EnumIter, EnumString};
+use serde::{Serialize, Deserialize};
+use uuid::Uuid;
+use chrono::NaiveDate;
+use crate::models::invoice_status::InvoiceStatus;
 
-#[derive(
-    Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy,
-)]
-#[strum(serialize_all = "PascalCase")]
-pub enum InvoiceStatus {
-    Draft,
-    Open,
-    Paid,
-    PartiallyPaid,
-    Void,
-}
-
-impl InvoiceStatus {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::Draft => "Draft",
-            Self::Open => "Open",
-            Self::Paid => "Paid",
-            Self::PartiallyPaid => "PartiallyPaid",
-            Self::Void => "Void",
-        }
-    }
-}
-
-impl Default for InvoiceStatus {
-    fn default() -> Self {
-        Self::Draft
-    }
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct VendorInvoiceListItem {
+    pub id: Uuid,
+    pub partner_name: String,
+    pub invoice_number: String,
+    pub issue_date: NaiveDate,
+    pub due_date: NaiveDate,
+    pub net_amount: i64,
+    pub tax_amount: i64,
+    pub gross_amount: i64,
+    pub amount_remaining: i64,
+    pub status: InvoiceStatus,
 }

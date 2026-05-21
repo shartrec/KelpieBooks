@@ -1,0 +1,145 @@
+/*!
+ * Copyright (c) 2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.voucher {
+  &__form {
+    width: 100%;
+    max-width: 1250px;
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    &__header {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    &__invoice {
+      width: 12rem;
+    }
+    &__totals {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1.5rem;
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f9fafb;
+      border-top: 1px solid #e5e7eb;
+      font-weight: bold;
+    }
+    &__balanced {
+      color: $color-success;
+      padding: 0 1rem;
+      border-radius: 4px;
+      background-color: #eafaf1;
+    }
+
+  }
+
+  &__entries {
+    display: grid;
+    gap: 5px;
+  }
+
+  &__entry-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 110px 110px 110px 30px;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+    font-size: 0.9rem;
+    color: #576574;
+  }
+
+  &__entry-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 110px 110px 110px 30px;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    input, select {
+      margin-bottom: 0;
+      padding: 6px 8px; /* More compact inputs */
+      width: 100%;
+    }
+  }
+}
+
+// Button configuration for primary transaction executions
+.btn-pay-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px; // Breathing room between the credit card icon and text label
+  background-color: #28a745; // Emerald Accounting Success green
+  color: #ffffff;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius, 4px);
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  &:hover:not(:disabled) {
+    background-color: #218838; // Rich dark emerald on cursor focus
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.97); // Tight physical press response
+  }
+
+  &:disabled {
+    background-color: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+
+    .btn-pay-icon {
+      filter: grayscale(100%);
+      opacity: 0.4;
+    }
+  }
+
+  // Micro SVG icon positioning inside button
+  .btn-pay-icon {
+    width: 13px;
+    height: 13px;
+    display: inline-flex;
+    align-items: center;
+    color: currentColor; // Automatically inherits text color transitions
+  }
+}

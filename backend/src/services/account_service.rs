@@ -30,6 +30,7 @@ use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::models::{account::Account, system_tag::SystemTag};
 use shared_core::requests::configuration::UpdateConfigurationRequest;
+use shared_core::requests::transaction::CreateTransactionRequest;
 use sqlx::Acquire;
 use std::collections::{HashMap, VecDeque};
 use uuid::Uuid;
@@ -221,4 +222,59 @@ pub async fn update_configuration(
     tx.commit().await?;
 
     Ok(())
+}
+
+pub async fn create_transaction(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    req: CreateTransactionRequest,
+) -> Result<Uuid, ApiError> {
+    let total_debits: i64 = req.entries.iter().map(|e| e.debit).sum();
+    let total_credits: i64 = req.entries.iter().map(|e| e.credit).sum();
+
+    if total_debits == 0 || total_credits == 0 || total_debits != total_credits {
+        return Err(ApiError::Invalid(
+            "Transaction must be balanced and not zero.".to_string(),
+        ));
+    }
+
+    // Check the organization locked date
+    let organization = db::organization::get(pool, organization_id).await?;
+
+    if let Some(date) = organization.unwrap().locked_until {
+        if req.date <= date {
+            return Err(ApiError::Forbidden(
+                "Period is locked for editing".to_string(),
+            ));
+        }
+    }
+
+    let main_description = req.entries.get(0).and_then(|e| e.description.clone());
+
+    let mut tx = pool.begin().await?;
+
+    let transaction_id = db::transaction::insert(
+        &mut tx,
+        organization_id,
+        req.date,
+        main_description,
+        req.reference.clone(),
+    )
+    .await?;
+
+    for entry in &req.entries {
+        db::journal_entry::insert(
+            &mut tx,
+            transaction_id,
+            entry.account_id,
+            entry.debit,
+            entry.credit,
+            entry.description.clone(),
+        )
+        .await?;
+    }
+
+    tx.commit().await?;
+
+    Ok(transaction_id)
 }

@@ -90,12 +90,12 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
 
     html! {
         <div class="drawer-overlay" onclick={on_close.clone()}>
-            <div class="partner-drawer" onclick={|e: MouseEvent| e.stop_propagation()}>
-                <header class="partner-drawer__header">
+            <div class="drawer" onclick={|e: MouseEvent| e.stop_propagation()}>
+                <header class="drawer__header">
                     <h3>{ &props.partner.legal_name }</h3>
                     <button class="btn-close" onclick={on_close.clone()}>{ "✖" }</button>
                 </header>
-                <div class="partner-drawer__tabs">
+                <div class="drawer__tabs">
                     <button
                         class={classes!("tab-trigger", (*active_tab == DrawerTab::General).then_some("tab-trigger--active"))}
                         onclick={set_tab.reform(|_| DrawerTab::General)}
@@ -115,7 +115,7 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
                         { "Contacts" }
                     </button>
                 </div>
-                <div class="partner-drawer__content">
+                <div class="drawer__content">
                     if let Some(e) = &*error {
                         <div class="error">{e}</div>
                     }
@@ -144,7 +144,7 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
                         }
                     }
                 </div>
-                <footer class="partner-drawer__footer">
+                <footer class="drawer__footer">
                     <button class="button-secondary" onclick={on_close.clone()}>{ "Close" }</button>
                 </footer>
             </div>

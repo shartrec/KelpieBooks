@@ -15,6 +15,7 @@ Before writing any code, you must understand our core architectural invariants. 
 * All monetary values must be represented as `i64` whole cents (e.g., `$10.50` is stored and calculated as `1050`).
 * All mathematical modifications must happen via safe integer calculations to completely eliminate rounding errors.
 * Use the available format_currency() function to format monetary values for display.
+* Use the CurrencyInput component in the front end for currency input.
 
 ### Rule B: WebAssembly Isolation (`shared_core`)
 * The `shared_core` crate is a database-agnostic domain layer shared directly with the frontend Yew app compiled to WASM.

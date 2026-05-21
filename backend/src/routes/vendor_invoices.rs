@@ -1,0 +1,99 @@
+/*
+ * Copyright (c) 2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+
+use crate::routes::security::AuthenticatedUser;
+use crate::util::ApiError;
+use crate::DbKelpie;
+use rocket::serde::json::Json;
+use rocket::{get, post, put, routes, Route};
+use rocket_db_pools::Connection;
+use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
+use shared_core::models::vendor_invoice::VendorInvoice;
+use shared_core::requests::vendor_invoice::{CreateVendorInvoiceRequest, UpdateVendorInvoiceRequest};
+use crate::services::vendor_invoice_service;
+use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
+use crate::util::types::PathUuid;
+
+pub(crate) fn routes() -> Vec<Route> {
+    routes![
+        get_vendor_invoices,
+        get_vendor_invoice,
+        create_vendor_invoice,
+        update_vendor_invoice,
+        update_vendor_invoice_items,
+    ]
+}
+
+#[get("/api/vendor-invoices")]
+async fn get_vendor_invoices(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+) -> Result<Json<Vec<VendorInvoiceListItem>>, ApiError> {
+    let invoices =
+        vendor_invoice_service::get_vendor_invoices(&mut pool, user.organization_id).await?;
+    Ok(Json(invoices))
+}
+
+#[get("/api/vendor-invoices/<id>")]
+async fn get_vendor_invoice(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    id: PathUuid,
+) -> Result<Json<VendorInvoice>, ApiError> {
+    let invoice =
+        vendor_invoice_service::get_vendor_invoice(&mut pool, user.organization_id, *id).await?;
+    Ok(Json(invoice))
+}
+
+#[post("/api/vendor-invoices", data = "<req>")]
+async fn create_vendor_invoice(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    req: Json<CreateVendorInvoiceRequest>,
+) -> Result<Json<VendorInvoice>, ApiError> {
+    let new_invoice = vendor_invoice_service::create_vendor_invoice(&mut pool, user.organization_id, &req).await?;
+    Ok(Json(new_invoice))
+}
+
+#[put("/api/vendor-invoices/<id>", data = "<req>")]
+async fn update_vendor_invoice(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    id: PathUuid,
+    req: Json<UpdateVendorInvoiceRequest>,
+) -> Result<Json<VendorInvoice>, ApiError> {
+    let updated_invoice = vendor_invoice_service::update_vendor_invoice(&mut pool, user.organization_id, *id, &req).await?;
+    Ok(Json(updated_invoice))
+}
+
+#[put("/api/vendor-invoices/<id>/items", data = "<req>")]
+async fn update_vendor_invoice_items(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    id: PathUuid,
+    req: Json<Vec<VendorInvoiceItem>>,
+) -> Result<Json<Vec<VendorInvoiceItem>>, ApiError> {
+    let updated_items = vendor_invoice_service::update_vendor_invoice_items(&mut pool, user.organization_id, *id, &req).await?;
+    Ok(Json(updated_items))
+}

@@ -23,11 +23,12 @@
  */
 
 use crate::models::invoice_status::InvoiceStatus;
+use crate::models::vendor_invoice_item::VendorInvoiceItem;
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct VendorInvoice {
     pub id: Uuid,
     pub organization_id: Uuid,
@@ -37,11 +38,14 @@ pub struct VendorInvoice {
     pub status: InvoiceStatus,
     pub issue_date: NaiveDate,
     pub due_date: NaiveDate,
-    pub amount_due: i64,
+    pub net_amount: i64,
+    pub tax_amount: i64,
+    pub gross_amount: i64,
     pub amount_remaining: i64,
     pub notes: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub items: Vec<VendorInvoiceItem>,
 }
 
 impl VendorInvoice {

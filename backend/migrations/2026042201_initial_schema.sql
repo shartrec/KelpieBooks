@@ -57,6 +57,7 @@ CREATE TYPE system_tag AS ENUM (
     'AccountsPayable',
     'RetainedEarnings',
     'SalesTaxPayable',
+    'SalesTaxClearing',
     'Revenue',
     'Expense',
     'CostOfGoodsSold'

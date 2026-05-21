@@ -328,12 +328,12 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                 <table class="report-table">
                     <thead>
                         <tr>
-                            <th>{ "Date" }</th>
-                            <th>{ "Description" }</th>
-                            <th class="amount">{ "Debit" }</th>
-                            <th class="amount">{ "Credit" }</th>
-                            <th class="amount">{ "Balance" }</th>
-                            <th class="actions-col"></th>
+                            <th class="table__text-col">{ "Date" }</th>
+                            <th class="table__text-col">{ "Description" }</th>
+                            <th class="table__value-col">{ "Debit" }</th>
+                            <th class="table__value-col">{ "Credit" }</th>
+                            <th class="table__value-col">{ "Balance" }</th>
+                            <th class="table__col-actions"></th>
                         </tr>
                     </thead>
                     <tbody>

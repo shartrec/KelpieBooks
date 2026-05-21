@@ -80,6 +80,14 @@ Good candidates for `shared_core` include:
 * Enum values used by both frontend and backend
 * Shared formatting or validation helpers
 
+### Handling Currency values
+* 
+* Never use `f32` or `f64` for tracking financial values.
+* All monetary values must be represented as `i64` whole cents (e.g., `$10.50` is stored and calculated as `1050`).
+* All mathematical modifications must happen via safe integer calculations to completely eliminate rounding errors.
+* Use the available format_currency() function to format monetary values for display.
+* Use the CurrencyInput component in the front end for currency input.
+
 ### Keep Backend Layers Separate
 
 Backend changes should generally follow this flow:

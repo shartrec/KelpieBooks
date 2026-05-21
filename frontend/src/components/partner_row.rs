@@ -21,7 +21,6 @@
  *      Trevor Campbell
  *
  */
-
 use shared_core::dtos::partner_list_item::PartnerListItem;
 use uuid::Uuid;
 use yew::prelude::*;
@@ -69,9 +68,9 @@ pub fn partner_row(props: &PartnerRowProps) -> Html {
             <td class="table__col-actions">
                 <div class="actions-wrapper">
                     <button class="icon-button btn-action" onclick={on_edit}>
-                        <img src="/images/edit.svg" alt="Edit" />
+                        <img src="/images/view.svg" alt="View" />
                     </button>
-                    <button class="icon-button btn-action" onclick={on_delete}>
+                    <button class="icon-button btn-action" onclick={on_delete} disabled={!props.partner.can_delete}>
                         <img src="/images/delete.svg" alt="Delete" />
                     </button>
                 </div>

@@ -55,15 +55,17 @@ CREATE TABLE vendor_invoices
     due_date        DATE            NOT NULL,
 
     -- Tracking monetary sums in cents (BIGINT to avoid float truncation bugs)
-    amount_due      BIGINT          NOT NULL, -- Total amount of the invoice
+    net_amount       BIGINT         NOT NULL, -- Net amount of the invoice
+    tax_amount       BIGINT         NOT NULL, -- Tax amount of the invoice
+    gross_amount     BIGINT         NOT NULL, -- Gross amount of the invoice
     amount_remaining BIGINT         NOT NULL, -- Amount left to pay (for partial tracking)
 
     notes           TEXT,
     created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT check_positive_amounts CHECK (amount_due >= 0 AND amount_remaining >= 0),
-    CONSTRAINT check_remaining_le_due CHECK (amount_remaining <= amount_due),
+    CONSTRAINT check_positive_amounts CHECK (gross_amount >= 0 AND amount_remaining >= 0),
+    CONSTRAINT check_remaining_le_due CHECK (amount_remaining <= gross_amount),
     CONSTRAINT check_due_date_valid CHECK (due_date >= issue_date)
 );
 
@@ -72,6 +74,23 @@ CREATE INDEX idx_vendor_invoices_partner ON vendor_invoices (partner_id);
 -- Prevent duplicate processing of the same invoice number from a single vendor
 CREATE UNIQUE INDEX idx_vendor_invoice_uniq_per_vendor ON vendor_invoices (organization_id, partner_id, invoice_number);
 
+CREATE TABLE vendor_invoice_items
+(
+    id                UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
+    vendor_invoice_id UUID        NOT NULL REFERENCES vendor_invoices (id) ON DELETE CASCADE,
+
+    -- The critical GL link: reference to your Chart of Accounts
+    account_id        UUID        NOT NULL REFERENCES accounts (id) ON DELETE RESTRICT,
+
+    description       TEXT                 DEFAULT '',
+    net_amount        BIGINT      NOT NULL DEFAULT 0, -- Line amount before tax
+    tax_amount        BIGINT      NOT NULL DEFAULT 0, -- Tax applied to this specific line
+    total_amount      BIGINT      NOT NULL DEFAULT 0, -- Net + Tax
+
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_invoice_items_invoice ON vendor_invoice_items (vendor_invoice_id);
 
 -- =============================================================================
 -- 4. Accounts Payable: Vendor Payments

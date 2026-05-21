@@ -67,6 +67,7 @@ fn from_row_to_partner_list_item(row: &sqlx::postgres::PgRow) -> PartnerListItem
         trade_name: row.get("trade_name"),
         is_vendor: row.get("is_vendor"),
         is_customer: row.get("is_customer"),
+        can_delete: row.get("can_delete"),
     }
 }
 
@@ -124,10 +125,26 @@ pub(crate) async fn get_all_by_org(
 ) -> Result<Vec<PartnerListItem>, sqlx::Error> {
     sqlx::query(
         r#"
-        SELECT id, legal_name, trade_name, is_vendor, is_customer
-        FROM partners
-        WHERE organization_id = $1
-        ORDER BY legal_name
+        SELECT
+            p.id,
+            p.legal_name,
+            p.trade_name,
+            p.is_vendor,
+            p.is_customer,
+            CASE
+                WHEN COUNT(vi.id) > 0 THEN FALSE
+                ELSE TRUE
+            END AS can_delete
+        FROM
+            partners p
+        LEFT JOIN
+            vendor_invoices vi ON p.id = vi.partner_id
+        WHERE
+            p.organization_id = $1
+        GROUP BY
+            p.id
+        ORDER BY
+            p.legal_name
         "#,
     )
     .bind(organization_id)
@@ -290,7 +307,7 @@ pub(crate) async fn insert_contact(
 ) -> Result<PartnerContact, sqlx::Error> {
     let row = sqlx::query(
         r#"
-        INSERT INTO partner_contacts (organization_id, partner_id, is_primary, first_name, last_name, email, phone, role_title)
+        INSERT INTO partner_contacts (organization_id, partner_id, is_primary, first_name, last__name, email, phone, role_title)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING *
         "#,

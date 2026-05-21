@@ -22,35 +22,28 @@
  *
  */
 
-use serde::{Deserialize, Serialize};
-use strum::{Display, EnumIter, EnumString};
+use crate::components::layout::Layout;
+use crate::components::vendor_invoice_table::VendorInvoiceTable;
+use yew::prelude::*;
+use yew_router::prelude::*;
+use crate::router::Route;
 
-#[derive(
-    Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy,
-)]
-#[strum(serialize_all = "PascalCase")]
-pub enum InvoiceStatus {
-    Draft,
-    Open,
-    Paid,
-    PartiallyPaid,
-    Void,
-}
+#[function_component(PayablesLedgerPage)]
+pub fn payables_ledger_page() -> Html {
+    let navigator = use_navigator().unwrap();
+    let on_add_click = {
+        let navigator = navigator.clone();
+        Callback::from(move |_| {
+            navigator.push(&Route::NewVendorInvoice);
+        })
+    };
 
-impl InvoiceStatus {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::Draft => "Draft",
-            Self::Open => "Open",
-            Self::Paid => "Paid",
-            Self::PartiallyPaid => "PartiallyPaid",
-            Self::Void => "Void",
-        }
-    }
-}
-
-impl Default for InvoiceStatus {
-    fn default() -> Self {
-        Self::Draft
+    html! {
+        <Layout>
+            <div class="table-actions">
+                <button class="button-primary" onclick={on_add_click}>{ "+ New Invoice" }</button>
+            </div>
+            <VendorInvoiceTable />
+        </Layout>
     }
 }

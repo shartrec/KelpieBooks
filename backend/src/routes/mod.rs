@@ -33,6 +33,8 @@ pub(crate) mod reports;
 pub(crate) mod security;
 pub(crate) mod transactions;
 pub(crate) mod users;
+pub(crate) mod vendor_invoices;
+pub(crate) mod vendor_invoice_payments;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Role {

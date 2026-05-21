@@ -23,34 +23,25 @@
  */
 
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumIter, EnumString};
+use uuid::Uuid;
+use chrono::NaiveDate;
+use crate::models::vendor_invoice_item::VendorInvoiceItem;
 
-#[derive(
-    Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy,
-)]
-#[strum(serialize_all = "PascalCase")]
-pub enum InvoiceStatus {
-    Draft,
-    Open,
-    Paid,
-    PartiallyPaid,
-    Void,
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
+pub struct CreateVendorInvoiceRequest {
+    pub partner_id: Uuid,
+    pub invoice_number: String,
+    pub issue_date: NaiveDate,
+    pub due_date: NaiveDate,
+    pub notes: Option<String>,
+    pub items: Vec<VendorInvoiceItem>,
 }
 
-impl InvoiceStatus {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::Draft => "Draft",
-            Self::Open => "Open",
-            Self::Paid => "Paid",
-            Self::PartiallyPaid => "PartiallyPaid",
-            Self::Void => "Void",
-        }
-    }
-}
-
-impl Default for InvoiceStatus {
-    fn default() -> Self {
-        Self::Draft
-    }
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct UpdateVendorInvoiceRequest {
+    pub id: Uuid,
+    pub invoice_number: String,
+    pub issue_date: NaiveDate,
+    pub due_date: NaiveDate,
+    pub notes: Option<String>,
 }
