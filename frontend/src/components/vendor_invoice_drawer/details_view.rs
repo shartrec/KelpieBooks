@@ -22,15 +22,15 @@
  *
  */
 
-use yew::prelude::*;
-use shared_core::models::vendor_invoice::VendorInvoice;
 use crate::api::Api;
 use crate::contexts::auth_context::use_user_context;
-use yew_router::prelude::use_navigator;
-use shared_core::requests::vendor_invoice::UpdateVendorInvoiceRequest;
-use web_sys::HtmlInputElement;
 use chrono::NaiveDate;
 use gloo_timers::callback::Timeout;
+use shared_core::models::vendor_invoice::VendorInvoice;
+use shared_core::requests::vendor_invoice::UpdateVendorInvoiceRequest;
+use web_sys::HtmlInputElement;
+use yew::prelude::*;
+use yew_router::prelude::use_navigator;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct DetailsViewProps {
@@ -124,7 +124,7 @@ pub fn details_view(props: &DetailsViewProps) -> Html {
                     <input type="date" value={request.due_date.format("%Y-%m-%d").to_string()} onchange={on_date_change(|r, v| r.due_date = v)} required=true />
 
                     <label>{"Notes: "}</label>
-                    <textarea oninput={on_input(|r, v| r.notes = Some(v))} value={request.notes.clone().unwrap_or("".to_string())} />
+                    <textarea oninput={on_input(|r, v| r.notes = Some(v))} value={request.notes.clone().unwrap_or_default()} />
                 </div>
                 <div class="voucher-footer">
                     if let Some(e) = &*error {

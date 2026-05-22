@@ -341,9 +341,9 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                             <tr>
                                 <td>{ &entry.date.to_string() }</td>
                                 <td>{ "Opening Balance" }</td>
-                                <td class="amount">{ if entry.debit > 0 { format_currency(&entry.debit) } else { "".to_string() } }</td>
-                                <td class="amount">{ if entry.credit > 0 { format_currency(&entry.credit) } else { "".to_string() } }</td>
-                                <td class="amount">{ format_currency(&entry.running_balance) }</td>
+                                <td class="table__value-col">{ if entry.debit > 0 { format_currency(&entry.debit) } else { "".to_string() } }</td>
+                                <td class="table__value-col">{ if entry.credit > 0 { format_currency(&entry.credit) } else { "".to_string() } }</td>
+                                <td class="table__value-col">{ format_currency(&entry.running_balance) }</td>
                                 <td></td>
                             </tr>
                         }

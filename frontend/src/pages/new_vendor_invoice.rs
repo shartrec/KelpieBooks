@@ -22,20 +22,21 @@
  *
  */
 
-use yew::prelude::*;
-use shared_core::requests::vendor_invoice::CreateVendorInvoiceRequest;
-use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
-use uuid::Uuid;
+use crate::api::Api;
 use crate::components::layout::Layout;
 use crate::components::vendor_invoice_item_row::VendorInvoiceItemRow;
-use crate::api::Api;
 use crate::contexts::auth_context::use_user_context;
-use yew_router::prelude::use_navigator;
-use shared_core::dtos::partner_list_item::PartnerListItem;
-use shared_core::dtos::account_with_balance::AccountWithBalance;
-use web_sys::HtmlInputElement;
-use chrono::{NaiveDate, Local};
 use crate::router::Route;
+use chrono::{Local, NaiveDate};
+use shared_core::dtos::partner_list_item::PartnerListItem;
+use shared_core::models::account::Account;
+use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
+use shared_core::requests::vendor_invoice::CreateVendorInvoiceRequest;
+use uuid::Uuid;
+use web_sys::HtmlInputElement;
+use yew::prelude::*;
+use yew_router::prelude::use_navigator;
+use shared_core::models::account_category::AccountCategory;
 
 #[function_component(NewVendorInvoicePage)]
 pub fn new_vendor_invoice_page() -> Html {
@@ -87,10 +88,11 @@ pub fn new_vendor_invoice_page() -> Html {
                     Err(e) => error.set(Some(format!("Network error: {}", e))),
                 }
 
-                let fetched_accounts = Api::get("/api/accounts_with_balances", user_ctx, navigator).await;
+                let url = format!("/api/accounts_by_category/{}", AccountCategory::Expense.to_string());
+                let fetched_accounts = Api::get(&url, user_ctx, navigator).await;
                 match fetched_accounts {
                     Ok(response) if response.ok() => {
-                        match response.json::<Vec<AccountWithBalance>>().await {
+                        match response.json::<Vec<Account>>().await {
                             Ok(data) => accounts.set(data),
                             Err(e) => error.set(Some(format!("Failed to parse accounts: {}", e))),
                         }

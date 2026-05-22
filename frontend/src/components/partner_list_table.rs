@@ -28,8 +28,8 @@ use crate::components::delete_partner_confirmation_modal::DeletePartnerConfirmat
 use crate::components::partner_drawer::PartnerDrawer;
 use crate::components::partner_row::PartnerRow;
 use crate::contexts::auth_context::use_user_context;
-use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::partner_list_item::PartnerListItem;
+use shared_core::models::account::Account;
 use shared_core::models::account_category::AccountCategory;
 use shared_core::models::partner::Partner;
 use shared_core::models::partner_address::PartnerAddress;
@@ -86,10 +86,10 @@ pub fn partner_list_table() -> Html {
                 }
 
                 let fetched_accounts =
-                    Api::get("/api/accounts_with_balances", user_ctx, navigator).await;
+                    Api::get("/api/accounts", user_ctx, navigator).await;
                 match fetched_accounts {
                     Ok(response) if response.ok() => {
-                        match response.json::<Vec<AccountWithBalance>>().await {
+                        match response.json::<Vec<Account>>().await {
                             Ok(data) => accounts.set(data),
                             Err(e) => error.set(Some(format!("Failed to parse accounts: {}", e))),
                         }

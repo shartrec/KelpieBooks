@@ -28,6 +28,7 @@ use chrono::{Local, NaiveDate};
 use rocket_db_pools::sqlx::PgConnection;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
+use shared_core::models::account_category::AccountCategory;
 use shared_core::models::{account::Account, system_tag::SystemTag};
 use shared_core::requests::configuration::UpdateConfigurationRequest;
 use shared_core::requests::transaction::CreateTransactionRequest;
@@ -41,6 +42,14 @@ pub async fn get_accounts(
 ) -> Result<Vec<Account>, ApiError> {
     let accounts = db::account::get_all_by_org(pool, organization_id).await?;
 
+    Ok(accounts)
+}
+pub async fn get_accounts_by_category(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    category: AccountCategory,
+) -> Result<Vec<Account>, ApiError> {
+    let accounts = db::account::get_all_by_category(pool, organization_id, vec!(category)).await?;
     Ok(accounts)
 }
 
@@ -65,6 +74,7 @@ pub async fn get_account_with_balance(
         name: account.name,
         category: account.category,
         is_group: account.is_group,
+        is_bank_account: account.is_bank_account,
         system_tag: account.system_tag,
         created_at: account.created_at,
     })
@@ -129,12 +139,25 @@ pub async fn get_accounts_with_balances(
             name: acc.name,
             category: acc.category,
             is_group: acc.is_group,
+            is_bank_account: acc.is_bank_account,
             system_tag: acc.system_tag,
             created_at: acc.created_at,
         })
         .collect();
 
     Ok(result)
+}
+
+pub async fn get_payment_methods(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+) -> Result<Vec<Account>, ApiError> {
+    let accounts = db::account::get(pool, organization_id).await?;
+    let payment_methods = accounts
+        .into_iter()
+        .filter(|acc| acc.is_bank_account)
+        .collect();
+    Ok(payment_methods)
 }
 
 pub async fn get_journal_entries_with_running_balance(

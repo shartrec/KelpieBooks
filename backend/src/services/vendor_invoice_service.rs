@@ -29,11 +29,11 @@ use rocket_db_pools::sqlx::{self, PgConnection};
 use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
 use shared_core::models::system_tag::SystemTag;
 use shared_core::models::vendor_invoice::VendorInvoice;
+use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
 use shared_core::requests::transaction::{CreateTransactionRequest, JournalEntryLine};
 use shared_core::requests::vendor_invoice::{CreateVendorInvoiceRequest, UpdateVendorInvoiceRequest};
 use sqlx::Acquire;
 use uuid::Uuid;
-use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
 
 pub async fn get_vendor_invoices(
     pool: &mut PgConnection,
@@ -138,7 +138,7 @@ pub async fn update_vendor_invoice(
         return Err(ApiError::Forbidden("You do not have permission to update this invoice.".to_string()));
     }
     let updated_invoice = vendor_invoice_db::update(pool, id, req).await?;
-    let mut returned_invoice = get_vendor_invoice(pool, organization_id, updated_invoice.id).await?;
+    let returned_invoice = get_vendor_invoice(pool, organization_id, updated_invoice.id).await?;
     Ok(returned_invoice)
 }
 
@@ -159,6 +159,12 @@ pub async fn update_vendor_invoice_items(
     for item in items {
         vendor_invoice_db::insert_item(&mut tx, id, item).await?;
     }
+
+    let total_net: i64 = items.iter().map(|item| item.net_amount).sum();
+    let total_tax: i64 = items.iter().map(|item| item.tax_amount).sum();
+    let gross_amount = total_net + total_tax;
+
+    vendor_invoice_db::update_totals(&mut tx, id, total_net, total_tax, gross_amount).await?;
 
     tx.commit().await?;
 

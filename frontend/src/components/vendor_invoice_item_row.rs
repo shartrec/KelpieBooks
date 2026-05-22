@@ -23,7 +23,7 @@
  */
 
 use crate::components::currency_input::CurrencyInput;
-use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::models::account::Account;
 use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
 use uuid::Uuid;
 use yew::prelude::*;
@@ -31,7 +31,7 @@ use yew::prelude::*;
 #[derive(Properties, PartialEq)]
 pub struct VendorInvoiceItemRowProps {
     pub item: VendorInvoiceItem,
-    pub accounts: Vec<AccountWithBalance>,
+    pub accounts: Vec<Account>,
     pub on_change: Callback<VendorInvoiceItem>,
     pub on_delete: Callback<Uuid>,
 }

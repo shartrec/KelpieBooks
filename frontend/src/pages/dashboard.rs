@@ -87,7 +87,7 @@ pub fn dashboard_page() -> Html {
                 </section>
 
                 <section class="card shadow-sm p-4">
-                    <h3>{ "Recent Activity" }</h3>
+                    <h3>{ "Recent Ledger Activity" }</h3>
                     <table class="audit-table">
                         <thead>
                             <tr>

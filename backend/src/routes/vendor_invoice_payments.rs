@@ -23,6 +23,8 @@
  */
 
 use crate::routes::security::AuthenticatedUser;
+use crate::services::vendor_invoice_payment_service;
+use crate::util::types::PathUuid;
 use crate::util::ApiError;
 use crate::DbKelpie;
 use rocket::serde::json::Json;
@@ -30,8 +32,6 @@ use rocket::{get, post, routes, Route};
 use rocket_db_pools::Connection;
 use shared_core::models::vendor_invoice_payment::VendorInvoicePayment;
 use shared_core::requests::vendor_invoice_payment::CreateVendorInvoicePaymentRequest;
-use crate::services::vendor_invoice_payment_service;
-use crate::util::types::PathUuid;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![

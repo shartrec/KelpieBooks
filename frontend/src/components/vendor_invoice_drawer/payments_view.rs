@@ -22,18 +22,17 @@
  *
  */
 
-use yew::prelude::*;
-use shared_core::models::vendor_invoice::VendorInvoice;
-use shared_core::models::vendor_invoice_payment::VendorInvoicePayment;
 use crate::api::Api;
 use crate::contexts::auth_context::use_user_context;
-use yew_router::prelude::use_navigator;
-use shared_core::dtos::account_with_balance::AccountWithBalance;
-use uuid::Uuid;
-use shared_core::requests::vendor_invoice_payment::CreateVendorInvoicePaymentRequest;
-use web_sys::{HtmlInputElement, HtmlSelectElement};
 use chrono::{Local, NaiveDate};
-use shared_core::models::account_category::AccountCategory;
+use shared_core::models::account::Account;
+use shared_core::models::vendor_invoice::VendorInvoice;
+use shared_core::models::vendor_invoice_payment::VendorInvoicePayment;
+use shared_core::requests::vendor_invoice_payment::CreateVendorInvoicePaymentRequest;
+use uuid::Uuid;
+use web_sys::{HtmlInputElement, HtmlSelectElement};
+use yew::prelude::*;
+use yew_router::prelude::use_navigator;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct PaymentsViewProps {
@@ -94,11 +93,11 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
             let user_ctx = user_ctx.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_accounts = Api::get("/api/accounts_with_balances", user_ctx, navigator).await;
+                let fetched_accounts = Api::get("/api/accounts/payment-methods", user_ctx, navigator).await;
                 match fetched_accounts {
                     Ok(response) if response.ok() => {
-                        match response.json::<Vec<AccountWithBalance>>().await {
-                            Ok(data) => accounts.set(data.into_iter().filter(|a| a.category == AccountCategory::Asset).collect()),
+                        match response.json::<Vec<Account>>().await {
+                            Ok(data) => accounts.set(data),
                             Err(e) => error.set(Some(format!("Failed to parse accounts: {}", e))),
                         }
                     }

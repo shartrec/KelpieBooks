@@ -122,10 +122,10 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                     </button>
                     { primary_entry.date.to_string() }
                 </td>
-                <td>{ props.transaction_group.description.clone().unwrap_or_default() }</td>
-                <td class="amount">{ format_currency(&primary_entry.debit) }</td>
-                <td class="amount">{ format_currency(&primary_entry.credit) }</td>
-                <td class="amount">{ format_currency(&primary_entry.running_balance) }</td>
+                <td class="table__text-col">{ props.transaction_group.description.clone().unwrap_or_default() }</td>
+                <td class="table__value-col">{ format_currency(&primary_entry.debit) }</td>
+                <td class="table__value-col">{ format_currency(&primary_entry.credit) }</td>
+                <td class="table__value-col">{ format_currency(&primary_entry.running_balance) }</td>
                 <td class="actions-cell">
                     <div class="actions-dropdown">
                         <button class="icon-button" onclick={on_toggle_dropdown} title="Actions">
@@ -169,14 +169,14 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                                 <p>{ "Loading details..." }</p>
                             } else if let Some(detail) = &*transaction_detail {
                                 <div class="journal-entry__header">
-                                    <span>{ "Details for trans" }</span>
-                                    <span>{ &detail.transaction.id.to_string()[0..8] }</span>
-                                    <span class="amount">{ "Debit" }</span>
-                                    <span class="amount">{ "Credit" }</span>
+                                    <span class="table__text-col">{ "Details for trans" }</span>
+                                    <span class="table__text-col">{ &detail.transaction.id.to_string()[0..8] }</span>
+                                    <span class="table__value-col">{ "Debit" }</span>
+                                    <span class="table__value-col">{ "Credit" }</span>
                                 </div>
                                 { for detail.entries.iter().map(|entry| html! {
                                     <div class="journal-entry__line">
-                                        <span>
+                                        <span class="table__text-col">
                                             <Link<Route>
                                                 to={Route::AccountLedger { id: entry.account_id }}
                                                 classes={classes!("account-link")}
@@ -184,9 +184,9 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                                                 { &entry.account_name }
                                             </Link<Route>>
                                         </span>
-                                        <span>{ entry.description.clone().unwrap_or_default() }</span>
-                                        <span class="amount">{ format_currency(&entry.debit) }</span>
-                                        <span class="amount">{ format_currency(&entry.credit) }</span>
+                                        <span class="table__text-col">{ entry.description.clone().unwrap_or_default() }</span>
+                                        <span class="table__value-col">{ format_currency(&entry.debit) }</span>
+                                        <span class="table__value-col">{ format_currency(&entry.credit) }</span>
                                     </div>
                                 })}
                             } else {

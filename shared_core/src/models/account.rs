@@ -37,6 +37,7 @@ pub struct Account {
     pub name: String,
     pub category: AccountCategory,
     pub is_group: bool,
+    pub is_bank_account: bool,
     pub system_tag: Option<SystemTag>,
     pub created_at: DateTime<Utc>,
 }

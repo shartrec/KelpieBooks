@@ -22,10 +22,10 @@
  *
  */
 
+use crate::models::vendor_invoice_item::VendorInvoiceItem;
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::NaiveDate;
-use crate::models::vendor_invoice_item::VendorInvoiceItem;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct CreateVendorInvoiceRequest {

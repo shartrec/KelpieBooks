@@ -58,6 +58,7 @@ fn from_row_to_account(row: &sqlx::postgres::PgRow) -> Account {
         name: row.get("name"),
         category,
         is_group: row.get("is_group"),
+        is_bank_account: row.get("is_bank_account"),
         system_tag,
         created_at: row.get("created_at"),
     }
@@ -74,6 +75,7 @@ pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<Acco
             name,
             category::TEXT as category,
             is_group,
+            is_bank_account,
             system_tag::TEXT as system_tag,
             created_at
         FROM accounts
@@ -100,6 +102,7 @@ pub(crate) async fn get_all_by_org(
             name,
             category::TEXT as category,
             is_group,
+            is_bank_account,
             system_tag::TEXT as system_tag,
             created_at
         FROM accounts
@@ -120,9 +123,9 @@ pub(crate) async fn insert(
 ) -> Result<Account, sqlx::Error> {
     let row = sqlx::query(
         r#"
-        INSERT INTO accounts (organization_id, name, code, category, parent_id, is_group, system_tag)
-        VALUES ($1, $2, $3, $4::account_category, $5, $6, $7::system_tag)
-        RETURNING id, organization_id, parent_id, code, name, category::TEXT as category, is_group, system_tag::TEXT as system_tag, created_at
+        INSERT INTO accounts (organization_id, name, code, category, parent_id, is_group, is_bank_account, system_tag)
+        VALUES ($1, $2, $3, $4::account_category, $5, $6, $7, $8::system_tag)
+        RETURNING id, organization_id, parent_id, code, name, category::TEXT as category, is_group, is_bank_account, system_tag::TEXT as system_tag, created_at
         "#,
     )
     .bind(org_id)
@@ -131,6 +134,7 @@ pub(crate) async fn insert(
     .bind(req.category.to_string())
     .bind(req.parent_id)
     .bind(req.is_group)
+    .bind(req.is_bank_account)
     .bind(req.system_tag.map(|s| s.to_string()))
     .fetch_one(pool)
     .await?;
@@ -145,15 +149,16 @@ pub(crate) async fn update(
     let row = sqlx::query(
         r#"
         UPDATE accounts
-        SET name = $1, code = $2, category = $3::account_category, is_group = $4, system_tag = $5::system_tag
-        WHERE id = $6
-        RETURNING id, organization_id, parent_id, code, name, category::TEXT as category, is_group, system_tag::TEXT as system_tag, created_at
+        SET name = $1, code = $2, category = $3::account_category, is_group = $4, is_bank_account = $5, system_tag = $6::system_tag
+        WHERE id = $7
+        RETURNING id, organization_id, parent_id, code, name, category::TEXT as category, is_group, is_bank_account, system_tag::TEXT as system_tag, created_at
         "#,
     )
     .bind(&req.name)
     .bind(&req.code)
     .bind(req.category.to_string())
     .bind(req.is_group)
+    .bind(req.is_bank_account)
     .bind(req.system_tag.map(|s| s.to_string()))
     .bind(id)
     .fetch_one(pool)
@@ -197,6 +202,7 @@ pub(crate) async fn get_all_by_category(
             name,
             category::TEXT as category,
             is_group,
+            is_bank_account,
             system_tag::TEXT as system_tag,
             created_at
         FROM accounts
@@ -225,6 +231,7 @@ pub(crate) async fn get_by_system_tag(
             name,
             category::TEXT as category,
             is_group,
+            is_bank_account,
             system_tag::TEXT as system_tag,
             created_at
         FROM accounts

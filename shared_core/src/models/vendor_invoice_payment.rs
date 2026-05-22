@@ -22,9 +22,9 @@
  *
  */
 
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc, NaiveDate};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct VendorInvoicePayment {

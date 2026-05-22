@@ -1,3 +1,4 @@
+use std::str::FromStr;
 use crate::db::account as account_db;
 use crate::export::account_ledger_export::{generate_ledger_csv, generate_ledger_typst};
 use crate::export::utils::compile_typst_to_pdf;
@@ -15,12 +16,15 @@ use rocket_db_pools::Connection;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::models::account::Account;
+use shared_core::models::account_category::AccountCategory;
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
         get_accounts,
+        get_accounts_by_category,
         get_accounts_with_balances,
+        get_payment_methods,
         get_account,
         get_account_entries,
         create_account,
@@ -39,6 +43,24 @@ async fn get_accounts(
     Ok(Json(accounts))
 }
 
+#[get("/api/accounts_by_category/<category>")]
+async fn get_accounts_by_category(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    category: String,
+) -> Result<Json<Vec<Account>>, ApiError> {
+    if let Ok(category) = AccountCategory::from_str(&category) {
+        let accounts = account_service::get_accounts_by_category(
+            &mut pool,
+            user.organization_id,
+            category
+        ).await?;
+        Ok(Json(accounts))
+    } else {
+        Err(ApiError::Internal(format!("Category {} not found", category)))
+    }
+}
+
 #[get("/api/accounts_with_balances")]
 async fn get_accounts_with_balances(
     mut pool: Connection<DbKelpie>,
@@ -46,6 +68,16 @@ async fn get_accounts_with_balances(
 ) -> Result<Json<Vec<AccountWithBalance>>, ApiError> {
     let accounts =
         account_service::get_accounts_with_balances(&mut pool, user.organization_id).await?;
+    Ok(Json(accounts))
+}
+
+#[get("/api/accounts/payment-methods")]
+async fn get_payment_methods(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+) -> Result<Json<Vec<Account>>, ApiError> {
+    let accounts =
+        account_service::get_payment_methods(&mut pool, user.organization_id).await?;
     Ok(Json(accounts))
 }
 
@@ -93,6 +125,7 @@ async fn create_account(
         name: new_account.name,
         category: new_account.category,
         is_group: new_account.is_group,
+        is_bank_account: new_account.is_bank_account,
         system_tag: new_account.system_tag,
         created_at: new_account.created_at,
         balance: 0,
@@ -114,6 +147,7 @@ async fn update_account(
         name: updated_account.name,
         category: updated_account.category,
         is_group: updated_account.is_group,
+        is_bank_account: updated_account.is_bank_account,
         system_tag: updated_account.system_tag,
         created_at: updated_account.created_at,
         balance: 0,

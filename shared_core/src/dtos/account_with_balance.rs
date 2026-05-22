@@ -38,6 +38,7 @@ pub struct AccountWithBalance {
     pub name: String,
     pub category: AccountCategory,
     pub is_group: bool,
+    pub is_bank_account: bool,
     pub system_tag: Option<SystemTag>,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub balance: i64,

@@ -24,9 +24,9 @@
 
 use crate::components::layout::Layout;
 use crate::components::vendor_invoice_table::VendorInvoiceTable;
+use crate::router::Route;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::router::Route;
 
 #[function_component(PayablesLedgerPage)]
 pub fn payables_ledger_page() -> Html {

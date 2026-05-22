@@ -22,15 +22,15 @@
  *
  */
 
-use yew::prelude::*;
-use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
 use crate::api::Api;
+use crate::components::vendor_invoice_drawer::VendorInvoiceDrawer;
 use crate::contexts::auth_context::use_user_context;
-use yew_router::prelude::use_navigator;
+use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
+use shared_core::models::vendor_invoice::VendorInvoice;
 use shared_core::util::format_currency;
 use uuid::Uuid;
-use shared_core::models::vendor_invoice::VendorInvoice;
-use crate::components::vendor_invoice_drawer::VendorInvoiceDrawer;
+use yew::prelude::*;
+use yew_router::prelude::use_navigator;
 
 #[function_component(VendorInvoiceTable)]
 pub fn vendor_invoice_table() -> Html {

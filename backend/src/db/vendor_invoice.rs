@@ -24,12 +24,12 @@
 
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
+use shared_core::models::invoice_status::InvoiceStatus;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
 use shared_core::requests::vendor_invoice::{CreateVendorInvoiceRequest, UpdateVendorInvoiceRequest};
-use uuid::Uuid;
 use std::str::FromStr;
-use shared_core::models::invoice_status::InvoiceStatus;
+use uuid::Uuid;
 
 fn from_row_to_vendor_invoice(row: &sqlx::postgres::PgRow) -> VendorInvoice {
     let status_str: String = row.get("status");
@@ -196,6 +196,29 @@ pub(crate) async fn update(
     .fetch_one(pool)
     .await?;
     Ok(from_row_to_vendor_invoice(&row))
+}
+
+pub(crate) async fn update_totals(
+    pool: &mut PgConnection,
+    id: Uuid,
+    net_amount: i64,
+    tax_amount: i64,
+    gross_amount: i64,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        UPDATE vendor_invoices
+        SET net_amount = $1, tax_amount = $2, gross_amount = $3, amount_remaining = $3
+        WHERE id = $4
+        "#,
+    )
+    .bind(net_amount)
+    .bind(tax_amount)
+    .bind(gross_amount)
+    .bind(id)
+    .execute(pool)
+    .await?;
+    Ok(())
 }
 
 pub(crate) async fn update_amount_remaining(

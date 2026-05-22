@@ -112,6 +112,7 @@ pub async fn get_profit_loss(
             name: acc.name,
             category: acc.category,
             is_group: acc.is_group,
+            is_bank_account: acc.is_bank_account,
             system_tag: acc.system_tag,
             created_at: acc.created_at,
         })
@@ -192,6 +193,7 @@ pub async fn get_expense_breakdown(
             name: acc.name,
             category: acc.category,
             is_group: acc.is_group,
+            is_bank_account: acc.is_bank_account,
             system_tag: acc.system_tag,
             created_at: acc.created_at,
         })
@@ -293,6 +295,7 @@ pub async fn get_balance_sheet(
             name: acc.name,
             category: acc.category,
             is_group: acc.is_group,
+            is_bank_account: acc.is_bank_account,
             system_tag: acc.system_tag,
             created_at: acc.created_at,
         };
@@ -356,6 +359,7 @@ pub async fn get_trial_balance(
             name: acc.name,
             category: acc.category,
             is_group: acc.is_group,
+            is_bank_account: acc.is_bank_account,
             system_tag: acc.system_tag,
             created_at: acc.created_at,
         })

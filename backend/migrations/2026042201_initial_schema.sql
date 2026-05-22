@@ -76,6 +76,7 @@ CREATE TABLE accounts
 
     -- Logic flags
     is_group        BOOLEAN          NOT NULL DEFAULT FALSE, -- If true, no postings allowed
+    is_bank_account BOOLEAN          NOT NULL DEFAULT FALSE,
     system_tag      system_tag,                             -- If not null, this is a system account
 
     created_at      TIMESTAMPTZ      NOT NULL DEFAULT NOW(),

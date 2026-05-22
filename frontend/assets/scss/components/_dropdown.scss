@@ -40,6 +40,7 @@
     img {
       width: 18px; // Force a consistent small size for the trigger
       height: 18px;
+      max-width: none;
       opacity: 0.6;
       transition: opacity 0.2s;
     }

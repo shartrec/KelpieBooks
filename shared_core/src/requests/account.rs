@@ -34,6 +34,7 @@ pub struct CreateAccountRequest {
     pub category: AccountCategory,
     pub parent_id: Option<Uuid>,
     pub is_group: bool,
+    pub is_bank_account: bool,
     pub system_tag: Option<SystemTag>,
 }
 impl Default for CreateAccountRequest {
@@ -44,6 +45,7 @@ impl Default for CreateAccountRequest {
             category: AccountCategory::Asset,
             parent_id: None,
             is_group: false,
+            is_bank_account: false,
             system_tag: None,
         }
     }
@@ -56,5 +58,6 @@ pub struct UpdateAccountRequest {
     pub category: AccountCategory,
     // parent_id is often excluded from simple updates due to complexity.
     pub is_group: bool,
+    pub is_bank_account: bool,
     pub system_tag: Option<SystemTag>,
 }

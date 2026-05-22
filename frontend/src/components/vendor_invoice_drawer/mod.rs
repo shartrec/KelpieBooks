@@ -22,12 +22,13 @@
  *
  */
 
-mod details_view;
-mod lines_view;
-mod payments_view;
+pub mod details_view;
+pub mod items_view;
+pub mod payments_view;
+pub mod item_edit_card;
 
 use crate::components::vendor_invoice_drawer::details_view::DetailsView;
-use crate::components::vendor_invoice_drawer::lines_view::LinesView;
+use crate::components::vendor_invoice_drawer::items_view::ItemsView;
 use crate::components::vendor_invoice_drawer::payments_view::PaymentsView;
 use crate::contexts::auth_context::use_user_context;
 use shared_core::models::vendor_invoice::VendorInvoice;
@@ -37,7 +38,7 @@ use yew_router::prelude::use_navigator;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InvoiceDrawerTab {
     General,
-    Lines,
+    Items,
     Payments,
 }
 
@@ -84,10 +85,10 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
                         { "General" }
                     </button>
                     <button
-                        class={classes!("tab-trigger", (*active_tab == InvoiceDrawerTab::Lines).then_some("tab-trigger--active"))}
-                        onclick={set_tab.reform(|_| InvoiceDrawerTab::Lines)}
+                        class={classes!("tab-trigger", (*active_tab == InvoiceDrawerTab::Items).then_some("tab-trigger--active"))}
+                        onclick={set_tab.reform(|_| InvoiceDrawerTab::Items)}
                     >
-                        { "Details" }
+                        { "Items" }
                     </button>
                     <button
                         class={classes!("tab-trigger", (*active_tab == InvoiceDrawerTab::Payments).then_some("tab-trigger--active"))}
@@ -100,7 +101,7 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
                     {
                         match *active_tab {
                             InvoiceDrawerTab::General => html! { <DetailsView invoice={props.invoice.clone()} on_change={props.on_change.clone()} /> },
-                            InvoiceDrawerTab::Lines => html! { <LinesView invoice={props.invoice.clone()} on_change={props.on_change.clone()} /> },
+                            InvoiceDrawerTab::Items => html! { <ItemsView invoice={props.invoice.clone()} on_change={props.on_change.clone()} /> },
                             InvoiceDrawerTab::Payments => html! { <PaymentsView invoice={props.invoice.clone()} on_change={props.on_change.clone()} /> },
                         }
                     }

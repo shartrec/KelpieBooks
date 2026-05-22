@@ -22,16 +22,16 @@
  *
  */
 
-use crate::db::{vendor_invoice as vendor_invoice_db, vendor_invoice_payment as vendor_invoice_payment_db, account as account_db};
+use crate::db::{account as account_db, vendor_invoice as vendor_invoice_db, vendor_invoice_payment as vendor_invoice_payment_db};
 use crate::services::account_service;
 use crate::util::ApiError;
 use rocket_db_pools::sqlx::{self, PgConnection};
-use shared_core::models::vendor_invoice_payment::VendorInvoicePayment;
-use shared_core::requests::vendor_invoice_payment::CreateVendorInvoicePaymentRequest;
-use uuid::Uuid;
-use sqlx::Acquire;
 use shared_core::models::system_tag::SystemTag;
+use shared_core::models::vendor_invoice_payment::VendorInvoicePayment;
 use shared_core::requests::transaction::{CreateTransactionRequest, JournalEntryLine};
+use shared_core::requests::vendor_invoice_payment::CreateVendorInvoicePaymentRequest;
+use sqlx::Acquire;
+use uuid::Uuid;
 
 pub async fn get_vendor_invoice_payments(
     pool: &mut PgConnection,

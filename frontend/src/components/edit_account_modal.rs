@@ -42,6 +42,7 @@ pub fn edit_account_modal(props: &EditAccountModalProps) -> Html {
         code: props.account.code.clone(),
         category: props.account.category,
         is_group: props.account.is_group,
+        is_bank_account: props.account.is_bank_account,
         system_tag: props.account.system_tag,
     });
 
@@ -88,6 +89,17 @@ pub fn edit_account_modal(props: &EditAccountModalProps) -> Html {
         })
     };
 
+    let on_is_bank_account_change = {
+        let state = request.clone();
+        Callback::from(move |e: Event| {
+            let mut info = (*state).clone();
+            info.is_bank_account = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .checked();
+            state.set(info);
+        })
+    };
+
     let on_form_submit = {
         let on_submit = props.on_submit.clone();
         let request = request.clone();
@@ -126,6 +138,9 @@ pub fn edit_account_modal(props: &EditAccountModalProps) -> Html {
 
                     <label>{"Is Group:"}</label>
                     <input type="checkbox" checked={request.is_group} onchange={on_is_group_change} />
+
+                    <label>{"Is Bank Account:"}</label>
+                    <input type="checkbox" checked={request.is_bank_account} onchange={on_is_bank_account_change} />
 
                     <div class="modal__form__actions">
                         <button type="button" onclick={on_cancel} class="button-secondary">{ "Cancel" }</button>
