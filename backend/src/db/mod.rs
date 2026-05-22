@@ -30,6 +30,5 @@ pub(crate) mod partner;
 pub(crate) mod transaction;
 pub(crate) mod user;
 pub(crate) mod vendor_invoice;
-pub(crate) mod vendor_invoice_payment;
 pub(crate) mod vendor_payment;
 pub(crate) mod vendor_payment_allocation;

@@ -51,7 +51,7 @@ CREATE INDEX idx_partner_addresses_partner ON partner_addresses (partner_id);
 
 -- Partial unique index: Ensures only ONE primary address exists per partner per type
 CREATE UNIQUE INDEX idx_partner_single_primary_address
-    ON partner_addresses (partner_id, type)
+    ON partner_addresses (partner_id, address_type)
     WHERE is_primary = TRUE;
 
 

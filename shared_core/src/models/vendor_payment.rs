@@ -36,7 +36,7 @@ pub struct VendorPayment {
     pub transaction_id: Option<Uuid>,
 
     pub payment_date: NaiveDate,
-    pub payment_method: String, // e.g., "EFT", "Check", "Card"
+    pub paid_from_account: Uuid, // e.g., "EFT", "Check", "Card"
     pub amount: i64,            // Total paid value in cents
     pub reference: Option<String>,
 

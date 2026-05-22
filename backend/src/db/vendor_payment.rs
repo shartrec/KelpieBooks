@@ -34,7 +34,7 @@ fn from_row_to_vendor_payment(row: &sqlx::postgres::PgRow) -> VendorPayment {
         partner_id: row.get("partner_id"),
         transaction_id: row.get("transaction_id"),
         payment_date: row.get("payment_date"),
-        payment_method: row.get("payment_method"),
+        paid_from_account: row.get("paid_from_account"),
         amount: row.get("amount"),
         reference: row.get("reference"),
         created_at: row.get("created_at"),
@@ -78,13 +78,13 @@ pub(crate) async fn get_all(
 
 pub(crate) async fn insert(
     pool: &mut PgConnection,
-    organization_id: Uuid,
-    partner_id: Uuid,
-    transaction_id: Option<Uuid>,
-    payment_date: NaiveDate,
-    payment_method: String,
-    amount: i64,
-    reference: Option<String>,
+    organization_id: &Uuid,
+    partner_id: &Uuid,
+    transaction_id: &Uuid,
+    payment_date: &NaiveDate,
+    paid_from_account: &Uuid,
+    amount: &i64,
+    reference: &Option<String>,
 ) -> Result<VendorPayment, sqlx::Error> {
     let row = sqlx::query(
         r#"
@@ -93,7 +93,7 @@ pub(crate) async fn insert(
             partner_id,
             transaction_id,
             payment_date,
-            payment_method,
+            paid_from_account,
             amount,
             reference
         )
@@ -105,7 +105,7 @@ pub(crate) async fn insert(
     .bind(partner_id)
     .bind(transaction_id)
     .bind(payment_date)
-    .bind(payment_method)
+    .bind(paid_from_account)
     .bind(amount)
     .bind(reference)
     .fetch_one(pool)
@@ -119,7 +119,7 @@ pub(crate) async fn update(
     partner_id: Uuid,
     transaction_id: Option<Uuid>,
     payment_date: NaiveDate,
-    payment_method: String,
+    paid_from_account: String,
     amount: i64,
     reference: Option<String>,
 ) -> Result<VendorPayment, sqlx::Error> {
@@ -130,7 +130,7 @@ pub(crate) async fn update(
             partner_id = $1,
             transaction_id = $2,
             payment_date = $3,
-            payment_method = $4,
+            paid_from_account = $4,
             amount = $5,
             reference = $6
         WHERE id = $7
@@ -140,7 +140,7 @@ pub(crate) async fn update(
     .bind(partner_id)
     .bind(transaction_id)
     .bind(payment_date)
-    .bind(payment_method)
+    .bind(paid_from_account)
     .bind(amount)
     .bind(reference)
     .bind(id)
