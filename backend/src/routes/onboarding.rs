@@ -67,10 +67,10 @@ async fn register(
     let _user = db::user::insert(
         &mut tx,
         org.id,
-        request.user_email.clone(),
-        pwd_hash,
-        request.user_full_name.clone(),
-        request.user_display_name.clone(),
+        &request.user_email,
+        &pwd_hash,
+        &request.user_full_name,
+        request.user_display_name.as_deref(),
     )
     .await?;
 

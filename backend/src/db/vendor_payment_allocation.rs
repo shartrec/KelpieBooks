@@ -32,7 +32,7 @@ fn from_row_to_vendor_payment_allocation(row: &sqlx::postgres::PgRow) -> VendorP
         organization_id: row.get("organization_id"),
         vendor_invoice_id: row.get("vendor_invoice_id"),
         vendor_payment_id: row.get("vendor_payment_id"),
-        allocated_amount: row.get("allocated_amount"),
+        allocated_amount: row.get("amount"),
         created_at: row.get("created_at"),
     }
 }
@@ -78,27 +78,23 @@ pub(crate) async fn get_all(
 
 pub(crate) async fn insert(
     pool: &mut PgConnection,
-    organization_id: Uuid,
-    vendor_invoice_id: Uuid,
     vendor_payment_id: Uuid,
-    allocated_amount: i64,
+    req: &VendorPaymentAllocation,
 ) -> Result<VendorPaymentAllocation, sqlx::Error> {
     let row = sqlx::query(
         r#"
         INSERT INTO vendor_payment_allocations (
-            organization_id,
             vendor_invoice_id,
             vendor_payment_id,
             allocated_amount
         )
-        VALUES ($1, $2, $3, $4)
+        VALUES ($1, $2, $3)
         RETURNING *
         "#,
     )
-    .bind(organization_id)
-    .bind(vendor_invoice_id)
+    .bind(req.vendor_invoice_id)
     .bind(vendor_payment_id)
-    .bind(allocated_amount)
+    .bind(req.allocated_amount)
     .fetch_one(pool)
     .await?;
     Ok(from_row_to_vendor_payment_allocation(&row))
@@ -107,9 +103,7 @@ pub(crate) async fn insert(
 pub(crate) async fn update(
     pool: &mut PgConnection,
     id: Uuid,
-    vendor_invoice_id: Uuid,
-    vendor_payment_id: Uuid,
-    allocated_amount: i64,
+    req: &VendorPaymentAllocation,
 ) -> Result<VendorPaymentAllocation, sqlx::Error> {
     let row = sqlx::query(
         r#"
@@ -122,9 +116,9 @@ pub(crate) async fn update(
         RETURNING *
         "#,
     )
-    .bind(vendor_invoice_id)
-    .bind(vendor_payment_id)
-    .bind(allocated_amount)
+    .bind(req.vendor_invoice_id)
+    .bind(req.vendor_payment_id)
+    .bind(req.allocated_amount)
     .bind(id)
     .fetch_one(pool)
     .await?;

@@ -22,9 +22,9 @@
  *
  */
 
-use chrono::NaiveDate;
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use shared_core::models::vendor_payment::VendorPayment;
+use shared_core::requests::vendor_payment::CreateVendorPaymentRequest;
 use uuid::Uuid;
 
 fn from_row_to_vendor_payment(row: &sqlx::postgres::PgRow) -> VendorPayment {
@@ -78,13 +78,9 @@ pub(crate) async fn get_all(
 
 pub(crate) async fn insert(
     pool: &mut PgConnection,
-    organization_id: &Uuid,
-    partner_id: &Uuid,
-    transaction_id: &Uuid,
-    payment_date: &NaiveDate,
-    paid_from_account: &Uuid,
-    amount: &i64,
-    reference: &Option<String>,
+    organization_id: Uuid,
+    transaction_id: Uuid,
+    req: &CreateVendorPaymentRequest,
 ) -> Result<VendorPayment, sqlx::Error> {
     let row = sqlx::query(
         r#"
@@ -102,12 +98,12 @@ pub(crate) async fn insert(
         "#,
     )
     .bind(organization_id)
-    .bind(partner_id)
+    .bind(req.partner_id)
     .bind(transaction_id)
-    .bind(payment_date)
-    .bind(paid_from_account)
-    .bind(amount)
-    .bind(reference)
+    .bind(req.payment_date)
+    .bind(req.bank_account_id)
+    .bind(req.amount)
+    .bind(&req.reference)
     .fetch_one(pool)
     .await?;
     Ok(from_row_to_vendor_payment(&row))
@@ -116,33 +112,26 @@ pub(crate) async fn insert(
 pub(crate) async fn update(
     pool: &mut PgConnection,
     id: Uuid,
-    partner_id: Uuid,
-    transaction_id: Option<Uuid>,
-    payment_date: NaiveDate,
-    paid_from_account: String,
-    amount: i64,
-    reference: Option<String>,
+    req: &CreateVendorPaymentRequest,
 ) -> Result<VendorPayment, sqlx::Error> {
     let row = sqlx::query(
         r#"
         UPDATE vendor_payments
         SET
             partner_id = $1,
-            transaction_id = $2,
-            payment_date = $3,
-            paid_from_account = $4,
-            amount = $5,
-            reference = $6
-        WHERE id = $7
+            payment_date = $2,
+            paid_from_account = $3,
+            amount = $4,
+            reference = $5
+        WHERE id = $6
         RETURNING *
         "#,
     )
-    .bind(partner_id)
-    .bind(transaction_id)
-    .bind(payment_date)
-    .bind(paid_from_account)
-    .bind(amount)
-    .bind(reference)
+    .bind(req.partner_id)
+    .bind(req.payment_date)
+    .bind(req.bank_account_id)
+    .bind(req.amount)
+    .bind(&req.reference)
     .bind(id)
     .fetch_one(pool)
     .await?;

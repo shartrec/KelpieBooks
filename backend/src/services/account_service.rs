@@ -49,7 +49,7 @@ pub async fn get_accounts_by_category(
     organization_id: Uuid,
     category: AccountCategory,
 ) -> Result<Vec<Account>, ApiError> {
-    let accounts = db::account::get_all_by_category(pool, organization_id, vec!(category)).await?;
+    let accounts = db::account::get_all_by_category(pool, organization_id, &[category]).await?;
     Ok(accounts)
 }
 
@@ -152,7 +152,7 @@ pub async fn get_payment_methods(
     pool: &mut PgConnection,
     organization_id: Uuid,
 ) -> Result<Vec<Account>, ApiError> {
-    let accounts = db::account::get(pool, organization_id).await?;
+    let accounts = db::account::get_all_by_org(pool, organization_id).await?;
     let payment_methods = accounts
         .into_iter()
         .filter(|acc| acc.is_bank_account)
@@ -222,7 +222,7 @@ pub async fn get_system_accounts(
 pub async fn update_system_accounts(
     pool: &mut PgConnection,
     organization_id: Uuid,
-    system_accounts: HashMap<SystemTag, Uuid>,
+    system_accounts: &HashMap<SystemTag, Uuid>,
 ) -> Result<HashMap<SystemTag, Uuid>, ApiError> {
     let mut tx = pool.begin().await?;
     db::account::update_system_accounts(&mut tx, organization_id, system_accounts).await?;
@@ -235,11 +235,11 @@ pub async fn update_system_accounts(
 pub async fn update_configuration(
     pool: &mut PgConnection,
     organization_id: Uuid,
-    req: UpdateConfigurationRequest,
+    req: &UpdateConfigurationRequest,
 ) -> Result<(), ApiError> {
     let mut tx = pool.begin().await?;
 
-    db::account::update_system_accounts(&mut tx, organization_id, req.system_accounts).await?;
+    db::account::update_system_accounts(&mut tx, organization_id, &req.system_accounts).await?;
     db::organization::set_audit_mode(&mut tx, organization_id, req.strict_audit_mode).await?;
 
     tx.commit().await?;
@@ -250,7 +250,7 @@ pub async fn update_configuration(
 pub async fn create_transaction(
     pool: &mut PgConnection,
     organization_id: Uuid,
-    req: CreateTransactionRequest,
+    req: &CreateTransactionRequest,
 ) -> Result<Uuid, ApiError> {
     let total_debits: i64 = req.entries.iter().map(|e| e.debit).sum();
     let total_credits: i64 = req.entries.iter().map(|e| e.credit).sum();
@@ -280,8 +280,8 @@ pub async fn create_transaction(
         &mut tx,
         organization_id,
         req.date,
-        main_description,
-        req.reference.clone(),
+        &main_description,
+        &req.reference,
     )
     .await?;
 
@@ -292,7 +292,7 @@ pub async fn create_transaction(
             entry.account_id,
             entry.debit,
             entry.credit,
-            entry.description.clone(),
+            entry.description.as_deref(),
         )
         .await?;
     }

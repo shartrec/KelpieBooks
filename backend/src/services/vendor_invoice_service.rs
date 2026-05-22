@@ -113,7 +113,7 @@ pub async fn create_vendor_invoice(
         reference: Some(req.invoice_number.clone()),
         entries: jels,
     };
-    let transaction_id = account_service::create_transaction(&mut tx, organization_id, ct_req).await?;
+    let transaction_id = account_service::create_transaction(&mut tx, organization_id, &ct_req).await?;
 
     let new_invoice = vendor_invoice_db::insert(&mut tx, organization_id, transaction_id, req).await?;
 

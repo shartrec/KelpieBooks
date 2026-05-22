@@ -159,7 +159,7 @@ pub(crate) async fn insert(
     account_id: Uuid,
     debit: i64,
     credit: i64,
-    description: Option<String>,
+    description: Option<&str>,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         "INSERT INTO journal_entries (transaction_id, account_id, debit, credit, description) VALUES ($1, $2, $3, $4, $5)"

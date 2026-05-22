@@ -111,7 +111,7 @@ async fn update_transaction(
         ));
     }
 
-    let main_description = req.entries.get(0).and_then(|e| e.description.clone());
+    let main_description = &req.entries.get(0).and_then(|e| e.description.clone());
 
     let mut tx = pool.begin().await?;
 
@@ -122,7 +122,7 @@ async fn update_transaction(
         user.organization_id,
         req.date,
         main_description,
-        req.reference.clone(),
+        &req.reference,
     )
     .await?;
 
@@ -133,7 +133,7 @@ async fn update_transaction(
             entry.account_id,
             entry.debit,
             entry.credit,
-            entry.description.clone(),
+            entry.description.as_deref(),
         )
         .await?;
     }
@@ -176,8 +176,8 @@ async fn reverse_transaction(
         &mut tx,
         user.organization_id,
         reversal_date,
-        Some(req.description.clone()),
-        original_transaction.reference,
+        &Some(req.description.clone()),
+        &original_transaction.reference,
     )
     .await?;
 
@@ -190,9 +190,9 @@ async fn reverse_transaction(
             entry.debit,
             Some(format!(
                 "{} - {}",
-                req.description.clone(),
-                entry.description.clone().unwrap_or("".to_string())
-            )),
+                req.description,
+                entry.description.as_deref().unwrap_or("")
+            ).as_str()),
         )
         .await?;
     }
@@ -208,6 +208,6 @@ async fn create_transaction(
     user: AuthenticatedUser,
     req: Json<CreateTransactionRequest>,
 ) -> Result<&'static str, ApiError> {
-    account_service::create_transaction(&mut pool, user.organization_id, req.into_inner()).await?;
+    account_service::create_transaction(&mut pool, user.organization_id, &req).await?;
     Ok("Transaction created successfully.")
 }

@@ -66,8 +66,8 @@ pub(crate) async fn insert(
     pool: &mut PgConnection,
     organization_id: Uuid,
     date: NaiveDate,
-    description: Option<String>,
-    reference: Option<String>,
+    description: &Option<String>,
+    reference: &Option<String>,
 ) -> Result<Uuid, sqlx::Error> {
     let row = sqlx::query(
         "INSERT INTO transactions (organization_id, date, description, reference) VALUES ($1, $2, $3, $4) RETURNING id"

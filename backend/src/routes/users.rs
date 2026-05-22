@@ -69,10 +69,10 @@ pub(crate) async fn update_me(
     let updated_user = user::update(
         &mut *pool,
         auth_user.user_id,
-        update_data.email.clone(),
-        original_user.password_hash.clone(),
-        update_data.full_name.clone(),
-        update_data.display_name.clone(),
+        &update_data.email,
+        &original_user.password_hash,
+        &update_data.full_name,
+        update_data.display_name.as_deref(),
     )
     .await?;
 
@@ -108,10 +108,10 @@ pub(crate) async fn update_password(
     user::update(
         &mut *pool,
         auth_user.user_id,
-        original_user.email,
-        new_password_hash,
-        original_user.full_name,
-        original_user.display_name,
+        &original_user.email,
+        &new_password_hash,
+        &original_user.full_name,
+        original_user.display_name.as_deref(),
     )
     .await?;
 

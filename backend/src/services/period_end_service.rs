@@ -42,8 +42,8 @@ pub async fn close_financial_year(
         pool,
         organization_id,
         year_end,
-        Some("Closing Entry".to_string()),
-        None,
+        &Some("Closing Entry".to_string()),
+        &None,
     )
     .await?;
 
@@ -51,7 +51,7 @@ pub async fn close_financial_year(
     let income_accounts = db::account::get_all_by_category(
         pool,
         organization_id,
-        vec![AccountCategory::Revenue, AccountCategory::Expense],
+        &[AccountCategory::Revenue, AccountCategory::Expense],
     )
     .await?;
     for account in income_accounts {
@@ -71,7 +71,7 @@ pub async fn close_financial_year(
                 account.id,
                 debit,
                 credit,
-                Some("Closing Entry".to_string()),
+                Some("Closing Entry"),
             )
             .await?;
         }
@@ -95,7 +95,7 @@ pub async fn close_financial_year(
         retained_earnings_account.id,
         debit,
         credit,
-        Some("Closing Net Income".to_string()),
+        Some("Closing Net Income"),
     )
     .await?;
 

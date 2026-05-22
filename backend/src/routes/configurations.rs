@@ -61,7 +61,7 @@ async fn set_system_accounts(
     match account_service::update_system_accounts(
         &mut db,
         user.organization_id,
-        system_accounts.into_inner(),
+        &system_accounts.into_inner(),
     )
     .await
     {
@@ -76,7 +76,7 @@ async fn update_configuration(
     user: AuthenticatedUser,
     req: Json<UpdateConfigurationRequest>,
 ) -> Result<(), rocket::http::Status> {
-    match account_service::update_configuration(&mut db, user.organization_id, req.into_inner())
+    match account_service::update_configuration(&mut db, user.organization_id, &req.into_inner())
         .await
     {
         Ok(_) => Ok(()),

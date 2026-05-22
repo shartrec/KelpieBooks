@@ -189,9 +189,9 @@ pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, sql
 pub(crate) async fn get_all_by_category(
     pool: &mut PgConnection,
     organization_id: Uuid,
-    categories: Vec<AccountCategory>,
+    categories: &[AccountCategory],
 ) -> Result<Vec<Account>, sqlx::Error> {
-    let category_strs: Vec<String> = categories.into_iter().map(|c| c.to_string()).collect();
+    let category_strs: Vec<String> = categories.iter().map(|c| c.to_string()).collect();
     sqlx::query(
         r#"
         SELECT
@@ -274,7 +274,7 @@ pub(crate) async fn get_system_accounts(
 pub(crate) async fn update_system_accounts(
     pool: &mut PgConnection,
     organization_id: Uuid,
-    system_accounts: HashMap<SystemTag, Uuid>,
+    system_accounts: &HashMap<SystemTag, Uuid>,
 ) -> Result<(), sqlx::Error> {
     // Clear all existing system tags for the organization
     sqlx::query(

@@ -65,27 +65,12 @@ pub async fn create_vendor_payment(
         reference: req.reference.clone(),
         entries: jels,
     };
-    let transaction_id = account_service::create_transaction(&mut tx, organization_id, ct_req).await?;
+    let transaction_id = account_service::create_transaction(&mut tx, organization_id, &ct_req).await?;
 
-    let new_payment = vendor_payment_db::insert(
-        &mut tx,
-        &organization_id,
-        &req.partner_id,
-        &transaction_id,
-        &req.payment_date,
-        &req.bank_account_id,
-        &req.amount,
-        &req.reference,
-        ).await?;
+    let new_payment = vendor_payment_db::insert(&mut tx, organization_id, transaction_id, req).await?;
 
     for allocation in &req.allocations {
-        vendor_payment_allocation_db::insert(
-            &mut tx,
-            organization_id,
-            allocation.vendor_invoice_id,
-            new_payment.id,
-            allocation.allocated_amount
-        ).await?;
+        vendor_payment_allocation_db::insert(&mut tx, new_payment.id, allocation).await?;
         vendor_invoice_db::update_amount_remaining(&mut tx, allocation.vendor_invoice_id, -allocation.allocated_amount).await?;
     }
 

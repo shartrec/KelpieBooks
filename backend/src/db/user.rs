@@ -43,10 +43,10 @@ fn from_row_to_user_with_org(row: &sqlx::postgres::PgRow) -> UserWithOrg {
 pub(crate) async fn insert(
     pool: &mut PgConnection,
     organization_id: Uuid,
-    email: String,
-    password_hash: String,
-    full_name: String,
-    display_name: Option<String>,
+    email: &str,
+    password_hash: &str,
+    full_name: &str,
+    display_name: Option<&str>,
 ) -> Result<User, sqlx::Error> {
     let row = sqlx::query(
         "INSERT INTO users (organization_id, email, password_hash, full_name, display_name) VALUES ($1, $2, $3, $4, $5) RETURNING *"
@@ -72,10 +72,10 @@ pub(crate) async fn insert(
 pub(crate) async fn update(
     pool: &mut PgConnection,
     id: Uuid,
-    email: String,
-    password_hash: String,
-    full_name: String,
-    display_name: Option<String>,
+    email: &str,
+    password_hash: &str,
+    full_name: &str,
+    display_name: Option<&str>,
 ) -> Result<User, sqlx::Error> {
     let row = sqlx::query(
         "UPDATE users SET email=$1, password_hash=$2, full_name=$3, display_name=$4 WHERE id = $5 RETURNING *"
