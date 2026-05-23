@@ -50,8 +50,8 @@ fn from_row_to_partner_contact(row: &sqlx::postgres::PgRow) -> PartnerContact {
         organization_id: row.get("organization_id"),
         partner_id: row.get("partner_id"),
         is_primary: row.get("is_primary"),
-        first_name: row.get("first_name"),
-        last_name: row.get("last_name"),
+        full_name: row.get("full_name"),
+        preferred_name: row.get("preferred_name"),
         email: row.get("email"),
         phone: row.get("phone"),
         role_title: row.get("role_title"),
@@ -142,7 +142,7 @@ pub(crate) async fn get_all_by_org(
         WHERE
             p.organization_id = $1
         GROUP BY
-            p.id
+            p.id, p.legal_name
         ORDER BY
             p.legal_name
         "#,
@@ -307,7 +307,7 @@ pub(crate) async fn insert_contact(
 ) -> Result<PartnerContact, sqlx::Error> {
     let row = sqlx::query(
         r#"
-        INSERT INTO partner_contacts (organization_id, partner_id, is_primary, first_name, last__name, email, phone, role_title)
+        INSERT INTO partner_contacts (organization_id, partner_id, is_primary, full_name, preferred_name, email, phone, role_title)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING *
         "#,
@@ -315,8 +315,8 @@ pub(crate) async fn insert_contact(
     .bind(organization_id)
     .bind(partner_id)
     .bind(contact.is_primary)
-    .bind(&contact.first_name)
-    .bind(&contact.last_name)
+    .bind(&contact.full_name)
+    .bind(&contact.preferred_name)
     .bind(&contact.email)
     .bind(&contact.phone)
     .bind(&contact.role_title)
@@ -334,14 +334,14 @@ pub(crate) async fn update_contact(
     let row = sqlx::query(
         r#"
         UPDATE partner_contacts
-        SET is_primary = $1, first_name = $2, last_name = $3, email = $4, phone = $5, role_title = $6
+        SET is_primary = $1, full_name = $2, preferred_name = $3, email = $4, phone = $5, role_title = $6
         WHERE id = $7 AND organization_id = $8
         RETURNING *
         "#,
     )
     .bind(contact.is_primary)
-    .bind(&contact.first_name)
-    .bind(&contact.last_name)
+    .bind(&contact.full_name)
+    .bind(&contact.preferred_name)
     .bind(&contact.email)
     .bind(&contact.phone)
     .bind(&contact.role_title)

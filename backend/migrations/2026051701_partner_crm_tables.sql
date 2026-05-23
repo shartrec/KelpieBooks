@@ -65,8 +65,8 @@ CREATE TABLE partner_contacts
     partner_id      UUID            NOT NULL REFERENCES partners (id) ON DELETE CASCADE,
 
     is_primary      BOOLEAN         NOT NULL DEFAULT FALSE,
-    first_name      TEXT            NOT NULL,
-    last_name       TEXT            NOT NULL,
+    full_name      TEXT            NOT NULL,
+    preferred_name       TEXT            NOT NULL,
     email           TEXT,
     phone           TEXT,
     role_title      TEXT, -- e.g., "Accounts Payable Clerk", "Sales Director"

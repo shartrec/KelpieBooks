@@ -183,7 +183,7 @@ pub fn contacts_view(props: &ContactsViewProps) -> Html {
                         html! {
                             <div class={card_class}>
                                 <div class="card__header">
-                                    <h5>{ format!("{} {}", contact.first_name, contact.last_name) }</h5>
+                                    <h5>{ format!("{} {}", contact.full_name, contact.preferred_name) }</h5>
                                     if contact.is_primary {
                                         <span class="badge badge--contact">{ "Primary" }</span>
                                     }

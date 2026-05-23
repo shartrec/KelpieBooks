@@ -54,7 +54,7 @@ pub fn delete_contact_confirmation_modal(props: &DeleteContactConfirmationModalP
                 <h2>{ "Confirm Deletion" }</h2>
                 <p>
                     { "Are you sure you want to delete the contact: " }
-                    <strong>{ &props.contact.first_name }{" "}{&props.contact.last_name}</strong>
+                    <strong>{ &props.contact.full_name }{" "}{&props.contact.preferred_name}</strong>
                     { "?" }
                 </p>
                 <p class="warning-text">
