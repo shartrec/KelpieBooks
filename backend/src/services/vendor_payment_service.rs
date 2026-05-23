@@ -33,6 +33,19 @@ use shared_core::requests::vendor_payment::CreateVendorPaymentRequest;
 use sqlx::Acquire;
 use uuid::Uuid;
 
+pub async fn get_vendor_invoice_payments(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    invoice_id: Uuid,
+) -> Result<Vec<VendorPayment>, ApiError> {
+    let invoice = vendor_invoice_db::get(pool, invoice_id).await?.ok_or_else(|| ApiError::NotFound("Invoice not found.".to_string()))?;
+    if invoice.organization_id != organization_id {
+        return Err(ApiError::Forbidden("You do not have permission to view this invoice.".to_string()));
+    }
+    let payments = vendor_payment_db::get_all_by_invoice(pool, invoice_id).await?;
+    Ok(payments)
+}
+
 pub async fn create_vendor_payment(
     pool: &mut PgConnection,
     organization_id: Uuid,

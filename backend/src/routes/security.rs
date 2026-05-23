@@ -83,7 +83,7 @@ async fn login(
                 full_name: user.full_name,
                 display_name: user.display_name,
                 role: auth_user.role.to_string(),
-                organisation_id: user.organization_id,
+                organization_id: user.organization_id,
             };
 
             Ok(Json(user_detail))
@@ -101,7 +101,7 @@ async fn me(user: AuthenticatedUser) -> Json<UserDetail> {
         full_name: user.full_name,
         display_name: user.display_name,
         role: user.role.to_string(),
-        organisation_id: user.organization_id,
+        organization_id: user.organization_id,
     })
 }
 

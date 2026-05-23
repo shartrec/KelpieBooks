@@ -76,6 +76,25 @@ pub(crate) async fn get_all(
     .map(|rows| rows.iter().map(from_row_to_vendor_payment).collect())
 }
 
+pub(crate) async fn get_all_by_invoice(
+    pool: &mut PgConnection,
+    invoice_id: Uuid,
+) -> Result<Vec<VendorPayment>, sqlx::Error> {
+    sqlx::query(
+        r#"
+        SELECT vp.*
+        FROM vendor_payments vp
+        JOIN vendor_payment_allocations vpa ON vp.id = vpa.vendor_payment_id
+        WHERE vpa.vendor_invoice_id = $1
+        ORDER BY vp.payment_date DESC, vp.created_at DESC
+        "#,
+    )
+    .bind(invoice_id)
+    .fetch_all(pool)
+    .await
+    .map(|rows| rows.iter().map(from_row_to_vendor_payment).collect())
+}
+
 pub(crate) async fn insert(
     pool: &mut PgConnection,
     organization_id: Uuid,

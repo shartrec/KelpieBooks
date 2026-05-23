@@ -26,6 +26,7 @@ use crate::api::Api;
 use crate::components::vendor_invoice_drawer::VendorInvoiceDrawer;
 use crate::contexts::auth_context::use_user_context;
 use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
+use shared_core::models::partner::Partner;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use shared_core::util::format_currency;
 use uuid::Uuid;
@@ -40,6 +41,8 @@ pub fn vendor_invoice_table() -> Html {
     let error = use_state(|| None::<String>);
     let loading = use_state(|| true);
     let invoice_to_edit = use_state(|| None::<VendorInvoice>);
+    let partner_to_edit = use_state(|| None::<Partner>);
+    let show_actions = use_state(|| None::<Uuid>);
 
     let fetch_invoices = {
         let invoices = invoices.clone();
@@ -84,20 +87,35 @@ pub fn vendor_invoice_table() -> Html {
 
     let on_edit_click = {
         let invoice_to_edit = invoice_to_edit.clone();
+        let partner_to_edit = partner_to_edit.clone();
         let error = error.clone();
         let user_ctx = user_ctx.clone();
         let navigator = navigator.clone();
         Callback::from(move |id: Uuid| {
             let invoice_to_edit = invoice_to_edit.clone();
+            let partner_to_edit = partner_to_edit.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let resp = Api::get(&format!("/api/vendor-invoices/{}", id), user_ctx, navigator).await;
+                let resp = Api::get(&format!("/api/vendor-invoices/{}", id), user_ctx.clone(), navigator.clone()).await;
                 match resp {
                     Ok(r) if r.ok() => {
                         match r.json::<VendorInvoice>().await {
-                            Ok(invoice) => invoice_to_edit.set(Some(invoice)),
+                            Ok(invoice) => {
+                                let partner_resp = Api::get(&format!("/api/partners/{}", invoice.partner_id), user_ctx, navigator).await;
+                                match partner_resp {
+                                    Ok(pr) if pr.ok() => {
+                                        match pr.json::<Partner>().await {
+                                            Ok(partner) => partner_to_edit.set(Some(partner)),
+                                            Err(e) => error.set(Some(format!("Failed to parse partner: {}", e))),
+                                        }
+                                    }
+                                    Ok(pr) => error.set(Some(format!("Failed to fetch partner: {}", pr.status()))),
+                                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                                }
+                                invoice_to_edit.set(Some(invoice));
+                            }
                             Err(e) => error.set(Some(format!("Failed to parse invoice: {}", e))),
                         }
                     }
@@ -110,18 +128,22 @@ pub fn vendor_invoice_table() -> Html {
 
     let on_drawer_close = {
         let invoice_to_edit = invoice_to_edit.clone();
+        let partner_to_edit = partner_to_edit.clone();
         Callback::from(move |()| {
             invoice_to_edit.set(None);
+            partner_to_edit.set(None);
         })
     };
 
     let on_drawer_change = {
         let invoice_id = invoice_to_edit.as_ref().map(|i| i.id);
         let on_edit_click = on_edit_click.clone();
+        let fetch_invoices = fetch_invoices.clone();
         Callback::from(move |()| {
             if let Some(id) = invoice_id {
                 on_edit_click.emit(id);
             }
+            fetch_invoices.emit(());
         })
     };
 
@@ -134,9 +156,10 @@ pub fn vendor_invoice_table() -> Html {
 
     html! {
         <>
-            if let Some(invoice) = &*invoice_to_edit {
+            if let (Some(invoice), Some(partner)) = (&*invoice_to_edit, &*partner_to_edit) {
                 <VendorInvoiceDrawer
                     invoice={invoice.clone()}
+                    partner={partner.clone()}
                     on_close={on_drawer_close}
                     on_change={on_drawer_change}
                 />
@@ -164,6 +187,17 @@ pub fn vendor_invoice_table() -> Html {
                                 on_edit_click.emit(invoice_id);
                             })
                         };
+                        let on_actions_toggle = {
+                            let show_actions = show_actions.clone();
+                            let invoice_id = invoice.id;
+                            Callback::from(move |_| {
+                                if show_actions.as_ref() == Some(&invoice_id) {
+                                    show_actions.set(None);
+                                } else {
+                                    show_actions.set(Some(invoice_id));
+                                }
+                            })
+                        };
                         html! {
                             <tr>
                                 <td class="table__text-col">{ &invoice.partner_name }</td>
@@ -175,18 +209,29 @@ pub fn vendor_invoice_table() -> Html {
                                 <td class="table__value-col">{ format_currency(&invoice.gross_amount) }</td>
                                 <td class="table__value-col">{ format_currency(&invoice.amount_remaining) }</td>
                                 <td class="table__col-actions">
-                                    <button class="btn-pay-action">
+                                    <button class="btn-pay-action" disabled={invoice.amount_remaining == 0} onclick={on_edit.clone()}>
                                         <span class="btn-pay-icon">
                                             <img src="/images/credit-card.svg" alt="" style="width:100%; height:100%;" />
                                         </span>
                                         <span>{ "Pay" }</span>
                                     </button>
-                                    <button class="icon-button" onclick={on_edit}>
-                                        <img src="/images/view.svg" alt="View" />
-                                    </button>
-                                    <button class="icon-button">
-                                        <img src="/images/delete.svg" alt="Delete" />
-                                    </button>
+                                    <div class="actions-dropdown">
+                                        <button class="icon-button" onclick={on_actions_toggle} title="Actions">
+                                            <img src="/images/more-vertical.svg" alt="Actions" class="dropdown-trigger-icon" />
+                                        </button>
+                                        if *show_actions == Some(invoice.id) {
+                                            <div class="actions-dropdown__content">
+                                                <button class="dropdown-item" onclick={on_edit}>
+                                                    <img src="/images/view.svg" alt="View" />
+                                                    <span>{ "View" }</span>
+                                                </button>
+                                                <button class="dropdown-item">
+                                                    <img src="/images/delete.svg" alt="Delete" />
+                                                    <span>{ "Delete" }</span>
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
                                 </td>
                             </tr>
                         }

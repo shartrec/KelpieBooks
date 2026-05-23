@@ -23,7 +23,7 @@
  */
 
 use crate::routes::security::AuthenticatedUser;
-use crate::services::vendor_invoice_service;
+use crate::services::{vendor_invoice_service, vendor_payment_service};
 use crate::util::types::PathUuid;
 use crate::util::ApiError;
 use crate::DbKelpie;
@@ -33,12 +33,14 @@ use rocket_db_pools::Connection;
 use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
+use shared_core::models::vendor_payment::VendorPayment;
 use shared_core::requests::vendor_invoice::{CreateVendorInvoiceRequest, UpdateVendorInvoiceRequest};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
         get_vendor_invoices,
         get_vendor_invoice,
+        get_vendor_invoice_payments,
         create_vendor_invoice,
         update_vendor_invoice,
         update_vendor_invoice_items,
@@ -64,6 +66,17 @@ async fn get_vendor_invoice(
     let invoice =
         vendor_invoice_service::get_vendor_invoice(&mut pool, user.organization_id, *id).await?;
     Ok(Json(invoice))
+}
+
+#[get("/api/vendor-invoices/<invoice_id>/payments")]
+async fn get_vendor_invoice_payments(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    invoice_id: PathUuid,
+) -> Result<Json<Vec<VendorPayment>>, ApiError> {
+    let payments =
+        vendor_payment_service::get_vendor_invoice_payments(&mut pool, user.organization_id, *invoice_id).await?;
+    Ok(Json(payments))
 }
 
 #[post("/api/vendor-invoices", data = "<req>")]

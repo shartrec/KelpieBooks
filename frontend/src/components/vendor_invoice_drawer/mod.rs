@@ -31,9 +31,11 @@ use crate::components::vendor_invoice_drawer::details_view::DetailsView;
 use crate::components::vendor_invoice_drawer::items_view::ItemsView;
 use crate::components::vendor_invoice_drawer::payments_view::PaymentsView;
 use crate::contexts::auth_context::use_user_context;
+use shared_core::models::partner::Partner;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
+use shared_core::util::format_currency;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InvoiceDrawerTab {
@@ -45,6 +47,7 @@ pub enum InvoiceDrawerTab {
 #[derive(Properties, PartialEq, Clone)]
 pub struct VendorInvoiceDrawerProps {
     pub invoice: VendorInvoice,
+    pub partner: Partner,
     pub on_close: Callback<()>,
     pub on_change: Callback<()>,
 }
@@ -68,15 +71,43 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
         })
     };
 
+    let total_gross = props.invoice.gross_amount;
+    let balance_remaining = props.invoice.gross_amount - props.invoice.amount_remaining;
     html! {
         <div class="drawer-overlay" onclick={on_close.clone()}>
             <div class="drawer" onclick={|e: MouseEvent| e.stop_propagation()}>
                 <header class="drawer__header">
-                    <h3>{ "Edit Invoice" }</h3>
+                    // Vendor Identity Context Line
+                    <h3 class="payment-context-banner__vendor">{ &props.partner.trade_name }</h3>
                     <button class="close-button" onclick={on_close.clone()}>
                         <img src="/images/x.svg" alt="Close" />
                     </button>
                 </header>
+
+                <div class="payment-context-banner">
+                    // Metadata & Financial Reconciliation Badges
+                    <div class="payment-context-banner__details">
+                        <span>{ format!("Inv #: {}", props.invoice.invoice_number) }</span>
+                        <span style="color: var(--border-color, #cbd5e1);">{"|"}</span>
+
+                        // Always display the true historical original invoice gross liability
+                        <span class="amount-badge amount-badge--gross">
+                            { format!("Gross: {}", format_currency(&total_gross)) }
+                        </span>
+
+                        // Conditionally mount outstanding balances if a partial pay variance exists
+                        { if balance_remaining != total_gross {
+                            html! {
+                                <span class="amount-badge amount-badge--outstanding">
+                                    { format!("Outstanding Balance: {}", format_currency(&balance_remaining)) }
+                                </span>
+                            }
+                        } else {
+                            html! {}
+                        }}
+                    </div>
+                </div>
+
                 <div class="drawer__tabs">
                     <button
                         class={classes!("tab-trigger", (*active_tab == InvoiceDrawerTab::General).then_some("tab-trigger--active"))}

@@ -32,7 +32,7 @@ fn from_row_to_vendor_payment_allocation(row: &sqlx::postgres::PgRow) -> VendorP
         organization_id: row.get("organization_id"),
         vendor_invoice_id: row.get("vendor_invoice_id"),
         vendor_payment_id: row.get("vendor_payment_id"),
-        allocated_amount: row.get("amount"),
+        allocated_amount: row.get("allocated_amount"),
         created_at: row.get("created_at"),
     }
 }
@@ -84,14 +84,16 @@ pub(crate) async fn insert(
     let row = sqlx::query(
         r#"
         INSERT INTO vendor_payment_allocations (
+            organization_id,
             vendor_invoice_id,
             vendor_payment_id,
             allocated_amount
         )
-        VALUES ($1, $2, $3)
+        VALUES ($1, $2, $3, $4)
         RETURNING *
         "#,
     )
+    .bind(req.organization_id)
     .bind(req.vendor_invoice_id)
     .bind(vendor_payment_id)
     .bind(req.allocated_amount)

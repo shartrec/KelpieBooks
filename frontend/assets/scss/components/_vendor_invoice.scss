@@ -220,3 +220,51 @@
     margin-top: 2px;
   }
 }
+
+.payment-context-banner {
+  background-color: #f8fafc; // Soft, non-intrusive slate background
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--border-radius, 4px);
+  padding: 0.75rem 1rem;
+  //margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  &__vendor {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--brand-dark, #1e293b);
+    margin: 0;
+  }
+
+  &__details {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  // High-visibility structural financial metrics badges
+  .amount-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.75rem;
+
+    &--gross {
+      background-color: #e2e8f0;
+      color: #334155;
+    }
+
+    &--outstanding {
+      background-color: #fef3c7; // Amber warning warning field for variance
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+  }
+}

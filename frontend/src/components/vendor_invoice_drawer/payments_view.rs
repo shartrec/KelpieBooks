@@ -23,16 +23,19 @@
  */
 
 use crate::api::Api;
+use crate::components::currency_input::CurrencyInput;
 use crate::contexts::auth_context::use_user_context;
-use chrono::{Local, NaiveDate};
+use chrono::{Local, NaiveDate, Utc};
 use shared_core::models::account::Account;
 use shared_core::models::vendor_invoice::VendorInvoice;
-use shared_core::models::vendor_invoice_payment::VendorInvoicePayment;
-use shared_core::requests::vendor_invoice_payment::CreateVendorInvoicePaymentRequest;
+use shared_core::models::vendor_payment::VendorPayment;
+use shared_core::models::vendor_payment_allocation::VendorPaymentAllocation;
+use shared_core::requests::vendor_payment::CreateVendorPaymentRequest;
 use uuid::Uuid;
 use web_sys::{HtmlInputElement, HtmlSelectElement};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
+use shared_core::util::format_currency;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct PaymentsViewProps {
@@ -47,12 +50,23 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
     let payments = use_state(Vec::new);
     let accounts = use_state(Vec::new);
     let error = use_state(|| None::<String>);
-    let request = use_state(|| CreateVendorInvoicePaymentRequest {
-        vendor_invoice_id: props.invoice.id,
-        payment_date: Local::now().date_naive(),
-        bank_account_id: Uuid::nil(),
-        amount: props.invoice.amount_remaining,
-        reference: None,
+    let request = use_state(|| {
+        let user = user_ctx.user.as_ref().unwrap();
+        CreateVendorPaymentRequest {
+            partner_id: props.invoice.partner_id,
+            payment_date: Local::now().date_naive(),
+            bank_account_id: Uuid::nil(),
+            amount: props.invoice.amount_remaining,
+            reference: None,
+            allocations: vec![VendorPaymentAllocation {
+                id: Uuid::new_v4(),
+                organization_id: user.organization_id,
+                vendor_invoice_id: props.invoice.id,
+                vendor_payment_id: Uuid::nil(),
+                allocated_amount: props.invoice.amount_remaining,
+                created_at: Utc::now(),
+            }],
+        }
     });
 
     let fetch_payments = {
@@ -70,7 +84,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
                 let fetched_payments = Api::get(&format!("/api/vendor-invoices/{}/payments", invoice_id), user_ctx, navigator).await;
                 match fetched_payments {
                     Ok(response) if response.ok() => {
-                        match response.json::<Vec<VendorInvoicePayment>>().await {
+                        match response.json::<Vec<VendorPayment>>().await {
                             Ok(data) => payments.set(data),
                             Err(e) => error.set(Some(format!("Failed to parse payments: {}", e))),
                         }
@@ -108,13 +122,14 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
         })
     };
 
+    let fetch_payments_clone = fetch_payments.clone();
     use_effect_with((), move |()| {
-        fetch_payments.emit(());
+        fetch_payments_clone.emit(());
         fetch_accounts.emit(());
         || ()
     });
 
-    let on_input = |field_updater: fn(&mut CreateVendorInvoicePaymentRequest, String)| {
+    let on_input = |field_updater: fn(&mut CreateVendorPaymentRequest, String)| {
         let state = request.clone();
         Callback::from(move |e: InputEvent| {
             let mut info = (*state).clone();
@@ -124,7 +139,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
         })
     };
 
-    let on_date_change = |field_updater: fn(&mut CreateVendorInvoicePaymentRequest, NaiveDate)| {
+    let on_date_change = |field_updater: fn(&mut CreateVendorPaymentRequest, NaiveDate)| {
         let state = request.clone();
         Callback::from(move |e: Event| {
             let mut info = (*state).clone();
@@ -136,7 +151,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
         })
     };
 
-    let on_select_change = |field_updater: fn(&mut CreateVendorInvoicePaymentRequest, String)| {
+    let on_select_change = |field_updater: fn(&mut CreateVendorPaymentRequest, String)| {
         let state = request.clone();
         Callback::from(move |e: Event| {
             let mut info = (*state).clone();
@@ -146,12 +161,23 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
         })
     };
 
+    let on_amount_change = {
+        let request = request.clone();
+        Callback::from(move |value: i64| {
+            let mut new_request = (*request).clone();
+            new_request.amount = value;
+            new_request.allocations[0].allocated_amount = value;
+            request.set(new_request);
+        })
+    };
+
     let on_submit = {
         let request = request.clone();
         let on_change = props.on_change.clone();
         let user_ctx = user_ctx.clone();
         let navigator = navigator.clone();
         let error = error.clone();
+        let fetch_payments = fetch_payments.clone();
         Callback::from(move |e: SubmitEvent| {
             e.prevent_default();
             let request = request.clone();
@@ -159,11 +185,13 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
             let user_ctx = user_ctx.clone();
             let navigator = navigator.clone();
             let error = error.clone();
+            let fetch_payments = fetch_payments.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let resp = Api::post("/api/vendor-invoice-payments", &*request, user_ctx, navigator).await;
+                let resp = Api::post("/api/vendor-payments", &*request, user_ctx, navigator).await;
                 match resp {
                     Ok(r) if r.ok() => {
                         on_change.emit(());
+                        fetch_payments.emit(());
                     }
                     Ok(r) => error.set(Some(format!("Failed to make payment: {}", r.status()))),
                     Err(e) => error.set(Some(format!("Network error: {}", e))),
@@ -188,7 +216,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
                     </select>
 
                     <label>{"Amount:"}</label>
-                    <input type="number" value={request.amount.to_string()} oninput={on_input(|r, v| r.amount = v.parse().unwrap_or(0))} required=true />
+                    <CurrencyInput value={request.amount} on_change={on_amount_change} />
 
                     <label>{"Reference:"}</label>
                     <input type="text" value={request.reference.as_deref().unwrap_or("").to_string()} oninput={on_input(|r, v| r.reference = Some(v))} />
@@ -213,7 +241,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
                     { for (*payments).iter().map(|payment| html! {
                         <tr>
                             <td>{payment.payment_date.format("%d %b %Y").to_string()}</td>
-                            <td>{payment.amount}</td>
+                            <td>{format_currency(&payment.amount)}</td>
                             <td>{payment.reference.as_deref().unwrap_or("")}</td>
                         </tr>
                     })}
