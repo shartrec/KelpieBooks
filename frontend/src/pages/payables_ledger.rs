@@ -23,7 +23,9 @@
  */
 
 use crate::components::layout::Layout;
+use crate::components::vendor_invoice_filter::VendorInvoiceFilter;
 use crate::components::vendor_invoice_table::VendorInvoiceTable;
+use crate::contexts::vendor_invoice_filter_context::VendorInvoiceFilterProvider;
 use crate::router::Route;
 use yew::prelude::*;
 use yew_router::prelude::*;
@@ -40,10 +42,16 @@ pub fn payables_ledger_page() -> Html {
 
     html! {
         <Layout>
-            <div class="table-actions">
-                <button class="button-primary" onclick={on_add_click}>{ "+ New Invoice" }</button>
-            </div>
-            <VendorInvoiceTable />
+            <VendorInvoiceFilterProvider>
+                <div class="report-header">
+                    <h3>{ "Payables Ledger" }</h3>
+                    <VendorInvoiceFilter />
+                </div>
+                <div class="table-actions">
+                    <button class="button-primary" onclick={on_add_click}>{ "+ New Invoice" }</button>
+                </div>
+                <VendorInvoiceTable />
+            </VendorInvoiceFilterProvider>
         </Layout>
     }
 }

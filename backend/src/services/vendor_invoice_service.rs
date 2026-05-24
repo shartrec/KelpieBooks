@@ -24,9 +24,10 @@
 use crate::db::{account as account_db, vendor_invoice as vendor_invoice_db};
 use crate::services::account_service;
 use crate::util::ApiError;
-use chrono::Local;
+use chrono::{Local, NaiveDate};
 use rocket_db_pools::sqlx::{self, PgConnection};
 use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
+use shared_core::models::invoice_status::InvoiceStatus;
 use shared_core::models::system_tag::SystemTag;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
@@ -38,8 +39,13 @@ use uuid::Uuid;
 pub async fn get_vendor_invoices(
     pool: &mut PgConnection,
     organization_id: Uuid,
+    start_date: Option<NaiveDate>,
+    end_date: Option<NaiveDate>,
+    partner_id: Option<Uuid>,
+    min_amount: Option<i64>,
+    status: Option<String>,
 ) -> Result<Vec<VendorInvoiceListItem>, ApiError> {
-    let invoices = vendor_invoice_db::get_all_by_org(pool, organization_id).await?;
+    let invoices = vendor_invoice_db::get_by_org(pool, organization_id, start_date, end_date, partner_id, min_amount, status).await?;
     Ok(invoices)
 }
 
@@ -115,7 +121,14 @@ pub async fn create_vendor_invoice(
     };
     let transaction_id = account_service::create_transaction(&mut tx, organization_id, &ct_req).await?;
 
-    let new_invoice = vendor_invoice_db::insert(&mut tx, organization_id, transaction_id, req).await?;
+    let mut new_invoice = vendor_invoice_db::insert(&mut tx, organization_id, transaction_id, req).await?;
+    new_invoice.status = if new_invoice.amount_remaining == 0 {
+        InvoiceStatus::Paid
+    } else {
+        InvoiceStatus::Open
+    };
+    vendor_invoice_db::update_status(&mut tx, new_invoice.id, new_invoice.status).await?;
+
 
     for item in &req.items {
         vendor_invoice_db::insert_item(&mut tx, new_invoice.id, item).await?;
@@ -165,6 +178,15 @@ pub async fn update_vendor_invoice_items(
     let gross_amount = total_net + total_tax;
 
     vendor_invoice_db::update_totals(&mut tx, id, total_net, total_tax, gross_amount).await?;
+
+    let status = if gross_amount == 0 {
+        InvoiceStatus::Paid
+    } else if gross_amount > invoice.amount_remaining {
+        InvoiceStatus::PartiallyPaid
+    } else {
+        InvoiceStatus::Open
+    };
+    vendor_invoice_db::update_status(&mut tx, id, status).await?;
 
     tx.commit().await?;
 

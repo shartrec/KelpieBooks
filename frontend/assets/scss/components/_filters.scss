@@ -1,0 +1,71 @@
+/*!
+ * Copyright (c) 2026. Trevor Campbell and others.
+ *
+ * This file is part of KelpieBooks.
+ *
+ * KelpieBooks is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License,or
+ * (at your option) any later version.
+ *
+ * KelpieBooks is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with KelpieBooks; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Contributors:
+ *      Trevor Campbell
+ *
+ */
+
+// The horizontal flex layout housing the entire filter structure
+.filter-bar-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center; // CRITICAL: Snaps the vertical centers of all kids to an identical baseline
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  width: 100%;
+}
+
+// Fixed Segmented Control Module Box
+.filter-segmented-control {
+  display: inline-flex;
+  align-items: center; // Fixes internal alignment
+  background-color: #f1f5f9;
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: var(--border-radius, 4px);
+  padding: 2px;
+  height: 32px; // Strict master height match
+  box-sizing: border-box;
+  flex-shrink: 0;
+
+  .segment-trigger {
+    background: transparent;
+    border: none;
+    border-radius: calc(var(--border-radius, 4px) - 1px);
+    color: #64748b;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0 14px;
+    height: 100%; // Spans the full inner 28px bounds
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center; // Forces text layout center-lines to snap vertically
+    justify-content: center;
+    line-height: 1; // Strips out font metric baseline variations
+    margin: 0;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+
+    &--active {
+      background-color: #ffffff;
+      color: var(--brand-dark, #0f172a);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+  }
+}

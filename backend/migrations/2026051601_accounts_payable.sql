@@ -37,7 +37,7 @@ CREATE INDEX idx_je_partner ON journal_entries (partner_id);
 -- =============================================================================
 -- 3. Accounts Payable: Vendor Invoices (Bills)
 -- =============================================================================
-CREATE TYPE invoice_status AS ENUM ('Draft', 'Open', 'Paid', 'PartiallyPaid', 'Void');
+CREATE TYPE invoice_status AS ENUM ('Open', 'Paid', 'PartiallyPaid', 'Void');
 
 CREATE TABLE vendor_invoices
 (
@@ -49,7 +49,7 @@ CREATE TABLE vendor_invoices
     transaction_id  UUID                     REFERENCES transactions (id) ON DELETE SET NULL,
 
     invoice_number  TEXT            NOT NULL, -- The vendor's invoice number
-    status          invoice_status  NOT NULL DEFAULT 'Draft',
+    status          invoice_status  NOT NULL DEFAULT 'Open',
 
     issue_date      DATE            NOT NULL,
     due_date        DATE            NOT NULL,

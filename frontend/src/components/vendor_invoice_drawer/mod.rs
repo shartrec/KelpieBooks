@@ -50,13 +50,16 @@ pub struct VendorInvoiceDrawerProps {
     pub partner: Partner,
     pub on_close: Callback<()>,
     pub on_change: Callback<()>,
+    #[prop_or(InvoiceDrawerTab::General)]
+    pub initial_tab: InvoiceDrawerTab,
 }
 
 #[function_component(VendorInvoiceDrawer)]
 pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
-    let active_tab = use_state(|| InvoiceDrawerTab::General);
+    let active_tab = use_state(|| props.initial_tab);
     let user_ctx = use_user_context();
     let navigator = use_navigator().unwrap();
+
 
     let set_tab = {
         let active_tab = active_tab.clone();
@@ -72,7 +75,7 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
     };
 
     let total_gross = props.invoice.gross_amount;
-    let balance_remaining = props.invoice.gross_amount - props.invoice.amount_remaining;
+    let balance_remaining = props.invoice.amount_remaining;
     html! {
         <div class="drawer-overlay" onclick={on_close.clone()}>
             <div class="drawer" onclick={|e: MouseEvent| e.stop_propagation()}>

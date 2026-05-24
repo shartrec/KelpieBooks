@@ -22,6 +22,7 @@
  *
  */
 
+use chrono::NaiveDate;
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
 use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
 use shared_core::models::invoice_status::InvoiceStatus;
@@ -114,12 +115,16 @@ pub(crate) async fn get_items(
     .map(|rows| rows.iter().map(from_row_to_vendor_invoice_item).collect())
 }
 
-pub(crate) async fn get_all_by_org(
+pub(crate) async fn get_by_org(
     pool: &mut PgConnection,
     organization_id: Uuid,
+    start_date: Option<NaiveDate>,
+    end_date: Option<NaiveDate>,
+    partner_id: Option<Uuid>,
+    min_amount: Option<i64>,
+    status: Option<String>,
 ) -> Result<Vec<VendorInvoiceListItem>, sqlx::Error> {
-    sqlx::query(
-        r#"
+    let mut query = String::from(r#"
         SELECT
             vi.id,
             p.legal_name as partner_name,
@@ -134,13 +139,55 @@ pub(crate) async fn get_all_by_org(
         FROM vendor_invoices vi
         JOIN partners p ON vi.partner_id = p.id
         WHERE vi.organization_id = $1
-        ORDER BY vi.issue_date DESC
-        "#,
-    )
-    .bind(organization_id)
-    .fetch_all(pool)
-    .await
-    .map(|rows| rows.iter().map(from_row_to_vendor_invoice_list_item).collect())
+    "#);
+
+    let mut i = 2;
+    if start_date.is_some() {
+        query.push_str(&format!(" AND vi.issue_date >= ${}", i));
+        i += 1;
+    }
+    if end_date.is_some() {
+        query.push_str(&format!(" AND vi.issue_date <= ${}", i));
+        i += 1;
+    }
+    if partner_id.is_some() {
+        query.push_str(&format!(" AND vi.partner_id = ${}", i));
+        i += 1;
+    }
+    if min_amount.is_some() {
+        query.push_str(&format!(" AND vi.gross_amount >= ${}", i));
+        i += 1;
+    }
+    if let Some(status) = &status {
+        let statuses: Vec<&str> = status.split(',').collect();
+        query.push_str(&format!(" AND vi.status::TEXT = ANY(${})", i));
+    }
+
+    query.push_str(" ORDER BY vi.issue_date DESC");
+
+    let mut query_builder = sqlx::query(&query).bind(organization_id);
+
+    if let Some(start_date) = start_date {
+        query_builder = query_builder.bind(start_date);
+    }
+    if let Some(end_date) = end_date {
+        query_builder = query_builder.bind(end_date);
+    }
+    if let Some(partner_id) = partner_id {
+        query_builder = query_builder.bind(partner_id);
+    }
+    if let Some(min_amount) = min_amount {
+        query_builder = query_builder.bind(min_amount);
+    }
+    if let Some(status) = &status {
+        let statuses: Vec<&str> = status.split(',').collect();
+        query_builder = query_builder.bind(statuses);
+    }
+
+    query_builder
+        .fetch_all(pool)
+        .await
+        .map(|rows| rows.iter().map(from_row_to_vendor_invoice_list_item).collect())
 }
 
 pub(crate) async fn insert(
@@ -215,6 +262,25 @@ pub(crate) async fn update_totals(
     .bind(net_amount)
     .bind(tax_amount)
     .bind(gross_amount)
+    .bind(id)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub(crate) async fn update_status(
+    pool: &mut PgConnection,
+    id: Uuid,
+    status: InvoiceStatus,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        UPDATE vendor_invoices
+        SET status = $1::invoice_status
+        WHERE id = $2
+        "#,
+    )
+    .bind(status.to_string())
     .bind(id)
     .execute(pool)
     .await?;

@@ -281,3 +281,17 @@ button {
   margin: 0;
   vertical-align: middle;
 }
+// Clean Baseline Overrides for adjacent input fields
+.form-select,
+.form-input {
+  height: 32px; // Locks height parameter to mirror the segmented box explicitly
+  box-sizing: border-box;
+  padding: 0 0.5rem;
+  line-height: 1; // Synchronizes text baseline anchors across inputs
+  margin: 0;
+}
+
+// Set std width for currency fields
+.currency-input {
+  width: 10rem;
+}

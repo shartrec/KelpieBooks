@@ -24,7 +24,7 @@
 
 use crate::routes::security::AuthenticatedUser;
 use crate::services::{vendor_invoice_service, vendor_payment_service};
-use crate::util::types::PathUuid;
+use crate::util::types::{PathDate, PathUuid};
 use crate::util::ApiError;
 use crate::DbKelpie;
 use rocket::serde::json::Json;
@@ -47,13 +47,18 @@ pub(crate) fn routes() -> Vec<Route> {
     ]
 }
 
-#[get("/api/vendor-invoices")]
+#[get("/api/vendor-invoices?<start_date>&<end_date>&<partner_id>&<min_amount>&<status>")]
 async fn get_vendor_invoices(
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
+    start_date: Option<PathDate>,
+    end_date: Option<PathDate>,
+    partner_id: Option<PathUuid>,
+    min_amount: Option<i64>,
+    status: Option<String>,
 ) -> Result<Json<Vec<VendorInvoiceListItem>>, ApiError> {
     let invoices =
-        vendor_invoice_service::get_vendor_invoices(&mut pool, user.organization_id).await?;
+        vendor_invoice_service::get_vendor_invoices(&mut pool, user.organization_id, start_date.map(|d| *d), end_date.map(|d| *d), partner_id.map(|u| *u), min_amount, status).await?;
     Ok(Json(invoices))
 }
 

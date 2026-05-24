@@ -23,9 +23,11 @@
  */
 
 use crate::api::Api;
-use crate::components::vendor_invoice_drawer::VendorInvoiceDrawer;
+use crate::components::vendor_invoice_drawer::{InvoiceDrawerTab, VendorInvoiceDrawer};
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::vendor_invoice_filter_context::{use_vendor_invoice_filter, PaymentStatusFilter};
 use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
+use shared_core::models::invoice_status::InvoiceStatus;
 use shared_core::models::partner::Partner;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use shared_core::util::format_currency;
@@ -37,12 +39,14 @@ use yew_router::prelude::use_navigator;
 pub fn vendor_invoice_table() -> Html {
     let user_ctx = use_user_context();
     let navigator = use_navigator().unwrap();
+    let filter_ctx = use_vendor_invoice_filter();
     let invoices = use_state(Vec::new);
     let error = use_state(|| None::<String>);
     let loading = use_state(|| true);
     let invoice_to_edit = use_state(|| None::<VendorInvoice>);
     let partner_to_edit = use_state(|| None::<Partner>);
     let show_actions = use_state(|| None::<Uuid>);
+    let initial_tab = use_state(|| InvoiceDrawerTab::General);
 
     let fetch_invoices = {
         let invoices = invoices.clone();
@@ -50,15 +54,36 @@ pub fn vendor_invoice_table() -> Html {
         let loading = loading.clone();
         let user_ctx = user_ctx.clone();
         let navigator = navigator.clone();
+        let filter_ctx = filter_ctx.clone();
         Callback::from(move |_: ()| {
             let invoices = invoices.clone();
             let error = error.clone();
             let loading = loading.clone();
             let user_ctx = user_ctx.clone();
             let navigator = navigator.clone();
+            let filter_ctx = filter_ctx.clone();
             loading.set(true);
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_invoices = Api::get("/api/vendor-invoices", user_ctx, navigator).await;
+                let mut url = format!(
+                    "/api/vendor-invoices?start_date={}&end_date={}",
+                    filter_ctx.start_date, filter_ctx.end_date
+                );
+                if let Some(partner_id) = filter_ctx.partner_id {
+                    url.push_str(&format!("&partner_id={}", partner_id));
+                }
+                if let Some(min_amount) = filter_ctx.min_amount {
+                    url.push_str(&format!("&min_amount={}", min_amount));
+                }
+                match filter_ctx.status {
+                    PaymentStatusFilter::Outstanding => {
+                        url.push_str(&format!("&status={},{}", InvoiceStatus::Open.as_str(), InvoiceStatus::PartiallyPaid.as_str()));
+                    }
+                    PaymentStatusFilter::Paid => {
+                        url.push_str(&format!("&status={}", InvoiceStatus::Paid.as_str()));
+                    }
+                    PaymentStatusFilter::All => {}
+                }
+                let fetched_invoices = Api::get(&url, user_ctx, navigator).await;
                 loading.set(false);
                 match fetched_invoices {
                     Ok(response) if response.ok() => {
@@ -80,10 +105,19 @@ pub fn vendor_invoice_table() -> Html {
     };
 
     let fetch_invoices_clone = fetch_invoices.clone();
-    use_effect_with((), move |()| {
-        fetch_invoices_clone.emit(());
-        || ()
-    });
+    use_effect_with(
+        (
+            filter_ctx.start_date,
+            filter_ctx.end_date,
+            filter_ctx.partner_id,
+            filter_ctx.min_amount,
+            filter_ctx.status,
+        ),
+        move |_| {
+            fetch_invoices_clone.emit(());
+            || ()
+        },
+    );
 
     let on_edit_click = {
         let invoice_to_edit = invoice_to_edit.clone();
@@ -91,12 +125,14 @@ pub fn vendor_invoice_table() -> Html {
         let error = error.clone();
         let user_ctx = user_ctx.clone();
         let navigator = navigator.clone();
-        Callback::from(move |id: Uuid| {
+        let initial_tab = initial_tab.clone();
+        Callback::from(move |(id, tab): (Uuid, InvoiceDrawerTab)| {
             let invoice_to_edit = invoice_to_edit.clone();
             let partner_to_edit = partner_to_edit.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();
             let navigator = navigator.clone();
+            initial_tab.set(tab);
             wasm_bindgen_futures::spawn_local(async move {
                 let resp = Api::get(&format!("/api/vendor-invoices/{}", id), user_ctx.clone(), navigator.clone()).await;
                 match resp {
@@ -141,7 +177,7 @@ pub fn vendor_invoice_table() -> Html {
         let fetch_invoices = fetch_invoices.clone();
         Callback::from(move |()| {
             if let Some(id) = invoice_id {
-                on_edit_click.emit(id);
+                on_edit_click.emit((id, InvoiceDrawerTab::General));
             }
             fetch_invoices.emit(());
         })
@@ -162,6 +198,7 @@ pub fn vendor_invoice_table() -> Html {
                     partner={partner.clone()}
                     on_close={on_drawer_close}
                     on_change={on_drawer_change}
+                    initial_tab={*initial_tab}
                 />
             }
             <table class="table">
@@ -184,7 +221,14 @@ pub fn vendor_invoice_table() -> Html {
                             let on_edit_click = on_edit_click.clone();
                             let invoice_id = invoice.id;
                             Callback::from(move |_| {
-                                on_edit_click.emit(invoice_id);
+                                on_edit_click.emit((invoice_id, InvoiceDrawerTab::General));
+                            })
+                        };
+                        let on_pay = {
+                            let on_edit_click = on_edit_click.clone();
+                            let invoice_id = invoice.id;
+                            Callback::from(move |_| {
+                                on_edit_click.emit((invoice_id, InvoiceDrawerTab::Payments));
                             })
                         };
                         let on_actions_toggle = {
@@ -209,7 +253,7 @@ pub fn vendor_invoice_table() -> Html {
                                 <td class="table__value-col">{ format_currency(&invoice.gross_amount) }</td>
                                 <td class="table__value-col">{ format_currency(&invoice.amount_remaining) }</td>
                                 <td class="table__col-actions">
-                                    <button class="btn-pay-action" disabled={invoice.amount_remaining == 0} onclick={on_edit.clone()}>
+                                    <button class="btn-pay-action" disabled={invoice.amount_remaining == 0} onclick={on_pay}>
                                         <span class="btn-pay-icon">
                                             <img src="/images/credit-card.svg" alt="" style="width:100%; height:100%;" />
                                         </span>

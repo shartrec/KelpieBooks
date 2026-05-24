@@ -22,3 +22,4 @@ pub mod vendor_invoice_item_row;
 pub mod vendor_invoice_table;
 pub mod vendor_invoice_drawer;
 pub mod generic_delete_confirmation_modal;
+pub mod vendor_invoice_filter;

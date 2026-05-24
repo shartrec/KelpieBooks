@@ -30,7 +30,6 @@ use strum::{Display, EnumIter, EnumString};
 )]
 #[strum(serialize_all = "PascalCase")]
 pub enum InvoiceStatus {
-    Draft,
     Open,
     Paid,
     PartiallyPaid,
@@ -40,7 +39,6 @@ pub enum InvoiceStatus {
 impl InvoiceStatus {
     pub fn as_str(&self) -> &'static str {
         match self {
-            Self::Draft => "Draft",
             Self::Open => "Open",
             Self::Paid => "Paid",
             Self::PartiallyPaid => "PartiallyPaid",
@@ -51,6 +49,6 @@ impl InvoiceStatus {
 
 impl Default for InvoiceStatus {
     fn default() -> Self {
-        Self::Draft
+        Self::Open
     }
 }

@@ -97,3 +97,8 @@
   width: 100%;
   padding: $space-md;
 }
+
+// Set std width for currency fields
+.currency-input {
+  width: 10rem;
+}
