@@ -23,3 +23,4 @@ pub mod vendor_invoice_table;
 pub mod vendor_invoice_drawer;
 pub mod generic_delete_confirmation_modal;
 pub mod vendor_invoice_filter;
+pub mod aged_trial_balance_matrix;

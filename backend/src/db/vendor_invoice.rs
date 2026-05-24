@@ -24,6 +24,7 @@
 
 use chrono::NaiveDate;
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
+use shared_core::dtos::top_payable::TopPayable;
 use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
 use shared_core::models::invoice_status::InvoiceStatus;
 use shared_core::models::vendor_invoice::VendorInvoice;
@@ -60,6 +61,7 @@ fn from_row_to_vendor_invoice_list_item(row: &sqlx::postgres::PgRow) -> VendorIn
     let status = InvoiceStatus::from_str(&status_str).unwrap();
     VendorInvoiceListItem {
         id: row.get("id"),
+        partner_id: row.get("partner_id"),
         partner_name: row.get("partner_name"),
         invoice_number: row.get("invoice_number"),
         issue_date: row.get("issue_date"),
@@ -69,6 +71,14 @@ fn from_row_to_vendor_invoice_list_item(row: &sqlx::postgres::PgRow) -> VendorIn
         gross_amount: row.get("gross_amount"),
         amount_remaining: row.get("amount_remaining"),
         status,
+    }
+}
+
+fn from_row_to_top_payable(row: &sqlx::postgres::PgRow) -> TopPayable {
+    TopPayable {
+        partner_name: row.get("partner_name"),
+        due_date: row.get("due_date"),
+        amount: row.get("amount_remaining"),
     }
 }
 
@@ -127,6 +137,7 @@ pub(crate) async fn get_by_org(
     let mut query = String::from(r#"
         SELECT
             vi.id,
+            vi.partner_id,
             p.legal_name as partner_name,
             vi.invoice_number,
             vi.issue_date,
@@ -188,6 +199,33 @@ pub(crate) async fn get_by_org(
         .fetch_all(pool)
         .await
         .map(|rows| rows.iter().map(from_row_to_vendor_invoice_list_item).collect())
+}
+
+pub(crate) async fn get_top_payables(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    due_date_before: &NaiveDate,
+) -> Result<Vec<TopPayable>, sqlx::Error> {
+    sqlx::query(
+        r#"
+        SELECT
+            p.legal_name as partner_name,
+            vi.due_date,
+            vi.amount_remaining
+        FROM vendor_invoices vi
+        JOIN partners p ON vi.partner_id = p.id
+        WHERE vi.organization_id = $1
+          AND vi.status::TEXT IN ('Open', 'PartiallyPaid')
+          AND vi.due_date <= $2
+        ORDER BY vi.amount_remaining DESC
+        LIMIT 5
+        "#,
+    )
+    .bind(organization_id)
+    .bind(due_date_before)
+    .fetch_all(pool)
+    .await
+    .map(|rows| rows.iter().map(from_row_to_top_payable).collect())
 }
 
 pub(crate) async fn insert(
@@ -262,25 +300,6 @@ pub(crate) async fn update_totals(
     .bind(net_amount)
     .bind(tax_amount)
     .bind(gross_amount)
-    .bind(id)
-    .execute(pool)
-    .await?;
-    Ok(())
-}
-
-pub(crate) async fn update_status(
-    pool: &mut PgConnection,
-    id: Uuid,
-    status: InvoiceStatus,
-) -> Result<(), sqlx::Error> {
-    sqlx::query(
-        r#"
-        UPDATE vendor_invoices
-        SET status = $1::invoice_status
-        WHERE id = $2
-        "#,
-    )
-    .bind(status.to_string())
     .bind(id)
     .execute(pool)
     .await?;

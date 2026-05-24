@@ -3,11 +3,12 @@ use crate::contexts::auth_context::use_user_context;
 use crate::contexts::org_context::use_org_context;
 use crate::router::Route;
 use crate::services::dashboard::{
-    get_expense_breakdown, get_financial_health, get_recent_transactions,
+    get_expense_breakdown, get_financial_health, get_recent_transactions, get_top_payables,
 };
 use shared_core::dtos::dashboard::FinancialHealth;
 use shared_core::dtos::expense_breakdown::ExpenseBreakdown;
 use shared_core::dtos::recent_transaction::RecentTransaction;
+use shared_core::dtos::top_payable::TopPayable;
 use shared_core::util::format_currency;
 use yew::prelude::*;
 use yew_router::prelude::*;
@@ -21,12 +22,14 @@ pub fn dashboard_page() -> Html {
     let financial_health_state = use_state(|| None::<FinancialHealth>);
     let recent_transactions_state = use_state(|| None::<Vec<RecentTransaction>>);
     let expense_breakdown_state = use_state(|| None::<Vec<ExpenseBreakdown>>);
+    let top_payables_state = use_state(|| None::<Vec<TopPayable>>);
     let error_state = use_state(|| None::<String>);
 
     {
         let financial_health_state = financial_health_state.clone();
         let recent_transactions_state = recent_transactions_state.clone();
         let expense_breakdown_state = expense_breakdown_state.clone();
+        let top_payables_state = top_payables_state.clone();
         let error_state = error_state.clone();
         let user_ctx = user_ctx.clone();
         let navigator = navigator.clone();
@@ -59,6 +62,15 @@ pub fn dashboard_page() -> Html {
                     Err(e) => error_state3.set(Some(e)),
                 }
             });
+            let error_state = error_state.clone();
+            let user_ctx = user_ctx.clone();
+            let navigator = navigator.clone();
+            wasm_bindgen_futures::spawn_local(async move {
+                match get_top_payables(user_ctx.clone(), navigator.clone()).await {
+                    Ok(data) => top_payables_state.set(Some(data)),
+                    Err(e) => error_state.set(Some(e)),
+                }
+            });
             || ()
         });
     }
@@ -86,36 +98,61 @@ pub fn dashboard_page() -> Html {
                     }
                 </section>
 
-                <section class="card shadow-sm p-4">
-                    <h3>{ "Recent Ledger Activity" }</h3>
-                    <table class="audit-table">
-                        <thead>
-                            <tr>
-                                <th>{ "Date" }</th>
-                                <th>{ "Description" }</th>
-                                <th style="text-align: right">{ "Amount" }</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            if let Some(transactions) = &*recent_transactions_state {
-                                { for transactions.iter().map(|tx| html! {
-                                    <tr>
-                                        <td>
-                                            <Link<Route>
-                                                to={Route::AccountLedger { id: tx.account_id }}
-                                                classes={classes!("account-link")}
-                                            >
-                                                {tx.date.format("%d %b %Y").to_string() }
-                                            </Link<Route>>
-                                        </td>
-                                        <td>{ tx.description.clone() }</td>
-                                        <td class="stat-value-small">{ format_currency(&tx.amount) }</td>
-                                    </tr>
-                                })}
-                            }
-                        </tbody>
-                    </table>
-                </section>
+                <div class="dashboard-columns">
+                    <section class="card shadow-sm p-4">
+                        <h3>{ "Recent Ledger Activity" }</h3>
+                        <table class="audit-table">
+                            <thead>
+                                <tr>
+                                    <th>{ "Date" }</th>
+                                    <th>{ "Description" }</th>
+                                    <th style="text-align: right">{ "Amount" }</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                if let Some(transactions) = &*recent_transactions_state {
+                                    { for transactions.iter().map(|tx| html! {
+                                        <tr>
+                                            <td>
+                                                <Link<Route>
+                                                    to={Route::AccountLedger { id: tx.account_id }}
+                                                    classes={classes!("account-link")}
+                                                >
+                                                    {tx.date.format("%d %b %Y").to_string() }
+                                                </Link<Route>>
+                                            </td>
+                                            <td>{ tx.description.clone() }</td>
+                                            <td class="stat-value-small">{ format_currency(&tx.amount) }</td>
+                                        </tr>
+                                    })}
+                                }
+                            </tbody>
+                        </table>
+                    </section>
+                    <section class="card shadow-sm p-4">
+                        <h3>{ "Top 5 Payables" }</h3>
+                        <table class="audit-table">
+                            <thead>
+                                <tr>
+                                    <th>{ "Vendor" }</th>
+                                    <th>{ "Due Date" }</th>
+                                    <th style="text-align: right">{ "Amount" }</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                if let Some(payables) = &*top_payables_state {
+                                    { for payables.iter().map(|p| html! {
+                                        <tr>
+                                            <td>{ p.partner_name.clone() }</td>
+                                            <td>{ p.due_date.format("%d %b %Y").to_string() }</td>
+                                            <td class="stat-value-small">{ format_currency(&p.amount) }</td>
+                                        </tr>
+                                    })}
+                                }
+                            </tbody>
+                        </table>
+                    </section>
+                </div>
             </div>
         </Layout>
     }

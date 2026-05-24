@@ -44,6 +44,7 @@ use rocket::serde::json::Json;
 use rocket::{get, routes, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::dtos::aged_payable_summary::AgedPayableSummary;
 use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
 use shared_core::reports::balance_sheet::BalanceSheet;
 use uuid::Uuid;
@@ -54,6 +55,7 @@ pub(crate) fn routes() -> Vec<Route> {
         get_balance_sheet,
         get_trial_balance,
         get_general_ledger,
+        get_aged_payables,
         export_trial_balance,
         export_profit_loss,
         export_balance_sheet,
@@ -136,6 +138,20 @@ async fn get_general_ledger(
         min_amount,
     )
     .await?;
+    Ok(Json(report))
+}
+
+#[get("/api/reports/aged-payables?<date>")]
+async fn get_aged_payables(
+    mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    date: String,
+) -> Result<Json<Vec<AgedPayableSummary>>, ApiError> {
+    let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
+        .map_err(|_| ApiError::Invalid("Invalid date".to_string()))?;
+
+    let report =
+        report_service::get_aged_payables(&mut pool, user.organization_id, report_date).await?;
     Ok(Json(report))
 }
 

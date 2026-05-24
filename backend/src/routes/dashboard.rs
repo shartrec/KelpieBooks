@@ -1,18 +1,20 @@
 use crate::db::journal_entry::get_all_by_transaction;
 use crate::db::transaction::get_recent_transactions as get_recent_transactions_from_db;
+use crate::db::vendor_invoice::get_top_payables as get_top_payables_from_db;
 use crate::routes::security::AuthenticatedUser;
 use crate::services::account_service::{get_account_with_balance, get_system_accounts};
 use crate::services::report_service::{
     get_expense_breakdown as get_expense_breakdown_from_service, get_profit_loss,
 };
 use crate::DbKelpie;
-use chrono::{Datelike, Local, NaiveDate};
+use chrono::{Datelike, Duration, Local, NaiveDate};
 use rocket::serde::json::Json;
 use rocket::{get, routes, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::dashboard::FinancialHealth;
 use shared_core::dtos::expense_breakdown::ExpenseBreakdown;
 use shared_core::dtos::recent_transaction::RecentTransaction;
+use shared_core::dtos::top_payable::TopPayable;
 use shared_core::models::{account_category::AccountCategory, system_tag::SystemTag};
 use uuid::Uuid;
 
@@ -140,10 +142,26 @@ async fn get_expense_breakdown(
     Ok(Json(breakdown))
 }
 
+#[get("/top-payables")]
+async fn get_top_payables(
+    mut db: Connection<DbKelpie>,
+    user: AuthenticatedUser,
+) -> Result<Json<Vec<TopPayable>>, rocket::http::Status> {
+    let org_id = user.organization_id;
+
+    let date_before = Local::now().date_naive() + Duration::days(7);
+    let payables = get_top_payables_from_db(&mut db, org_id, &date_before)
+        .await
+        .unwrap_or_default();
+
+    Ok(Json(payables))
+}
+
 pub fn routes() -> Vec<Route> {
     routes![
         get_financial_health,
         get_recent_transactions,
-        get_expense_breakdown
+        get_expense_breakdown,
+        get_top_payables
     ]
 }
