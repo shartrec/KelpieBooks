@@ -23,6 +23,7 @@
  */
 
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::i18n::t;
 use shared_core::models::account_category::AccountCategory;
 use shared_core::requests::account::UpdateAccountRequest;
 use std::str::FromStr;
@@ -119,32 +120,32 @@ pub fn edit_account_modal(props: &EditAccountModalProps) -> Html {
     html! {
         <div class="modal-overlay" onclick={on_cancel.clone()}>
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
-                <h2>{ "Edit Account" }</h2>
+                <h2>{ t("account-modal-edit-title") }</h2>
                 <form onsubmit={on_form_submit} class="modal__form">
-                    <label>{"Code:"}</label>
+                    <label>{t("account-modal-code-label")}</label>
                     <input type="text" value={request.code.clone()} oninput={on_code_input} required=true />
 
-                    <label>{"Name:"}</label>
+                    <label>{t("account-modal-name-label")}</label>
                     <input type="text" value={request.name.clone()} oninput={on_name_input} required=true />
 
-                    <label>{"Category:"}</label>
+                    <label>{t("account-modal-category-label")}</label>
                     <select onchange={on_category_change}>
-                        <option value="Asset" selected={request.category == AccountCategory::Asset}>{ "Asset" }</option>
-                        <option value="Liability" selected={request.category == AccountCategory::Liability}>{ "Liability" }</option>
-                        <option value="Equity" selected={request.category == AccountCategory::Equity}>{ "Equity" }</option>
-                        <option value="Revenue" selected={request.category == AccountCategory::Revenue}>{ "Revenue" }</option>
-                        <option value="Expense" selected={request.category == AccountCategory::Expense}>{ "Expense" }</option>
+                        <option value="Asset" selected={request.category == AccountCategory::Asset}>{ t("account-category-asset") }</option>
+                        <option value="Liability" selected={request.category == AccountCategory::Liability}>{ t("account-category-liability") }</option>
+                        <option value="Equity" selected={request.category == AccountCategory::Equity}>{ t("account-category-equity") }</option>
+                        <option value="Revenue" selected={request.category == AccountCategory::Revenue}>{ t("account-category-revenue") }</option>
+                        <option value="Expense" selected={request.category == AccountCategory::Expense}>{ t("account-category-expense") }</option>
                     </select>
 
-                    <label>{"Is Group:"}</label>
+                    <label>{t("account-modal-is-group-label")}</label>
                     <input type="checkbox" checked={request.is_group} onchange={on_is_group_change} />
 
-                    <label>{"Is Bank Account:"}</label>
+                    <label>{t("account-modal-is-bank-account-label")}</label>
                     <input type="checkbox" checked={request.is_bank_account} onchange={on_is_bank_account_change} />
 
                     <div class="modal__form__actions">
-                        <button type="button" onclick={on_cancel} class="button-secondary">{ "Cancel" }</button>
-                        <button type="submit">{ "Save Changes" }</button>
+                        <button type="button" onclick={on_cancel} class="button-secondary">{ t("common-cancel") }</button>
+                        <button type="submit">{ t("account-modal-save-button") }</button>
                     </div>
                 </form>
             </div>

@@ -22,6 +22,7 @@
  *
  */
 use crate::components::currency_input::CurrencyInput;
+use shared_core::i18n::t;
 use shared_core::requests::transaction::JournalEntryLine;
 use uuid::Uuid;
 use web_sys::HtmlSelectElement;
@@ -113,12 +114,12 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
     html! {
         <div class="journal__entry-row">
             <select ref={select_ref} onchange={on_account_change}>
-                <option value="" disabled=true selected={props.entry.account_id.is_nil()}>{ "Select Account" }</option>
+                <option value="" disabled=true selected={props.entry.account_id.is_nil()}>{ t("journal-entry-select-account") }</option>
                 { for props.accounts.iter().map(|(id, name)| html! {
                     <option value={id.to_string()} selected={*id == props.entry.account_id}>{name}</option>
                 })}
             </select>
-            <input type="text" placeholder="Description"
+            <input type="text" placeholder={t("journal-entry-description-placeholder")}
                    value={props.entry.description.clone().unwrap_or_default()}
                    oninput={on_description_change} />
 
@@ -126,15 +127,15 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
             <CurrencyInput
                 value={props.entry.debit}
                 on_change={on_debit_change}
-                placeholder="0.00"
+                placeholder={t("journal-entry-currency-placeholder")}
             />
             <CurrencyInput
                 value={props.entry.credit}
                 on_change={on_credit_change}
-                placeholder="0.00"
+                placeholder={t("journal-entry-currency-placeholder")}
             />
 
-            <button type="button" onclick={on_delete_click} class="icon-button">{ "X" }</button>
+            <button type="button" onclick={on_delete_click} class="icon-button">{ t("journal-entry-delete-button") }</button>
         </div>
     }
 }

@@ -87,7 +87,7 @@ pub fn currency_input(props: &CurrencyProps) -> Html {
     }
 }
 
-// Logic helpers (keep in the same file or a separate logic util)
+// Logic helpers
 fn format_cents(cents: i64) -> String {
     let dollars = cents / 100;
     let fractional = (cents % 100).abs();

@@ -24,8 +24,10 @@
 
 use crate::contexts::auth_context::UserContextHandle;
 use crate::router::Route;
+use fluent::fluent_args;
 use gloo_net::http::Request;
 use shared_core::dtos::user_detail::UserDetail;
+use shared_core::i18n::{t, t_args};
 use shared_core::requests::auth::LoginRequest;
 use yew::function_component;
 use yew::html;
@@ -72,14 +74,20 @@ pub fn login_page() -> Html {
                             user_ctx.dispatch(Some(user));
                             is_login_success.set(true);
                         } else {
-                            error_state.set(Some("Failed to parse login response.".to_string()));
+                            error_state.set(Some(t("login-error-parse-response")));
                         }
                     }
                     Ok(r) => {
-                        error_state.set(Some(format!("Login failed: {}", r.status())));
+                        error_state.set(Some(t_args(
+                            "login-error-failed",
+                            &fluent_args!["status" => r.status()],
+                        )));
                     }
                     Err(e) => {
-                        error_state.set(Some(format!("Network error: {}", e)));
+                        error_state.set(Some(t_args(
+                            "login-error-network",
+                            &fluent_args!["error" => e.to_string()],
+                        )));
                     }
                 }
             });
@@ -91,16 +99,16 @@ pub fn login_page() -> Html {
             <div class="login-card">
                 <div class="login-brand">
                     // Pulling in your brand asset to establish identity
-                    <img src="/images/kelpiedog_120x120_transparent.png" alt="KelpieBooks Logo" class="login-logo" />
-                    <h1>{ "KelpieBooks" }</h1>
-                    <p class="subtitle">{ "SME Accounting Engine" }</p>
+                    <img src="/images/kelpiedog_120x120_transparent.png" alt={t("login-logo-alt-text")} class="login-logo" />
+                    <h1>{ t("branding-app-name") }</h1>
+                    <p class="subtitle">{ t("branding-app-subtitle") }</p>
                 </div>
                 <LoginForm
                         on_login={on_login_submit}
                         error={(*error_state).clone()}
                     />
                 <div class="login-footer">
-                    <p>{ "Need help? Contact your administrator." }</p>
+                    <p>{ t("login-help-text") }</p>
                 </div>
             </div>
         </div>
@@ -151,15 +159,15 @@ pub fn login_form(props: &LoginFormProps) -> Html {
     html! {
         <form onsubmit={on_submit} class="login-form">
             <div class="input-field-group">
-                <label>{"User Email: "}</label>
+                <label>{t("login-form-email-label")}</label>
                 <input type="text" value={(*user_email).clone()} oninput={on_user_email_input} required=true autocomplete="username" />
             </div>
             <div class="input-field-group">
-                <label>{"Password: "}</label>
+                <label>{t("login-form-password-label")}</label>
                 <input type="password" value={(*password).clone()} oninput={on_password_input} required=true autocomplete="current-password" />
             </div>
             <button type="submit" class="button-primary login-btn">
-                    { "Sign In" }
+                    { t("login-form-submit-button") }
             </button>
             if let Some(err) = error {
                 <div class="login__form__error">{err}</div>

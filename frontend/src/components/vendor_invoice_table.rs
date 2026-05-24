@@ -26,7 +26,9 @@ use crate::api::Api;
 use crate::components::vendor_invoice_drawer::{InvoiceDrawerTab, VendorInvoiceDrawer};
 use crate::contexts::auth_context::use_user_context;
 use crate::contexts::vendor_invoice_filter_context::{use_vendor_invoice_filter, PaymentStatusFilter};
+use fluent::fluent_args;
 use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
+use shared_core::i18n::{t, t_args};
 use shared_core::models::invoice_status::InvoiceStatus;
 use shared_core::models::partner::Partner;
 use shared_core::models::vendor_invoice::VendorInvoice;
@@ -91,14 +93,20 @@ pub fn vendor_invoice_table() -> Html {
                             Ok(data) => {
                                 invoices.set(data);
                             }
-                            Err(e) => error.set(Some(format!("Failed to parse invoices: {}", e))),
+                            Err(e) => error.set(Some(t_args(
+                                "vendor-invoice-table-error-parse-invoices",
+                                &fluent_args!["error" => e.to_string()],
+                            ))),
                         }
                     }
-                    Ok(response) => error.set(Some(format!(
-                        "Failed to fetch invoices: {}",
-                        response.status()
+                    Ok(response) => error.set(Some(t_args(
+                        "vendor-invoice-table-error-fetch-invoices",
+                        &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -144,19 +152,37 @@ pub fn vendor_invoice_table() -> Html {
                                     Ok(pr) if pr.ok() => {
                                         match pr.json::<Partner>().await {
                                             Ok(partner) => partner_to_edit.set(Some(partner)),
-                                            Err(e) => error.set(Some(format!("Failed to parse partner: {}", e))),
+                                            Err(e) => error.set(Some(t_args(
+                                                "vendor-invoice-table-error-parse-partner",
+                                                &fluent_args!["error" => e.to_string()],
+                                            ))),
                                         }
                                     }
-                                    Ok(pr) => error.set(Some(format!("Failed to fetch partner: {}", pr.status()))),
-                                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                                    Ok(pr) => error.set(Some(t_args(
+                                        "vendor-invoice-table-error-fetch-partner",
+                                        &fluent_args!["status" => pr.status()],
+                                    ))),
+                                    Err(e) => error.set(Some(t_args(
+                                        "common-network-error",
+                                        &fluent_args!["error" => e.to_string()],
+                                    ))),
                                 }
                                 invoice_to_edit.set(Some(invoice));
                             }
-                            Err(e) => error.set(Some(format!("Failed to parse invoice: {}", e))),
+                            Err(e) => error.set(Some(t_args(
+                                "vendor-invoice-table-error-parse-invoice",
+                                &fluent_args!["error" => e.to_string()],
+                            ))),
                         }
                     }
-                    Ok(r) => error.set(Some(format!("Failed to fetch invoice: {}", r.status()))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Ok(r) => error.set(Some(t_args(
+                        "vendor-invoice-table-error-fetch-invoice",
+                        &fluent_args!["status" => r.status()],
+                    ))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -184,7 +210,7 @@ pub fn vendor_invoice_table() -> Html {
     };
 
     if *loading {
-        return html! { <p>{ "Loading..." }</p> };
+        return html! { <p>{ t("common-loading") }</p> };
     }
     if let Some(err) = &*error {
         return html! { <div class="error">{ err }</div> };
@@ -204,15 +230,15 @@ pub fn vendor_invoice_table() -> Html {
             <table class="table">
                 <thead>
                     <tr>
-                        <th class="table__text-col">{ "Vendor" }</th>
-                        <th class="table__text-col">{ "Invoice #" }</th>
-                        <th class="table__value-col">{ "Invoice Date" }</th>
-                        <th class="table__value-col">{ "Due Date" }</th>
-                        <th class="table__value-col">{ "Net" }</th>
-                        <th class="table__value-col">{ "Tax" }</th>
-                        <th class="table__value-col">{ "Gross" }</th>
-                        <th class="table__value-col">{ "Balance Due" }</th>
-                        <th class="table__col-actions">{ "Actions" }</th>
+                        <th class="table__text-col">{ t("common-vendor") }</th>
+                        <th class="table__text-col">{ t("vendor-invoice-table-invoice-number") }</th>
+                        <th class="table__value-col">{ t("vendor-invoice-table-invoice-date") }</th>
+                        <th class="table__value-col">{ t("common-due-date") }</th>
+                        <th class="table__value-col">{ t("common-net") }</th>
+                        <th class="table__value-col">{ t("common-tax") }</th>
+                        <th class="table__value-col">{ t("common-gross") }</th>
+                        <th class="table__value-col">{ t("vendor-invoice-table-balance-due") }</th>
+                        <th class="table__col-actions">{ t("common-actions") }</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -257,21 +283,21 @@ pub fn vendor_invoice_table() -> Html {
                                         <span class="btn-pay-icon">
                                             <img src="/images/credit-card.svg" alt="" style="width:100%; height:100%;" />
                                         </span>
-                                        <span>{ "Pay" }</span>
+                                        <span>{ t("common-pay") }</span>
                                     </button>
                                     <div class="actions-dropdown">
-                                        <button class="icon-button" onclick={on_actions_toggle} title="Actions">
-                                            <img src="/images/more-vertical.svg" alt="Actions" class="dropdown-trigger-icon" />
+                                        <button class="icon-button" onclick={on_actions_toggle} title={t("common-actions")}>
+                                            <img src="/images/more-vertical.svg" alt={t("common-actions")} class="dropdown-trigger-icon" />
                                         </button>
                                         if *show_actions == Some(invoice.id) {
                                             <div class="actions-dropdown__content">
                                                 <button class="dropdown-item" onclick={on_edit}>
-                                                    <img src="/images/view.svg" alt="View" />
-                                                    <span>{ "View" }</span>
+                                                    <img src="/images/view.svg" alt={t("common-view")} />
+                                                    <span>{ t("common-view") }</span>
                                                 </button>
                                                 <button class="dropdown-item">
-                                                    <img src="/images/delete.svg" alt="Delete" />
-                                                    <span>{ "Delete" }</span>
+                                                    <img src="/images/delete.svg" alt={t("common-delete")} />
+                                                    <span>{ t("common-delete") }</span>
                                                 </button>
                                             </div>
                                         }

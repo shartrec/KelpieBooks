@@ -24,6 +24,7 @@
 
 use crate::router::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::i18n::t;
 use shared_core::util::format_currency;
 use std::collections::HashSet;
 use uuid::Uuid;
@@ -99,9 +100,9 @@ pub fn account_row(props: &AccountRowProps) -> Html {
                     if is_parent {
                         <button onclick={on_toggle_collapse} class="collapse-toggle">
                             if is_collapsed {
-                                <img src="/images/chevron-right.svg" alt="Expand" />
+                                <img src="/images/chevron-right.svg" alt={t("common-expand")} />
                             } else {
-                                <img src="/images/chevron-down.svg" alt="Collapse" />
+                                <img src="/images/chevron-down.svg" alt={t("common-collapse")} />
                             }
                         </button>
                     }
@@ -112,11 +113,11 @@ pub fn account_row(props: &AccountRowProps) -> Html {
                 <td class="table__col-actions">
                     <div class="actions-wrapper">
                         <button class="icon-button btn-action" onclick={on_edit_click}>
-                            <img src="/images/edit.svg" alt="Edit" />
+                            <img src="/images/edit.svg" alt={t("common-edit")} />
                         </button>
                         if !is_parent && props.node.account.balance == 0 {
                             <button class="icon-button btn-action" onclick={on_delete_click}>
-                                <img src="/images/delete.svg" alt="Delete" />
+                                <img src="/images/delete.svg" alt={t("common-delete")} />
                             </button>
                         }
                     </div>

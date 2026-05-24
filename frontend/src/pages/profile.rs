@@ -26,8 +26,10 @@ use crate::api::Api;
 use crate::components::layout::Layout;
 use crate::contexts::auth_context::use_user_context;
 use crate::router::Route;
+use fluent::fluent_args;
 use serde::Serialize;
 use shared_core::dtos::user_detail::UserDetail;
+use shared_core::i18n::{t, t_args};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
@@ -138,14 +140,20 @@ pub fn profile_page() -> Html {
                             error_state.set(None);
                             navigator.push(&Route::Dashboard);
                         } else {
-                            error_state.set(Some("Failed to parse server response.".to_string()));
+                            error_state.set(Some(t("profile-error-parse-response")));
                         }
                     }
                     Ok(r) => {
-                        error_state.set(Some(format!("Error saving profile: {}", r.status())));
+                        error_state.set(Some(t_args(
+                            "profile-error-save-profile",
+                            &fluent_args!["status" => r.status()],
+                        )));
                     }
                     Err(e) => {
-                        error_state.set(Some(format!("Network error: {}", e)));
+                        error_state.set(Some(t_args(
+                            "common-network-error",
+                            &fluent_args!["error" => e.to_string()],
+                        )));
                     }
                 }
             });
@@ -217,11 +225,16 @@ pub fn profile_page() -> Html {
                             navigator.push(&Route::Dashboard);
                         }
                         Ok(r) => {
-                            password_error
-                                .set(Some(format!("Error changing password: {}", r.status())));
+                            password_error.set(Some(t_args(
+                                "profile-error-change-password",
+                                &fluent_args!["status" => r.status()],
+                            )));
                         }
                         Err(e) => {
-                            password_error.set(Some(format!("Network error: {}", e)));
+                            password_error.set(Some(t_args(
+                                "common-network-error",
+                                &fluent_args!["error" => e.to_string()],
+                            )));
                         }
                     }
                 });
@@ -231,24 +244,24 @@ pub fn profile_page() -> Html {
 
     html! {
         <Layout>
-            <h1>{ "Edit Profile" }</h1>
+            <h1>{ t("profile-title") }</h1>
             <div class="profile__forms-container">
                 <form onsubmit={on_submit_details} class="profile__form">
-                    <h2>{ "Your Details" }</h2>
-                    <label>{"Email:"}</label>
+                    <h2>{ t("profile-details-title") }</h2>
+                    <label>{t("profile-email-label")}</label>
                     <input type="email" value={user_update.email.clone()} oninput={on_email_input} required=true />
 
-                    <label>{"Full Name:"}</label>
+                    <label>{t("profile-full-name-label")}</label>
                     <input type="text" value={user_update.full_name.clone()} oninput={on_full_name_input} required=true />
 
-                    <label>{"Display Name:"}</label>
+                    <label>{t("profile-display-name-label")}</label>
                     <input type="text" value={user_update.display_name.clone().unwrap_or_default()} oninput={on_display_name_input} />
 
                     <div class="Method…-actions">
-                        <button type="submit">{"Save Details"}</button>
+                        <button type="submit">{t("profile-save-details-button")}</button>
                     </div>
                     if *details_success {
-                        <div class="message message__success">{"Profile saved successfully!"}</div>
+                        <div class="message message__success">{t("profile-save-success-message")}</div>
                     }
                     if let Some(err) = (*details_error).clone() {
                         <div class="message message__error">{err}</div>
@@ -256,14 +269,14 @@ pub fn profile_page() -> Html {
                 </form>
 
                 <form onsubmit={on_submit_password} class="profile__form">
-                    <h2>{ "Change Password" }</h2>
-                    <label>{"Old Password:"}</label>
+                    <h2>{ t("profile-change-password-title") }</h2>
+                    <label>{t("profile-old-password-label")}</label>
                     <input type="password" oninput={on_old_password_input} required=true />
 
-                    <label>{"New Password:"}</label>
+                    <label>{t("profile-new-password-label")}</label>
                     <input type="password" oninput={on_new_password_input} required=true />
 
-                    <label>{"Confirm New Password:"}</label>
+                    <label>{t("profile-confirm-password-label")}</label>
                     <input
                         type="password"
                         oninput={on_confirm_password_input}
@@ -272,10 +285,10 @@ pub fn profile_page() -> Html {
                     />
 
                     <div class="profile__form-actions">
-                        <button type="submit" disabled={!can_submit_password}>{"Change Password"}</button>
+                        <button type="submit" disabled={!can_submit_password}>{t("profile-change-password-button")}</button>
                     </div>
                     if *password_success {
-                        <div class="message message__success">{"Password changed successfully!"}</div>
+                        <div class="message message__success">{t("profile-password-change-success")}</div>
                     }
                     if let Some(err) = (*password_error).clone() {
                         <div class="message message__error">{err}</div>

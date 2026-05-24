@@ -23,7 +23,9 @@
  */
 
 use crate::router::Route;
+use fluent::fluent_args;
 use gloo_net::http::Request;
+use shared_core::i18n::{t, t_args};
 use shared_core::requests::onboard::OnboardingRequest;
 use yew::function_component;
 use yew::html;
@@ -55,10 +57,16 @@ pub fn register_page() -> Html {
                         navigator.push(&Route::Login);
                     }
                     Ok(r) => {
-                        error_state.set(Some(format!("Server error: {}", r.status())));
+                        error_state.set(Some(t_args(
+                            "register-error-server",
+                            &fluent_args!["status" => r.status()],
+                        )));
                     }
                     Err(e) => {
-                        error_state.set(Some(format!("Network error: {}", e)));
+                        error_state.set(Some(t_args(
+                            "common-network-error",
+                            &fluent_args!["error" => e.to_string()],
+                        )));
                     }
                 }
             });
@@ -67,7 +75,7 @@ pub fn register_page() -> Html {
 
     html! {
         <div class="page-container">
-            <h1>{"Create your Account"}</h1>
+            <h1>{t("register-title")}</h1>
             <RegisterForm
                 on_register={on_register_submit}
                 error={(*error_state).clone()}
@@ -166,26 +174,26 @@ pub fn register_form(props: &RegisterFormProps) -> Html {
 
     html! {
         <form onsubmit={on_submit} class="auth-form">
-            <label>{"Organization Name: "}</label>
+            <label>{t("register-org-name-label")}</label>
             <input type="text" value={(*organisation).clone()} oninput={on_organisation_input} required=true />
 
-            <label>{"Full Name: "}</label>
+            <label>{t("register-full-name-label")}</label>
             <input type="text" value={(*full_name).clone()} oninput={on_full_name_input} required=true />
 
-            <label>{"Display Name (Optional): "}</label>
+            <label>{t("register-display-name-label")}</label>
             <input type="text" value={(*display_name).clone()} oninput={on_display_name_input} />
 
-            <label>{"Email: "}</label>
+            <label>{t("register-email-label")}</label>
             <input type="email" value={(*user_email).clone()} oninput={on_user_email_input} required=true autocomplete="email" />
 
-            <label>{"Password: "}</label>
+            <label>{t("register-password-label")}</label>
             <input type="password" value={(*password).clone()} oninput={on_password_input} required=true autocomplete="new-password" />
 
-            <label>{"Chart of Accounts Template: "}</label>
+            <label>{t("register-coa-template-label")}</label>
             <input type="text" value={(*coa_template_id).clone()} oninput={on_coa_template_id_input} required=true />
 
             <div class="form-actions">
-                <button type="submit">{"Register"}</button>
+                <button type="submit">{t("register-submit-button")}</button>
             </div>
             if let Some(err) = error {
                 <div class="error">{err}</div>

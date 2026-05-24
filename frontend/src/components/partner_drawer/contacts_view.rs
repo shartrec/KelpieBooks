@@ -26,6 +26,8 @@ use crate::api::Api;
 use crate::components::partner_drawer::contact_edit_card::ContactEditCard;
 use crate::components::partner_drawer::delete_contact_confirmation_modal::DeleteContactConfirmationModal;
 use crate::contexts::auth_context::use_user_context;
+use fluent::fluent_args;
+use shared_core::i18n::{t, t_args};
 use shared_core::models::partner_contact::PartnerContact;
 use uuid::Uuid;
 use yew::prelude::*;
@@ -105,8 +107,14 @@ pub fn contacts_view(props: &ContactsViewProps) -> Html {
                         on_change.emit(());
                         editing_state.set(EditState::None);
                     }
-                    Ok(r) => error.set(Some(format!("Failed to save contact: {}", r.status()))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Ok(r) => error.set(Some(t_args(
+                        "contacts-view-error-save",
+                        &fluent_args!["status" => r.status()],
+                    ))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -147,9 +155,15 @@ pub fn contacts_view(props: &ContactsViewProps) -> Html {
                             contact_to_delete.set(None);
                         }
                         Ok(r) => {
-                            error.set(Some(format!("Failed to delete contact: {}", r.status())))
+                            error.set(Some(t_args(
+                                "contacts-view-error-delete",
+                                &fluent_args!["status" => r.status()],
+                            )))
                         }
-                        Err(e) => error.set(Some(format!("Network error: {}", e))),
+                        Err(e) => error.set(Some(t_args(
+                            "common-network-error",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     }
                 });
             }
@@ -159,7 +173,7 @@ pub fn contacts_view(props: &ContactsViewProps) -> Html {
     html! {
         <div class="contacts-view">
             <div class="table-actions">
-                <button class="button-primary" onclick={on_add_click} disabled={*editing_state != EditState::None}>{ "Add Contact" }</button>
+                <button class="button-primary" onclick={on_add_click} disabled={*editing_state != EditState::None}>{ t("contacts-view-add-button") }</button>
             </div>
 
             if let Some(e) = &*error {
@@ -185,20 +199,20 @@ pub fn contacts_view(props: &ContactsViewProps) -> Html {
                                 <div class="card__header">
                                     <h5>{ format!("{} {}", contact.full_name, contact.preferred_name) }</h5>
                                     if contact.is_primary {
-                                        <span class="badge badge--contact">{ "Primary" }</span>
+                                        <span class="badge badge--contact">{ t("common-primary") }</span>
                                     }
                                 </div>
                                 <div class="card__body">
-                                    <p>{ contact.role_title.as_deref().unwrap_or("No role specified") }</p>
+                                    <p>{ contact.role_title.as_deref().unwrap_or(&t("contacts-view-no-role")) }</p>
                                     <p>{ contact.email.as_deref().unwrap_or("") }</p>
                                     <p>{ contact.phone.as_deref().unwrap_or("") }</p>
                                 </div>
                                 <div class="card__footer">
                                     <button class="icon-button" onclick={on_edit_click(contact.id)} disabled={*editing_state != EditState::None}>
-                                        <img src="/images/edit.svg" alt="Edit" />
+                                        <img src="/images/edit.svg" alt={t("common-edit")} />
                                     </button>
                                     <button class="icon-button" onclick={on_delete_click(contact.clone())} disabled={*editing_state != EditState::None}>
-                                        <img src="/images/delete.svg" alt="Delete" />
+                                        <img src="/images/delete.svg" alt={t("common-delete")} />
                                     </button>
                                 </div>
                             </div>

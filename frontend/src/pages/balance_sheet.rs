@@ -28,7 +28,9 @@ use crate::components::report_options::ReportOptions;
 use crate::contexts::auth_context::use_user_context;
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::router::Route;
+use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::i18n::{t, t_args};
 use shared_core::reports::balance_sheet::BalanceSheet;
 use shared_core::util::format_currency;
 use std::collections::{HashMap, HashSet};
@@ -185,19 +187,22 @@ pub fn balance_sheet_page() -> Html {
                                     balance_sheet_holder.set(Rc::new(data_holder));
                                     error.set(None);
                                 }
-                                Err(e) => error.set(Some(format!(
-                                    "Failed to parse Balance Sheet data: {}",
-                                    e
+                                Err(e) => error.set(Some(t_args(
+                                    "balance-sheet-error-parse",
+                                    &fluent_args!["error" => e.to_string()],
                                 ))),
                             }
                         } else {
-                            error.set(Some(format!(
-                                "Error fetching Balance Sheet: {}",
-                                resp.status()
+                            error.set(Some(t_args(
+                                "balance-sheet-error-fetch",
+                                &fluent_args!["status" => resp.status()],
                             )));
                         }
                     }
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
                 loading.set(false);
             });
@@ -245,9 +250,9 @@ pub fn balance_sheet_page() -> Html {
                         if is_parent {
                             <button onclick={on_toggle} class="collapse-toggle">
                                 if is_collapsed {
-                                    <img src="/images/chevron-right.svg" alt="Expand" />
+                                    <img src="/images/chevron-right.svg" alt={t("common-expand")} />
                                 } else {
-                                    <img src="/images/chevron-down.svg" alt="Collapse" />
+                                    <img src="/images/chevron-down.svg" alt={t("common-collapse")} />
                                 }
                             </button>
                         }
@@ -268,50 +273,50 @@ pub fn balance_sheet_page() -> Html {
         <Layout>
             <div class="report-page">
                 <div class="report-header">
-                    <h3>{ "Balance Sheet" }</h3>
+                    <h3>{ t("balance-sheet-title") }</h3>
                     <ReportOptions show_start_date={false} show_end_date={true} />
                 </div>
 
                 if *loading {
-                    <p>{ "Loading..." }</p>
+                    <p>{ t("common-loading") }</p>
                 } else if let Some(err) = &*error {
                     <div class="error">{ err }</div>
                 } else {
                     <table class="report-table">
                         <thead>
                             <tr>
-                                <th>{ "Account" }</th>
-                                <th style="text-align: right;">{ "Balance" }</th>
+                                <th>{ t("common-account") }</th>
+                                <th style="text-align: right;">{ t("common-balance") }</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="report__section-header"><td colspan="2">{ "Assets" }</td></tr>
+                            <tr class="report__section-header"><td colspan="2">{ t("balance-sheet-assets-section") }</td></tr>
                             { for asset_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
                             <tr class="report-total-row">
-                                <td><strong>{ "Total Assets" }</strong></td>
+                                <td><strong>{ t("balance-sheet-total-assets") }</strong></td>
                                 <td style="text-align: right;"><strong>{ format_currency(&balance_sheet_holder.balance_sheet.total_assets) }</strong></td>
                             </tr>
 
-                            <tr class="report__section-header"><td colspan="2">{ "Liabilities" }</td></tr>
+                            <tr class="report__section-header"><td colspan="2">{ t("balance-sheet-liabilities-section") }</td></tr>
                             { for liability_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
                             <tr class="report-total-row">
-                                <td><strong>{ "Total Liabilities" }</strong></td>
+                                <td><strong>{ t("balance-sheet-total-liabilities") }</strong></td>
                                 <td style="text-align: right;"><strong>{ format_currency(&balance_sheet_holder.balance_sheet.total_liabilities) }</strong></td>
                             </tr>
 
-                            <tr class="report__section-header"><td colspan="2">{ "Equity" }</td></tr>
+                            <tr class="report__section-header"><td colspan="2">{ t("balance-sheet-equity-section") }</td></tr>
                             { for equity_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
                             <tr>
-                                <td style="padding-left: 1.5rem">{ "Current Year Earnings" }</td>
+                                <td style="padding-left: 1.5rem">{ t("balance-sheet-current-year-earnings") }</td>
                                 <td style="text-align: right;">{ format_currency(&balance_sheet_holder.balance_sheet.net_income) }</td>
                             </tr>
                             <tr class="report-total-row">
-                                <td><strong>{ "Total Equity" }</strong></td>
+                                <td><strong>{ t("balance-sheet-total-equity") }</strong></td>
                                 <td style="text-align: right;"><strong>{ format_currency(&balance_sheet_holder.balance_sheet.total_equity) }</strong></td>
                             </tr>
 
                             <tr class="report__total-row">
-                                <td><strong>{ "Total Liabilities & Equity" }</strong></td>
+                                <td><strong>{ t("balance-sheet-total-liabilities-equity") }</strong></td>
                                 <td style="text-align: right;"><strong>{ format_currency(&(balance_sheet_holder.balance_sheet.total_liabilities + balance_sheet_holder.balance_sheet.total_equity)) }</strong></td>
                             </tr>
                         </tbody>

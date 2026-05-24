@@ -28,6 +28,7 @@ use crate::contexts::org_context::{OrgAction, OrgContextHandle};
 use crate::router::Route;
 use chrono::NaiveDate;
 use serde_json::json;
+use shared_core::i18n::t;
 use web_sys::{Event, HtmlInputElement};
 use yew::{function_component, html, use_context, use_state, Callback, Html, TargetCast};
 use yew_router::prelude::use_navigator;
@@ -90,9 +91,9 @@ pub fn period_settings() -> Html {
 
     html! {
         <Layout>
-            <h1>{ "Accounting Period Settings" }</h1>
+            <h1>{ t("period-settings-title") }</h1>
             <div class="settings-card">
-                <p>{ "Prevent changes to transactions on or before this date:" }</p>
+                <p>{ t("period-settings-description") }</p>
                 <div class="input-group">
                         <input
                             type="date"
@@ -104,14 +105,14 @@ pub fn period_settings() -> Html {
                             class="button-primary"
                             onclick={on_save_lock}
                         >
-                            { "Update Lock Date" }
+                            { t("period-settings-update-button") }
                         </button>
                     </div>
 
                     <p class="text-muted">
-                        { "Current Lock: " }
+                        { t("period-settings-current-lock") }
                         <strong>
-                            { org_ctx.locked_until.map(|d| d.format("%d %b %Y").to_string()).unwrap_or_else(|| "None".to_string()) }
+                            { org_ctx.locked_until.map(|d| d.format("%d %b %Y").to_string()).unwrap_or_else(|| t("common-none")) }
                         </strong>
                     </p>
             </div>

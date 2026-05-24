@@ -22,6 +22,7 @@
  *
  */
 
+use shared_core::i18n::t;
 use shared_core::requests::partner::CreatePartnerRequest;
 use uuid::Uuid;
 use yew::prelude::*;
@@ -146,42 +147,42 @@ pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
     html! {
         <div class="modal-overlay" onclick={on_overlay_click}>
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
-                <h2>{ "Add New Partner" }</h2>
+                <h2>{ t("add-partner-title") }</h2>
                 <form onsubmit={on_form_submit} class="modal__form">
-                    <label>{"Legal Name:"}</label>
+                    <label>{t("add-partner-legal-name-label")}</label>
                     <input type="text" oninput={on_legal_name_input} required=true />
 
-                    <label>{"Trade Name:"}</label>
+                    <label>{t("add-partner-trade-name-label")}</label>
                     <input type="text" oninput={on_trade_name_input} />
 
-                    <label>{"Tax Identifier:"}</label>
+                    <label>{t("add-partner-tax-identifier-label")}</label>
                     <input type="text" oninput={on_tax_identifier_input} />
 
-                    <label>{"Is Vendor:"}</label>
+                    <label>{t("add-partner-is-vendor-label")}</label>
                     <input type="checkbox" onchange={on_is_vendor_change} />
 
-                    <label>{"Is Customer:"}</label>
+                    <label>{t("add-partner-is-customer-label")}</label>
                     <input type="checkbox" onchange={on_is_customer_change} />
 
-                    <label>{"Default AP Account:"}</label>
+                    <label>{t("add-partner-default-ap-account-label")}</label>
                     <select onchange={on_ap_account_change}>
-                        <option value="" selected=true>{ "None" }</option>
+                        <option value="" selected=true>{ t("common-none") }</option>
                         { for props.ap_accounts.iter().map(|(id, name)| html! {
                             <option value={id.to_string()}>{name}</option>
                         })}
                     </select>
 
-                    <label>{"Default AR Account:"}</label>
+                    <label>{t("add-partner-default-ar-account-label")}</label>
                     <select onchange={on_ar_account_change}>
-                        <option value="" selected=true>{ "None" }</option>
+                        <option value="" selected=true>{ t("common-none") }</option>
                         { for props.ar_accounts.iter().map(|(id, name)| html! {
                             <option value={id.to_string()}>{name}</option>
                         })}
                     </select>
 
                     <div class="modal__form__actions">
-                        <button type="button" onclick={on_cancel_click} class="button-secondary">{ "Cancel" }</button>
-                        <button type="submit">{ "Add Partner" }</button>
+                        <button type="button" onclick={on_cancel_click} class="button-secondary">{ t("common-cancel") }</button>
+                        <button type="submit">{ t("partner-list-add-partner-button") }</button>
                     </div>
                     if let Some(err) = &*error {
                         <div class="error">{ err }</div>

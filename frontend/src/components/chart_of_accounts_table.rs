@@ -28,8 +28,10 @@ use crate::components::add_account_modal::AddAccountModal;
 use crate::components::delete_confirmation_modal::DeleteConfirmationModal;
 use crate::components::edit_account_modal::EditAccountModal;
 use crate::contexts::auth_context::use_user_context;
+use fluent::fluent_args;
 use log::info;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::i18n::{t, t_args};
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
@@ -74,14 +76,20 @@ pub fn chart_of_accounts_table() -> Html {
                                 data.sort_by(|a, b| a.code.cmp(&b.code));
                                 accounts.set(data);
                             }
-                            Err(e) => error.set(Some(format!("Failed to parse accounts: {}", e))),
+                            Err(e) => error.set(Some(t_args(
+                                "coa-error-parse-accounts",
+                                &fluent_args!["error" => e.to_string()],
+                            ))),
                         }
                     }
-                    Ok(response) => error.set(Some(format!(
-                        "Failed to fetch accounts: {}",
-                        response.status()
+                    Ok(response) => error.set(Some(t_args(
+                        "coa-error-fetch-accounts",
+                        &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Err(e) => error.set(Some(t_args(
+                        "coa-error-network",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -116,8 +124,14 @@ pub fn chart_of_accounts_table() -> Html {
                         on_modal_close.emit(());
                         fetch_accounts.emit(());
                     }
-                    Ok(r) => error.set(Some(format!("Failed to add account: {}", r.status()))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Ok(r) => error.set(Some(t_args(
+                        "coa-error-add-account",
+                        &fluent_args!["status" => r.status()],
+                    ))),
+                    Err(e) => error.set(Some(t_args(
+                        "coa-error-network",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -145,9 +159,15 @@ pub fn chart_of_accounts_table() -> Html {
                             fetch_accounts.emit(());
                         }
                         Ok(r) => {
-                            error.set(Some(format!("Failed to update account: {}", r.status())))
+                            error.set(Some(t_args(
+                                "coa-error-update-account",
+                                &fluent_args!["status" => r.status()],
+                            )))
                         }
-                        Err(e) => error.set(Some(format!("Network error: {}", e))),
+                        Err(e) => error.set(Some(t_args(
+                            "coa-error-network",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     }
                 });
             }
@@ -176,9 +196,15 @@ pub fn chart_of_accounts_table() -> Html {
                             fetch_accounts.emit(());
                         }
                         Ok(r) => {
-                            error.set(Some(format!("Failed to delete account: {}", r.status())))
+                            error.set(Some(t_args(
+                                "coa-error-delete-account",
+                                &fluent_args!["status" => r.status()],
+                            )))
                         }
-                        Err(e) => error.set(Some(format!("Network error: {}", e))),
+                        Err(e) => error.set(Some(t_args(
+                            "coa-error-network",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     }
                 });
             }
@@ -251,7 +277,7 @@ pub fn chart_of_accounts_table() -> Html {
         .collect();
 
     if *loading {
-        return html! { <p>{ "Loading..." }</p> };
+        return html! { <p>{ t("common-loading") }</p> };
     }
     if let Some(err) = &*error {
         return html! { <div class="error">{ err }</div> };
@@ -283,7 +309,7 @@ pub fn chart_of_accounts_table() -> Html {
     html! {
         <>
             <div class="table-actions">
-                <button onclick={on_add_click}>{ "Add Account" }</button>
+                <button onclick={on_add_click}>{ t("coa-add-account-button") }</button>
             </div>
 
             if *show_add_modal { <AddAccountModal on_close={on_modal_close.clone()} on_submit={on_add_submit} parent_accounts={parent_accounts} /> }
@@ -293,11 +319,11 @@ pub fn chart_of_accounts_table() -> Html {
             <table class="table coa-table">
                 <thead>
                     <tr>
-                        <th class="table__text-col">{ "Code" }</th>
-                        <th class="table__text-col">{ "Name" }</th>
-                        <th class="table__text-col">{ "Category" }</th>
-                        <th class="table__value-col">{ "Balance" }</th>
-                        <th class="table__col-actions">{ "Actions" }</th>
+                        <th class="table__text-col">{ t("common-code") }</th>
+                        <th class="table__text-col">{ t("common-name") }</th>
+                        <th class="table__text-col">{ t("common-category") }</th>
+                        <th class="table__value-col">{ t("common-balance") }</th>
+                        <th class="table__col-actions">{ t("common-actions") }</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -26,6 +26,8 @@ use crate::api::Api;
 use crate::components::layout::Layout;
 use crate::contexts::auth_context::use_user_context;
 use chrono::{Datelike, NaiveDate, Utc};
+use fluent::fluent_args;
+use shared_core::i18n::{t, t_args};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
@@ -88,15 +90,21 @@ pub fn close_year_page() -> Html {
 
                 match response {
                     Ok(resp) if resp.ok() => {
-                        success.set(Some("Financial year closed successfully.".to_string()));
+                        success.set(Some(t("close-year-success-message")));
                     }
                     Ok(resp) => {
                         let status = resp.status();
                         let err_msg = resp.text().await.unwrap_or_default();
-                        error.set(Some(format!("Error {}: {}", status, err_msg)));
+                        error.set(Some(t_args(
+                            "close-year-error",
+                            &fluent_args!["status" => status, "error" => err_msg],
+                        )));
                     }
                     Err(e) => {
-                        error.set(Some(format!("Network error: {}", e)));
+                        error.set(Some(t_args(
+                            "common-network-error",
+                            &fluent_args!["error" => e.to_string()],
+                        )));
                     }
                 }
                 loading.set(false);
@@ -114,14 +122,14 @@ pub fn close_year_page() -> Html {
     html! {
         <Layout>
             <div class="page">
-                <h3>{ "Close Financial Year" }</h3>
+                <h3>{ t("close-year-title") }</h3>
                 <p class="page-description">
-                    { "Closing the financial year is an irreversible process. It will summarize all revenue and expense accounts into Retained Earnings and lock all transactions on or before the selected date." }
+                    { t("close-year-description") }
                 </p>
 
                 <div class="data-form">
                     <div class="form-group">
-                        <label for="year-end-date">{ "Select Year-End Date" }</label>
+                        <label for="year-end-date">{ t("close-year-select-date-label") }</label>
                         <input
                             id="year-end-date"
                             type="date"
@@ -131,13 +139,13 @@ pub fn close_year_page() -> Html {
                     </div>
                     <div class="form-actions">
                         <button class="button button-danger" onclick={on_initiate_close} disabled={*loading}>
-                            { "Close Financial Year" }
+                            { t("close-year-button") }
                         </button>
                     </div>
                 </div>
 
                 if *loading {
-                    <p>{ "Closing year..." }</p>
+                    <p>{ t("close-year-loading-message") }</p>
                 }
 
                 if let Some(err) = &*error {
@@ -151,15 +159,13 @@ pub fn close_year_page() -> Html {
                 if *show_confirmation {
                     <div class="modal-backdrop">
                         <div class="modal">
-                            <h4>{ "Confirm Year-End Close" }</h4>
+                            <h4>{ t("close-year-confirm-title") }</h4>
                             <p>
-                                { "Are you sure you want to close the financial year ending on " }
-                                <strong>{ year_end_date.format("%d %B %Y").to_string() }</strong>
-                                { "? This action cannot be undone." }
+                                { t_args("close-year-confirm-message", &fluent_args!["date" => year_end_date.format("%d %B %Y").to_string()]) }
                             </p>
                             <div class="modal-actions">
-                                <button class="button" onclick={on_cancel_close}>{ "Cancel" }</button>
-                                <button class="button button-danger" onclick={on_confirm_close}>{ "Yes, Close Year" }</button>
+                                <button class="button" onclick={on_cancel_close}>{ t("common-cancel") }</button>
+                                <button class="button button-danger" onclick={on_confirm_close}>{ t("close-year-confirm-button") }</button>
                             </div>
                         </div>
                     </div>

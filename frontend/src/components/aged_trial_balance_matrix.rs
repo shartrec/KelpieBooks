@@ -25,7 +25,9 @@
 use crate::api::Api;
 use crate::contexts::auth_context::use_user_context;
 use chrono::Local;
+use fluent::fluent_args;
 use shared_core::dtos::aged_payable_summary::AgedPayableSummary;
+use shared_core::i18n::{t, t_args};
 use shared_core::util::format_currency;
 use uuid::Uuid;
 use yew::prelude::*;
@@ -64,14 +66,20 @@ pub fn aged_trial_balance_matrix() -> Html {
                             Ok(data) => {
                                 summary.set(data);
                             }
-                            Err(e) => error.set(Some(format!("Failed to parse summary: {}", e))),
+                            Err(e) => error.set(Some(t_args(
+                                "aged-trial-balance-error-parse",
+                                &fluent_args!["error" => e.to_string()],
+                            ))),
                         }
                     }
-                    Ok(response) => error.set(Some(format!(
-                        "Failed to fetch summary: {}",
-                        response.status()
+                    Ok(response) => error.set(Some(t_args(
+                        "aged-trial-balance-error-fetch",
+                        &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -96,7 +104,7 @@ pub fn aged_trial_balance_matrix() -> Html {
     };
 
     if *loading {
-        return html! { <p>{ "Loading..." }</p> };
+        return html! { <p>{ t("common-loading") }</p> };
     }
     if let Some(err) = &*error {
         return html! { <div class="error">{ err }</div> };
@@ -106,13 +114,13 @@ pub fn aged_trial_balance_matrix() -> Html {
         <table class="table">
             <thead>
                 <tr>
-                    <th>{ "Vendor" }</th>
-                    <th class="table__value-col">{ "Current" }</th>
-                    <th class="table__value-col">{ "1-30 Days" }</th>
-                    <th class="table__value-col">{ "31-60 Days" }</th>
-                    <th class="table__value-col">{ "61-90 Days" }</th>
-                    <th class="table__value-col">{ "90+ Days" }</th>
-                    <th class="table__value-col">{ "Total" }</th>
+                    <th>{ t("common-vendor") }</th>
+                    <th class="table__value-col">{ t("aged-trial-balance-current") }</th>
+                    <th class="table__value-col">{ t("aged-trial-balance-1-30-days") }</th>
+                    <th class="table__value-col">{ t("aged-trial-balance-31-60-days") }</th>
+                    <th class="table__value-col">{ t("aged-trial-balance-61-90-days") }</th>
+                    <th class="table__value-col">{ t("aged-trial-balance-90-plus-days") }</th>
+                    <th class="table__value-col">{ t("common-total") }</th>
                 </tr>
             </thead>
             <tbody>

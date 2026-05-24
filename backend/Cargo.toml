@@ -11,6 +11,7 @@ shared_core = { path = "../shared_core" }
 base64 = "0.22.1"
 bcrypt = "0.17.0"
 chrono = { version = "0.4", features = ["serde"] }
+fluent = {workspace = true}
 jsonwebtoken = { version = "8.3" }
 log = "0.4"
 rand = "0.8.5"

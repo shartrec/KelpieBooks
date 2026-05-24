@@ -22,6 +22,7 @@
  *
  */
 
+use shared_core::i18n::t;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -54,8 +55,8 @@ pub fn generic_delete_confirmation_modal(props: &GenericDeleteConfirmationModalP
                 <h2>{ &props.title }</h2>
                 <p>{ &props.message }</p>
                 <div class="modal__form__actions">
-                    <button type="button" onclick={on_cancel} class="button-secondary">{ "Cancel" }</button>
-                    <button type="button" onclick={on_confirm_delete} class="button-danger">{ "Confirm Delete" }</button>
+                    <button type="button" onclick={on_cancel} class="button-secondary">{ t("common-cancel") }</button>
+                    <button type="button" onclick={on_confirm_delete} class="button-danger">{ t("common-confirm-delete-button") }</button>
                 </div>
             </div>
         </div>

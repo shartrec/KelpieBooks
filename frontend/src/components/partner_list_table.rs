@@ -28,7 +28,9 @@ use crate::components::delete_partner_confirmation_modal::DeletePartnerConfirmat
 use crate::components::partner_drawer::PartnerDrawer;
 use crate::components::partner_row::PartnerRow;
 use crate::contexts::auth_context::use_user_context;
+use fluent::fluent_args;
 use shared_core::dtos::partner_list_item::PartnerListItem;
+use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
 use shared_core::models::account_category::AccountCategory;
 use shared_core::models::partner::Partner;
@@ -75,14 +77,20 @@ pub fn partner_list_table() -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<PartnerListItem>>().await {
                             Ok(data) => partners.set(data),
-                            Err(e) => error.set(Some(format!("Failed to parse partners: {}", e))),
+                            Err(e) => error.set(Some(t_args(
+                                "partner-list-error-parse-partners",
+                                &fluent_args!["error" => e.to_string()],
+                            ))),
                         }
                     }
-                    Ok(response) => error.set(Some(format!(
-                        "Failed to fetch partners: {}",
-                        response.status()
+                    Ok(response) => error.set(Some(t_args(
+                        "partner-list-error-fetch-partners",
+                        &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
 
                 let fetched_accounts =
@@ -91,14 +99,20 @@ pub fn partner_list_table() -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<Account>>().await {
                             Ok(data) => accounts.set(data),
-                            Err(e) => error.set(Some(format!("Failed to parse accounts: {}", e))),
+                            Err(e) => error.set(Some(t_args(
+                                "partner-list-error-parse-accounts",
+                                &fluent_args!["error" => e.to_string()],
+                            ))),
                         }
                     }
-                    Ok(response) => error.set(Some(format!(
-                        "Failed to fetch accounts: {}",
-                        response.status()
+                    Ok(response) => error.set(Some(t_args(
+                        "partner-list-error-fetch-accounts",
+                        &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
                 loading.set(false);
             });
@@ -151,10 +165,19 @@ pub fn partner_list_table() -> Html {
                 match resp {
                     Ok(r) if r.ok() => match r.json::<Partner>().await {
                         Ok(partner) => partner_to_edit.set(Some(partner)),
-                        Err(e) => error.set(Some(format!("Failed to parse partner: {}", e))),
+                        Err(e) => error.set(Some(t_args(
+                            "partner-list-error-parse-partner",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     },
-                    Ok(r) => error.set(Some(format!("Failed to fetch partner: {}", r.status()))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Ok(r) => error.set(Some(t_args(
+                        "partner-list-error-fetch-partner",
+                        &fluent_args!["status" => r.status()],
+                    ))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
 
                 let resp = Api::get(
@@ -166,10 +189,19 @@ pub fn partner_list_table() -> Html {
                 match resp {
                     Ok(r) if r.ok() => match r.json::<Vec<PartnerAddress>>().await {
                         Ok(addresses) => partner_addresses.set(addresses),
-                        Err(e) => error.set(Some(format!("Failed to parse addresses: {}", e))),
+                        Err(e) => error.set(Some(t_args(
+                            "partner-list-error-parse-addresses",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     },
-                    Ok(r) => error.set(Some(format!("Failed to fetch addresses: {}", r.status()))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Ok(r) => error.set(Some(t_args(
+                        "partner-list-error-fetch-addresses",
+                        &fluent_args!["status" => r.status()],
+                    ))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
 
                 let resp = Api::get(
@@ -181,10 +213,19 @@ pub fn partner_list_table() -> Html {
                 match resp {
                     Ok(r) if r.ok() => match r.json::<Vec<PartnerContact>>().await {
                         Ok(contacts) => partner_contacts.set(contacts),
-                        Err(e) => error.set(Some(format!("Failed to parse contacts: {}", e))),
+                        Err(e) => error.set(Some(t_args(
+                            "partner-list-error-parse-contacts",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     },
-                    Ok(r) => error.set(Some(format!("Failed to fetch contacts: {}", r.status()))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Ok(r) => error.set(Some(t_args(
+                        "partner-list-error-fetch-contacts",
+                        &fluent_args!["status" => r.status()],
+                    ))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -218,8 +259,14 @@ pub fn partner_list_table() -> Html {
                         on_modal_close.emit(());
                         fetch_data.emit(());
                     }
-                    Ok(r) => error.set(Some(format!("Failed to add partner: {}", r.status()))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Ok(r) => error.set(Some(t_args(
+                        "partner-list-error-add-partner",
+                        &fluent_args!["status" => r.status()],
+                    ))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -258,9 +305,15 @@ pub fn partner_list_table() -> Html {
                             fetch_data.emit(());
                         }
                         Ok(r) => {
-                            error.set(Some(format!("Failed to delete partner: {}", r.status())))
+                            error.set(Some(t_args(
+                                "partner-list-error-delete-partner",
+                                &fluent_args!["status" => r.status()],
+                            )))
                         }
-                        Err(e) => error.set(Some(format!("Network error: {}", e))),
+                        Err(e) => error.set(Some(t_args(
+                            "common-network-error",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     }
                 });
             }
@@ -279,7 +332,7 @@ pub fn partner_list_table() -> Html {
         .collect();
 
     if *loading {
-        return html! { <p>{ "Loading..." }</p> };
+        return html! { <p>{ t("common-loading") }</p> };
     }
     if let Some(err) = &*error {
         return html! { <div class="error">{ err }</div> };
@@ -288,7 +341,7 @@ pub fn partner_list_table() -> Html {
     html! {
         <>
             <div class="table-actions">
-                <button onclick={on_add_click}>{ "Add Partner" }</button>
+                <button onclick={on_add_click}>{ t("partner-list-add-partner-button") }</button>
             </div>
 
             if *show_add_modal {
@@ -321,10 +374,10 @@ pub fn partner_list_table() -> Html {
             <table class="table">
                 <thead>
                     <tr>
-                        <th class="table__text-col">{ "Legal Name" }</th>
-                        <th class="table__text-col">{ "Trade Name" }</th>
-                        <th class="table__text-col">{ "Type" }</th>
-                        <th class="table__col-actions">{ "Actions" }</th>
+                        <th class="table__text-col">{ t("partner-list-legal-name") }</th>
+                        <th class="table__text-col">{ t("partner-list-trade-name") }</th>
+                        <th class="table__text-col">{ t("common-type") }</th>
+                        <th class="table__col-actions">{ t("common-actions") }</th>
                     </tr>
                 </thead>
                 <tbody>

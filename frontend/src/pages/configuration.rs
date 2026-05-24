@@ -27,6 +27,8 @@ use crate::components::layout::Layout;
 use crate::contexts::auth_context::use_user_context;
 use crate::contexts::org_context::{OrgAction, OrgContextHandle, OrgState};
 use crate::router::Route;
+use fluent::fluent_args;
+use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
 use shared_core::models::organization::Organization;
 use shared_core::models::system_tag::SystemTag;
@@ -97,13 +99,13 @@ pub fn configuration_page() -> Html {
                                     }));
                                     details_error.set(None);
                                 }
-                                _ => details_error.set(Some("Failed to parse data".to_string())),
+                                _ => details_error.set(Some(t("configuration-error-parse"))),
                             }
                         } else {
-                            details_error.set(Some("Failed to fetch data".to_string()));
+                            details_error.set(Some(t("configuration-error-fetch")));
                         }
                     }
-                    _ => details_error.set(Some("Network error".to_string())),
+                    _ => details_error.set(Some(t("common-network-error"))),
                 }
                 loading.set(false);
             });
@@ -145,11 +147,16 @@ pub fn configuration_page() -> Html {
                         navigator.push(&Route::Dashboard);
                     }
                     Ok(r) => {
-                        error_state
-                            .set(Some(format!("Error saving configuration: {}", r.status())));
+                        error_state.set(Some(t_args(
+                            "configuration-error-save",
+                            &fluent_args!["status" => r.status()],
+                        )));
                     }
                     Err(e) => {
-                        error_state.set(Some(format!("Network error: {}", e)));
+                        error_state.set(Some(t_args(
+                            "common-network-error",
+                            &fluent_args!["error" => e.to_string()],
+                        )));
                     }
                 }
             });
@@ -178,24 +185,24 @@ pub fn configuration_page() -> Html {
     html! {
         <Layout>
             <div class="page">
-                <h3>{ "Configuration" }</h3>
+                <h3>{ t("configuration-title") }</h3>
                 if *loading {
-                    <p>{ "Loading..." }</p>
+                    <p>{ t("common-loading") }</p>
                 } else {
                     <div class="data-form">
-                        <h4 class="data-form__full-width">{ "Organization Settings" }</h4>
-                        <label for="strict_audit_mode">{ "Strict Audit Mode" }</label>
+                        <h4 class="data-form__full-width">{ t("configuration-org-settings-title") }</h4>
+                        <label for="strict_audit_mode">{ t("configuration-strict-audit-label") }</label>
                         <input
                             type="checkbox"
                             id="strict_audit_mode"
                             checked={*strict_audit_mode}
                             onchange={on_audit_change}
                         />
-                        <small class="data-form__full-width">{ "When enabled, forbids editing and deletion of Journal Entries for closed periods." }</small>
+                        <small class="data-form__full-width">{ t("configuration-strict-audit-description") }</small>
                         <hr class="data-form__full-width"/>
 
-                        <h4>{ "System Accounts" }</h4>
-                        <p> { "Map system-critical accounts to the correct accounts in your chart of accounts." } </p>
+                        <h4>{ t("configuration-system-accounts-title") }</h4>
+                        <p> { t("configuration-system-accounts-description") } </p>
                         { for SystemTag::iterator().map(|tag| {
                             let selected_account_id = system_accounts.get(&tag).map(|id| id.to_string());
                             html! {
@@ -213,7 +220,7 @@ pub fn configuration_page() -> Html {
                                         }
                                         value={selected_account_id}
                                     >
-                                        <option value="" disabled=true>{ "Select Account" }</option>
+                                        <option value="" disabled=true>{ t("configuration-select-account") }</option>
                                         { for accounts.iter().map(|acc| html! {
                                             <option
                                                 value={acc.id.to_string()}
@@ -227,10 +234,10 @@ pub fn configuration_page() -> Html {
                             }
                         })}
                         <div class="data-form__actions">
-                            <button onclick={on_save}>{ "Save Configuration" }</button>
+                            <button onclick={on_save}>{ t("configuration-save-button") }</button>
                         </div>
                         if *details_success {
-                            <div class="message message__success">{"Configuration saved successfully!"}</div>
+                            <div class="message message__success">{t("configuration-save-success")}</div>
                         }
                         if let Some(err) = (*details_error).clone() {
                             <div class="message message__error">{err}</div>

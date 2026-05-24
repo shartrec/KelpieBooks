@@ -2,11 +2,12 @@
 members = [
     "backend",
     "frontend",
-"shared_core",
+    "shared_core",
 ]
 resolver = "2"
 
 [workspace.dependencies]
+fluent = { version = "0.16" }
 rust_decimal = "1.35.0"
 rust_decimal_macros = "1.35.0"
 sqlx = { version = "0.7", default-features = false, features = [

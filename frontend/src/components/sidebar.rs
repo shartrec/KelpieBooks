@@ -23,6 +23,7 @@
  */
 
 use crate::router::Route;
+use shared_core::i18n::t;
 use yew::prelude::*;
 use yew_router::prelude::*;
 // Assuming your router's Route enum is in lib.rs or main.rs
@@ -49,47 +50,47 @@ pub fn sidebar() -> Html {
     html! {
         <aside class="sidebar">
             <div class="sidebar__header">
-                <img src="/images/kelpiedog_120x120_transparent.png" alt="Logo" class="sidebar__logo" />
-                <h2>{ "KelpieBooks" }</h2>
+                <img src="/images/kelpiedog_120x120_transparent.png" alt={t("sidebar-logo-alt")} class="sidebar__logo" />
+                <h2>{ t("branding-app-name") }</h2>
             </div>
             <nav class="sidebar__nav">
                 <ul>
-                    <li><Link<Route> to={Route::Dashboard}>{ "Dashboard" }</Link<Route>></li>
-                    <li><Link<Route> to={Route::Ledger}>{ "Accounts" }</Link<Route>></li>
-                    <li><Link<Route> to={Route::Payables}>{ "Payables" }</Link<Route>></li>
-                    <li><Link<Route> to={Route::PartnerList}>{ "Partners" }</Link<Route>></li>
+                    <li><Link<Route> to={Route::Dashboard}>{ t("sidebar-dashboard") }</Link<Route>></li>
+                    <li><Link<Route> to={Route::Ledger}>{ t("sidebar-accounts") }</Link<Route>></li>
+                    <li><Link<Route> to={Route::Payables}>{ t("sidebar-payables") }</Link<Route>></li>
+                    <li><Link<Route> to={Route::PartnerList}>{ t("sidebar-partners") }</Link<Route>></li>
                     <li class="sidebar__group">
                         <div class="sidebar__group-header" onclick={toggle_reports}>
-                            <span>{ "Reports" }</span>
+                            <span>{ t("sidebar-reports") }</span>
                             <img
                                 src="/images/chevron-right.svg"
-                                alt="Toggle"
+                                alt={t("common-toggle")}
                                 class={if *reports_open { "rotated" } else { "" }}
                             />
                         </div>
                         if *reports_open {
                             <ul class="sidebar__sub-nav">
-                                <li><Link<Route> to={Route::TrialBalance}>{ "Trial Balance" }</Link<Route>></li>
-                                <li><Link<Route> to={Route::ProfitLoss}>{ "Profit & Loss" }</Link<Route>></li>
-                                <li><Link<Route> to={Route::BalanceSheet}>{ "Balance Sheet" }</Link<Route>></li>
-                                <li><Link<Route> to={Route::GeneralLedger}>{ "General Ledger" }</Link<Route>></li>
+                                <li><Link<Route> to={Route::TrialBalance}>{ t("sidebar-trial-balance") }</Link<Route>></li>
+                                <li><Link<Route> to={Route::ProfitLoss}>{ t("sidebar-profit-loss") }</Link<Route>></li>
+                                <li><Link<Route> to={Route::BalanceSheet}>{ t("sidebar-balance-sheet") }</Link<Route>></li>
+                                <li><Link<Route> to={Route::GeneralLedger}>{ t("sidebar-general-ledger") }</Link<Route>></li>
                             </ul>
                         }
                     </li>
                     <li class="sidebar__group">
                         <div class="sidebar__group-header" onclick={toggle_tasks}>
-                            <span>{ "Tasks" }</span>
+                            <span>{ t("sidebar-tasks") }</span>
                             <img
                                 src="/images/chevron-right.svg"
-                                alt="Toggle"
+                                alt={t("common-toggle")}
                                 class={if *tasks_open { "rotated" } else { "" }}
                             />
                         </div>
                         if *tasks_open {
                             <ul class="sidebar__sub-nav">
-                                <li><Link<Route> to={Route::CloseYear}>{ "Close Year" }</Link<Route>></li>
-                                <li><Link<Route> to={Route::PeriodSettings}>{ "Period Settings" }</Link<Route>></li>
-                                <li><Link<Route> to={Route::Configuration}>{ "Configuration" }</Link<Route>></li>
+                                <li><Link<Route> to={Route::CloseYear}>{ t("sidebar-close-year") }</Link<Route>></li>
+                                <li><Link<Route> to={Route::PeriodSettings}>{ t("sidebar-period-settings") }</Link<Route>></li>
+                                <li><Link<Route> to={Route::Configuration}>{ t("sidebar-configuration") }</Link<Route>></li>
                             </ul>
                         }
                     </li>

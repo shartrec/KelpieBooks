@@ -11,6 +11,8 @@ use crate::components::partner_drawer::addresses_view::AddressesView;
 use crate::components::partner_drawer::contacts_view::ContactsView;
 use crate::components::partner_drawer::general_view::GeneralView;
 use crate::contexts::auth_context::use_user_context;
+use fluent::fluent_args;
+use shared_core::i18n::{t, t_args};
 use shared_core::models::partner::Partner;
 use shared_core::models::partner_address::PartnerAddress;
 use shared_core::models::partner_contact::PartnerContact;
@@ -81,8 +83,14 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
                     Ok(r) if r.ok() => {
                         on_change.emit(());
                     }
-                    Ok(r) => error.set(Some(format!("Failed to save partner: {}", r.status()))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Ok(r) => error.set(Some(t_args(
+                        "partner-drawer-error-save",
+                        &fluent_args!["status" => r.status()],
+                    ))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -93,26 +101,26 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
             <div class="drawer" onclick={|e: MouseEvent| e.stop_propagation()}>
                 <header class="drawer__header">
                     <h3>{ &props.partner.legal_name }</h3>
-                    <button class="btn-close" onclick={on_close.clone()}>{ "✖" }</button>
+                    <button class="btn-close" onclick={on_close.clone()}>{ t("partner-drawer-close-button") }</button>
                 </header>
                 <div class="drawer__tabs">
                     <button
                         class={classes!("tab-trigger", (*active_tab == DrawerTab::General).then_some("tab-trigger--active"))}
                         onclick={set_tab.reform(|_| DrawerTab::General)}
                     >
-                        { "General" }
+                        { t("common-general") }
                     </button>
                     <button
                         class={classes!("tab-trigger", (*active_tab == DrawerTab::Addresses).then_some("tab-trigger--active"))}
                         onclick={set_tab.reform(|_| DrawerTab::Addresses)}
                     >
-                        { "Addresses" }
+                        { t("common-addresses") }
                     </button>
                     <button
                         class={classes!("tab-trigger", (*active_tab == DrawerTab::Contacts).then_some("tab-trigger--active"))}
                         onclick={set_tab.reform(|_| DrawerTab::Contacts)}
                     >
-                        { "Contacts" }
+                        { t("common-contacts") }
                     </button>
                 </div>
                 <div class="drawer__content">
@@ -145,7 +153,7 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
                     }
                 </div>
                 <footer class="drawer__footer">
-                    <button class="button-secondary" onclick={on_close.clone()}>{ "Close" }</button>
+                    <button class="button-secondary" onclick={on_close.clone()}>{ t("common-close") }</button>
                 </footer>
             </div>
         </div>

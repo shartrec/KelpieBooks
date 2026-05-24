@@ -24,14 +24,15 @@
 
 use crate::components::chart_of_accounts_table::ChartOfAccountsTable;
 use crate::components::layout::Layout;
+use shared_core::i18n::t;
 use yew::prelude::*;
 
 #[function_component(LedgerPage)]
 pub fn ledger_page() -> Html {
     html! {
         <Layout>
-            <h1>{ "Chart of Accounts" }</h1>
-            <p>{ "This is a list of all accounts in your organization. The balances include all transactions and are rolled up into parent accounts." }</p>
+            <h1>{ t("coa-title") }</h1>
+            <p>{ t("coa-description") }</p>
             <ChartOfAccountsTable />
         </Layout>
     }

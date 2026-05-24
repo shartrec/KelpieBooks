@@ -33,7 +33,9 @@ use crate::contexts::org_context::use_org_context;
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::pages::new_transaction::NewTransactionQuery;
 use crate::router::Route;
+use fluent::fluent_args;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
+use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
 use shared_core::requests::transaction::ReverseTransactionRequest;
 use shared_core::util::format_currency;
@@ -128,14 +130,20 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<JournalEntryWithBalance>>().await {
                             Ok(data) => entries.set(Rc::new(data)),
-                            Err(e) => error.set(Some(format!("Failed to parse entries: {}", e))),
+                            Err(e) => error.set(Some(t_args(
+                                "ledger-error-parse-entries",
+                                &fluent_args!["error" => e.to_string()],
+                            ))),
                         }
                     }
-                    Ok(response) => error.set(Some(format!(
-                        "Failed to fetch entries: {}",
-                        response.status()
+                    Ok(response) => error.set(Some(t_args(
+                        "ledger-error-fetch-entries",
+                        &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Err(e) => error.set(Some(t_args(
+                        "coa-error-network",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -206,11 +214,14 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                             on_modal_close.emit(());
                             fetch_entries.emit(());
                         }
-                        Ok(r) => error.set(Some(format!(
-                            "Failed to reverse transaction: {}",
-                            r.status()
+                        Ok(r) => error.set(Some(t_args(
+                            "ledger-error-reverse-transaction",
+                            &fluent_args!["status" => r.status()],
                         ))),
-                        Err(e) => error.set(Some(format!("Network error: {}", e))),
+                        Err(e) => error.set(Some(t_args(
+                            "coa-error-network",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     }
                 });
             }
@@ -239,11 +250,14 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                             on_modal_close.emit(());
                             fetch_entries.emit(());
                         }
-                        Ok(r) => error.set(Some(format!(
-                            "Failed to delete transaction: {}",
-                            r.status()
+                        Ok(r) => error.set(Some(t_args(
+                            "ledger-error-delete-transaction",
+                            &fluent_args!["status" => r.status()],
                         ))),
-                        Err(e) => error.set(Some(format!("Network error: {}", e))),
+                        Err(e) => error.set(Some(t_args(
+                            "coa-error-network",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     }
                 });
             }
@@ -284,7 +298,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
     let transaction_groups = use_memo(entries.clone(), |entries| {
         let mut groups: HashMap<Uuid, TransactionGroup> = HashMap::new();
         for entry in entries.iter() {
-            if entry.description != Some("Opening Balance".to_string()) {
+            if entry.description != Some(t("ledger-opening-balance")) {
                 groups.insert(
                     entry.transaction_id,
                     TransactionGroup {
@@ -303,21 +317,21 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
 
     let opening_balance_entry = entries
         .iter()
-        .find(|e| e.description == Some("Opening Balance".to_string()));
+        .find(|e| e.description == Some(t("ledger-opening-balance")));
 
     html! {
         <Layout>
             <div class="report-header">
-                <h3>{ format!("Ledger: {}", account_name) }</h3>
+                <h3>{ t_args("ledger-title", &fluent_args!["name" => account_name]) }</h3>
                 <ReportOptions show_start_date={true} show_end_date={true} />
             </div>
             <div class="table-actions">
                 <Link<Route, NewTransactionQuery> to={Route::NewTransaction} query={query} classes="button">
-                    { "Add New Transaction" }
+                    { t("ledger-add-transaction-button") }
                 </Link<Route, NewTransactionQuery>>
             </div>
             if *loading {
-                <p>{ "Loading..." }</p>
+                <p>{ t("common-loading") }</p>
             } else if let Some(err) = &*error {
                 <div class="error">{ err }</div>
             } else {
@@ -328,11 +342,11 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                 <table class="report-table">
                     <thead>
                         <tr>
-                            <th class="table__text-col">{ "Date" }</th>
-                            <th class="table__text-col">{ "Description" }</th>
-                            <th class="table__value-col">{ "Debit" }</th>
-                            <th class="table__value-col">{ "Credit" }</th>
-                            <th class="table__value-col">{ "Balance" }</th>
+                            <th class="table__text-col">{ t("common-date") }</th>
+                            <th class="table__text-col">{ t("common-description") }</th>
+                            <th class="table__value-col">{ t("common-debit") }</th>
+                            <th class="table__value-col">{ t("common-credit") }</th>
+                            <th class="table__value-col">{ t("common-balance") }</th>
                             <th class="table__col-actions"></th>
                         </tr>
                     </thead>
@@ -340,7 +354,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                         if let Some(entry) = opening_balance_entry {
                             <tr>
                                 <td>{ &entry.date.to_string() }</td>
-                                <td>{ "Opening Balance" }</td>
+                                <td>{ t("ledger-opening-balance") }</td>
                                 <td class="table__value-col">{ if entry.debit > 0 { format_currency(&entry.debit) } else { "".to_string() } }</td>
                                 <td class="table__value-col">{ if entry.credit > 0 { format_currency(&entry.credit) } else { "".to_string() } }</td>
                                 <td class="table__value-col">{ format_currency(&entry.running_balance) }</td>

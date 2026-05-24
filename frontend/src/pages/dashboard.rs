@@ -5,10 +5,12 @@ use crate::router::Route;
 use crate::services::dashboard::{
     get_expense_breakdown, get_financial_health, get_recent_transactions, get_top_payables,
 };
+use fluent::fluent_args;
 use shared_core::dtos::dashboard::FinancialHealth;
 use shared_core::dtos::expense_breakdown::ExpenseBreakdown;
 use shared_core::dtos::recent_transaction::RecentTransaction;
 use shared_core::dtos::top_payable::TopPayable;
+use shared_core::i18n::{t, t_args};
 use shared_core::util::format_currency;
 use yew::prelude::*;
 use yew_router::prelude::*;
@@ -79,34 +81,34 @@ pub fn dashboard_page() -> Html {
         <Layout>
             <div class="dashboard-container">
                 <header class="dashboard-header-flex">
-                    <h1>{ "Dashboard" }</h1>
+                    <h1>{ t("dashboard-title") }</h1>
                     if let Some(lock_date) = org_context.locked_until {
                         <span class="period-badge">
-                            { format!("🔒 Period Locked Until: {}", lock_date.format("%d %b %Y")) }
+                            { t_args("dashboard-period-locked", &fluent_args!["date" => lock_date.format("%d %b %Y").to_string()]) }
                         </span>
                     } else {
-                        <span class="period-badge warning">{ "🔓 Period Open" }</span>
+                        <span class="period-badge warning">{ t("dashboard-period-open") }</span>
                     }
                 </header>
 
                 <section class="dashboard-grid">
                     if let Some(health) = &*financial_health_state {
-                        <FinancialCard title="Net Profit (YTD)" value={&health.net_profit_ytd} />
-                        <FinancialCard title="Operating Bank" value={&health.bank_balance} />
-                        <FinancialCard title="Receivables" value={&health.accounts_receivable} />
-                        <FinancialCard title="Payables" value={&health.accounts_payable} />
+                        <FinancialCard title={t("dashboard-net-profit-ytd")} value={health.net_profit_ytd} />
+                        <FinancialCard title={t("dashboard-operating-bank")} value={health.bank_balance} />
+                        <FinancialCard title={t("dashboard-receivables")} value={health.accounts_receivable} />
+                        <FinancialCard title={t("dashboard-payables")} value={health.accounts_payable} />
                     }
                 </section>
 
                 <div class="dashboard-columns">
                     <section class="card shadow-sm p-4">
-                        <h3>{ "Recent Ledger Activity" }</h3>
+                        <h3>{ t("dashboard-recent-ledger-activity") }</h3>
                         <table class="audit-table">
                             <thead>
                                 <tr>
-                                    <th>{ "Date" }</th>
-                                    <th>{ "Description" }</th>
-                                    <th style="text-align: right">{ "Amount" }</th>
+                                    <th>{ t("common-date") }</th>
+                                    <th>{ t("common-description") }</th>
+                                    <th style="text-align: right">{ t("common-amount") }</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -130,13 +132,13 @@ pub fn dashboard_page() -> Html {
                         </table>
                     </section>
                     <section class="card shadow-sm p-4">
-                        <h3>{ "Top 5 Payables" }</h3>
+                        <h3>{ t("dashboard-top-5-payables") }</h3>
                         <table class="audit-table">
                             <thead>
                                 <tr>
-                                    <th>{ "Vendor" }</th>
-                                    <th>{ "Due Date" }</th>
-                                    <th style="text-align: right">{ "Amount" }</th>
+                                    <th>{ t("common-vendor") }</th>
+                                    <th>{ t("common-due-date") }</th>
+                                    <th style="text-align: right">{ t("common-amount") }</th>
                                 </tr>
                             </thead>
                             <tbody>

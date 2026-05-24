@@ -31,6 +31,8 @@ use crate::components::vendor_invoice_drawer::details_view::DetailsView;
 use crate::components::vendor_invoice_drawer::items_view::ItemsView;
 use crate::components::vendor_invoice_drawer::payments_view::PaymentsView;
 use crate::contexts::auth_context::use_user_context;
+use fluent::fluent_args;
+use shared_core::i18n::{t, t_args};
 use shared_core::models::partner::Partner;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use yew::prelude::*;
@@ -83,26 +85,26 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
                     // Vendor Identity Context Line
                     <h3 class="payment-context-banner__vendor">{ &props.partner.trade_name }</h3>
                     <button class="close-button" onclick={on_close.clone()}>
-                        <img src="/images/x.svg" alt="Close" />
+                        <img src="/images/x.svg" alt={t("common-close")} />
                     </button>
                 </header>
 
                 <div class="payment-context-banner">
                     // Metadata & Financial Reconciliation Badges
                     <div class="payment-context-banner__details">
-                        <span>{ format!("Inv #: {}", props.invoice.invoice_number) }</span>
+                        <span>{ t_args("vendor-invoice-drawer-inv-number", &fluent_args!["number" => props.invoice.invoice_number.clone()]) }</span>
                         <span style="color: var(--border-color, #cbd5e1);">{"|"}</span>
 
                         // Always display the true historical original invoice gross liability
                         <span class="amount-badge amount-badge--gross">
-                            { format!("Gross: {}", format_currency(&total_gross)) }
+                            { t_args("vendor-invoice-drawer-gross", &fluent_args!["amount" => format_currency(&total_gross)]) }
                         </span>
 
                         // Conditionally mount outstanding balances if a partial pay variance exists
                         { if balance_remaining != total_gross {
                             html! {
                                 <span class="amount-badge amount-badge--outstanding">
-                                    { format!("Outstanding Balance: {}", format_currency(&balance_remaining)) }
+                                    { t_args("vendor-invoice-drawer-outstanding-balance", &fluent_args!["amount" => format_currency(&balance_remaining)]) }
                                 </span>
                             }
                         } else {
@@ -116,19 +118,19 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
                         class={classes!("tab-trigger", (*active_tab == InvoiceDrawerTab::General).then_some("tab-trigger--active"))}
                         onclick={set_tab.reform(|_| InvoiceDrawerTab::General)}
                     >
-                        { "General" }
+                        { t("common-general") }
                     </button>
                     <button
                         class={classes!("tab-trigger", (*active_tab == InvoiceDrawerTab::Items).then_some("tab-trigger--active"))}
                         onclick={set_tab.reform(|_| InvoiceDrawerTab::Items)}
                     >
-                        { "Items" }
+                        { t("common-items") }
                     </button>
                     <button
                         class={classes!("tab-trigger", (*active_tab == InvoiceDrawerTab::Payments).then_some("tab-trigger--active"))}
                         onclick={set_tab.reform(|_| InvoiceDrawerTab::Payments)}
                     >
-                        { "Payments" }
+                        { t("common-payments") }
                     </button>
                 </div>
                 <div class="drawer__content">
@@ -141,7 +143,7 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
                     }
                 </div>
                 <footer class="drawer__footer">
-                    <button class="button-secondary" onclick={on_close.clone()}>{ "Close" }</button>
+                    <button class="button-secondary" onclick={on_close.clone()}>{ t("common-close") }</button>
                 </footer>
             </div>
         </div>

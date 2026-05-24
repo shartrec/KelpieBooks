@@ -26,6 +26,8 @@ use crate::api::Api;
 use crate::components::currency_input::CurrencyInput;
 use crate::contexts::auth_context::use_user_context;
 use chrono::{Local, NaiveDate, Utc};
+use fluent::fluent_args;
+use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use shared_core::models::vendor_payment::VendorPayment;
@@ -86,11 +88,20 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<VendorPayment>>().await {
                             Ok(data) => payments.set(data),
-                            Err(e) => error.set(Some(format!("Failed to parse payments: {}", e))),
+                            Err(e) => error.set(Some(t_args(
+                                "payments-view-error-parse-payments",
+                                &fluent_args!["error" => e.to_string()],
+                            ))),
                         }
                     }
-                    Ok(response) => error.set(Some(format!("Failed to fetch payments: {}", response.status()))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Ok(response) => error.set(Some(t_args(
+                        "payments-view-error-fetch-payments",
+                        &fluent_args!["status" => response.status()],
+                    ))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -112,11 +123,20 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<Account>>().await {
                             Ok(data) => accounts.set(data),
-                            Err(e) => error.set(Some(format!("Failed to parse accounts: {}", e))),
+                            Err(e) => error.set(Some(t_args(
+                                "payments-view-error-parse-accounts",
+                                &fluent_args!["error" => e.to_string()],
+                            ))),
                         }
                     }
-                    Ok(response) => error.set(Some(format!("Failed to fetch accounts: {}", response.status()))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Ok(response) => error.set(Some(t_args(
+                        "payments-view-error-fetch-accounts",
+                        &fluent_args!["status" => response.status()],
+                    ))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -193,8 +213,14 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
                         on_change.emit(());
                         fetch_payments.emit(());
                     }
-                    Ok(r) => error.set(Some(format!("Failed to make payment: {}", r.status()))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Ok(r) => error.set(Some(t_args(
+                        "payments-view-error-make-payment",
+                        &fluent_args!["status" => r.status()],
+                    ))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -204,37 +230,37 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
         <div class="payments-view">
             <form onsubmit={on_submit}>
                 <div class="data-form">
-                    <label>{"Payment Date:"}</label>
+                    <label>{t("payments-view-payment-date-label")}</label>
                     <input type="date" value={request.payment_date.format("%Y-%m-%d").to_string()} onchange={on_date_change(|r, v| r.payment_date = v)} required=true />
 
-                    <label>{"Bank Account:"}</label>
+                    <label>{t("payments-view-bank-account-label")}</label>
                     <select onchange={on_select_change(|r, v| r.bank_account_id = Uuid::parse_str(&v).unwrap_or_default())} required=true>
-                        <option value="" disabled=true selected=true>{"Select an account"}</option>
+                        <option value="" disabled=true selected=true>{t("journal-entry-select-account")}</option>
                         { for (*accounts).iter().map(|account| html! {
                             <option value={account.id.to_string()}>{&account.name}</option>
                         })}
                     </select>
 
-                    <label>{"Amount:"}</label>
+                    <label>{t("common-amount")}</label>
                     <CurrencyInput value={request.amount} on_change={on_amount_change} />
 
-                    <label>{"Reference:"}</label>
+                    <label>{t("payments-view-reference-label")}</label>
                     <input type="text" value={request.reference.as_deref().unwrap_or("").to_string()} oninput={on_input(|r, v| r.reference = Some(v))} />
                 </div>
                 <div class="voucher-footer">
                     if let Some(e) = &*error {
                         <div class="error">{e}</div>
                     }
-                    <button type="submit" class="button-primary">{ "Make Payment" }</button>
+                    <button type="submit" class="button-primary">{ t("payments-view-make-payment-button") }</button>
                 </div>
             </form>
 
             <table class="table">
                 <thead>
                     <tr>
-                        <th>{"Date"}</th>
-                        <th>{"Amount"}</th>
-                        <th>{"Reference"}</th>
+                        <th>{t("common-date")}</th>
+                        <th>{t("common-amount")}</th>
+                        <th>{t("payments-view-reference-label")}</th>
                     </tr>
                 </thead>
                 <tbody>

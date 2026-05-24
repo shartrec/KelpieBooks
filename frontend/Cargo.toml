@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 shared_core = { path = "../shared_core" }
 chrono = { version = "0.4", features = ["serde"] }
+fluent = {workspace = true}
 gloo-net = "0.6.0"
 gloo-console = "0.4.0"
 gloo-timers = "0.3.0"

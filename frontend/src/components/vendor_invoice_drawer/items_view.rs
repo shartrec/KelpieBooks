@@ -26,6 +26,8 @@ use crate::api::Api;
 use crate::components::generic_delete_confirmation_modal::GenericDeleteConfirmationModal;
 use crate::components::vendor_invoice_drawer::item_edit_card::ItemEditCard;
 use crate::contexts::auth_context::use_user_context;
+use fluent::fluent_args;
+use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
@@ -69,11 +71,20 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<Account>>().await {
                             Ok(data) => accounts.set(data),
-                            Err(e) => error.set(Some(format!("Failed to parse accounts: {}", e))),
+                            Err(e) => error.set(Some(t_args(
+                                "new-vendor-invoice-error-parse-accounts",
+                                &fluent_args!["error" => e.to_string()],
+                            ))),
                         }
                     }
-                    Ok(response) => error.set(Some(format!("Failed to fetch accounts: {}", response.status()))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Ok(response) => error.set(Some(t_args(
+                        "new-vendor-invoice-error-fetch-accounts",
+                        &fluent_args!["status" => response.status()],
+                    ))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -174,8 +185,14 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                     Ok(r) if r.ok() => {
                         on_change.emit(());
                     }
-                    Ok(r) => error.set(Some(format!("Failed to update invoice items: {}", r.status()))),
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Ok(r) => error.set(Some(t_args(
+                        "items-view-error-update-items",
+                        &fluent_args!["status" => r.status()],
+                    ))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -210,7 +227,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                         let account_display = accounts.iter()
                             .find(|acc| acc.id == item.account_id) // Match the GL ID
                             .map(|acc| format!("{} - {}", acc.code, acc.name)) // Format as "6100 - Software Expenses"
-                            .unwrap_or_else(|| "Unknown GL Account".to_string());
+                            .unwrap_or_else(|| t("items-view-unknown-gl-account"));
 
                         html! {
                             <div class="card-item-compact">
@@ -218,16 +235,16 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                                 <div class="card-item-compact__meta">
                                     // Replace placeholder text with your structural account lookup if available
                                     <span class="card-item-compact__account-badge">
-                                        { format!("GL: {}", account_display) }
+                                        { t_args("items-view-gl-label", &fluent_args!["account" => account_display]) }
                                     </span>
 
                                     // Inline micro-actions shifted up to eliminate dedicated footer bars
                                     <div class="card__actions" style="display: flex; gap: 4px;">
                                         <button type="button" class="icon-button" onclick={on_edit}>
-                                            <img src="/images/edit.svg" alt="Edit" style="width: 13px; height: 13px;" />
+                                            <img src="/images/edit.svg" alt={t("common-edit")} style="width: 13px; height: 13px;" />
                                         </button>
                                         <button type="button" class="icon-button" onclick={on_delete}>
-                                            <img src="/images/delete.svg" alt="Delete" style="width: 13px; height: 13px;" />
+                                            <img src="/images/delete.svg" alt={t("common-delete")} style="width: 13px; height: 13px;" />
                                         </button>
                                     </div>
                                 </div>
@@ -243,7 +260,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                                             { format_currency(&item.total_amount) }
                                         </p>
                                         <p class="card-item-compact__sub-breakdown">
-                                            { format!("Net: {} | Tax: {}", format_currency(&item.net_amount), format_currency(&item.tax_amount)) }
+                                            { t_args("items-view-net-tax-breakdown", &fluent_args!["net" => format_currency(&item.net_amount), "tax" => format_currency(&item.tax_amount)]) }
                                         </p>
                                     </div>
                                 </div>
@@ -251,20 +268,20 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                         }
                     })}
                     <div class="table-actions">
-                        <button type="button" class="button-primary" onclick={add_item}>{ "+ Add Item" }</button>
+                        <button type="button" class="button-primary" onclick={add_item}>{ t("items-view-add-item-button") }</button>
                     </div>
                     <div class="voucher-footer">
                         if let Some(e) = &*error {
                             <div class="error">{e}</div>
                         }
-                        <button type="submit" class="button-primary">{ "Save Changes" }</button>
+                        <button type="submit" class="button-primary">{ t("account-modal-save-button") }</button>
                     </div>
                 </form>
             }
             if let Some(item) = &*item_to_delete {
                 <GenericDeleteConfirmationModal
-                    title="Delete Item"
-                    message={format!("Are you sure you want to delete the item: {}?", item.description)}
+                    title={t("items-view-delete-item-title")}
+                    message={t_args("items-view-delete-item-message", &fluent_args!["description" => item.description.clone()])}
                     on_confirm={on_delete_confirm}
                     on_cancel={on_delete_cancel}
                 />

@@ -23,6 +23,7 @@
  */
 
 use crate::components::currency_input::CurrencyInput;
+use shared_core::i18n::t;
 use shared_core::models::account::Account;
 use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
 use shared_core::util::format_currency;
@@ -102,37 +103,37 @@ pub fn item_edit_card(props: &ItemEditCardProps) -> Html {
             <div class="card__meta-line" style="margin-bottom: 0.75rem;">
                 <div class="card__title">
                     <strong style="font-size: 0.85rem; text-transform: uppercase; color: var(--brand-dark);">
-                        { if props.item.description.is_empty() { "Add Item" } else { "Edit Item" } }
+                        { if props.item.description.is_empty() { t("item-edit-card-add-title") } else { t("item-edit-card-edit-title") } }
                     </strong>
                 </div>
             </div>
 
             <div class="card-form-compact">
-                    <label>{"Description:"}</label>
+                    <label>{t("common-description")}</label>
                     <input type="text" value={item.description.clone()} oninput={on_input(|i, v| i.description = v)} />
 
-                    <label>{"Account:"}</label>
+                    <label>{t("common-account")}</label>
                     <select onchange={on_select_change(|i, v| i.account_id = Uuid::parse_str(&v).unwrap_or_default())}>
-                        <option value="" disabled=true selected={item.account_id.is_nil()}>{"Select an account"}</option>
+                        <option value="" disabled=true selected={item.account_id.is_nil()}>{t("journal-entry-select-account")}</option>
                         { for props.accounts.iter().map(|account| html! {
                             <option value={account.id.to_string()} selected={item.account_id == account.id}>{&account.name}</option>
                         })}
                     </select>
 
-                    <label>{"Net Amount:"}</label>
+                    <label>{t("item-edit-card-net-amount-label")}</label>
                     <CurrencyInput value={item.net_amount} on_change={on_net_amount_change} />
 
-                    <label>{"Tax Amount:"}</label>
+                    <label>{t("item-edit-card-tax-amount-label")}</label>
                     <CurrencyInput value={item.tax_amount} on_change={on_tax_amount_change} />
 
-                    <label>{"Total:"}</label>
+                    <label>{t("common-total")}</label>
                     <div class="total-amount">
                         {format_currency(&item.total_amount)}
                     </div>
             </div>
             <div class="card-footer">
-                <button class="button-primary" onclick={on_save}>{ "Save" }</button>
-                <button class="button-secondary" onclick={on_cancel}>{ "Cancel" }</button>
+                <button class="button-primary" onclick={on_save}>{ t("common-save") }</button>
+                <button class="button-secondary" onclick={on_cancel}>{ t("common-cancel") }</button>
             </div>
         </div>
     }

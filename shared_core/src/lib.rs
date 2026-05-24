@@ -23,22 +23,8 @@
  */
 
 pub mod dtos;
+pub mod i18n;
 pub mod models;
 pub mod reports;
 pub mod requests;
 pub mod util;
-
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}

@@ -4,6 +4,7 @@ use crate::router::Route;
 use gloo_net::http::Request;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::dtos::transaction_detail::TransactionDetail;
+use shared_core::i18n::t;
 use shared_core::util::format_currency;
 use uuid::Uuid;
 use yew::prelude::*;
@@ -115,9 +116,9 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                 <td>
                     <button onclick={on_toggle_expand} class="collapse-toggle">
                         if *expanded {
-                            <img src="/images/chevron-down.svg" alt="Collapse" />
+                            <img src="/images/chevron-down.svg" alt={t("common-collapse")} />
                         } else {
-                            <img src="/images/chevron-right.svg" alt="Expand" />
+                            <img src="/images/chevron-right.svg" alt={t("common-expand")} />
                         }
                     </button>
                     { primary_entry.date.to_string() }
@@ -128,24 +129,24 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                 <td class="table__value-col">{ format_currency(&primary_entry.running_balance) }</td>
                 <td class="actions-cell">
                     <div class="actions-dropdown">
-                        <button class="icon-button" onclick={on_toggle_dropdown} title="Actions">
-                            <img src="/images/more-vertical.svg" alt="Actions" class="dropdown-trigger-icon" />
+                        <button class="icon-button" onclick={on_toggle_dropdown} title={t("common-actions")}>
+                            <img src="/images/more-vertical.svg" alt={t("common-actions")} class="dropdown-trigger-icon" />
                         </button>
                         if *dropdown_open {
                             <div class="actions-dropdown__content">
                                 if strict_audit_mode {
                                     <button class="dropdown-item" onclick={on_reverse_click} disabled={is_locked}>
-                                        <img src="/images/reverse.svg" alt="Reverse" />
-                                        <span>{ "Reverse" }</span>
+                                        <img src="/images/reverse.svg" alt={t("transaction-row-reverse")} />
+                                        <span>{ t("transaction-row-reverse") }</span>
                                     </button>
                                 } else {
                                     <button class="dropdown-item" onclick={on_edit_click} disabled={is_locked}>
-                                        <img src="/images/edit.svg" alt="Edit" />
-                                        <span>{ "Edit" }</span>
+                                        <img src="/images/edit.svg" alt={t("common-edit")} />
+                                        <span>{ t("common-edit") }</span>
                                     </button>
                                     <button class="dropdown-item" onclick={on_delete_click} disabled={is_locked}>
-                                        <img src="/images/delete.svg" alt="Delete" />
-                                        <span>{ "Delete" }</span>
+                                        <img src="/images/delete.svg" alt={t("common-delete")} />
+                                        <span>{ t("common-delete") }</span>
                                     </button>
                                 }
                                 <Link<Route, NewTransactionQuery>
@@ -153,8 +154,8 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                                     query={duplicate_query}
                                     classes="dropdown-item"
                                 >
-                                    <img src="/images/edit.svg" alt="Duplicate" />
-                                    <span>{ "Duplicate" }</span>
+                                    <img src="/images/edit.svg" alt={t("transaction-row-duplicate")} />
+                                    <span>{ t("transaction-row-duplicate") }</span>
                                 </Link<Route, NewTransactionQuery>>
                             </div>
                         }
@@ -166,13 +167,13 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                     <td colspan="6">
                         <div class="transaction-detail__content">
                             if *loading_details {
-                                <p>{ "Loading details..." }</p>
+                                <p>{ t("transaction-row-loading-details") }</p>
                             } else if let Some(detail) = &*transaction_detail {
                                 <div class="journal-entry__header">
-                                    <span class="table__text-col">{ "Details for trans" }</span>
+                                    <span class="table__text-col">{ t("transaction-row-details-for") }</span>
                                     <span class="table__text-col">{ &detail.transaction.id.to_string()[0..8] }</span>
-                                    <span class="table__value-col">{ "Debit" }</span>
-                                    <span class="table__value-col">{ "Credit" }</span>
+                                    <span class="table__value-col">{ t("common-debit") }</span>
+                                    <span class="table__value-col">{ t("common-credit") }</span>
                                 </div>
                                 { for detail.entries.iter().map(|entry| html! {
                                     <div class="journal-entry__line">
@@ -190,7 +191,7 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                                     </div>
                                 })}
                             } else {
-                                <p class="error">{ "Could not load transaction details." }</p>
+                                <p class="error">{ t("transaction-row-error-load-details") }</p>
                             }
                         </div>
                     </td>

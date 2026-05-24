@@ -23,6 +23,7 @@
  */
 
 use crate::components::currency_input::CurrencyInput;
+use shared_core::i18n::t;
 use shared_core::models::account::Account;
 use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
 use uuid::Uuid;
@@ -97,7 +98,7 @@ pub fn vendor_invoice_item_row(props: &VendorInvoiceItemRowProps) -> Html {
         <div class="voucher__entry-row">
             <input type="text" value={props.item.description.clone()} oninput={on_description_change} />
             <select onchange={on_account_change}>
-                <option value="" disabled=true selected={props.item.account_id.is_nil()}>{"Select Account"}</option>
+                <option value="" disabled=true selected={props.item.account_id.is_nil()}>{t("journal-entry-select-account")}</option>
                 { for props.accounts.iter().map(|acc| html! {
                     <option value={acc.id.to_string()} selected={props.item.account_id == acc.id}>{&acc.name}</option>
                 })}
@@ -105,7 +106,7 @@ pub fn vendor_invoice_item_row(props: &VendorInvoiceItemRowProps) -> Html {
             <CurrencyInput value={props.item.net_amount} on_change={on_net_amount_change} />
             <CurrencyInput value={props.item.tax_amount} on_change={on_tax_amount_change} />
             <CurrencyInput value={props.item.total_amount} on_change={Callback::noop()} />
-            <button type="button" onclick={on_delete_click} class="icon-button">{ "X" }</button>
+            <button type="button" onclick={on_delete_click} class="icon-button">{ t("journal-entry-delete-button") }</button>
         </div>
     }
 }

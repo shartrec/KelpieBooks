@@ -28,7 +28,9 @@ use crate::components::report_options::ReportOptions;
 use crate::contexts::auth_context::use_user_context;
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::router::Route;
+use fluent::fluent_args;
 use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
+use shared_core::i18n::{t, t_args};
 use shared_core::util::format_currency;
 use yew::prelude::*;
 use yew_router::prelude::*;
@@ -140,15 +142,22 @@ pub fn general_ledger_report_page() -> Html {
                                         report_data.set(data);
                                         error.set(None);
                                     }
-                                    Err(e) => error
-                                        .set(Some(format!("Failed to parse report data: {}", e))),
+                                    Err(e) => error.set(Some(t_args(
+                                        "general-ledger-error-parse",
+                                        &fluent_args!["error" => e.to_string()],
+                                    ))),
                                 }
                             } else {
-                                error
-                                    .set(Some(format!("Error fetching report: {}", resp.status())));
+                                error.set(Some(t_args(
+                                    "general-ledger-error-fetch",
+                                    &fluent_args!["status" => resp.status()],
+                                )));
                             }
                         }
-                        Err(e) => error.set(Some(format!("Network error: {}", e))),
+                        Err(e) => error.set(Some(t_args(
+                            "common-network-error",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     }
                     loading.set(false);
                 });
@@ -172,22 +181,22 @@ pub fn general_ledger_report_page() -> Html {
         <Layout>
             <div class="report-page">
                 <div class="report-header">
-                    <h3>{ "General Ledger Detail" }</h3>
+                    <h3>{ t("general-ledger-title") }</h3>
                     <ReportOptions show_start_date={true} show_end_date={true} show_advanced_filters={true} />
                 </div>
                 if *loading {
-                    <p>{ "Loading..." }</p>
+                    <p>{ t("common-loading") }</p>
                 } else if let Some(err) = &*error {
                     <div class="error">{ err }</div>
                 } else {
                     <table class="report-table">
                         <thead>
                             <tr>
-                                <th>{ "Date" }</th>
-                                <th>{ "Description" }</th>
-                                <th class="text-amount">{ "Debit" }</th>
-                                <th class="text-amount">{ "Credit" }</th>
-                                <th class="text-amount">{ "Balance" }</th>
+                                <th>{ t("common-date") }</th>
+                                <th>{ t("common-description") }</th>
+                                <th class="text-amount">{ t("common-debit") }</th>
+                                <th class="text-amount">{ t("common-credit") }</th>
+                                <th class="text-amount">{ t("common-balance") }</th>
                             </tr>
                         </thead>
                         <tbody>

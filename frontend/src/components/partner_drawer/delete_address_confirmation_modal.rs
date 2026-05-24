@@ -22,6 +22,8 @@
  *
  */
 
+use fluent::fluent_args;
+use shared_core::i18n::{t, t_args};
 use shared_core::models::partner_address::PartnerAddress;
 use yew::prelude::*;
 
@@ -51,18 +53,16 @@ pub fn delete_address_confirmation_modal(props: &DeleteAddressConfirmationModalP
     html! {
         <div class="modal-overlay" onclick={on_cancel.clone()}>
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
-                <h2>{ "Confirm Deletion" }</h2>
+                <h2>{ t("common-confirm-deletion") }</h2>
                 <p>
-                    { "Are you sure you want to delete the address: " }
-                    <strong>{ &props.address.address_line1 }</strong>
-                    { "?" }
+                    { t_args("delete-address-confirm-message", &fluent_args!["address" => props.address.address_line1.clone()]) }
                 </p>
                 <p class="warning-text">
-                    { "This action cannot be undone." }
+                    { t("reversal-confirm-warning") }
                 </p>
                 <div class="modal__form__actions">
-                    <button type="button" onclick={on_cancel} class="button-secondary">{ "Cancel" }</button>
-                    <button type="button" onclick={on_confirm_delete} class="button-danger">{ "Confirm Delete" }</button>
+                    <button type="button" onclick={on_cancel} class="button-secondary">{ t("common-cancel") }</button>
+                    <button type="button" onclick={on_confirm_delete} class="button-danger">{ t("common-confirm-delete-button") }</button>
                 </div>
             </div>
         </div>

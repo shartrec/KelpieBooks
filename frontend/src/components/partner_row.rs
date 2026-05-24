@@ -22,6 +22,7 @@
  *
  */
 use shared_core::dtos::partner_list_item::PartnerListItem;
+use shared_core::i18n::t;
 use uuid::Uuid;
 use yew::prelude::*;
 
@@ -35,13 +36,13 @@ pub struct PartnerRowProps {
 #[function_component(PartnerRow)]
 pub fn partner_row(props: &PartnerRowProps) -> Html {
     let partner_type = if props.partner.is_vendor && props.partner.is_customer {
-        "Vendor & Customer".to_string()
+        t("partner-row-vendor-customer")
     } else if props.partner.is_vendor {
-        "Vendor".to_string()
+        t("common-vendor")
     } else if props.partner.is_customer {
-        "Customer".to_string()
+        t("common-customer")
     } else {
-        "None".to_string()
+        t("common-none")
     };
 
     let on_edit = {
@@ -68,10 +69,10 @@ pub fn partner_row(props: &PartnerRowProps) -> Html {
             <td class="table__col-actions">
                 <div class="actions-wrapper">
                     <button class="icon-button btn-action" onclick={on_edit}>
-                        <img src="/images/view.svg" alt="View" />
+                        <img src="/images/view.svg" alt={t("common-view")} />
                     </button>
                     <button class="icon-button btn-action" onclick={on_delete} disabled={!props.partner.can_delete}>
-                        <img src="/images/delete.svg" alt="Delete" />
+                        <img src="/images/delete.svg" alt={t("common-delete")} />
                     </button>
                 </div>
             </td>

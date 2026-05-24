@@ -28,7 +28,9 @@ use crate::components::report_options::ReportOptions;
 use crate::contexts::auth_context::use_user_context;
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::router::Route;
+use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::i18n::{t, t_args};
 use shared_core::models::account_category::AccountCategory;
 use shared_core::util::format_currency;
 use std::collections::{HashMap, HashSet};
@@ -182,14 +184,23 @@ pub fn profit_loss_page() -> Html {
                                     error.set(None);
                                 }
                                 Err(e) => {
-                                    error.set(Some(format!("Failed to parse P&L data: {}", e)))
+                                    error.set(Some(t_args(
+                                        "profit-loss-error-parse",
+                                        &fluent_args!["error" => e.to_string()],
+                                    )))
                                 }
                             }
                         } else {
-                            error.set(Some(format!("Error fetching P&L: {}", resp.status())));
+                            error.set(Some(t_args(
+                                "profit-loss-error-fetch",
+                                &fluent_args!["status" => resp.status()],
+                            )));
                         }
                     }
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Err(e) => error.set(Some(t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
                 loading.set(false);
             });
@@ -243,9 +254,9 @@ pub fn profit_loss_page() -> Html {
                         if is_parent {
                             <button onclick={on_toggle} class="collapse-toggle">
                                 if is_collapsed {
-                                    <img src="/images/chevron-right.svg" alt="Expand" />
+                                    <img src="/images/chevron-right.svg" alt={t("common-expand")} />
                                 } else {
-                                    <img src="/images/chevron-down.svg" alt="Collapse" />
+                                    <img src="/images/chevron-down.svg" alt={t("common-collapse")} />
                                 }
                             </button>
                         }
@@ -272,30 +283,30 @@ pub fn profit_loss_page() -> Html {
         <Layout>
             <div class="report-page">
                 <div class="report-header">
-                    <h3>{ "Profit & Loss" }</h3>
+                    <h3>{ t("profit-loss-title") }</h3>
                     <ReportOptions show_start_date={true} show_end_date={true} />
                 </div>
                 if *loading {
-                    <p>{ "Loading..." }</p>
+                    <p>{ t("common-loading") }</p>
                 } else if let Some(err) = &*error {
                     <div class="error">{ err }</div>
                 } else {
                     <table class="report-table">
                         <thead>
                             <tr>
-                                <th>{ "Account" }</th>
+                                <th>{ t("common-account") }</th>
                                 <th></th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="report__section-header"><td colspan="2">{ "Revenue" }</td><td></td></tr>
+                            <tr class="report__section-header"><td colspan="2">{ t("profit-loss-revenue-section") }</td><td></td></tr>
                             { for revenue_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
-                            <tr class="report__section-header"><td colspan="2">{ "Expenses" }</td><td></td></tr>
+                            <tr class="report__section-header"><td colspan="2">{ t("profit-loss-expenses-section") }</td><td></td></tr>
                             { for expense_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
 
                             <tr class="report__total-row">
-                                <td><strong>{ "Net Income" }</strong></td>
+                                <td><strong>{ t("profit-loss-net-income") }</strong></td>
                                 <td />
                                 <td style="text-align: right;">
                                     <strong>{ format_currency(&net_income) }</strong>

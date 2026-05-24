@@ -22,7 +22,9 @@
  *
  */
 
+use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::i18n::{t, t_args};
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -51,18 +53,16 @@ pub fn delete_confirmation_modal(props: &DeleteConfirmationModalProps) -> Html {
     html! {
         <div class="modal-overlay" onclick={on_cancel.clone()}>
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
-                <h2>{ "Confirm Deletion" }</h2>
+                <h2>{ t("common-confirm-deletion") }</h2>
                 <p>
-                    { "Are you sure you want to delete the account: " }
-                    <strong>{ &props.account.name }</strong>
-                    { "?" }
+                    { t_args("delete-confirm-message", &fluent_args!["name" => props.account.name.clone()]) }
                 </p>
                 <p class="warning-text">
-                    { "This action cannot be undone. You can only delete accounts with no transactions." }
+                    { t("delete-confirm-warning") }
                 </p>
                 <div class="modal__form__actions">
-                    <button type="button" onclick={on_cancel} class="button-secondary">{ "Cancel" }</button>
-                    <button type="button" onclick={on_confirm_delete} class="button-danger">{ "Confirm Delete" }</button>
+                    <button type="button" onclick={on_cancel} class="button-secondary">{ t("common-cancel") }</button>
+                    <button type="button" onclick={on_confirm_delete} class="button-danger">{ t("common-confirm-delete-button") }</button>
                 </div>
             </div>
         </div>

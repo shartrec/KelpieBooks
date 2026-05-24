@@ -27,6 +27,8 @@ use crate::components::currency_input::CurrencyInput;
 use crate::contexts::auth_context::use_user_context;
 use crate::contexts::report_context::{ReportAction, ReportContext};
 use chrono::NaiveDate;
+use fluent::fluent_args;
+use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
 use shared_core::models::account_category::AccountCategory;
 use uuid::Uuid;
@@ -145,23 +147,23 @@ pub fn report_options(props: &ReportOptionsProps) -> Html {
                 <div class="report__action-bar">
                     <div class="report__date-range-selector">
                         if props.show_start_date {
-                            <label>{ "From: " }</label>
+                            <label>{ t("report-options-from-label") }</label>
                             <input type="date" value={ctx.date_range.start_date.to_string()} onchange={on_start_change} />
                         }
                         if props.show_end_date {
-                            <label>{ "To: " }</label>
+                            <label>{ t("report-options-to-label") }</label>
                             <input type="date" value={ctx.date_range.end_date.to_string()} onchange={on_end_change} />
                         }
                     </div>
                     <div class="report__export-buttons">
                         if ctx.on_export_csv.is_some() {
-                            <button class="icon-button" onclick={on_export_csv_click} title="Export to CSV">
-                                <img src="/images/download.svg" alt="Export CSV" />
+                            <button class="icon-button" onclick={on_export_csv_click} title={t("report-options-export-csv-tooltip")}>
+                                <img src="/images/download.svg" alt={t("report-options-export-csv-tooltip")} />
                             </button>
                         }
                         if ctx.on_export_pdf.is_some() {
-                            <button class="icon-button" onclick={on_export_pdf_click} title="Export to PDF">
-                                <img src="/images/export-pdf.svg" alt="Export PDF" />
+                            <button class="icon-button" onclick={on_export_pdf_click} title={t("report-options-export-pdf-tooltip")}>
+                                <img src="/images/export-pdf.svg" alt={t("report-options-export-pdf-tooltip")} />
                             </button>
                         }
                     </div>
@@ -169,15 +171,15 @@ pub fn report_options(props: &ReportOptionsProps) -> Html {
                 if props.show_advanced_filters {
                     <div class="report__advanced-filters">
                         <div class="report__filter-group">
-                            <label>{ "Accounts:" }</label>
+                            <label>{ t("report-options-accounts-label") }</label>
                             <AccountFilter accounts={(*accounts).clone()}/>
                         </div>
                         <div class="report__filter-group">
-                            <label>{ "Min Amount:" }</label>
+                            <label>{ t("report-options-min-amount-label") }</label>
                             <CurrencyInput
                                 value={ctx.min_amount.unwrap_or(0)}
                                 on_change={on_min_amount_change}
-                                placeholder="0.00"
+                                placeholder={t("journal-entry-currency-placeholder")}
                             />
                         </div>
                     </div>
@@ -214,12 +216,12 @@ pub fn account_filter(props: &AccountFilterProps) -> Html {
     if let Some(ctx) = report_ctx {
         html! {
             <div class="report__filter-group">
-                <span class="filter-label">{ "Account:" }</span>
+                <span class="filter-label">{ t("report-options-accounts-label") }</span>
                 <div class="filter-trigger" onclick={on_toggle_dropdown}>
                     { if ctx.selected_accounts.is_empty() {
-                        "All Accounts".to_string()
+                        t("report-options-all-accounts")
                     } else {
-                        format!("{} Selected", ctx.selected_accounts.len())
+                        t_args("report-options-selected-accounts", &fluent_args!["count" => ctx.selected_accounts.len()])
                     }}
                 </div>
 

@@ -26,6 +26,7 @@ use crate::contexts::auth_context::UserContextHandle;
 use crate::contexts::org_context::OrgContextHandle;
 use crate::router::Route;
 use gloo_net::http::Request;
+use shared_core::i18n::t;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
@@ -72,7 +73,7 @@ pub fn header() -> Html {
             let name_to_display = user.display_name.as_ref().unwrap_or(&user.full_name);
             html! { <span class="username">{ name_to_display }</span> }
         } else {
-            html! { <span class="username">{ "Loading..." }</span> }
+            html! { <span class="username">{ t("common-loading") }</span> }
         }
     } else {
         html! { <span></span> }
@@ -88,17 +89,17 @@ pub fn header() -> Html {
                     <div class="user-menu">
                         <button onclick={toggle_dropdown} class="user-menu-trigger">
                             { user_display }
-                            <img src="/images/chevron-down.svg" alt="Toggle menu" />
+                            <img src="/images/chevron-down.svg" alt={t("header-toggle-menu-alt")} />
                         </button>
                         if *dropdown_open {
                             <div class="user-menu-dropdown">
                                 <Link<Route> to={Route::Profile} classes="user-menu__item">
-                                    <img src="/images/user.svg" alt="Profile" />
-                                    <span>{ "Edit Profile" }</span>
+                                    <img src="/images/user.svg" alt={t("header-profile-alt")} />
+                                    <span>{ t("header-edit-profile") }</span>
                                 </Link<Route>>
                                 <button onclick={on_logout_click} class="user-menu__item">
-                                    <img src="/images/logout.svg" alt="Logout" />
-                                    <span>{ "Logout" }</span>
+                                    <img src="/images/logout.svg" alt={t("header-logout-alt")} />
+                                    <span>{ t("header-logout") }</span>
                                 </button>
                             </div>
                         }

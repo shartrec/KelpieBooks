@@ -21,9 +21,11 @@
  *      Trevor Campbell
  *
  */
+use fluent::fluent_args;
 use gloo_net::http::Request;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::dtos::transaction_detail::TransactionDetail;
+use shared_core::i18n::{t, t_args};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -52,12 +54,21 @@ pub fn reversal_confirmation_modal(props: &ReversalConfirmationModalProps) -> Ht
                 match resp {
                     Ok(r) if r.ok() => match r.json::<TransactionDetail>().await {
                         Ok(detail) => transaction_detail.set(Some(detail)),
-                        Err(e) => error.set(Some(format!("Failed to parse transaction: {}", e))),
+                        Err(e) => error.set(Some(t_args(
+                            "transaction-error-parse",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     },
                     Ok(r) => {
-                        error.set(Some(format!("Failed to fetch transaction: {}", r.status())))
+                        error.set(Some(t_args(
+                            "transaction-error-fetch",
+                            &fluent_args!["status" => r.status()],
+                        )))
                     }
-                    Err(e) => error.set(Some(format!("Network error: {}", e))),
+                    Err(e) => error.set(Some(t_args(
+                        "coa-error-network",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
             || ()
@@ -90,22 +101,22 @@ pub fn reversal_confirmation_modal(props: &ReversalConfirmationModalProps) -> Ht
     html! {
         <div class="modal-overlay" onclick={on_cancel.clone()}>
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
-                <h2>{ "Confirm Transaction Reversal" }</h2>
+                <h2>{ t("reversal-confirm-title") }</h2>
 
                 if let Some(detail) = &*transaction_detail {
                     <div class="transaction-details-summary">
                         <p>
-                            <strong>{ "Date: " }</strong> { detail.transaction.date.format("%Y-%m-%d").to_string() }
+                            <strong>{ t("common-date") }</strong> { detail.transaction.date.format("%Y-%m-%d").to_string() }
                         </p>
                         if let Some(desc) = &detail.transaction.description {
-                             <p><strong>{ "Original Description: " }</strong> { desc }</p>
+                             <p><strong>{ t("reversal-confirm-original-description") }</strong> { desc }</p>
                         }
                         <table class="table min-width-400">
                             <thead>
                                 <tr>
-                                    <th>{ "Account" }</th>
-                                    <th class="amount">{ "Debit" }</th>
-                                    <th class="amount">{ "Credit" }</th>
+                                    <th>{ t("common-account") }</th>
+                                    <th class="amount">{ t("common-debit") }</th>
+                                    <th class="amount">{ t("common-credit") }</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -122,11 +133,11 @@ pub fn reversal_confirmation_modal(props: &ReversalConfirmationModalProps) -> Ht
                 } else if let Some(err) = &*error {
                     <p class="error">{ err }</p>
                 } else {
-                    <p>{ "Loading transaction details..." }</p>
+                    <p>{ t("transaction-row-loading-details") }</p>
                 }
 
                 <div class="form-group">
-                    <label for="reversal-description">{ "Reversal Description" }</label>
+                    <label for="reversal-description">{ t("reversal-confirm-reversal-description") }</label>
                     <input
                         id="reversal-description"
                         type="text"
@@ -137,11 +148,11 @@ pub fn reversal_confirmation_modal(props: &ReversalConfirmationModalProps) -> Ht
                 </div>
 
                 <p class="warning-text">
-                    { "This action cannot be undone." }
+                    { t("reversal-confirm-warning") }
                 </p>
                 <div class="form-actions">
-                    <button type="button" onclick={on_cancel} class="button-secondary">{ "Cancel" }</button>
-                    <button type="button" onclick={on_confirm_reverse} class="button-danger">{ "Confirm Reversal" }</button>
+                    <button type="button" onclick={on_cancel} class="button-secondary">{ t("common-cancel") }</button>
+                    <button type="button" onclick={on_confirm_reverse} class="button-danger">{ t("reversal-confirm-button") }</button>
                 </div>
             </div>
         </div>
