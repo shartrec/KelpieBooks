@@ -1,7 +1,6 @@
 pub mod account_row;
 pub mod add_account_modal;
 pub mod add_partner_modal;
-pub mod bar_chart;
 pub mod chart_of_accounts_table;
 pub mod currency_input;
 pub mod delete_confirmation_modal;
