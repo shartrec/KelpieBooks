@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2026.
+ *
+ * This file is part of KelpieBooks. For terms of use, please see the file
+ * called LICENSE at the top level of the KelpieBooks source tree
+ *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
+ */
+
 use crate::db::journal_entry::get_all_by_transaction;
 use crate::db::transaction::get_recent_transactions as get_recent_transactions_from_db;
 use crate::db::vendor_invoice::get_top_payables as get_top_payables_from_db;
