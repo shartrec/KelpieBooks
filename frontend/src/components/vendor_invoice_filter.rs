@@ -151,7 +151,7 @@ pub fn vendor_invoice_filter() -> Html {
                 <div class="report__filter-group">
                     <label>{ t("vendor-invoice-filter-vendor-label") }</label>
                     <select onchange={on_vendor_change}>
-                        <option value="">{ t("vendor-invoice-filter-all-vendors") }</option>
+                        <option value="" selected=true>{ t("vendor-invoice-filter-all-vendors") }</option>
                         { for (*vendors).iter().map(|vendor| html! {
                             <option value={vendor.id.to_string()}>{ &vendor.legal_name }</option>
                         })}

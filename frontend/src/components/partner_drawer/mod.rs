@@ -100,8 +100,10 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
         <div class="drawer-overlay" onclick={on_close.clone()}>
             <div class="drawer" onclick={|e: MouseEvent| e.stop_propagation()}>
                 <header class="drawer__header">
-                    <h3>{ &props.partner.legal_name }</h3>
-                    <button class="btn-close" onclick={on_close.clone()}>{ t("partner-drawer-close-button") }</button>
+                    <h3>{ &props.partner.legal_name } </h3>
+                        <button class="btn-close" type="button" onclick={on_close.clone()}>
+                            <img src="/images/x.svg" alt={t("common-close")} />
+                        </button>
                 </header>
                 <div class="drawer__tabs">
                     <button

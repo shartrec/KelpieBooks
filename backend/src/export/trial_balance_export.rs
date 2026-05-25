@@ -23,7 +23,9 @@
  */
 
 use crate::export::utils::{build_table_header, wrap_report_layout};
+use shared_core::i18n::{t, t_args};
 use chrono::NaiveDate;
+use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::models::{account_category::AccountCategory, organization::Organization};
 use shared_core::util::format_currency_typ;
@@ -84,6 +86,13 @@ pub fn generate_trial_balance_csv(accounts: &[AccountWithBalance]) -> String {
 
     let mut csv_content = String::new();
     csv_content.push_str("Account,Debit,Credit\n");
+    csv_content.push_str(
+        &format!(
+            "{},{},{}\n",
+            t("common-account"),
+            t("common-debit"),
+            t("common-credit"),
+        ));
 
     fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String) {
         let indent = " ".repeat(depth * 2);
@@ -123,7 +132,7 @@ pub fn generate_trial_balance_csv(accounts: &[AccountWithBalance]) -> String {
     }
     let debit = format_currency_typ(&total_debit);
     let credit = format_currency_typ(&total_credit);
-    csv_content.push_str(&format!("\"Total\",\"{}\",\"{}\"\n", debit, credit));
+    csv_content.push_str(&format!("\"{}\",\"{}\",\"{}\"\n", t("trial-balance-export-total"), debit, credit));
     csv_content
 }
 
@@ -137,7 +146,7 @@ pub fn generate_trial_balance_typst(
 
     let mut typst_content = String::new();
     typst_content.push_str(&*build_table_header(
-        &["Account", "Debit", "Credit"],
+        &[t("common-account"), t("common-debit"), t("common-credit")],
         &[false, true, true],
     ));
 
@@ -178,16 +187,17 @@ pub fn generate_trial_balance_typst(
         build_typst_rows(node, 0, &mut typst_content);
     }
     typst_content.push_str(&format!(
-        "  [*Total*], align(right)[*{}*], align(right)[*{}*],\n",
+        "  [*{}*], align(right)[*{}*], align(right)[*{}*],\n",
+        t("common-total"),
         (total_debit as f64) / 100.0,
         (total_credit as f64) / 100.0
     ));
     typst_content.push_str(")\n");
 
     let name = org.as_ref().map(|o| o.name.as_str());
-    let report_qual = format!(
-        "As at {}",
-        report_date.format("%d %b %Y").to_string().as_str()
+    let report_qual = t_args(
+        "balance-sheet-export-as-at",
+        &fluent_args!["date" => report_date.format("%d %b %Y").to_string()],
     );
-    wrap_report_layout(name, "Trial Balance", &*report_qual, typst_content.as_str())
+    wrap_report_layout(name, &t("trial-balance-title"), &*report_qual, typst_content.as_str())
 }

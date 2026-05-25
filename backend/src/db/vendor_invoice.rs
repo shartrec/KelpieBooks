@@ -170,7 +170,6 @@ pub(crate) async fn get_by_org(
         i += 1;
     }
     if let Some(status) = &status {
-        let statuses: Vec<&str> = status.split(',').collect();
         query.push_str(&format!(" AND vi.status::TEXT = ANY(${})", i));
     }
 

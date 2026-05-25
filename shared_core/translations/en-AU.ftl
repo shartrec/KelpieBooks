@@ -147,7 +147,6 @@ ledger-error-delete-transaction = Failed to delete transaction: { $status }
 journal-entry-select-account = Select Account
 journal-entry-description-placeholder = Description
 journal-entry-currency-placeholder = 0.00
-journal-entry-delete-button = X
 
 # Transaction Row
 transaction-row-reverse = Reverse
@@ -312,11 +311,11 @@ aged-trial-balance-error-fetch = Failed to fetch summary: { $status }
 vendor-invoice-filter-outstanding = Outstanding
 vendor-invoice-filter-fully-paid = Fully Paid
 vendor-invoice-filter-all-invoices = All Invoices
-vendor-invoice-filter-from-label = "From: "
-vendor-invoice-filter-to-label = "To: "
-vendor-invoice-filter-vendor-label = "Vendor:"
+vendor-invoice-filter-from-label = From:
+vendor-invoice-filter-to-label = "o:
+vendor-invoice-filter-vendor-label = Vendor:
 vendor-invoice-filter-all-vendors = All Vendors
-vendor-invoice-filter-min-amount-label = "Min Amount:"
+vendor-invoice-filter-min-amount-label = Min Amount:
 
 # Vendor Invoice Table
 vendor-invoice-table-invoice-number = Invoice #
@@ -387,8 +386,8 @@ delete-partner-confirm-message = Are you sure you want to delete the partner: { 
 partner-row-vendor-customer = Vendor & Customer
 
 # Report Options
-report-options-from-label = "From: "
-report-options-to-label = "To: "
+report-options-from-label = From:
+report-options-to-label = To:
 report-options-export-csv-tooltip = Export to CSV
 report-options-export-pdf-tooltip = Export to PDF
 report-options-accounts-label = Accounts:
@@ -398,7 +397,6 @@ report-options-selected-accounts = { $count } Selected
 
 # Partner Drawer
 partner-drawer-error-save = Failed to save partner: { $status }
-partner-drawer-close-button = ✖
 
 # Address Edit Card
 address-edit-card-edit-title = Edit Address
@@ -440,12 +438,10 @@ contacts-view-error-save = Failed to save contact: { $status }
 contacts-view-error-delete = Failed to delete contact: { $status }
 
 # Delete Address Confirmation Modal
-delete-address-confirm-prefix = Are you sure you want to delete the address:{" "}
-delete-address-confirm-suffix = ?
+delete-address-confirm-message = Are you sure you want to delete the address: { $address }?
 
 # Delete Contact Confirmation Modal
-delete-contact-confirm-prefix = Are you sure you want to delete the contact: {" "}
-delete-contact-confirm-suffix = ?
+delete-contact-confirm-message = Are you sure you want to delete the contact: { $name } { $preferred_name }?
 
 # Vendor Invoice Drawer
 vendor-invoice-drawer-inv-number = Inv #: { $number }
@@ -481,3 +477,28 @@ item-edit-card-add-title = Add Item
 item-edit-card-edit-title = Edit Item
 item-edit-card-net-amount-label = Net Amount:
 item-edit-card-tax-amount-label = Tax Amount:
+
+# Account Ledger Export
+account-ledger-export-report-qualifier = Account { $account_name } for Period { $start_date } - { $end_date }
+account-ledger-export-title = Journal Entries
+
+# Balance Sheet Export
+balance-sheet-export-assets-header = Assets,
+balance-sheet-export-total-assets = Total Assets
+balance-sheet-export-liabilities-header = Liabilities,
+balance-sheet-export-total-liabilities = Total Liabilities
+balance-sheet-export-equity-header = Equity,
+balance-sheet-export-current-year-earnings = Current Year Earnings
+balance-sheet-export-total-equity = Total Equity
+balance-sheet-export-total-liabilities-equity = Total Liabilities & Equity
+balance-sheet-export-as-at = As at { $date }
+
+# General Ledger Export
+general-ledger-export-period = Period { $start_date } - { $end_date }
+
+# Profit Loss Export
+profit-loss-export-revenue-header = Revenue,
+profit-loss-export-expenses-header = Expenses,
+
+# Trial Balance Export
+trial-balance-export-total = Total

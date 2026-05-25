@@ -106,7 +106,10 @@ pub fn vendor_invoice_item_row(props: &VendorInvoiceItemRowProps) -> Html {
             <CurrencyInput value={props.item.net_amount} on_change={on_net_amount_change} />
             <CurrencyInput value={props.item.tax_amount} on_change={on_tax_amount_change} />
             <CurrencyInput value={props.item.total_amount} on_change={Callback::noop()} />
-            <button type="button" onclick={on_delete_click} class="icon-button">{ t("journal-entry-delete-button") }</button>
+            <button class="icon-button btn-action" onclick={on_delete_click}>
+                <img src="/images/delete.svg" alt={t("common-delete")} />
+            </button>
+
         </div>
     }
 }

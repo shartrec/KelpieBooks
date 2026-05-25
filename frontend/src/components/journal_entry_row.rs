@@ -135,7 +135,9 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
                 placeholder={t("journal-entry-currency-placeholder")}
             />
 
-            <button type="button" onclick={on_delete_click} class="icon-button">{ t("journal-entry-delete-button") }</button>
+            <button class="icon-button btn-action" onclick={on_delete_click}>
+                <img src="/images/delete.svg" alt={t("common-delete")} />
+            </button>
         </div>
     }
 }

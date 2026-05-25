@@ -25,7 +25,7 @@ use typst_as_lib::typst_kit_options::TypstKitFontOptions;
 use typst_as_lib::TypstEngine;
 use typst_assets::fonts;
 
-pub fn build_table_header(headings: &[&str], align_right: &[bool]) -> String {
+pub fn build_table_header(headings: &[String], align_right: &[bool]) -> String {
     // Generate column layout: first is auto, rest are 1fr
     // For 3 headings, this produces: "auto, 1fr, 1fr"
     let col_layout = std::iter::once("auto")

@@ -11,7 +11,6 @@ use shared_core::models::partner::Partner;
 use shared_core::models::partner_address::PartnerAddress;
 use shared_core::models::partner_contact::PartnerContact;
 use shared_core::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
-use uuid::Uuid;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![

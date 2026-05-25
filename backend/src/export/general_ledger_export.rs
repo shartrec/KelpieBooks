@@ -23,7 +23,9 @@
  */
 
 use crate::export::utils::{build_table_header, wrap_report_layout};
+use shared_core::i18n::{t, t_args};
 use chrono::NaiveDate;
+use fluent::fluent_args;
 use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
 use shared_core::models::organization::Organization;
 use shared_core::util::format_currency_typ;
@@ -31,12 +33,12 @@ use shared_core::util::format_currency_typ;
 pub fn generate_general_ledger_csv(lines: &[GeneralLedgerLine]) -> String {
     let mut wtr = csv::Writer::from_writer(vec![]);
     wtr.write_record(&[
-        "Account",
-        "Date",
-        "Description",
-        "Debit",
-        "Credit",
-        "Balance",
+        t("common-account"),
+        t("common-date"),
+        t("common-description"),
+        t("common-debit"),
+        t("common-credit"),
+        t("common-balance"),
     ])
     .unwrap();
 
@@ -62,7 +64,7 @@ pub fn generate_general_ledger_typst(
 ) -> String {
     let mut typst_content = String::new();
     typst_content.push_str(&*build_table_header(
-        &["Date", "Description", "Debit", "Credit"],
+        &[t("common-date"), t("common-description"), t("common-debit"), t("common-credit")],
         &[false, false, true, true],
     ));
 
@@ -106,14 +108,13 @@ pub fn generate_general_ledger_typst(
     typst_content.push_str(")\n");
 
     let name = org.as_ref().map(|o| o.name.as_str());
-    let report_qual = format!(
-        "Period {} - {}",
-        start_date.format("%d %b %Y").to_string().as_str(),
-        end_date.format("%d %b %Y").to_string().as_str()
+    let report_qual = t_args(
+        "general-ledger-export-period",
+        &fluent_args!["start_date" => start_date.format("%d %b %Y").to_string(), "end_date" => end_date.format("%d %b %Y").to_string()],
     );
     wrap_report_layout(
         name,
-        "Journal Entries",
+        &t("account-ledger-export-title"),
         &*report_qual,
         typst_content.as_str(),
     )

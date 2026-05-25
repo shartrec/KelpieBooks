@@ -83,10 +83,10 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
             <div class="drawer" onclick={|e: MouseEvent| e.stop_propagation()}>
                 <header class="drawer__header">
                     // Vendor Identity Context Line
-                    <h3 class="payment-context-banner__vendor">{ &props.partner.trade_name }</h3>
-                    <button class="close-button" onclick={on_close.clone()}>
-                        <img src="/images/x.svg" alt={t("common-close")} />
-                    </button>
+                    <h3 class="payment-context-banner__vendor">{ &props.partner.trade_name.clone().unwrap_or(props.partner.legal_name.clone()) } </h3>
+                        <button class="btn-close" type="button" onclick={on_close.clone()}>
+                            <img src="/images/x.svg" alt={t("common-close")} />
+                        </button>
                 </header>
 
                 <div class="payment-context-banner">

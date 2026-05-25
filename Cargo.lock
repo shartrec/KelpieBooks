@@ -201,8 +201,10 @@ dependencies = [
  "csv",
  "derive_typst_intoval",
  "fluent",
+ "include_dir",
  "jsonwebtoken",
  "log",
+ "once_cell",
  "rand",
  "rocket",
  "rocket_db_pools",
@@ -217,6 +219,7 @@ dependencies = [
  "typst-as-lib",
  "typst-assets 0.11.1",
  "typst-pdf",
+ "unic-langid",
  "uuid",
 ]
 

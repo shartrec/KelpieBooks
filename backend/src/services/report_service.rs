@@ -24,7 +24,7 @@
 
 use crate::db;
 use crate::util::ApiError;
-use chrono::{Local, NaiveDate};
+use chrono::NaiveDate;
 use rocket_db_pools::sqlx::PgConnection;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::aged_payable_summary::AgedPayableSummary;
