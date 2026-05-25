@@ -152,7 +152,7 @@ journal-entry-currency-placeholder = 0.00
 transaction-row-reverse = Reverse
 transaction-row-duplicate = Duplicate
 transaction-row-loading-details = Loading details...
-transaction-row-details-for = Details for trans
+transaction-row-details-for = Details for transaction
 transaction-row-error-load-details = Could not load transaction details.
 
 # Reversal Confirmation Modal
@@ -312,7 +312,7 @@ vendor-invoice-filter-outstanding = Outstanding
 vendor-invoice-filter-fully-paid = Fully Paid
 vendor-invoice-filter-all-invoices = All Invoices
 vendor-invoice-filter-from-label = From:
-vendor-invoice-filter-to-label = "o:
+vendor-invoice-filter-to-label = To:
 vendor-invoice-filter-vendor-label = Vendor:
 vendor-invoice-filter-all-vendors = All Vendors
 vendor-invoice-filter-min-amount-label = Min Amount:
