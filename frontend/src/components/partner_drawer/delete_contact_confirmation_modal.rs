@@ -55,7 +55,9 @@ pub fn delete_contact_confirmation_modal(props: &DeleteContactConfirmationModalP
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
                 <h2>{ t("common-confirm-deletion") }</h2>
                 <p>
-                    { t_args("delete-contact-confirm-message", &fluent_args!["name" => props.contact.full_name.clone(), "preferred_name" => props.contact.preferred_name.clone()]) }
+                    { t("delete-address-confirm-prefix") }
+                    <strong>{ &props.contact.full_name }</strong>
+                    { t("delete-address-confirm-suffix") }
                 </p>
                 <p class="warning-text">
                     { t("reversal-confirm-warning") }

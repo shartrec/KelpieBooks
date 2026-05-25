@@ -55,7 +55,9 @@ pub fn delete_address_confirmation_modal(props: &DeleteAddressConfirmationModalP
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
                 <h2>{ t("common-confirm-deletion") }</h2>
                 <p>
-                    { t_args("delete-address-confirm-message", &fluent_args!["address" => props.address.address_line1.clone()]) }
+                    { t("delete-address-confirm-prefix") }
+                    <strong>{ &props.address.address_line1 }</strong>
+                    { t("delete-address-confirm-suffix") }
                 </p>
                 <p class="warning-text">
                     { t("reversal-confirm-warning") }

@@ -440,10 +440,12 @@ contacts-view-error-save = Failed to save contact: { $status }
 contacts-view-error-delete = Failed to delete contact: { $status }
 
 # Delete Address Confirmation Modal
-delete-address-confirm-message = Are you sure you want to delete the address: { $address }?
+delete-address-confirm-prefix = Are you sure you want to delete the address:{" "}
+delete-address-confirm-suffix = ?
 
 # Delete Contact Confirmation Modal
-delete-contact-confirm-message = Are you sure you want to delete the contact: { $name } { $preferred_name }?
+delete-contact-confirm-prefix = Are you sure you want to delete the contact: {" "}
+delete-contact-confirm-suffix = ?
 
 # Vendor Invoice Drawer
 vendor-invoice-drawer-inv-number = Inv #: { $number }
