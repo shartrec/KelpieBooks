@@ -19,9 +19,9 @@ use shared_core::dtos::expense_breakdown::ExpenseBreakdown;
 use shared_core::dtos::recent_transaction::RecentTransaction;
 use shared_core::dtos::top_payable::TopPayable;
 use shared_core::i18n::{t, t_args};
-use shared_core::util::format_currency;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use crate::contexts::locale_context::use_locale;
 
 #[function_component(DashboardPage)]
 pub fn dashboard_page() -> Html {
@@ -85,6 +85,8 @@ pub fn dashboard_page() -> Html {
         });
     }
 
+    let i18n = use_locale();
+
     html! {
         <Layout>
             <div class="dashboard-container">
@@ -132,7 +134,7 @@ pub fn dashboard_page() -> Html {
                                                 </Link<Route>>
                                             </td>
                                             <td>{ tx.description.clone() }</td>
-                                            <td class="stat-value-small">{ format_currency(&tx.amount) }</td>
+                                            <td class="stat-value-small">{ i18n.format_currency(tx.amount) }</td>
                                         </tr>
                                     })}
                                 }
@@ -155,7 +157,7 @@ pub fn dashboard_page() -> Html {
                                         <tr>
                                             <td>{ p.partner_name.clone() }</td>
                                             <td>{ p.due_date.format("%d %b %Y").to_string() }</td>
-                                            <td class="stat-value-small">{ format_currency(&p.amount) }</td>
+                                            <td class="stat-value-small">{ i18n.format_currency(p.amount) }</td>
                                         </tr>
                                     })}
                                 }
@@ -176,11 +178,12 @@ struct FinancialCardProps {
 
 #[function_component(FinancialCard)]
 fn financial_card(props: &FinancialCardProps) -> Html {
+    let i18n = use_locale();
     html! {
         <div class="stat-card">
             <span class="stat-label">{ &props.title }</span>
             <div class="stat-value">
-                { format_currency(&props.value) }
+                { i18n.format_currency(props.value) }
             </div>
         </div>
     }

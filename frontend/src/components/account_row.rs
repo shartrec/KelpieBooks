@@ -9,11 +9,11 @@
 use crate::router::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::i18n::t;
-use shared_core::util::format_currency;
 use std::collections::HashSet;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use crate::contexts::locale_context::use_locale;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
@@ -76,6 +76,7 @@ pub fn account_row(props: &AccountRowProps) -> Html {
         }
     };
 
+    let i18n = use_locale();
     html! {
         <>
             <tr class={if is_parent { "parent-account" } else { "" }}>
@@ -93,7 +94,7 @@ pub fn account_row(props: &AccountRowProps) -> Html {
                     { account_name_display }
                 </td>
                 <td>{ props.node.account.category.to_string() }</td>
-                <td style="text-align: right;">{ format_currency(&props.node.account.balance) }</td>
+                <td style="text-align: right;">{ i18n.format_currency(props.node.account.balance) }</td>
                 <td class="table__col-actions">
                     <div class="actions-wrapper">
                         <button class="icon-button btn-action" onclick={on_edit_click}>

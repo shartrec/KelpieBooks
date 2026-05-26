@@ -6,14 +6,13 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::export::utils::{build_table_header, wrap_report_layout};
+use crate::export::utils::{build_table_header, format_currency_typ, wrap_report_layout};
 use shared_core::i18n::{t, t_args};
 use chrono::NaiveDate;
 use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::models::organization::Organization;
 use shared_core::reports::balance_sheet::BalanceSheet;
-use shared_core::util::format_currency_typ;
 use std::collections::HashMap;
 use uuid::Uuid;
 
@@ -154,7 +153,7 @@ pub fn generate_balance_sheet_typst(
             "  [{} {}], align(right)[{}],[],\n",
             indent,
             node.account.name,
-            format_currency_typ(&node.account.balance)
+            format_currency_typ(node.account.balance)
         ));
         for child in &node.children {
             build_typst_rows(child, depth + 1, content);
@@ -168,7 +167,7 @@ pub fn generate_balance_sheet_typst(
     typst_content.push_str(&format!(
         "align(right)[*{}*],[],align(right)[*{}*],\n",
         t("balance-sheet-total-assets"),
-        format_currency_typ(&balance_sheet.total_assets)
+        format_currency_typ(balance_sheet.total_assets)
     ));
 
     typst_content.push_str(&format!("[*{}*],[],[],\n", t("balance-sheet-liabilities-section")));
@@ -178,7 +177,7 @@ pub fn generate_balance_sheet_typst(
     typst_content.push_str(&format!(
         "align(right)[*{}*],[],align(right)[*{}*],\n",
         t("balance-sheet-total-liabilities"),
-        format_currency_typ(&balance_sheet.total_liabilities)
+        format_currency_typ(balance_sheet.total_liabilities)
     ));
 
     typst_content.push_str(&format!("[*{}*],[],[],\n", t("balance-sheet-equity-section")));
@@ -188,18 +187,18 @@ pub fn generate_balance_sheet_typst(
     typst_content.push_str(&format!(
         "[{}],align(right)[{}],[],",
         t("balance-sheet-current-year-earnings"),
-        format_currency_typ(&balance_sheet.net_income)
+        format_currency_typ(balance_sheet.net_income)
     ));
 
     typst_content.push_str(&format!(
         "align(right)[*{}*],[],align(right)[*{}*],\n",
         t("balance-sheet-total-equity"),
-        format_currency_typ(&balance_sheet.total_equity)
+        format_currency_typ(balance_sheet.total_equity)
     ));
     typst_content.push_str(&format!(
         "align(right)[*{}*],[],align(right)[*{}*],\n",
         t("balance-sheet-total-liabilities-equity"),
-        format_currency_typ(&&(balance_sheet.total_liabilities + balance_sheet.total_equity))
+        format_currency_typ(balance_sheet.total_liabilities + balance_sheet.total_equity)
     ));
 
     typst_content.push_str(")\n");

@@ -16,12 +16,12 @@ use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::i18n::{t, t_args};
 use shared_core::reports::balance_sheet::BalanceSheet;
-use shared_core::util::format_currency;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::{use_navigator, Link};
+use crate::contexts::locale_context::{use_locale, LocaleContext};
 
 #[derive(Clone)]
 pub struct BalanceSheetHolder {
@@ -90,6 +90,7 @@ pub fn balance_sheet_page() -> Html {
     let user_ctx = use_user_context();
     let navigator = use_navigator().unwrap();
     let report_ctx = use_report_context();
+
     let balance_sheet_holder = use_state(|| {
         Rc::new(BalanceSheetHolder {
             balance_sheet: BalanceSheet::default(),
@@ -195,6 +196,7 @@ pub fn balance_sheet_page() -> Html {
     }
 
     fn render_report_row(
+        i18n: LocaleContext,
         node: &AccountNode,
         depth: usize,
         collapsed: &UseStateHandle<HashSet<Uuid>>,
@@ -216,6 +218,7 @@ pub fn balance_sheet_page() -> Html {
                 collapsed.set(new_set);
             })
         };
+
 
         let account_name_display = if node.account.is_group {
             html! { { &node.account.name } }
@@ -243,15 +246,17 @@ pub fn balance_sheet_page() -> Html {
                         { account_name_display }
                     </td>
                     <td style="text-align: right;">
-                        { format_currency(&node.account.balance) }
+                        { i18n.format_currency(node.account.balance) }
                     </td>
                 </tr>
                 if is_parent && !is_collapsed {
-                    { for node.children.iter().map(|child| render_report_row(child, depth + 1, collapsed)) }
+                    { for node.children.iter().map(|child| render_report_row(i18n.clone(), child, depth + 1, collapsed)) }
                 }
             </>
         }
     }
+
+    let i18n = use_locale();
 
     html! {
         <Layout>
@@ -275,33 +280,33 @@ pub fn balance_sheet_page() -> Html {
                         </thead>
                         <tbody>
                             <tr class="report__section-header"><td colspan="2">{ t("balance-sheet-assets-section") }</td></tr>
-                            { for asset_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
+                            { for asset_nodes.iter().map(|node| render_report_row(i18n.clone(), node, 0, &collapsed_nodes)) }
                             <tr class="report-total-row">
                                 <td><strong>{ t("balance-sheet-total-assets") }</strong></td>
-                                <td style="text-align: right;"><strong>{ format_currency(&balance_sheet_holder.balance_sheet.total_assets) }</strong></td>
+                                <td style="text-align: right;"><strong>{ i18n.format_currency(balance_sheet_holder.balance_sheet.total_assets) }</strong></td>
                             </tr>
 
                             <tr class="report__section-header"><td colspan="2">{ t("balance-sheet-liabilities-section") }</td></tr>
-                            { for liability_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
+                            { for liability_nodes.iter().map(|node| render_report_row(i18n.clone(), node, 0, &collapsed_nodes)) }
                             <tr class="report-total-row">
                                 <td><strong>{ t("balance-sheet-total-liabilities") }</strong></td>
-                                <td style="text-align: right;"><strong>{ format_currency(&balance_sheet_holder.balance_sheet.total_liabilities) }</strong></td>
+                                <td style="text-align: right;"><strong>{ i18n.format_currency(balance_sheet_holder.balance_sheet.total_liabilities) }</strong></td>
                             </tr>
 
                             <tr class="report__section-header"><td colspan="2">{ t("balance-sheet-equity-section") }</td></tr>
-                            { for equity_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
+                            { for equity_nodes.iter().map(|node| render_report_row(i18n.clone(), node, 0, &collapsed_nodes)) }
                             <tr>
                                 <td style="padding-left: 1.5rem">{ t("balance-sheet-current-year-earnings") }</td>
-                                <td style="text-align: right;">{ format_currency(&balance_sheet_holder.balance_sheet.net_income) }</td>
+                                <td style="text-align: right;">{ i18n.format_currency(balance_sheet_holder.balance_sheet.net_income) }</td>
                             </tr>
                             <tr class="report-total-row">
                                 <td><strong>{ t("balance-sheet-total-equity") }</strong></td>
-                                <td style="text-align: right;"><strong>{ format_currency(&balance_sheet_holder.balance_sheet.total_equity) }</strong></td>
+                                <td style="text-align: right;"><strong>{ i18n.format_currency(balance_sheet_holder.balance_sheet.total_equity) }</strong></td>
                             </tr>
 
                             <tr class="report__total-row">
                                 <td><strong>{ t("balance-sheet-total-liabilities-equity") }</strong></td>
-                                <td style="text-align: right;"><strong>{ format_currency(&(balance_sheet_holder.balance_sheet.total_liabilities + balance_sheet_holder.balance_sheet.total_equity)) }</strong></td>
+                                <td style="text-align: right;"><strong>{ i18n.format_currency(balance_sheet_holder.balance_sheet.total_liabilities + balance_sheet_holder.balance_sheet.total_equity) }</strong></td>
                             </tr>
                         </tbody>
                     </table>

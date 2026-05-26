@@ -6,13 +6,12 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::export::utils::{build_table_header, wrap_report_layout};
+use crate::export::utils::{build_table_header, format_currency_typ, wrap_report_layout};
 use shared_core::i18n::{t, t_args};
 use chrono::NaiveDate;
 use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::models::{account_category::AccountCategory, organization::Organization};
-use shared_core::util::format_currency_typ;
 use std::collections::HashMap;
 use uuid::Uuid;
 
@@ -100,7 +99,7 @@ pub fn generate_profit_loss_csv(accounts: &[AccountWithBalance]) -> String {
             "\"{}{}\",\"{}\"\n",
             indent,
             node.account.name,
-            format_currency_typ(&display_balance)
+            format_currency_typ(display_balance)
         ));
         for child in &node.children {
             build_csv_rows(child, depth + 1, content);
@@ -118,7 +117,7 @@ pub fn generate_profit_loss_csv(accounts: &[AccountWithBalance]) -> String {
     csv_content.push_str(&format!(
         "\"{}\",\"{}\"\n",
         t("profit-loss-net-income"),
-        format_currency_typ(&net_income)
+        format_currency_typ(net_income)
     ));
     csv_content
 }
@@ -148,14 +147,14 @@ pub fn generate_profit_loss_typst(
                 "[{} {}], [], align(right)[{}],\n",
                 indent,
                 node.account.name,
-                format_currency_typ(&display_balance)
+                format_currency_typ(display_balance)
             ));
         } else {
             content.push_str(&format!(
                 "  [{} {}], align(right)[{}], [],\n",
                 indent,
                 node.account.name,
-                format_currency_typ(&display_balance)
+                format_currency_typ(display_balance)
             ));
         }
         for child in &node.children {
@@ -174,7 +173,7 @@ pub fn generate_profit_loss_typst(
     typst_content.push_str(&format!(
         "[*{}*], [], align(right)[{}]\n",
         t("profit-loss-net-income"),
-        format_currency_typ(&net_income)
+        format_currency_typ(net_income)
     ));
     typst_content.push_str(")\n");
 

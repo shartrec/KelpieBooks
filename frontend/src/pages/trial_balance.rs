@@ -16,12 +16,12 @@ use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::i18n::{t, t_args};
 use shared_core::models::account_category::AccountCategory;
-use shared_core::util::format_currency;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::{use_navigator, Link};
+use crate::contexts::locale_context::{use_locale, LocaleContext};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
@@ -174,6 +174,7 @@ pub fn trial_balance_page() -> Html {
     }
 
     fn render_report_row(
+        i18n: LocaleContext,
         node: &AccountNode,
         depth: usize,
         collapsed: &UseStateHandle<HashSet<Uuid>>,
@@ -209,16 +210,16 @@ pub fn trial_balance_page() -> Html {
         let (debit_display, credit_display) = match node.account.category {
             AccountCategory::Asset | AccountCategory::Expense => {
                 if node.account.balance >= 0 {
-                    (format_currency(&node.account.balance), "".to_string())
+                    (i18n.format_currency(node.account.balance), "".to_string())
                 } else {
-                    ("".to_string(), format_currency(&node.account.balance.abs()))
+                    ("".to_string(), i18n.format_currency(node.account.balance.abs()))
                 }
             }
             AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
                 if node.account.balance <= 0 {
-                    ("".to_string(), format_currency(&node.account.balance.abs()))
+                    ("".to_string(), i18n.format_currency(node.account.balance.abs()))
                 } else {
-                    (format_currency(&node.account.balance), "".to_string())
+                    (i18n.format_currency(node.account.balance), "".to_string())
                 }
             }
         };
@@ -242,11 +243,13 @@ pub fn trial_balance_page() -> Html {
                     <td style="text-align: right;">{ credit_display }</td>
                 </tr>
                 if is_parent && !is_collapsed {
-                    { for node.children.iter().map(|child| render_report_row(child, depth + 1, collapsed)) }
+                    { for node.children.iter().map(|child| render_report_row(i18n.clone(), child, depth + 1, collapsed)) }
                 }
             </>
         }
     }
+
+    let i18n = use_locale();
 
     html! {
         <Layout>
@@ -269,11 +272,11 @@ pub fn trial_balance_page() -> Html {
                             </tr>
                         </thead>
                         <tbody>
-                            { for account_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
+                            { for account_nodes.iter().map(|node| render_report_row(i18n.clone(), node, 0, &collapsed_nodes)) }
                             <tr class="report-total-row">
                                 <td><strong>{ t("common-total") }</strong></td>
-                                <td style="text-align: right;"><strong>{ format_currency(&*total_debit) }</strong></td>
-                                <td style="text-align: right;"><strong>{ format_currency(&*total_credit) }</strong></td>
+                                <td style="text-align: right;"><strong>{ i18n.format_currency(*total_debit) }</strong></td>
+                                <td style="text-align: right;"><strong>{ i18n.format_currency(*total_credit) }</strong></td>
                             </tr>
                         </tbody>
                     </table>

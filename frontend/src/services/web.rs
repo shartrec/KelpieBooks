@@ -6,5 +6,8 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-pub mod dashboard;
-pub mod web;
+pub fn detect_browser_locale() -> String {
+    web_sys::window()
+        .and_then(|win| win.navigator().language())
+        .unwrap_or_else(|| "en-GB".to_string())     // Safe fallback
+}

@@ -15,9 +15,9 @@ use crate::router::Route;
 use fluent::fluent_args;
 use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
 use shared_core::i18n::{t, t_args};
-use shared_core::util::format_currency;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use crate::contexts::locale_context::use_locale;
 
 #[function_component(GeneralLedgerReportPage)]
 pub fn general_ledger_report_page() -> Html {
@@ -161,6 +161,8 @@ pub fn general_ledger_report_page() -> Html {
         grouped
     });
 
+    let i18n = use_locale();
+
     html! {
         <Layout>
             <div class="report-page">
@@ -197,9 +199,9 @@ pub fn general_ledger_report_page() -> Html {
                                                 </Link<Route>>
                                             </td>
                                             <td>{ line.description.clone().unwrap_or_default() }</td>
-                                            <td class="text-amount">{ format_currency(&line.debit) }</td>
-                                            <td class="text-amount">{ format_currency(&line.credit) }</td>
-                                            <td class="text-amount">{ format_currency(&line.balance) }</td>
+                                            <td class="text-amount">{ i18n.format_currency(line.debit) }</td>
+                                            <td class="text-amount">{ i18n.format_currency(line.credit) }</td>
+                                            <td class="text-amount">{ i18n.format_currency(line.balance) }</td>
                                         </tr>
                                     })}
                                 </>

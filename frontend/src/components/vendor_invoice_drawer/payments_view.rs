@@ -21,7 +21,7 @@ use uuid::Uuid;
 use web_sys::{HtmlInputElement, HtmlSelectElement};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::util::format_currency;
+use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct PaymentsViewProps {
@@ -210,6 +210,8 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
         })
     };
 
+    let i18n = use_locale();
+
     html! {
         <div class="payments-view">
             <form onsubmit={on_submit}>
@@ -251,7 +253,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
                     { for (*payments).iter().map(|payment| html! {
                         <tr>
                             <td>{payment.payment_date.format("%d %b %Y").to_string()}</td>
-                            <td>{format_currency(&payment.amount)}</td>
+                            <td>{i18n.format_currency(payment.amount)}</td>
                             <td>{payment.reference.as_deref().unwrap_or("")}</td>
                         </tr>
                     })}

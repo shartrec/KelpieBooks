@@ -13,10 +13,10 @@ use gloo_net::http::Request;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::dtos::transaction_detail::TransactionDetail;
 use shared_core::i18n::t;
-use shared_core::util::format_currency;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use crate::contexts::locale_context::use_locale;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TransactionGroup {
@@ -118,6 +118,8 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
         .locked_until
         .map_or(false, |lock_date| primary_entry.date <= lock_date);
 
+    let i18n = use_locale();
+
     html! {
         <>
             <tr class="transaction-summary-row">
@@ -132,9 +134,9 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                     { primary_entry.date.to_string() }
                 </td>
                 <td class="table__text-col">{ props.transaction_group.description.clone().unwrap_or_default() }</td>
-                <td class="table__value-col">{ format_currency(&primary_entry.debit) }</td>
-                <td class="table__value-col">{ format_currency(&primary_entry.credit) }</td>
-                <td class="table__value-col">{ format_currency(&primary_entry.running_balance) }</td>
+                <td class="table__value-col">{ i18n.format_currency(primary_entry.debit) }</td>
+                <td class="table__value-col">{ i18n.format_currency(primary_entry.credit) }</td>
+                <td class="table__value-col">{ i18n.format_currency(primary_entry.running_balance) }</td>
                 <td class="actions-cell">
                     <div class="actions-dropdown">
                         <button class="icon-button" onclick={on_toggle_dropdown} title={t("common-actions")}>
@@ -194,8 +196,8 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                                             </Link<Route>>
                                         </span>
                                         <span class="table__text-col">{ entry.description.clone().unwrap_or_default() }</span>
-                                        <span class="table__value-col">{ format_currency(&entry.debit) }</span>
-                                        <span class="table__value-col">{ format_currency(&entry.credit) }</span>
+                                        <span class="table__value-col">{ i18n.format_currency(entry.debit) }</span>
+                                        <span class="table__value-col">{ i18n.format_currency(entry.credit) }</span>
                                     </div>
                                 })}
                             } else {

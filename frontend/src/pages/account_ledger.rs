@@ -22,12 +22,12 @@ use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
 use shared_core::requests::transaction::ReverseTransactionRequest;
-use shared_core::util::format_currency;
 use std::collections::HashMap;
 use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use crate::contexts::locale_context::use_locale;
 
 #[derive(Debug, Properties, PartialEq)]
 pub struct AccountLedgerPageProps {
@@ -303,6 +303,8 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         .iter()
         .find(|e| e.description == Some(t("ledger-opening-balance")));
 
+    let i18n = use_locale();
+
     html! {
         <Layout>
             <div class="report-header">
@@ -339,9 +341,9 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                             <tr>
                                 <td>{ &entry.date.to_string() }</td>
                                 <td>{ t("ledger-opening-balance") }</td>
-                                <td class="table__value-col">{ if entry.debit > 0 { format_currency(&entry.debit) } else { "".to_string() } }</td>
-                                <td class="table__value-col">{ if entry.credit > 0 { format_currency(&entry.credit) } else { "".to_string() } }</td>
-                                <td class="table__value-col">{ format_currency(&entry.running_balance) }</td>
+                                <td class="table__value-col">{ if entry.debit > 0 { i18n.format_currency(entry.debit) } else { "".to_string() } }</td>
+                                <td class="table__value-col">{ if entry.credit > 0 { i18n.format_currency(entry.credit) } else { "".to_string() } }</td>
+                                <td class="table__value-col">{ i18n.format_currency(entry.running_balance) }</td>
                                 <td></td>
                             </tr>
                         }

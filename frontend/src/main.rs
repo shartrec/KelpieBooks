@@ -34,6 +34,7 @@ use shared_core::dtos::user_detail::UserDetail;
 use shared_core::models::organization::Organization;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use frontend::contexts::locale_context::LocaleProvider;
 
 /// The component that contains the router and switches between pages.
 #[function_component(AppRouter)]
@@ -95,13 +96,15 @@ fn app() -> Html {
     }
 
     html! {
-        <ContextProvider<UserContextHandle> context={user_ctx}>
-            <ContextProvider<OrgContextHandle> context={org_ctx}>
-                <ReportContextProvider>
-                    <AppRouter />
-                </ReportContextProvider>
-            </ContextProvider<OrgContextHandle>>
-        </ContextProvider<UserContextHandle>>
+        <LocaleProvider>
+            <ContextProvider<UserContextHandle> context={user_ctx}>
+                <ContextProvider<OrgContextHandle> context={org_ctx}>
+                    <ReportContextProvider>
+                        <AppRouter />
+                    </ReportContextProvider>
+                </ContextProvider<OrgContextHandle>>
+            </ContextProvider<UserContextHandle>>
+        </LocaleProvider>
     }
 }
 

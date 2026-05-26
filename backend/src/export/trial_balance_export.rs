@@ -6,13 +6,12 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::export::utils::{build_table_header, wrap_report_layout};
+use crate::export::utils::{build_table_header, format_currency_typ, wrap_report_layout};
 use shared_core::i18n::{t, t_args};
 use chrono::NaiveDate;
 use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::models::{account_category::AccountCategory, organization::Organization};
-use shared_core::util::format_currency_typ;
 use std::collections::HashMap;
 use uuid::Uuid;
 
@@ -83,11 +82,11 @@ pub fn generate_trial_balance_csv(accounts: &[AccountWithBalance]) -> String {
         let (debit_display, credit_display) = match node.account.category {
             AccountCategory::Asset | AccountCategory::Expense => {
                 if node.account.balance >= 0 {
-                    (format_currency_typ(&node.account.balance), "".to_string())
+                    (format_currency_typ(node.account.balance), "".to_string())
                 } else {
                     (
                         "".to_string(),
-                        format_currency_typ(&node.account.balance.abs()),
+                        format_currency_typ(node.account.balance.abs()),
                     )
                 }
             }
@@ -95,10 +94,10 @@ pub fn generate_trial_balance_csv(accounts: &[AccountWithBalance]) -> String {
                 if node.account.balance <= 0 {
                     (
                         "".to_string(),
-                        format_currency_typ(&node.account.balance.abs()),
+                        format_currency_typ(node.account.balance.abs()),
                     )
                 } else {
-                    (format_currency_typ(&node.account.balance), "".to_string())
+                    (format_currency_typ(node.account.balance), "".to_string())
                 }
             }
         };
@@ -114,8 +113,8 @@ pub fn generate_trial_balance_csv(accounts: &[AccountWithBalance]) -> String {
     for node in &account_nodes {
         build_csv_rows(node, 0, &mut csv_content);
     }
-    let debit = format_currency_typ(&total_debit);
-    let credit = format_currency_typ(&total_credit);
+    let debit = format_currency_typ(total_debit);
+    let credit = format_currency_typ(total_credit);
     csv_content.push_str(&format!("\"{}\",\"{}\",\"{}\"\n", t("trial-balance-export-total"), debit, credit));
     csv_content
 }
@@ -139,11 +138,11 @@ pub fn generate_trial_balance_typst(
         let (debit_display, credit_display) = match node.account.category {
             AccountCategory::Asset | AccountCategory::Expense => {
                 if node.account.balance >= 0 {
-                    (format_currency_typ(&node.account.balance), "".to_string())
+                    (format_currency_typ(node.account.balance), "".to_string())
                 } else {
                     (
                         "".to_string(),
-                        format_currency_typ(&node.account.balance.abs()),
+                        format_currency_typ(node.account.balance.abs()),
                     )
                 }
             }
@@ -151,10 +150,10 @@ pub fn generate_trial_balance_typst(
                 if node.account.balance <= 0 {
                     (
                         "".to_string(),
-                        format_currency_typ(&node.account.balance.abs()),
+                        format_currency_typ(node.account.balance.abs()),
                     )
                 } else {
-                    (format_currency_typ(&node.account.balance), "".to_string())
+                    (format_currency_typ(node.account.balance), "".to_string())
                 }
             }
         };

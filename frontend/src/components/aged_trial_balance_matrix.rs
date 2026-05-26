@@ -12,10 +12,10 @@ use chrono::Local;
 use fluent::fluent_args;
 use shared_core::dtos::aged_payable_summary::AgedPayableSummary;
 use shared_core::i18n::{t, t_args};
-use shared_core::util::format_currency;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
+use crate::contexts::locale_context::use_locale;
 
 #[function_component(AgedTrialBalanceMatrix)]
 pub fn aged_trial_balance_matrix() -> Html {
@@ -94,6 +94,8 @@ pub fn aged_trial_balance_matrix() -> Html {
         return html! { <div class="error">{ err }</div> };
     }
 
+    let i18n = use_locale();
+
     html! {
         <table class="table">
             <thead>
@@ -121,12 +123,12 @@ pub fn aged_trial_balance_matrix() -> Html {
                         <>
                             <tr onclick={on_toggle}>
                                 <td>{ &summary.partner_name }</td>
-                                <td class="table__value-col">{ format_currency(&summary.current) }</td>
-                                <td class="table__value-col">{ format_currency(&summary.days_30) }</td>
-                                <td class={classes!("table__value-col", if summary.days_60 > 0 { "col-severe" } else { "" })}>{ format_currency(&summary.days_60) }</td>
-                                <td class={classes!("table__value-col", if summary.days_90 > 0 { "col-severe" } else { "" })}>{ format_currency(&summary.days_90) }</td>
-                                <td class={classes!("table__value-col", if summary.days_90_plus > 0 { "col-severe" } else { "" })}>{ format_currency(&summary.days_90_plus) }</td>
-                                <td class="table__value-col">{ format_currency(&summary.total) }</td>
+                                <td class="table__value-col">{ i18n.format_currency(summary.current) }</td>
+                                <td class="table__value-col">{ i18n.format_currency(summary.days_30) }</td>
+                                <td class={classes!("table__value-col", if summary.days_60 > 0 { "col-severe" } else { "" })}>{ i18n.format_currency(summary.days_60) }</td>
+                                <td class={classes!("table__value-col", if summary.days_90 > 0 { "col-severe" } else { "" })}>{ i18n.format_currency(summary.days_90) }</td>
+                                <td class={classes!("table__value-col", if summary.days_90_plus > 0 { "col-severe" } else { "" })}>{ i18n.format_currency(summary.days_90_plus) }</td>
+                                <td class="table__value-col">{ i18n.format_currency(summary.total) }</td>
                             </tr>
                             if is_expanded {
                                 { for summary.invoices.iter().map(|invoice| {
@@ -135,7 +137,7 @@ pub fn aged_trial_balance_matrix() -> Html {
                                             <td class="table__text-col" colspan="2">{ &invoice.invoice_number }</td>
                                             <td class="table__value-col">{ invoice.issue_date.format("%d %b %Y").to_string() }</td>
                                             <td class="table__value-col">{ invoice.due_date.format("%d %b %Y").to_string() }</td>
-                                            <td class="table__value-col" colspan="2">{ format_currency(&invoice.amount_remaining) }</td>
+                                            <td class="table__value-col" colspan="2">{ i18n.format_currency(invoice.amount_remaining) }</td>
                                             <td class="table__value-col">{ "" }</td>
                                         </tr>
                                     }

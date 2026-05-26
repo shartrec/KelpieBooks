@@ -15,11 +15,11 @@ use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
-use shared_core::util::format_currency;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 use shared_core::models::account_category::AccountCategory;
+use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct ItemsViewProps {
@@ -182,6 +182,8 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
         })
     };
 
+    let i18n = use_locale();
+
     html! {
         <div class="items-view">
             if let Some(item) = &*item_to_edit {
@@ -241,10 +243,10 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                                     // Right Column
                                     <div class="card-item-compact__financials">
                                         <p class="card-item-compact__total">
-                                            { format_currency(&item.total_amount) }
+                                            { i18n.format_currency(item.total_amount) }
                                         </p>
                                         <p class="card-item-compact__sub-breakdown">
-                                            { t_args("items-view-net-tax-breakdown", &fluent_args!["net" => format_currency(&item.net_amount), "tax" => format_currency(&item.tax_amount)]) }
+                                            { t_args("items-view-net-tax-breakdown", &fluent_args!["net" => i18n.format_currency(item.net_amount), "tax" => i18n.format_currency(item.tax_amount)]) }
                                         </p>
                                     </div>
                                 </div>

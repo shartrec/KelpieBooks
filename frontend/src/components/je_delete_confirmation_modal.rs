@@ -10,8 +10,8 @@ use gloo_net::http::Request;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::dtos::transaction_detail::TransactionDetail;
 use shared_core::i18n::{t, t_args};
-use shared_core::util::format_currency;
 use yew::prelude::*;
+use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
 pub struct DeleteConfirmationModalProps {
@@ -71,6 +71,8 @@ pub fn delete_confirmation_modal(props: &DeleteConfirmationModalProps) -> Html {
         })
     };
 
+    let i18n = use_locale();
+
     html! {
         <div class="modal-overlay" onclick={on_cancel.clone()}>
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
@@ -96,8 +98,8 @@ pub fn delete_confirmation_modal(props: &DeleteConfirmationModalProps) -> Html {
                                 { for detail.entries.iter().map(|entry| html! {
                                     <tr>
                                         <td>{ &entry.account_name }</td>
-                                        <td class="amount">{ format_currency(&entry.debit) }</td>
-                                        <td class="amount">{ format_currency(&entry.credit) }</td>
+                                        <td class="amount">{ i18n.format_currency(entry.debit) }</td>
+                                        <td class="amount">{ i18n.format_currency(entry.credit) }</td>
                                     </tr>
                                 })}
                             </tbody>

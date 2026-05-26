@@ -5,10 +5,18 @@ edition = "2021"
 
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
+uuid = { workspace = true }
 fluent = {workspace = true}
-icu = { version = "2.0.0", default-features = false } # turn off compiled_data
-icu_provider = { version = "2.0.0", features = ["baked"] } # for databake
+fixed_decimal = "0.5.6"
+icu_locid = "1.5"
+icu_calendar = "1.5"
+icu_datetime = "1.5"
+icu_decimal = "1.5"
+# Compiled fallback locale data provider (zero network overhead for static layouts)
+icu_provider = "1.5"
+icu_provider_blob = "1.5"
 zerovec = "0.11.3-dev" # for databake
+
 serde = { version = "1.0", features = ["derive"] }
 strum = { version = "0.26", features = ["derive"] }
 unic-langid = { version = "0.9", features = ["serde", "macros"] }

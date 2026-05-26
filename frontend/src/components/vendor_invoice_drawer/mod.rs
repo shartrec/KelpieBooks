@@ -21,7 +21,7 @@ use shared_core::models::partner::Partner;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::util::format_currency;
+use crate::contexts::locale_context::use_locale;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InvoiceDrawerTab {
@@ -62,6 +62,9 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
 
     let total_gross = props.invoice.gross_amount;
     let balance_remaining = props.invoice.amount_remaining;
+
+    let i18n = use_locale();
+
     html! {
         <div class="drawer-overlay" onclick={on_close.clone()}>
             <div class="drawer" onclick={|e: MouseEvent| e.stop_propagation()}>
@@ -81,14 +84,14 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
 
                         // Always display the true historical original invoice gross liability
                         <span class="amount-badge amount-badge--gross">
-                            { t_args("vendor-invoice-drawer-gross", &fluent_args!["amount" => format_currency(&total_gross)]) }
+                            { t_args("vendor-invoice-drawer-gross", &fluent_args!["amount" => i18n.format_currency(total_gross)]) }
                         </span>
 
                         // Conditionally mount outstanding balances if a partial pay variance exists
                         { if balance_remaining != total_gross {
                             html! {
                                 <span class="amount-badge amount-badge--outstanding">
-                                    { t_args("vendor-invoice-drawer-outstanding-balance", &fluent_args!["amount" => format_currency(&balance_remaining)]) }
+                                    { t_args("vendor-invoice-drawer-outstanding-balance", &fluent_args!["amount" => i18n.format_currency(balance_remaining)]) }
                                 </span>
                             }
                         } else {

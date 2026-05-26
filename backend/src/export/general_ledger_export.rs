@@ -6,13 +6,12 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::export::utils::{build_table_header, wrap_report_layout};
+use crate::export::utils::{build_table_header, format_currency_typ, wrap_report_layout};
 use shared_core::i18n::{t, t_args};
 use chrono::NaiveDate;
 use fluent::fluent_args;
 use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
 use shared_core::models::organization::Organization;
-use shared_core::util::format_currency_typ;
 
 pub fn generate_general_ledger_csv(lines: &[GeneralLedgerLine]) -> String {
     let mut wtr = csv::Writer::from_writer(vec![]);
@@ -69,12 +68,12 @@ pub fn generate_general_ledger_typst(
 
         for entry in account_lines {
             let debit = if entry.debit > 0 {
-                format_currency_typ(&entry.debit)
+                format_currency_typ(entry.debit)
             } else {
                 "".to_string()
             };
             let credit = if entry.credit > 0 {
-                format_currency_typ(&entry.credit)
+                format_currency_typ(entry.credit)
             } else {
                 "".to_string()
             };

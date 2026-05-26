@@ -6,8 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use fluent::fluent_args;
-use shared_core::i18n::{t, t_args};
+use shared_core::i18n::t;
 use shared_core::models::partner_address::PartnerAddress;
 use yew::prelude::*;
 

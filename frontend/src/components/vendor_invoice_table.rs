@@ -16,10 +16,10 @@ use shared_core::i18n::{t, t_args};
 use shared_core::models::invoice_status::InvoiceStatus;
 use shared_core::models::partner::Partner;
 use shared_core::models::vendor_invoice::VendorInvoice;
-use shared_core::util::format_currency;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
+use crate::contexts::locale_context::use_locale;
 
 #[function_component(VendorInvoiceTable)]
 pub fn vendor_invoice_table() -> Html {
@@ -193,6 +193,8 @@ pub fn vendor_invoice_table() -> Html {
         })
     };
 
+    let i18n = use_locale();
+
     if *loading {
         return html! { <p>{ t("common-loading") }</p> };
     }
@@ -258,10 +260,10 @@ pub fn vendor_invoice_table() -> Html {
                                 <td class="table__text-col">{ &invoice.invoice_number }</td>
                                 <td class="table__value-col">{ invoice.issue_date.format("%d %b %Y").to_string() }</td>
                                 <td class="table__value-col">{ invoice.due_date.format("%d %b %Y").to_string() }</td>
-                                <td class="table__value-col">{ format_currency(&invoice.net_amount) }</td>
-                                <td class="table__value-col">{ format_currency(&invoice.tax_amount) }</td>
-                                <td class="table__value-col">{ format_currency(&invoice.gross_amount) }</td>
-                                <td class="table__value-col">{ format_currency(&invoice.amount_remaining) }</td>
+                                <td class="table__value-col">{ i18n.format_currency(invoice.net_amount) }</td>
+                                <td class="table__value-col">{ i18n.format_currency(invoice.tax_amount) }</td>
+                                <td class="table__value-col">{ i18n.format_currency(invoice.gross_amount) }</td>
+                                <td class="table__value-col">{ i18n.format_currency(invoice.amount_remaining) }</td>
                                 <td class="table__col-actions">
                                     <button class="btn-pay-action" disabled={invoice.amount_remaining == 0} onclick={on_pay}>
                                         <span class="btn-pay-icon">

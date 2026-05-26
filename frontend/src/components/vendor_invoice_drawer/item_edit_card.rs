@@ -10,10 +10,10 @@ use crate::components::currency_input::CurrencyInput;
 use shared_core::i18n::t;
 use shared_core::models::account::Account;
 use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
-use shared_core::util::format_currency;
 use uuid::Uuid;
 use web_sys::{HtmlInputElement, HtmlSelectElement};
 use yew::prelude::*;
+use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct ItemEditCardProps {
@@ -82,6 +82,8 @@ pub fn item_edit_card(props: &ItemEditCardProps) -> Html {
         })
     };
 
+    let i18n = use_locale();
+
     html! {
         <div class="card card--editing" style="padding: 1rem; margin-bottom: 1rem;">
             <div class="card__meta-line" style="margin-bottom: 0.75rem;">
@@ -112,7 +114,7 @@ pub fn item_edit_card(props: &ItemEditCardProps) -> Html {
 
                     <label>{t("common-total")}</label>
                     <div class="total-amount">
-                        {format_currency(&item.total_amount)}
+                        {i18n.format_currency(item.total_amount)}
                     </div>
             </div>
             <div class="card-footer">

@@ -8,6 +8,7 @@
 use typst_as_lib::typst_kit_options::TypstKitFontOptions;
 use typst_as_lib::TypstEngine;
 use typst_assets::fonts;
+use shared_core::util::format_currency_icu_typ;
 
 pub fn build_table_header(headings: &[String], align_right: &[bool]) -> String {
     // Generate column layout: first is auto, rest are 1fr
@@ -158,4 +159,9 @@ pub fn compile_typst_to_pdf(source: String) -> Result<Vec<u8>, String> {
         }
         Err(e) => Err(format!("typst::compile() returned an error!: {}", e)),
     }
+}
+
+pub fn format_currency_typ(amount_cents: i64) -> String {
+    // TODO use the user Locale
+    format_currency_icu_typ(amount_cents, Some("en-AU"))
 }

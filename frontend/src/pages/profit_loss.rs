@@ -16,12 +16,12 @@ use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::i18n::{t, t_args};
 use shared_core::models::account_category::AccountCategory;
-use shared_core::util::format_currency;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use crate::contexts::locale_context::{use_locale, LocaleContext};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
@@ -193,6 +193,7 @@ pub fn profit_loss_page() -> Html {
     }
 
     fn render_report_row(
+        i18n: LocaleContext,
         node: &AccountNode,
         depth: usize,
         collapsed: &UseStateHandle<HashSet<Uuid>>,
@@ -250,19 +251,20 @@ pub fn profit_loss_page() -> Html {
                         <td />
                     }
                     <td style="text-align: right;">
-                        { format_currency(&display_balance) }
+                        { i18n.format_currency(display_balance) }
                     </td>
                     if !is_parent {
                         <td />
                     }
                 </tr>
                 if is_parent && !is_collapsed {
-                    { for node.children.iter().map(|child| render_report_row(child, depth + 1, collapsed)) }
+                    { for node.children.iter().map(|child| render_report_row(i18n.clone(), child, depth + 1, collapsed)) }
                 }
             </>
         }
     }
 
+    let i18n = use_locale();
     html! {
         <Layout>
             <div class="report-page">
@@ -285,15 +287,15 @@ pub fn profit_loss_page() -> Html {
                         </thead>
                         <tbody>
                             <tr class="report__section-header"><td colspan="2">{ t("profit-loss-revenue-section") }</td><td></td></tr>
-                            { for revenue_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
+                            { for revenue_nodes.iter().map(|node| render_report_row(i18n.clone(), node, 0, &collapsed_nodes)) }
                             <tr class="report__section-header"><td colspan="2">{ t("profit-loss-expenses-section") }</td><td></td></tr>
-                            { for expense_nodes.iter().map(|node| render_report_row(node, 0, &collapsed_nodes)) }
+                            { for expense_nodes.iter().map(|node| render_report_row(i18n.clone(), node, 0, &collapsed_nodes)) }
 
                             <tr class="report__total-row">
                                 <td><strong>{ t("profit-loss-net-income") }</strong></td>
                                 <td />
                                 <td style="text-align: right;">
-                                    <strong>{ format_currency(&net_income) }</strong>
+                                    <strong>{ i18n.format_currency(net_income) }</strong>
                                 </td>
                             </tr>
                         </tbody>
