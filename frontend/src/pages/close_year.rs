@@ -14,6 +14,7 @@ use fluent::fluent_args;
 use shared_core::i18n::{t, t_args};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
+use crate::contexts::locale_context::use_locale;
 
 #[function_component(CloseYearPage)]
 pub fn close_year_page() -> Html {
@@ -27,6 +28,7 @@ pub fn close_year_page() -> Html {
     let loading = use_state(|| false);
     let error = use_state(|| None::<String>);
     let success = use_state(|| None::<String>);
+    let i18n = use_locale();
 
     let on_date_change = {
         let year_end_date = year_end_date.clone();
@@ -145,7 +147,7 @@ pub fn close_year_page() -> Html {
                         <div class="modal">
                             <h4>{ t("close-year-confirm-title") }</h4>
                             <p>
-                                { t_args("close-year-confirm-message", &fluent_args!["date" => year_end_date.format("%d %B %Y").to_string()]) }
+                                { t_args("close-year-confirm-message", &fluent_args!["date" =>{ i18n.format_date(*year_end_date) }]) }
                             </p>
                             <div class="modal-actions">
                                 <button class="button" onclick={on_cancel_close}>{ t("common-cancel") }</button>

@@ -43,9 +43,7 @@ pub struct VendorInvoiceDrawerProps {
 #[function_component(VendorInvoiceDrawer)]
 pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
     let active_tab = use_state(|| props.initial_tab);
-    let user_ctx = use_user_context();
-    let navigator = use_navigator().unwrap();
-
+    let i18n = use_locale();
 
     let set_tab = {
         let active_tab = active_tab.clone();
@@ -63,7 +61,6 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
     let total_gross = props.invoice.gross_amount;
     let balance_remaining = props.invoice.amount_remaining;
 
-    let i18n = use_locale();
 
     html! {
         <div class="drawer-overlay" onclick={on_close.clone()}>

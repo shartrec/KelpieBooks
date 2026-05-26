@@ -282,7 +282,7 @@ pub fn new_transaction_page() -> Html {
                    <label>
                        { t("new-transaction-date-label") }
                    </label>
-                       <input type="date" value={request.date.to_string()} onchange={on_date_change}
+                       <input type="date" value={request.date.format("%Y-%m-%d").to_string()} onchange={on_date_change}
                            min={ earliest_date.format("%Y-%m-%d").to_string() }
                        />
                </div>

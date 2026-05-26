@@ -339,7 +339,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                     <tbody>
                         if let Some(entry) = opening_balance_entry {
                             <tr>
-                                <td>{ &entry.date.to_string() }</td>
+                                <td>{ i18n.format_date(entry.date) }</td>
                                 <td>{ t("ledger-opening-balance") }</td>
                                 <td class="table__value-col">{ if entry.debit > 0 { i18n.format_currency(entry.debit) } else { "".to_string() } }</td>
                                 <td class="table__value-col">{ if entry.credit > 0 { i18n.format_currency(entry.credit) } else { "".to_string() } }</td>

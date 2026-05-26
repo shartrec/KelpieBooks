@@ -195,7 +195,7 @@ pub fn general_ledger_report_page() -> Html {
                                         <tr>
                                             <td>
                                                 <Link<Route> to={Route::AccountLedger { id: line.account_id }}>
-                                                    { &line.date.to_string() }
+                                                    { i18n.format_date(line.date) }
                                                 </Link<Route>>
                                             </td>
                                             <td>{ line.description.clone().unwrap_or_default() }</td>

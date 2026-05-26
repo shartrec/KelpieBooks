@@ -252,7 +252,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
                 <tbody>
                     { for (*payments).iter().map(|payment| html! {
                         <tr>
-                            <td>{payment.payment_date.format("%d %b %Y").to_string()}</td>
+                            <td>{ i18n.format_date(payment.payment_date) }</td>
                             <td>{i18n.format_currency(payment.amount)}</td>
                             <td>{payment.reference.as_deref().unwrap_or("")}</td>
                         </tr>

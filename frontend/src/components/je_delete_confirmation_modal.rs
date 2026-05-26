@@ -81,7 +81,7 @@ pub fn delete_confirmation_modal(props: &DeleteConfirmationModalProps) -> Html {
                 if let Some(detail) = &*transaction_detail {
                     <div class="transaction-details-summary">
                         <p>
-                            <strong>{ t("common-date") }</strong> { detail.transaction.date.format("%Y-%m-%d").to_string() }
+                            <strong>{ t("common-date") }</strong> { i18n.format_date(detail.transaction.date) }
                         </p>
                         if let Some(desc) = &detail.transaction.description {
                              <p><strong>{ t("reversal-confirm-original-description") }</strong> { desc }</p>

@@ -125,9 +125,9 @@ pub fn vendor_invoice_filter() -> Html {
                     </div>
                     <div class="report__date-range-selector">
                         <label>{ t("vendor-invoice-filter-from-label") }</label>
-                        <input type="date" value={filter_ctx.start_date.to_string()} onchange={on_start_change} />
+                        <input type="date" value={filter_ctx.start_date.format("%Y-%m-%d").to_string()} onchange={on_start_change} />
                         <label>{ t("vendor-invoice-filter-to-label") }</label>
-                        <input type="date" value={filter_ctx.end_date.to_string()} onchange={on_end_change} />
+                        <input type="date" value={filter_ctx.end_date.format("%Y-%m-%d").to_string()} onchange={on_end_change} />
                     </div>
                 </div>
             </div>

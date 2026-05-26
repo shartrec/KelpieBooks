@@ -94,7 +94,7 @@ pub fn dashboard_page() -> Html {
                     <h1>{ t("dashboard-title") }</h1>
                     if let Some(lock_date) = org_context.locked_until {
                         <span class="period-badge">
-                            { t_args("dashboard-period-locked", &fluent_args!["date" => lock_date.format("%d %b %Y").to_string()]) }
+                            { t_args("dashboard-period-locked", &fluent_args!["date" =>{ i18n.format_date(lock_date) }]) }
                         </span>
                     } else {
                         <span class="period-badge warning">{ t("dashboard-period-open") }</span>
@@ -130,7 +130,7 @@ pub fn dashboard_page() -> Html {
                                                     to={Route::AccountLedger { id: tx.account_id }}
                                                     classes={classes!("account-link")}
                                                 >
-                                                    {tx.date.format("%d %b %Y").to_string() }
+                                                    { i18n.format_date(tx.date) }
                                                 </Link<Route>>
                                             </td>
                                             <td>{ tx.description.clone() }</td>
@@ -156,7 +156,7 @@ pub fn dashboard_page() -> Html {
                                     { for payables.iter().map(|p| html! {
                                         <tr>
                                             <td>{ p.partner_name.clone() }</td>
-                                            <td>{ p.due_date.format("%d %b %Y").to_string() }</td>
+                                            <td>{ i18n.format_date(p.due_date) }</td>
                                             <td class="stat-value-small">{ i18n.format_currency(p.amount) }</td>
                                         </tr>
                                     })}

@@ -275,6 +275,11 @@ button {
   margin: 0;
 }
 
+.form-group {
+  label {
+    margin: 0 0.5rem
+  }
+}
 // Set std width for currency fields
 .currency-input {
   width: 10rem;

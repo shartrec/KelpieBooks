@@ -16,11 +16,13 @@ use shared_core::i18n::t;
 use web_sys::{Event, HtmlInputElement};
 use yew::{function_component, html, use_context, use_state, Callback, Html, TargetCast};
 use yew_router::prelude::use_navigator;
+use crate::contexts::locale_context::use_locale;
 
 #[function_component(PeriodSettings)]
 pub fn period_settings() -> Html {
     let user_ctx = use_user_context();
     let org_ctx = use_context::<OrgContextHandle>().expect("OrgContext not found");
+    let i18n = use_locale();
 
     let navigator = use_navigator().unwrap();
     // Local state for the input field so we don't spam the global context
@@ -82,7 +84,7 @@ pub fn period_settings() -> Html {
                         <input
                             type="date"
                             class="form-control"
-                            value={local_date.map(|d| d.to_string()).unwrap_or_default()}
+                            value={local_date.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_default()}
                             onchange={on_date_input}
                         />
                         <button
@@ -96,7 +98,7 @@ pub fn period_settings() -> Html {
                     <p class="text-muted">
                         { t("period-settings-current-lock") }
                         <strong>
-                            { org_ctx.locked_until.map(|d| d.format("%d %b %Y").to_string()).unwrap_or_else(|| t("common-none")) }
+                            { org_ctx.locked_until.map(|d|{ i18n.format_date(d) }).unwrap_or_else(|| t("common-none")) }
                         </strong>
                     </p>
             </div>

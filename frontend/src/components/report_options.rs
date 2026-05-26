@@ -132,11 +132,11 @@ pub fn report_options(props: &ReportOptionsProps) -> Html {
                     <div class="report__date-range-selector">
                         if props.show_start_date {
                             <label>{ t("report-options-from-label") }</label>
-                            <input type="date" value={ctx.date_range.start_date.to_string()} onchange={on_start_change} />
+                            <input type="date" value={ctx.date_range.start_date.format("%Y-%m-%d").to_string()} onchange={on_start_change} />
                         }
                         if props.show_end_date {
                             <label>{ t("report-options-to-label") }</label>
-                            <input type="date" value={ctx.date_range.end_date.to_string()} onchange={on_end_change} />
+                            <input type="date" value={ctx.date_range.end_date.format("%Y-%m-%d").to_string()} onchange={on_end_change} />
                         }
                     </div>
                     <div class="report__export-buttons">

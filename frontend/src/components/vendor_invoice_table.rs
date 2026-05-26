@@ -258,8 +258,8 @@ pub fn vendor_invoice_table() -> Html {
                             <tr>
                                 <td class="table__text-col">{ &invoice.partner_name }</td>
                                 <td class="table__text-col">{ &invoice.invoice_number }</td>
-                                <td class="table__value-col">{ invoice.issue_date.format("%d %b %Y").to_string() }</td>
-                                <td class="table__value-col">{ invoice.due_date.format("%d %b %Y").to_string() }</td>
+                                <td class="table__value-col">{ i18n.format_date(invoice.issue_date) }</td>
+                                <td class="table__value-col">{ i18n.format_date(invoice.due_date) }</td>
                                 <td class="table__value-col">{ i18n.format_currency(invoice.net_amount) }</td>
                                 <td class="table__value-col">{ i18n.format_currency(invoice.tax_amount) }</td>
                                 <td class="table__value-col">{ i18n.format_currency(invoice.gross_amount) }</td>

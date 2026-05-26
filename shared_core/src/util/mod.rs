@@ -58,7 +58,7 @@ pub fn format_date_icu(year: i32, month: u32, day: u32, target_locale: Option<&s
     // Initialize the thread-safe date compiler using native ISO calendar layout maps
     let date_formatter = DateFormatter::try_new_with_length(
         &locale_ident.into(),
-        length::Date::Short,
+        length::Date::Medium,
     )
     .expect("Failed to construct ICU4X DateTime engine configuration context");
 

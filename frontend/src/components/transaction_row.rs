@@ -131,7 +131,7 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                             <img src="/images/chevron-right.svg" alt={t("common-expand")} />
                         }
                     </button>
-                    { primary_entry.date.to_string() }
+                    { i18n.format_date(primary_entry.date) }
                 </td>
                 <td class="table__text-col">{ props.transaction_group.description.clone().unwrap_or_default() }</td>
                 <td class="table__value-col">{ i18n.format_currency(primary_entry.debit) }</td>

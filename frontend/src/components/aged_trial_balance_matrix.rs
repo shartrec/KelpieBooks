@@ -135,8 +135,8 @@ pub fn aged_trial_balance_matrix() -> Html {
                                     html! {
                                         <tr class="sub-row">
                                             <td class="table__text-col" colspan="2">{ &invoice.invoice_number }</td>
-                                            <td class="table__value-col">{ invoice.issue_date.format("%d %b %Y").to_string() }</td>
-                                            <td class="table__value-col">{ invoice.due_date.format("%d %b %Y").to_string() }</td>
+                                            <td class="table__value-col">{ i18n.format_date(invoice.issue_date) }</td>
+                                            <td class="table__value-col">{ i18n.format_date(invoice.due_date) }</td>
                                             <td class="table__value-col" colspan="2">{ i18n.format_currency(invoice.amount_remaining) }</td>
                                             <td class="table__value-col">{ "" }</td>
                                         </tr>

@@ -12,6 +12,7 @@ use shared_core::dtos::transaction_detail::TransactionDetail;
 use shared_core::i18n::{t, t_args};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
+use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
 pub struct ReversalConfirmationModalProps {
@@ -22,6 +23,7 @@ pub struct ReversalConfirmationModalProps {
 
 #[function_component(ReversalConfirmationModal)]
 pub fn reversal_confirmation_modal(props: &ReversalConfirmationModalProps) -> Html {
+    let i18n = use_locale();
     let transaction_detail = use_state(|| None::<TransactionDetail>);
     let error = use_state(|| None::<String>);
     let description =
@@ -90,7 +92,7 @@ pub fn reversal_confirmation_modal(props: &ReversalConfirmationModalProps) -> Ht
                 if let Some(detail) = &*transaction_detail {
                     <div class="transaction-details-summary">
                         <p>
-                            <strong>{ t("common-date") }</strong> { detail.transaction.date.format("%Y-%m-%d").to_string() }
+                            <strong>{ t("common-date") }</strong> { i18n.format_date(detail.transaction.date) }
                         </p>
                         if let Some(desc) = &detail.transaction.description {
                              <p><strong>{ t("reversal-confirm-original-description") }</strong> { desc }</p>
