@@ -17,6 +17,7 @@ use yew::function_component;
 use yew::html;
 use yew::prelude::*;
 use yew_router::hooks::use_navigator;
+use crate::services::web::detect_browser_locale;
 
 #[function_component(LoginPage)]
 pub fn login_page() -> Html {
@@ -135,6 +136,7 @@ pub fn login_form(props: &LoginFormProps) -> Html {
             let login_req = LoginRequest {
                 email: (*user_email).clone(),
                 password_raw: (*password).clone(),
+                locale: Some(detect_browser_locale()),
             };
             on_login.emit(login_req);
         })

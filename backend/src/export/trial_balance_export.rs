@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::export::utils::{build_table_header, format_currency_typ, wrap_report_layout};
+use crate::export::utils::{build_table_header, wrap_report_layout};
 use shared_core::i18n::{t, t_args};
 use chrono::NaiveDate;
 use fluent::fluent_args;
@@ -14,6 +14,8 @@ use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::models::{account_category::AccountCategory, organization::Organization};
 use std::collections::HashMap;
 use uuid::Uuid;
+use shared_core::util::format_currency_icu_typ;
+use crate::routes::security::AuthenticatedUser;
 
 #[derive(Clone, Debug)]
 pub struct AccountNode {
@@ -63,7 +65,7 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
     root_nodes
 }
 
-pub fn generate_trial_balance_csv(accounts: &[AccountWithBalance]) -> String {
+pub fn generate_trial_balance_csv(user: &AuthenticatedUser, accounts: &[AccountWithBalance]) -> String {
     let account_nodes = build_account_nodes(accounts);
     let (total_debit, total_credit) = AccountWithBalance::calculate_totals(accounts);
 
@@ -77,16 +79,16 @@ pub fn generate_trial_balance_csv(accounts: &[AccountWithBalance]) -> String {
             t("common-credit"),
         ));
 
-    fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String) {
+    fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String, locale: Option<&str> ) {
         let indent = " ".repeat(depth * 2);
         let (debit_display, credit_display) = match node.account.category {
             AccountCategory::Asset | AccountCategory::Expense => {
                 if node.account.balance >= 0 {
-                    (format_currency_typ(node.account.balance), "".to_string())
+                    (format_currency_icu_typ(node.account.balance, locale), "".to_string())
                 } else {
                     (
                         "".to_string(),
-                        format_currency_typ(node.account.balance.abs()),
+                        format_currency_icu_typ(node.account.balance.abs(), locale),
                     )
                 }
             }
@@ -94,10 +96,10 @@ pub fn generate_trial_balance_csv(accounts: &[AccountWithBalance]) -> String {
                 if node.account.balance <= 0 {
                     (
                         "".to_string(),
-                        format_currency_typ(node.account.balance.abs()),
+                        format_currency_icu_typ(node.account.balance.abs(), locale),
                     )
                 } else {
-                    (format_currency_typ(node.account.balance), "".to_string())
+                    (format_currency_icu_typ(node.account.balance, locale), "".to_string())
                 }
             }
         };
@@ -106,20 +108,21 @@ pub fn generate_trial_balance_csv(accounts: &[AccountWithBalance]) -> String {
             indent, node.account.name, debit_display, credit_display
         ));
         for child in &node.children {
-            build_csv_rows(child, depth + 1, content);
+            build_csv_rows(child, depth + 1, content, locale);
         }
     }
 
     for node in &account_nodes {
-        build_csv_rows(node, 0, &mut csv_content);
+        build_csv_rows(node, 0, &mut csv_content, Some(&user.locale));
     }
-    let debit = format_currency_typ(total_debit);
-    let credit = format_currency_typ(total_credit);
+    let debit = format_currency_icu_typ(total_debit, Some(&user.locale));
+    let credit = format_currency_icu_typ(total_credit, Some(&user.locale));
     csv_content.push_str(&format!("\"{}\",\"{}\",\"{}\"\n", t("trial-balance-export-total"), debit, credit));
     csv_content
 }
 
 pub fn generate_trial_balance_typst(
+    user: &AuthenticatedUser,
     accounts: &[AccountWithBalance],
     report_date: &NaiveDate,
     org: &Option<Organization>,
@@ -133,16 +136,16 @@ pub fn generate_trial_balance_typst(
         &[false, true, true],
     ));
 
-    fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String) {
+    fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String, locale: Option<&str>) {
         let indent = "#h(2.0em)".repeat(depth);
         let (debit_display, credit_display) = match node.account.category {
             AccountCategory::Asset | AccountCategory::Expense => {
                 if node.account.balance >= 0 {
-                    (format_currency_typ(node.account.balance), "".to_string())
+                    (format_currency_icu_typ(node.account.balance, locale), "".to_string())
                 } else {
                     (
                         "".to_string(),
-                        format_currency_typ(node.account.balance.abs()),
+                        format_currency_icu_typ(node.account.balance.abs(), locale),
                     )
                 }
             }
@@ -150,10 +153,10 @@ pub fn generate_trial_balance_typst(
                 if node.account.balance <= 0 {
                     (
                         "".to_string(),
-                        format_currency_typ(node.account.balance.abs()),
+                        format_currency_icu_typ(node.account.balance.abs(), locale),
                     )
                 } else {
-                    (format_currency_typ(node.account.balance), "".to_string())
+                    (format_currency_icu_typ(node.account.balance, locale), "".to_string())
                 }
             }
         };
@@ -162,12 +165,12 @@ pub fn generate_trial_balance_typst(
             indent, node.account.name, debit_display, credit_display
         ));
         for child in &node.children {
-            build_typst_rows(child, depth + 1, content);
+            build_typst_rows(child, depth + 1, content, locale);
         }
     }
 
     for node in &account_nodes {
-        build_typst_rows(node, 0, &mut typst_content);
+        build_typst_rows(node, 0, &mut typst_content, Some(&user.locale));
     }
     typst_content.push_str(&format!(
         "  [*{}*], align(right)[*{}*], align(right)[*{}*],\n",

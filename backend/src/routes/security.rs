@@ -48,6 +48,11 @@ async fn login(
                 return Err(Status::Unauthorized);
             }
 
+            let user_locale = login_request
+                .locale
+                .clone()
+                .unwrap_or_else(|| "en-GB".to_string());
+
             let auth_user = AuthenticatedUser {
                 user_id: user.id,
                 organization_id: user.organization_id,
@@ -57,6 +62,7 @@ async fn login(
                 display_name: user.display_name.clone(),
                 role: Role::User,
                 organisation_name: user.organisation_name.clone(),
+                locale: user_locale,
             };
             let token = generate_session_token(&auth_user);
             cookies.add(Cookie::build(("session", token)).http_only(false));
@@ -104,6 +110,7 @@ pub(crate) struct AuthenticatedUser {
     pub(crate) display_name: Option<String>,
     pub(crate) role: Role,
     pub(crate) organisation_name: String,
+    pub(crate) locale: String,
 }
 
 #[rocket::async_trait]
@@ -131,6 +138,7 @@ struct Claims {
     role: String,
     exp: usize,
     organisation_name: String,
+    locale: Option<String>
 }
 
 pub(crate) fn hash_pwd(password: &str) -> Result<String, ApiError> {
@@ -165,6 +173,7 @@ fn generate_session_token(user: &AuthenticatedUser) -> String {
         role: user.role.to_string(),
         exp: expiration,
         organisation_name: user.organisation_name.clone(),
+        locale: Some(user.locale.clone()),
     };
 
     encode(
@@ -194,6 +203,7 @@ pub(crate) fn validate_session_token(token: &str) -> Option<AuthenticatedUser> {
                     display_name: data.claims.display_name,
                     role: Role::from(&data.claims.role).unwrap_or(Role::Guest),
                     organisation_name: data.claims.organisation_name,
+                    locale: data.claims.locale.unwrap_or("en-GB".to_string()),
                 })
             } else {
                 None

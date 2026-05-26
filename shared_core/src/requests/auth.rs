@@ -12,4 +12,5 @@ use serde::{Deserialize, Serialize};
 pub struct LoginRequest {
     pub email: String,
     pub password_raw: String,
+    pub locale: Option<String>,
 }

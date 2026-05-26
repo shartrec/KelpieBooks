@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::export::utils::{build_table_header, format_currency_typ, wrap_report_layout};
+use crate::export::utils::{build_table_header, wrap_report_layout};
 use shared_core::i18n::{t, t_args};
 use chrono::NaiveDate;
 use fluent::fluent_args;
@@ -15,6 +15,8 @@ use shared_core::models::organization::Organization;
 use shared_core::reports::balance_sheet::BalanceSheet;
 use std::collections::HashMap;
 use uuid::Uuid;
+use shared_core::util::format_currency_icu_typ;
+use crate::routes::security::AuthenticatedUser;
 
 #[derive(Clone, Debug)]
 pub struct AccountNode {
@@ -132,6 +134,7 @@ pub fn generate_balance_sheet_csv(balance_sheet: &BalanceSheet) -> String {
 }
 
 pub fn generate_balance_sheet_typst(
+    user: &AuthenticatedUser,
     balance_sheet: &BalanceSheet,
     report_date: &NaiveDate,
     org: &Option<Organization>,
@@ -147,58 +150,59 @@ pub fn generate_balance_sheet_typst(
         &[false, true, true],
     ));
 
-    fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String) {
+    fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String, locale: Option<&str>) {
         let indent = "#h(2.0em)".repeat(depth);
+
         content.push_str(&format!(
             "  [{} {}], align(right)[{}],[],\n",
             indent,
             node.account.name,
-            format_currency_typ(node.account.balance)
+            format_currency_icu_typ(node.account.balance, locale)
         ));
         for child in &node.children {
-            build_typst_rows(child, depth + 1, content);
+            build_typst_rows(child, depth + 1, content, locale);
         }
     }
 
     typst_content.push_str(&format!("[*{}*],[],[],\n", t("balance-sheet-assets-section")));
     for node in &asset_nodes {
-        build_typst_rows(node, 0, &mut typst_content);
+        build_typst_rows(node, 0, &mut typst_content, Some(&user.locale));
     }
     typst_content.push_str(&format!(
         "align(right)[*{}*],[],align(right)[*{}*],\n",
         t("balance-sheet-total-assets"),
-        format_currency_typ(balance_sheet.total_assets)
+        format_currency_icu_typ(balance_sheet.total_assets, Some(&user.locale))
     ));
 
     typst_content.push_str(&format!("[*{}*],[],[],\n", t("balance-sheet-liabilities-section")));
     for node in &liability_nodes {
-        build_typst_rows(node, 0, &mut typst_content);
+        build_typst_rows(node, 0, &mut typst_content, Some(&user.locale));
     }
     typst_content.push_str(&format!(
         "align(right)[*{}*],[],align(right)[*{}*],\n",
         t("balance-sheet-total-liabilities"),
-        format_currency_typ(balance_sheet.total_liabilities)
+        format_currency_icu_typ(balance_sheet.total_liabilities, Some(&user.locale))
     ));
 
     typst_content.push_str(&format!("[*{}*],[],[],\n", t("balance-sheet-equity-section")));
     for node in &equity_nodes {
-        build_typst_rows(node, 0, &mut typst_content);
+        build_typst_rows(node, 0, &mut typst_content, Some(&user.locale));
     }
     typst_content.push_str(&format!(
         "[{}],align(right)[{}],[],",
         t("balance-sheet-current-year-earnings"),
-        format_currency_typ(balance_sheet.net_income)
+        format_currency_icu_typ(balance_sheet.net_income, Some(&user.locale))
     ));
 
     typst_content.push_str(&format!(
         "align(right)[*{}*],[],align(right)[*{}*],\n",
         t("balance-sheet-total-equity"),
-        format_currency_typ(balance_sheet.total_equity)
+        format_currency_icu_typ(balance_sheet.total_equity, Some(&user.locale))
     ));
     typst_content.push_str(&format!(
         "align(right)[*{}*],[],align(right)[*{}*],\n",
         t("balance-sheet-total-liabilities-equity"),
-        format_currency_typ(balance_sheet.total_liabilities + balance_sheet.total_equity)
+        format_currency_icu_typ(balance_sheet.total_liabilities + balance_sheet.total_equity, Some(&user.locale))
     ));
 
     typst_content.push_str(")\n");

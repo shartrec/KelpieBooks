@@ -205,7 +205,7 @@ async fn export_account_ledger(
 
         let (content, content_type, filename) = match format.as_str() {
             "csv" => {
-                let csv_data = generate_ledger_csv(&entries);
+                let csv_data = generate_ledger_csv(&user, &entries);
                 (
                     csv_data.into_bytes(),
                     ContentType::CSV,
@@ -214,6 +214,7 @@ async fn export_account_ledger(
             }
             "pdf" => {
                 let typst_data = generate_ledger_typst(
+                    &user,
                     &entries,
                     account.name.as_str(),
                     &start_date,

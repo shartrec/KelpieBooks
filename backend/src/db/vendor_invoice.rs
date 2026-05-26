@@ -153,7 +153,7 @@ pub(crate) async fn get_by_org(
         query.push_str(&format!(" AND vi.gross_amount >= ${}", i));
         i += 1;
     }
-    if let Some(status) = &status {
+    if let Some(_status) = &status {
         query.push_str(&format!(" AND vi.status::TEXT = ANY(${})", i));
     }
 

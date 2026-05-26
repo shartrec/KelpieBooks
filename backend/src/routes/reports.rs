@@ -155,7 +155,7 @@ async fn export_trial_balance(
 
     let (content, content_type, filename) = match format.as_str() {
         "csv" => {
-            let csv_data = generate_trial_balance_csv(&accounts);
+            let csv_data = generate_trial_balance_csv(&user, &accounts);
             (
                 csv_data.into_bytes(),
                 ContentType::CSV,
@@ -163,7 +163,7 @@ async fn export_trial_balance(
             )
         }
         "pdf" => {
-            let typst_data = generate_trial_balance_typst(&accounts, &report_date, &org);
+            let typst_data = generate_trial_balance_typst(&user, &accounts, &report_date, &org);
 
             match compile_typst_to_pdf(typst_data) {
                 Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
@@ -196,7 +196,7 @@ async fn export_profit_loss(
 
     let (content, content_type, filename) = match format.as_str() {
         "csv" => {
-            let csv_data = generate_profit_loss_csv(&accounts);
+            let csv_data = generate_profit_loss_csv(&user, &accounts);
             (
                 csv_data.into_bytes(),
                 ContentType::CSV,
@@ -204,7 +204,7 @@ async fn export_profit_loss(
             )
         }
         "pdf" => {
-            let typst_data = generate_profit_loss_typst(&accounts, &start_date, &end_date, &org);
+            let typst_data = generate_profit_loss_typst(&user, &accounts, &start_date, &end_date, &org);
             match compile_typst_to_pdf(typst_data) {
                 Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
                 Err(e) => return Err(ApiError::Internal(e)),
@@ -240,7 +240,7 @@ async fn export_balance_sheet(
             )
         }
         "pdf" => {
-            let typst_data = generate_balance_sheet_typst(&balance_sheet, &report_date, &org);
+            let typst_data = generate_balance_sheet_typst(&user, &balance_sheet, &report_date, &org);
             match compile_typst_to_pdf(typst_data) {
                 Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
                 Err(e) => return Err(ApiError::Internal(e)),
@@ -294,7 +294,7 @@ async fn export_general_ledger(
             )
         }
         "pdf" => {
-            let typst_data = generate_general_ledger_typst(&lines, &start_date, &end_date, &org);
+            let typst_data = generate_general_ledger_typst(&user, &lines, &start_date, &end_date, &org);
             match compile_typst_to_pdf(typst_data) {
                 Ok(pdf_bytes) => (
                     pdf_bytes,

@@ -160,8 +160,3 @@ pub fn compile_typst_to_pdf(source: String) -> Result<Vec<u8>, String> {
         Err(e) => Err(format!("typst::compile() returned an error!: {}", e)),
     }
 }
-
-pub fn format_currency_typ(amount_cents: i64) -> String {
-    // TODO use the user Locale
-    format_currency_icu_typ(amount_cents, Some("en-AU"))
-}
