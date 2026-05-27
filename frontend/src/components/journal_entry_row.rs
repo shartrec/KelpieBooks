@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use crate::components::currency_input::CurrencyInput;
-use shared_core::i18n::t;
+use crate::contexts::locale_context::use_locale;
 use shared_core::requests::transaction::JournalEntryLine;
 use uuid::Uuid;
 use web_sys::HtmlSelectElement;
@@ -24,6 +24,8 @@ pub struct JournalEntryRowProps {
 
 #[function_component(JournalEntryRow)]
 pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
+    let i18n = use_locale();
+
     let select_ref = use_node_ref(); // Create the reference
 
     // Effect that runs when 'should_focus' changes
@@ -98,12 +100,12 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
     html! {
         <div class="journal__entry-row">
             <select ref={select_ref} onchange={on_account_change}>
-                <option value="" disabled=true selected={props.entry.account_id.is_nil()}>{ t("journal-entry-select-account") }</option>
+                <option value="" disabled=true selected={props.entry.account_id.is_nil()}>{ i18n.t("journal-entry-select-account") }</option>
                 { for props.accounts.iter().map(|(id, name)| html! {
                     <option value={id.to_string()} selected={*id == props.entry.account_id}>{name}</option>
                 })}
             </select>
-            <input type="text" placeholder={t("journal-entry-description-placeholder")}
+            <input type="text" placeholder={i18n.t("journal-entry-description-placeholder")}
                    value={props.entry.description.clone().unwrap_or_default()}
                    oninput={on_description_change} />
 
@@ -111,16 +113,16 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
             <CurrencyInput
                 value={props.entry.debit}
                 on_change={on_debit_change}
-                placeholder={t("journal-entry-currency-placeholder")}
+                placeholder={i18n.t("journal-entry-currency-placeholder")}
             />
             <CurrencyInput
                 value={props.entry.credit}
                 on_change={on_credit_change}
-                placeholder={t("journal-entry-currency-placeholder")}
+                placeholder={i18n.t("journal-entry-currency-placeholder")}
             />
 
             <button class="icon-button btn-action" onclick={on_delete_click}>
-                <img src="/images/delete.svg" alt={t("common-delete")} />
+                <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
             </button>
         </div>
     }

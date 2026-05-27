@@ -9,12 +9,12 @@ use crate::api::Api;
 use crate::components::journal_entry_row::JournalEntryRow;
 use crate::components::layout::Layout;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use crate::contexts::org_context::OrgContextHandle;
 use crate::router::Route;
 use chrono::{Duration, NaiveDate};
 use fluent::fluent_args;
 use serde::{Deserialize, Serialize};
-use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
 use shared_core::requests::transaction::{
     CreateTransactionRequest, JournalEntryLine, UpdateTransactionRequest,
@@ -39,6 +39,7 @@ pub struct NewTransactionQuery {
 #[function_component(NewTransactionPage)]
 pub fn new_transaction_page() -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let request = use_state(CreateTransactionRequest::default);
     let edit_id = use_state(|| None::<Uuid>);
     let focus_index = use_state(|| None::<usize>);
@@ -241,20 +242,20 @@ pub fn new_transaction_page() -> Html {
 
     let is_edit_mode = edit_id.is_some();
     let page_title = if is_edit_mode {
-        t("new-transaction-edit-title")
+        i18n.t("new-transaction-edit-title")
     } else {
-        t("new-transaction-new-title")
+        i18n.t("new-transaction-new-title")
     };
     let save_button_text = if is_edit_mode {
-        t("new-transaction-update-button")
+        i18n.t("new-transaction-update-button")
     } else {
-        t("new-transaction-save-button")
+        i18n.t("new-transaction-save-button")
     };
 
     let page_header = if let Some(acc) = &*from_account {
         html! {
             <div class="page-subheader">
-                <h3>{ t("new-transaction-for-label") }<Link<Route> to={Route::AccountLedger { id: acc.id }}>{ &acc.name }</Link<Route>></h3>
+                <h3>{ i18n.t("new-transaction-for-label") }<Link<Route> to={Route::AccountLedger { id: acc.id }}>{ &acc.name }</Link<Route>></h3>
             </div>
         }
     } else {
@@ -280,7 +281,7 @@ pub fn new_transaction_page() -> Html {
            <form onsubmit={on_submit} class="transaction__form">
                <div class="transaction__form__header">
                    <label>
-                       { t("new-transaction-date-label") }
+                       { i18n.t("new-transaction-date-label") }
                    </label>
                        <input type="date" value={request.date.format("%Y-%m-%d").to_string()} onchange={on_date_change}
                            min={ earliest_date.format("%Y-%m-%d").to_string() }
@@ -289,10 +290,10 @@ pub fn new_transaction_page() -> Html {
 
                <div class="journal__entries">
                    <div class="journal__entry-header">
-                       <span>{ t("common-account") }</span>
-                       <span>{ t("common-description") }</span>
-                       <span>{ t("common-debit") }</span>
-                       <span>{ t("common-credit") }</span>
+                       <span>{ i18n.t("common-account") }</span>
+                       <span>{ i18n.t("common-description") }</span>
+                       <span>{ i18n.t("common-debit") }</span>
+                       <span>{ i18n.t("common-credit") }</span>
                        <span></span>
                    </div>
                    { for request.entries.iter().enumerate().map(|(i, entry)| {
@@ -311,20 +312,20 @@ pub fn new_transaction_page() -> Html {
                    })}
                </div>
                <div class="modal__form__actions">
-                   <button type="button" onclick={add_line} class="button-add-row">{ t("new-transaction-add-line-button") }</button>
+                   <button type="button" onclick={add_line} class="button-add-row">{ i18n.t("new-transaction-add-line-button") }</button>
                </div>
                <div class="transaction__form__totals">
-                   <div>{ t_args("new-transaction-debits-total", &fluent_args!["amount" => (total_debits as f64 / 100.0).to_string()]) }</div>
-                   <div>{ t_args("new-transaction-credits-total", &fluent_args!["amount" => (total_credits as f64 / 100.0).to_string()]) }</div>
+                   <div>{ i18n.t_args("new-transaction-debits-total", &fluent_args!["amount" => (total_debits as f64 / 100.0).to_string()]) }</div>
+                   <div>{ i18n.t_args("new-transaction-credits-total", &fluent_args!["amount" => (total_credits as f64 / 100.0).to_string()]) }</div>
                    <div class={if is_balanced { "transaction__form__balanced" } else { "transaction__form__unbalanced" }}>
-                       { if is_balanced { t("new-transaction-balanced") } else { t("new-transaction-unbalanced") } }
+                       { if is_balanced { i18n.t("new-transaction-balanced") } else { i18n.t("new-transaction-unbalanced") } }
                    </div>
                </div>
 
                <div class="modal__form__actions">
-                   <button type="button" onclick={on_cancel} class="button-secondary">{ t("common-cancel") }</button>
+                   <button type="button" onclick={on_cancel} class="button-secondary">{ i18n.t("common-cancel") }</button>
                    <button type="submit" disabled={!is_balanced || is_period_locked}>{
-                          if is_period_locked { t("new-transaction-period-locked") }
+                          if is_period_locked { i18n.t("new-transaction-period-locked") }
                           else { save_button_text }
                        }</button>
                </div>

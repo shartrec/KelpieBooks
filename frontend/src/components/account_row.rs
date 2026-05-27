@@ -6,14 +6,13 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+use crate::contexts::locale_context::use_locale;
 use crate::router::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
-use shared_core::i18n::t;
 use std::collections::HashSet;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::contexts::locale_context::use_locale;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
@@ -34,6 +33,8 @@ pub struct AccountRowProps {
 pub fn account_row(props: &AccountRowProps) -> Html {
     let is_parent = !props.node.children.is_empty();
     let is_collapsed = props.collapsed_nodes.contains(&props.node.account.id);
+
+    let i18n = use_locale();
 
     let on_toggle_collapse = {
         let collapsed_nodes = props.collapsed_nodes.clone();
@@ -76,7 +77,7 @@ pub fn account_row(props: &AccountRowProps) -> Html {
         }
     };
 
-    let i18n = use_locale();
+
     html! {
         <>
             <tr class={if is_parent { "parent-account" } else { "" }}>
@@ -85,9 +86,9 @@ pub fn account_row(props: &AccountRowProps) -> Html {
                     if is_parent {
                         <button onclick={on_toggle_collapse} class="collapse-toggle">
                             if is_collapsed {
-                                <img src="/images/chevron-right.svg" alt={t("common-expand")} />
+                                <img src="/images/chevron-right.svg" alt={i18n.t("common-expand")} />
                             } else {
-                                <img src="/images/chevron-down.svg" alt={t("common-collapse")} />
+                                <img src="/images/chevron-down.svg" alt={i18n.t("common-collapse")} />
                             }
                         </button>
                     }
@@ -98,11 +99,11 @@ pub fn account_row(props: &AccountRowProps) -> Html {
                 <td class="table__col-actions">
                     <div class="actions-wrapper">
                         <button class="icon-button btn-action" onclick={on_edit_click}>
-                            <img src="/images/edit.svg" alt={t("common-edit")} />
+                            <img src="/images/edit.svg" alt={i18n.t("common-edit")} />
                         </button>
                         if !is_parent && props.node.account.balance == 0 {
                             <button class="icon-button btn-action" onclick={on_delete_click}>
-                                <img src="/images/delete.svg" alt={t("common-delete")} />
+                                <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
                             </button>
                         }
                     </div>

@@ -8,6 +8,7 @@
 
 pub mod logging;
 pub mod types;
+pub mod locale_context;
 
 use bcrypt;
 use log::error;

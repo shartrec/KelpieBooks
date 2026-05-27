@@ -10,18 +10,17 @@ use crate::api::Api;
 use crate::components::layout::Layout;
 use crate::components::report_options::ReportOptions;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::{use_locale, LocaleContext};
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::router::Route;
 use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
-use shared_core::i18n::{t, t_args};
 use shared_core::models::account_category::AccountCategory;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::{use_navigator, Link};
-use crate::contexts::locale_context::{use_locale, LocaleContext};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AccountNode {
@@ -75,6 +74,7 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
 #[function_component(TrialBalancePage)]
 pub fn trial_balance_page() -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let navigator = use_navigator().unwrap();
     let report_ctx = use_report_context();
     let accounts = use_state(|| Rc::new(Vec::<AccountWithBalance>::new()));
@@ -130,6 +130,7 @@ pub fn trial_balance_page() -> Html {
         let error = error.clone();
         let report_date = report_ctx.date_range.end_date;
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
 
         use_effect_with(report_date, move |&report_date| {
@@ -137,6 +138,7 @@ pub fn trial_balance_page() -> Html {
             let loading = loading.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
@@ -150,19 +152,19 @@ pub fn trial_balance_page() -> Html {
                                     accounts.set(Rc::new(data));
                                     error.set(None);
                                 }
-                                Err(e) => error.set(Some(t_args(
+                                Err(e) => error.set(Some(i18n.t_args(
                                     "trial-balance-error-parse",
                                     &fluent_args!["error" => e.to_string()],
                                 ))),
                             }
                         } else {
-                            error.set(Some(t_args(
+                            error.set(Some(i18n.t_args(
                                 "trial-balance-error-fetch",
                                 &fluent_args!["status" => resp.status()],
                             )));
                         }
                     }
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -231,9 +233,9 @@ pub fn trial_balance_page() -> Html {
                         if is_parent {
                             <button onclick={on_toggle} class="collapse-toggle">
                                 if is_collapsed {
-                                    <img src="/images/chevron-right.svg" alt={t("common-expand")} />
+                                    <img src="/images/chevron-right.svg" alt={i18n.t("common-expand")} />
                                 } else {
-                                    <img src="/images/chevron-down.svg" alt={t("common-collapse")} />
+                                    <img src="/images/chevron-down.svg" alt={i18n.t("common-collapse")} />
                                 }
                             </button>
                         }
@@ -249,32 +251,30 @@ pub fn trial_balance_page() -> Html {
         }
     }
 
-    let i18n = use_locale();
-
     html! {
         <Layout>
             <div class="report-page">
                 <div class="report-header">
-                    <h3>{ t("trial-balance-title") }</h3>
+                    <h3>{ i18n.t("trial-balance-title") }</h3>
                     <ReportOptions show_start_date={false} show_end_date={true} />
                 </div>
                 if *loading {
-                    <p>{ t("common-loading") }</p>
+                    <p>{ i18n.t("common-loading") }</p>
                 } else if let Some(err) = &*error {
                     <div class="error">{ err }</div>
                 } else {
                     <table class="report-table">
                         <thead>
                             <tr>
-                                <th>{ t("common-account") }</th>
-                                <th style="text-align: right;">{ t("common-debit") }</th>
-                                <th style="text-align: right;">{ t("common-credit") }</th>
+                                <th>{ i18n.t("common-account") }</th>
+                                <th style="text-align: right;">{ i18n.t("common-debit") }</th>
+                                <th style="text-align: right;">{ i18n.t("common-credit") }</th>
                             </tr>
                         </thead>
                         <tbody>
                             { for account_nodes.iter().map(|node| render_report_row(i18n.clone(), node, 0, &collapsed_nodes)) }
                             <tr class="report-total-row">
-                                <td><strong>{ t("common-total") }</strong></td>
+                                <td><strong>{ i18n.t("common-total") }</strong></td>
                                 <td style="text-align: right;"><strong>{ i18n.format_currency(*total_debit) }</strong></td>
                                 <td style="text-align: right;"><strong>{ i18n.format_currency(*total_credit) }</strong></td>
                             </tr>

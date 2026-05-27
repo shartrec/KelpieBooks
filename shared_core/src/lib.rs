@@ -11,4 +11,3 @@ pub mod i18n;
 pub mod models;
 pub mod reports;
 pub mod requests;
-pub mod util;

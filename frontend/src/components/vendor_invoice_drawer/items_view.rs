@@ -10,16 +10,15 @@ use crate::api::Api;
 use crate::components::generic_delete_confirmation_modal::GenericDeleteConfirmationModal;
 use crate::components::vendor_invoice_drawer::item_edit_card::ItemEditCard;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use fluent::fluent_args;
-use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
+use shared_core::models::account_category::AccountCategory;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::models::account_category::AccountCategory;
-use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct ItemsViewProps {
@@ -30,6 +29,7 @@ pub struct ItemsViewProps {
 #[function_component(ItemsView)]
 pub fn items_view(props: &ItemsViewProps) -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let navigator = use_navigator().unwrap();
     let items = use_state(|| props.invoice.items.clone());
     let accounts = use_state(Vec::new);
@@ -42,11 +42,13 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
         let accounts = accounts.clone();
         let error = error.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         Callback::from(move |_: ()| {
             let accounts = accounts.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 let url = format!("/api/accounts_by_category/{}", AccountCategory::Expense.to_string());
@@ -55,17 +57,17 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<Account>>().await {
                             Ok(data) => accounts.set(data),
-                            Err(e) => error.set(Some(t_args(
+                            Err(e) => error.set(Some(i18n.t_args(
                                 "new-vendor-invoice-error-parse-accounts",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
                         }
                     }
-                    Ok(response) => error.set(Some(t_args(
+                    Ok(response) => error.set(Some(i18n.t_args(
                         "new-vendor-invoice-error-fetch-accounts",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -154,6 +156,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
         let items = items.clone();
         let on_change = props.on_change.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         let error = error.clone();
         Callback::from(move |e: SubmitEvent| {
@@ -161,6 +164,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
             let items = items.clone();
             let on_change = on_change.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             let error = error.clone();
             wasm_bindgen_futures::spawn_local(async move {
@@ -169,11 +173,11 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                     Ok(r) if r.ok() => {
                         on_change.emit(());
                     }
-                    Ok(r) => error.set(Some(t_args(
+                    Ok(r) => error.set(Some(i18n.t_args(
                         "items-view-error-update-items",
                         &fluent_args!["status" => r.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -213,7 +217,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                         let account_display = accounts.iter()
                             .find(|acc| acc.id == item.account_id) // Match the GL ID
                             .map(|acc| format!("{} - {}", acc.code, acc.name)) // Format as "6100 - Software Expenses"
-                            .unwrap_or_else(|| t("items-view-unknown-gl-account"));
+                            .unwrap_or_else(|| i18n.t("items-view-unknown-gl-account"));
 
                         html! {
                             <div class="card-item-compact">
@@ -221,16 +225,16 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                                 <div class="card-item-compact__meta">
                                     // Replace placeholder text with your structural account lookup if available
                                     <span class="card-item-compact__account-badge">
-                                        { t_args("items-view-gl-label", &fluent_args!["account" => account_display]) }
+                                        { i18n.t_args("items-view-gl-label", &fluent_args!["account" => account_display]) }
                                     </span>
 
                                     // Inline micro-actions shifted up to eliminate dedicated footer bars
                                     <div class="card__actions" style="display: flex; gap: 4px;">
                                         <button type="button" class="icon-button" onclick={on_edit}>
-                                            <img src="/images/edit.svg" alt={t("common-edit")} style="width: 13px; height: 13px;" />
+                                            <img src="/images/edit.svg" alt={i18n.t("common-edit")} style="width: 13px; height: 13px;" />
                                         </button>
                                         <button type="button" class="icon-button" onclick={on_delete}>
-                                            <img src="/images/delete.svg" alt={t("common-delete")} style="width: 13px; height: 13px;" />
+                                            <img src="/images/delete.svg" alt={i18n.t("common-delete")} style="width: 13px; height: 13px;" />
                                         </button>
                                     </div>
                                 </div>
@@ -246,7 +250,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                                             { i18n.format_currency(item.total_amount) }
                                         </p>
                                         <p class="card-item-compact__sub-breakdown">
-                                            { t_args("items-view-net-tax-breakdown", &fluent_args!["net" => i18n.format_currency(item.net_amount), "tax" => i18n.format_currency(item.tax_amount)]) }
+                                            { i18n.t_args("items-view-net-tax-breakdown", &fluent_args!["net" => i18n.format_currency(item.net_amount), "tax" => i18n.format_currency(item.tax_amount)]) }
                                         </p>
                                     </div>
                                 </div>
@@ -254,20 +258,20 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                         }
                     })}
                     <div class="table-actions">
-                        <button type="button" class="button-primary" onclick={add_item}>{ t("items-view-add-item-button") }</button>
+                        <button type="button" class="button-primary" onclick={add_item}>{ i18n.t("items-view-add-item-button") }</button>
                     </div>
                     <div class="voucher-footer">
                         if let Some(e) = &*error {
                             <div class="error">{e}</div>
                         }
-                        <button type="submit" class="button-primary">{ t("account-modal-save-button") }</button>
+                        <button type="submit" class="button-primary">{ i18n.t("account-modal-save-button") }</button>
                     </div>
                 </form>
             }
             if let Some(item) = &*item_to_delete {
                 <GenericDeleteConfirmationModal
-                    title={t("items-view-delete-item-title")}
-                    message={t_args("items-view-delete-item-message", &fluent_args!["description" => item.description.clone()])}
+                    title={i18n.t("items-view-delete-item-title")}
+                    message={i18n.t_args("items-view-delete-item-message", &fluent_args!["description" => item.description.clone()])}
                     on_confirm={on_delete_confirm}
                     on_cancel={on_delete_cancel}
                 />

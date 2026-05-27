@@ -9,10 +9,10 @@
 use crate::api::Api;
 use crate::components::currency_input::CurrencyInput;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use crate::contexts::report_context::{ReportAction, ReportContext};
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
 use shared_core::models::account_category::AccountCategory;
 use uuid::Uuid;
@@ -32,6 +32,7 @@ pub struct ReportOptionsProps {
 #[function_component(ReportOptions)]
 pub fn report_options(props: &ReportOptionsProps) -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let navigator = use_navigator().unwrap();
     let report_ctx = use_context::<ReportContext>();
     let accounts = use_state(Vec::new);
@@ -131,23 +132,23 @@ pub fn report_options(props: &ReportOptionsProps) -> Html {
                 <div class="report__action-bar">
                     <div class="report__date-range-selector">
                         if props.show_start_date {
-                            <label>{ t("report-options-from-label") }</label>
+                            <label>{ i18n.t("report-options-from-label") }</label>
                             <input type="date" value={ctx.date_range.start_date.format("%Y-%m-%d").to_string()} onchange={on_start_change} />
                         }
                         if props.show_end_date {
-                            <label>{ t("report-options-to-label") }</label>
+                            <label>{ i18n.t("report-options-to-label") }</label>
                             <input type="date" value={ctx.date_range.end_date.format("%Y-%m-%d").to_string()} onchange={on_end_change} />
                         }
                     </div>
                     <div class="report__export-buttons">
                         if ctx.on_export_csv.is_some() {
-                            <button class="icon-button" onclick={on_export_csv_click} title={t("report-options-export-csv-tooltip")}>
-                                <img src="/images/download.svg" alt={t("report-options-export-csv-tooltip")} />
+                            <button class="icon-button" onclick={on_export_csv_click} title={i18n.t("report-options-export-csv-tooltip")}>
+                                <img src="/images/download.svg" alt={i18n.t("report-options-export-csv-tooltip")} />
                             </button>
                         }
                         if ctx.on_export_pdf.is_some() {
-                            <button class="icon-button" onclick={on_export_pdf_click} title={t("report-options-export-pdf-tooltip")}>
-                                <img src="/images/export-pdf.svg" alt={t("report-options-export-pdf-tooltip")} />
+                            <button class="icon-button" onclick={on_export_pdf_click} title={i18n.t("report-options-export-pdf-tooltip")}>
+                                <img src="/images/export-pdf.svg" alt={i18n.t("report-options-export-pdf-tooltip")} />
                             </button>
                         }
                     </div>
@@ -155,15 +156,15 @@ pub fn report_options(props: &ReportOptionsProps) -> Html {
                 if props.show_advanced_filters {
                     <div class="report__advanced-filters">
                         <div class="report__filter-group">
-                            <label>{ t("report-options-accounts-label") }</label>
+                            <label>{ i18n.t("report-options-accounts-label") }</label>
                             <AccountFilter accounts={(*accounts).clone()}/>
                         </div>
                         <div class="report__filter-group">
-                            <label>{ t("report-options-min-amount-label") }</label>
+                            <label>{ i18n.t("report-options-min-amount-label") }</label>
                             <CurrencyInput
                                 value={ctx.min_amount.unwrap_or(0)}
                                 on_change={on_min_amount_change}
-                                placeholder={t("journal-entry-currency-placeholder")}
+                                placeholder={i18n.t("journal-entry-currency-placeholder")}
                             />
                         </div>
                     </div>
@@ -182,6 +183,7 @@ pub struct AccountFilterProps {
 
 #[function_component(AccountFilter)]
 pub fn account_filter(props: &AccountFilterProps) -> Html {
+    let i18n = use_locale();
     let report_ctx = use_context::<ReportContext>();
     let is_open = use_state(|| false);
 
@@ -200,12 +202,12 @@ pub fn account_filter(props: &AccountFilterProps) -> Html {
     if let Some(ctx) = report_ctx {
         html! {
             <div class="report__filter-group">
-                <span class="filter-label">{ t("report-options-accounts-label") }</span>
+                <span class="filter-label">{ i18n.t("report-options-accounts-label") }</span>
                 <div class="filter-trigger" onclick={on_toggle_dropdown}>
                     { if ctx.selected_accounts.is_empty() {
-                        t("report-options-all-accounts")
+                        i18n.t("report-options-all-accounts")
                     } else {
-                        t_args("report-options-selected-accounts", &fluent_args!["count" => ctx.selected_accounts.len()])
+                        i18n.t_args("report-options-selected-accounts", &fluent_args!["count" => ctx.selected_accounts.len()])
                     }}
                 </div>
 

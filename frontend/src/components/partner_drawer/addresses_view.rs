@@ -10,8 +10,8 @@ use crate::api::Api;
 use crate::components::partner_drawer::address_edit_card::AddressEditCard;
 use crate::components::partner_drawer::delete_address_confirmation_modal::DeleteAddressConfirmationModal;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use fluent::fluent_args;
-use shared_core::i18n::{t, t_args};
 use shared_core::models::address_type::AddressType;
 use shared_core::models::partner_address::PartnerAddress;
 use uuid::Uuid;
@@ -35,6 +35,7 @@ pub struct AddressesViewProps {
 #[function_component(AddressesView)]
 pub fn addresses_view(props: &AddressesViewProps) -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let navigator = use_navigator().unwrap();
     let editing_state = use_state(|| EditState::None);
     let address_to_delete = use_state(|| None::<PartnerAddress>);
@@ -60,12 +61,14 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
         let on_change = props.on_change.clone();
         let partner_id = props.partner_id;
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         let error = error.clone();
         Callback::from(move |address: PartnerAddress| {
             let on_change = on_change.clone();
             let editing_state = editing_state.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             let error = error.clone();
             let is_new = *editing_state == EditState::Adding;
@@ -92,11 +95,11 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
                         on_change.emit(());
                         editing_state.set(EditState::None);
                     }
-                    Ok(r) => error.set(Some(t_args(
+                    Ok(r) => error.set(Some(i18n.t_args(
                         "addresses-view-error-save",
                         &fluent_args!["status" => r.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -117,6 +120,7 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
         let on_change = props.on_change.clone();
         let partner_id = props.partner_id;
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         let error = error.clone();
         Callback::from(move |_: ()| {
@@ -124,6 +128,7 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
                 let on_change = on_change.clone();
                 let address_to_delete = address_to_delete.clone();
                 let user_ctx = user_ctx.clone();
+                let i18n = i18n.clone();
                 let navigator = navigator.clone();
                 let error = error.clone();
                 let address_id = address.id;
@@ -140,12 +145,12 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
                             address_to_delete.set(None);
                         }
                         Ok(r) => {
-                            error.set(Some(t_args(
+                            error.set(Some(i18n.t_args(
                                 "addresses-view-error-delete",
                                 &fluent_args!["status" => r.status()],
                             )))
                         }
-                        Err(e) => error.set(Some(t_args(
+                        Err(e) => error.set(Some(i18n.t_args(
                             "common-network-error",
                             &fluent_args!["error" => e.to_string()],
                         ))),
@@ -158,7 +163,7 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
     html! {
         <div class="addresses-view">
             <div class="table-actions">
-                <button class="button-primary" onclick={on_add_click} disabled={*editing_state != EditState::None}>{ t("addresses-view-add-button") }</button>
+                <button class="button-primary" onclick={on_add_click} disabled={*editing_state != EditState::None}>{ i18n.t("addresses-view-add-button") }</button>
             </div>
 
             if let Some(e) = &*error {
@@ -188,7 +193,7 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
                                 <div class="card__header">
                                     <h5>{ address.address_type.to_string() }</h5>
                                     if address.is_primary {
-                                        <span class="badge badge--primary">{ t("common-primary") }</span>
+                                        <span class="badge badge--primary">{ i18n.t("common-primary") }</span>
                                     }
                                 </div>
                                 <div class="card__body">
@@ -203,10 +208,10 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
                                 </div>
                                 <div class="card__footer">
                                     <button class="icon-button" onclick={on_edit_click(address.id)} disabled={*editing_state != EditState::None}>
-                                        <img src="/images/edit.svg" alt={t("common-edit")} />
+                                        <img src="/images/edit.svg" alt={i18n.t("common-edit")} />
                                     </button>
                                     <button class="icon-button" onclick={on_delete_click(address.clone())} disabled={*editing_state != EditState::None}>
-                                        <img src="/images/delete.svg" alt={t("common-delete")} />
+                                        <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
                                     </button>
                                 </div>
                             </div>

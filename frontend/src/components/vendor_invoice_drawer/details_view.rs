@@ -8,10 +8,10 @@
 
 use crate::api::Api;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use chrono::NaiveDate;
 use fluent::fluent_args;
 use gloo_timers::callback::Timeout;
-use shared_core::i18n::{t, t_args};
 use shared_core::models::vendor_invoice::VendorInvoice;
 use shared_core::requests::vendor_invoice::UpdateVendorInvoiceRequest;
 use web_sys::HtmlInputElement;
@@ -27,6 +27,7 @@ pub struct DetailsViewProps {
 #[function_component(DetailsView)]
 pub fn details_view(props: &DetailsViewProps) -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let navigator = use_navigator().unwrap();
     let request = use_state(|| UpdateVendorInvoiceRequest {
         id: props.invoice.id,
@@ -64,6 +65,7 @@ pub fn details_view(props: &DetailsViewProps) -> Html {
         let request = request.clone();
         let on_change = props.on_change.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         let error = error.clone();
         let show_saved = show_saved.clone();
@@ -72,6 +74,7 @@ pub fn details_view(props: &DetailsViewProps) -> Html {
             let request = request.clone();
             let on_change = on_change.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             let error = error.clone();
             let show_saved = show_saved.clone();
@@ -89,11 +92,11 @@ pub fn details_view(props: &DetailsViewProps) -> Html {
                             timeout.forget();
                         }
                     }
-                    Ok(r) => error.set(Some(t_args(
+                    Ok(r) => error.set(Some(i18n.t_args(
                         "details-view-error-update",
                         &fluent_args!["status" => r.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -106,16 +109,16 @@ pub fn details_view(props: &DetailsViewProps) -> Html {
         <div class="details-view">
             <form onsubmit={on_submit}>
                 <div class="data-form">
-                    <label>{t("vendor-invoice-table-invoice-number")}</label>
+                    <label>{i18n.t("vendor-invoice-table-invoice-number")}</label>
                     <input type="text" value={request.invoice_number.clone()} oninput={on_input(|r, v| r.invoice_number = v)} required=true />
 
-                    <label>{t("vendor-invoice-table-invoice-date")}</label>
+                    <label>{i18n.t("vendor-invoice-table-invoice-date")}</label>
                     <input type="date" value={request.issue_date.format("%Y-%m-%d").to_string()} onchange={on_date_change(|r, v| r.issue_date = v)} required=true />
 
-                    <label>{t("common-due-date")}</label>
+                    <label>{i18n.t("common-due-date")}</label>
                     <input type="date" value={request.due_date.format("%Y-%m-%d").to_string()} onchange={on_date_change(|r, v| r.due_date = v)} required=true />
 
-                    <label>{t("details-view-notes-label")}</label>
+                    <label>{i18n.t("details-view-notes-label")}</label>
                     <textarea oninput={on_input(|r, v| r.notes = Some(v))} value={request.notes.clone().unwrap_or_default()} />
                 </div>
                 <div class="voucher-footer">
@@ -123,10 +126,10 @@ pub fn details_view(props: &DetailsViewProps) -> Html {
                         <div class="error">{e}</div>
                     }
                     <div class="table-actions">
-                        <button type="submit" class="button-primary">{ t("account-modal-save-button") }</button>
+                        <button type="submit" class="button-primary">{ i18n.t("account-modal-save-button") }</button>
                     </div>
                     if *show_saved {
-                        <span class="fade-out message__success" style="margin-left: 1rem;">{ t("common-saved") }</span>
+                        <span class="fade-out message__success" style="margin-left: 1rem;">{ i18n.t("common-saved") }</span>
                     }
                 </div>
             </form>

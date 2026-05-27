@@ -7,16 +7,17 @@
  */
 
 use crate::contexts::auth_context::UserContextHandle;
+use crate::contexts::locale_context::use_locale;
 use crate::contexts::org_context::OrgContextHandle;
 use crate::router::Route;
 use gloo_net::http::Request;
-use shared_core::i18n::t;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
 #[function_component(Header)]
 pub fn header() -> Html {
     let user_ctx = use_context::<UserContextHandle>();
+    let i18n = use_locale();
     let org_state = use_context::<OrgContextHandle>();
     let navigator = use_navigator().unwrap();
     let dropdown_open = use_state(|| false);
@@ -57,7 +58,7 @@ pub fn header() -> Html {
             let name_to_display = user.display_name.as_ref().unwrap_or(&user.full_name);
             html! { <span class="username">{ name_to_display }</span> }
         } else {
-            html! { <span class="username">{ t("common-loading") }</span> }
+            html! { <span class="username">{ i18n.t("common-loading") }</span> }
         }
     } else {
         html! { <span></span> }
@@ -73,17 +74,17 @@ pub fn header() -> Html {
                     <div class="user-menu">
                         <button onclick={toggle_dropdown} class="user-menu-trigger">
                             { user_display }
-                            <img src="/images/chevron-down.svg" alt={t("header-toggle-menu-alt")} />
+                            <img src="/images/chevron-down.svg" alt={i18n.t("header-toggle-menu-alt")} />
                         </button>
                         if *dropdown_open {
                             <div class="user-menu-dropdown">
                                 <Link<Route> to={Route::Profile} classes="user-menu__item">
-                                    <img src="/images/user.svg" alt={t("header-profile-alt")} />
-                                    <span>{ t("header-edit-profile") }</span>
+                                    <img src="/images/user.svg" alt={i18n.t("header-profile-alt")} />
+                                    <span>{ i18n.t("header-edit-profile") }</span>
                                 </Link<Route>>
                                 <button onclick={on_logout_click} class="user-menu__item">
-                                    <img src="/images/logout.svg" alt={t("header-logout-alt")} />
-                                    <span>{ t("header-logout") }</span>
+                                    <img src="/images/logout.svg" alt={i18n.t("header-logout-alt")} />
+                                    <span>{ i18n.t("header-logout") }</span>
                                 </button>
                             </div>
                         }

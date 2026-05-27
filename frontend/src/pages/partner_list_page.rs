@@ -7,18 +7,20 @@
  */
 use crate::components::layout::Layout;
 use crate::components::partner_list_table::PartnerListTable;
-use shared_core::i18n::t;
+use crate::contexts::locale_context::use_locale;
 use yew::prelude::*;
 
 #[function_component(PartnerListPage)]
 pub fn partner_list_page() -> Html {
+    let i18n = use_locale();
+
     html! {
         <Layout>
             <div class="partner-list-container">
                 <header class="partner-list-header-flex">
-                    <h1>{ t("partner-list-title") }</h1>
+                    <h1>{ i18n.t("partner-list-title") }</h1>
                 </header>
-                <p>{ t("partner-list-description") }</p>
+                <p>{ i18n.t("partner-list-description") }</p>
                 <PartnerListTable />
             </div>
         </Layout>

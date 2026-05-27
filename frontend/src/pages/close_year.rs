@@ -9,12 +9,11 @@
 use crate::api::Api;
 use crate::components::layout::Layout;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use chrono::{Datelike, NaiveDate, Utc};
 use fluent::fluent_args;
-use shared_core::i18n::{t, t_args};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use crate::contexts::locale_context::use_locale;
 
 #[function_component(CloseYearPage)]
 pub fn close_year_page() -> Html {
@@ -54,6 +53,7 @@ pub fn close_year_page() -> Html {
         let success = success.clone();
         let show_confirmation = show_confirmation.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
 
         Callback::from(move |_| {
@@ -63,6 +63,7 @@ pub fn close_year_page() -> Html {
             let success = success.clone();
             let show_confirmation = show_confirmation.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
@@ -76,18 +77,18 @@ pub fn close_year_page() -> Html {
 
                 match response {
                     Ok(resp) if resp.ok() => {
-                        success.set(Some(t("close-year-success-message")));
+                        success.set(Some(i18n.t("close-year-success-message")));
                     }
                     Ok(resp) => {
                         let status = resp.status();
                         let err_msg = resp.text().await.unwrap_or_default();
-                        error.set(Some(t_args(
+                        error.set(Some(i18n.t_args(
                             "close-year-error",
                             &fluent_args!["status" => status, "error" => err_msg],
                         )));
                     }
                     Err(e) => {
-                        error.set(Some(t_args(
+                        error.set(Some(i18n.t_args(
                             "common-network-error",
                             &fluent_args!["error" => e.to_string()],
                         )));
@@ -108,14 +109,14 @@ pub fn close_year_page() -> Html {
     html! {
         <Layout>
             <div class="page">
-                <h3>{ t("close-year-title") }</h3>
+                <h3>{ i18n.t("close-year-title") }</h3>
                 <p class="page-description">
-                    { t("close-year-description") }
+                    { i18n.t("close-year-description") }
                 </p>
 
                 <div class="data-form">
                     <div class="form-group">
-                        <label for="year-end-date">{ t("close-year-select-date-label") }</label>
+                        <label for="year-end-date">{ i18n.t("close-year-select-date-label") }</label>
                         <input
                             id="year-end-date"
                             type="date"
@@ -125,13 +126,13 @@ pub fn close_year_page() -> Html {
                     </div>
                     <div class="form-actions">
                         <button class="button button-danger" onclick={on_initiate_close} disabled={*loading}>
-                            { t("close-year-button") }
+                            { i18n.t("close-year-button") }
                         </button>
                     </div>
                 </div>
 
                 if *loading {
-                    <p>{ t("close-year-loading-message") }</p>
+                    <p>{ i18n.t("close-year-loading-message") }</p>
                 }
 
                 if let Some(err) = &*error {
@@ -145,13 +146,13 @@ pub fn close_year_page() -> Html {
                 if *show_confirmation {
                     <div class="modal-backdrop">
                         <div class="modal">
-                            <h4>{ t("close-year-confirm-title") }</h4>
+                            <h4>{ i18n.t("close-year-confirm-title") }</h4>
                             <p>
-                                { t_args("close-year-confirm-message", &fluent_args!["date" =>{ i18n.format_date(*year_end_date) }]) }
+                                { i18n.t_args("close-year-confirm-message", &fluent_args!["date" =>{ i18n.format_date(*year_end_date) }]) }
                             </p>
                             <div class="modal-actions">
-                                <button class="button" onclick={on_cancel_close}>{ t("common-cancel") }</button>
-                                <button class="button button-danger" onclick={on_confirm_close}>{ t("close-year-confirm-button") }</button>
+                                <button class="button" onclick={on_cancel_close}>{ i18n.t("common-cancel") }</button>
+                                <button class="button button-danger" onclick={on_confirm_close}>{ i18n.t("close-year-confirm-button") }</button>
                             </div>
                         </div>
                     </div>

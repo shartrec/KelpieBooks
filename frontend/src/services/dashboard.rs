@@ -7,7 +7,7 @@
  */
 
 use crate::api::Api;
-use crate::contexts::auth_context::{UserContextHandle};
+use crate::contexts::auth_context::UserContextHandle;
 use shared_core::dtos::dashboard::FinancialHealth;
 use shared_core::dtos::expense_breakdown::ExpenseBreakdown;
 use shared_core::dtos::recent_transaction::RecentTransaction;

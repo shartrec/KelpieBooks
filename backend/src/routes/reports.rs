@@ -232,7 +232,7 @@ async fn export_balance_sheet(
 
     let (content, content_type, filename) = match format.as_str() {
         "csv" => {
-            let csv_data = generate_balance_sheet_csv(&balance_sheet);
+            let csv_data = generate_balance_sheet_csv(&user, &balance_sheet);
             (
                 csv_data.into_bytes(),
                 ContentType::CSV,
@@ -286,7 +286,7 @@ async fn export_general_ledger(
 
     let (content, content_type, filename) = match format.as_str() {
         "csv" => {
-            let csv_data = generate_general_ledger_csv(&lines);
+            let csv_data = generate_general_ledger_csv(&user, &lines);
             (
                 csv_data.into_bytes(),
                 ContentType::CSV,

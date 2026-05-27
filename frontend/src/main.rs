@@ -7,6 +7,7 @@
  */
 
 use frontend::contexts::auth_context::{UserContext, UserContextHandle};
+use frontend::contexts::locale_context::LocaleProvider;
 use frontend::contexts::org_context::{OrgAction, OrgContextHandle, OrgState};
 use frontend::contexts::report_context::ReportContextProvider;
 use frontend::pages::account_ledger::AccountLedgerPage;
@@ -34,7 +35,6 @@ use shared_core::dtos::user_detail::UserDetail;
 use shared_core::models::organization::Organization;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use frontend::contexts::locale_context::LocaleProvider;
 
 /// The component that contains the router and switches between pages.
 #[function_component(AppRouter)]

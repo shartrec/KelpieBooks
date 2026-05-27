@@ -9,11 +9,11 @@
 use crate::api::Api;
 use crate::components::currency_input::CurrencyInput;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use crate::contexts::vendor_invoice_filter_context::{use_vendor_invoice_filter, PaymentStatusFilter, VendorInvoiceFilterAction};
 use chrono::NaiveDate;
 use gloo_console::info;
 use shared_core::dtos::partner_list_item::PartnerListItem;
-use shared_core::i18n::t;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
@@ -21,6 +21,7 @@ use yew_router::prelude::use_navigator;
 #[function_component(VendorInvoiceFilter)]
 pub fn vendor_invoice_filter() -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let navigator = use_navigator().unwrap();
     let filter_ctx = use_vendor_invoice_filter();
     let vendors = use_state(Vec::new);
@@ -106,47 +107,47 @@ pub fn vendor_invoice_filter() -> Html {
                             class={classes!("segment-trigger", (filter_ctx.status == PaymentStatusFilter::Outstanding).then_some("segment-trigger--active"))}
                             onclick={let s = set_status.clone(); move |_| s.emit(PaymentStatusFilter::Outstanding)}
                         >
-                            { t("vendor-invoice-filter-outstanding") }
+                            { i18n.t("vendor-invoice-filter-outstanding") }
                         </button>
                         <button
                             type="button"
                             class={classes!("segment-trigger", (filter_ctx.status == PaymentStatusFilter::Paid).then_some("segment-trigger--active"))}
                             onclick={let s = set_status.clone(); move |_| s.emit(PaymentStatusFilter::Paid)}
                         >
-                            { t("vendor-invoice-filter-fully-paid") }
+                            { i18n.t("vendor-invoice-filter-fully-paid") }
                         </button>
                         <button
                             type="button"
                             class={classes!("segment-trigger", (filter_ctx.status == PaymentStatusFilter::All).then_some("segment-trigger--active"))}
                             onclick={let s = set_status.clone(); move |_| s.emit(PaymentStatusFilter::All)}
                         >
-                            { t("vendor-invoice-filter-all-invoices") }
+                            { i18n.t("vendor-invoice-filter-all-invoices") }
                         </button>
                     </div>
                     <div class="report__date-range-selector">
-                        <label>{ t("vendor-invoice-filter-from-label") }</label>
+                        <label>{ i18n.t("vendor-invoice-filter-from-label") }</label>
                         <input type="date" value={filter_ctx.start_date.format("%Y-%m-%d").to_string()} onchange={on_start_change} />
-                        <label>{ t("vendor-invoice-filter-to-label") }</label>
+                        <label>{ i18n.t("vendor-invoice-filter-to-label") }</label>
                         <input type="date" value={filter_ctx.end_date.format("%Y-%m-%d").to_string()} onchange={on_end_change} />
                     </div>
                 </div>
             </div>
             <div class="report__advanced-filters">
                 <div class="report__filter-group">
-                    <label>{ t("vendor-invoice-filter-vendor-label") }</label>
+                    <label>{ i18n.t("vendor-invoice-filter-vendor-label") }</label>
                     <select onchange={on_vendor_change}>
-                        <option value="" selected=true>{ t("vendor-invoice-filter-all-vendors") }</option>
+                        <option value="" selected=true>{ i18n.t("vendor-invoice-filter-all-vendors") }</option>
                         { for (*vendors).iter().map(|vendor| html! {
                             <option value={vendor.id.to_string()}>{ &vendor.legal_name }</option>
                         })}
                     </select>
                 </div>
                 <div class="report__filter-group">
-                    <label>{ t("vendor-invoice-filter-min-amount-label") }</label>
+                    <label>{ i18n.t("vendor-invoice-filter-min-amount-label") }</label>
                     <CurrencyInput
                         value={filter_ctx.min_amount.unwrap_or(0)}
                         on_change={on_min_amount_change}
-                        placeholder={t("journal-entry-currency-placeholder")}
+                        placeholder={i18n.t("journal-entry-currency-placeholder")}
                     />
                 </div>
             </div>

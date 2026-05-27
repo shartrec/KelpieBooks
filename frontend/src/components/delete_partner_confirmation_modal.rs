@@ -6,9 +6,9 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+use crate::contexts::locale_context::use_locale;
 use fluent::fluent_args;
 use shared_core::dtos::partner_list_item::PartnerListItem;
-use shared_core::i18n::{t, t_args};
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -20,6 +20,8 @@ pub struct DeletePartnerConfirmationModalProps {
 
 #[function_component(DeletePartnerConfirmationModal)]
 pub fn delete_partner_confirmation_modal(props: &DeletePartnerConfirmationModalProps) -> Html {
+    let i18n = use_locale();
+
     let on_cancel = {
         let on_close = props.on_close.clone();
         Callback::from(move |_| {
@@ -37,16 +39,16 @@ pub fn delete_partner_confirmation_modal(props: &DeletePartnerConfirmationModalP
     html! {
         <div class="modal-overlay" onclick={on_cancel.clone()}>
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
-                <h2>{ t("common-confirm-deletion") }</h2>
+                <h2>{ i18n.t("common-confirm-deletion") }</h2>
                 <p>
-                    { t_args("delete-partner-confirm-message", &fluent_args!["name" => props.partner.legal_name.clone()]) }
+                    { i18n.t_args("delete-partner-confirm-message", &fluent_args!["name" => props.partner.legal_name.clone()]) }
                 </p>
                 <p class="warning-text">
-                    { t("reversal-confirm-warning") }
+                    { i18n.t("reversal-confirm-warning") }
                 </p>
                 <div class="modal__form__actions">
-                    <button type="button" onclick={on_cancel} class="button-secondary">{ t("common-cancel") }</button>
-                    <button type="button" onclick={on_confirm_delete} class="button-danger">{ t("common-confirm-delete-button") }</button>
+                    <button type="button" onclick={on_cancel} class="button-secondary">{ i18n.t("common-cancel") }</button>
+                    <button type="button" onclick={on_confirm_delete} class="button-danger">{ i18n.t("common-confirm-delete-button") }</button>
                 </div>
             </div>
         </div>

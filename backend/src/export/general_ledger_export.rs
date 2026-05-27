@@ -7,23 +7,25 @@
  */
 
 use crate::export::utils::{build_table_header, wrap_report_layout};
-use shared_core::i18n::{t, t_args};
+use crate::routes::security::AuthenticatedUser;
 use chrono::NaiveDate;
 use fluent::fluent_args;
 use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
+use shared_core::i18n::format_currency_icu_typ;
 use shared_core::models::organization::Organization;
-use shared_core::util::format_currency_icu_typ;
-use crate::routes::security::AuthenticatedUser;
+use crate::util::locale_context::LocaleContext;
 
-pub fn generate_general_ledger_csv(lines: &[GeneralLedgerLine]) -> String {
+pub fn generate_general_ledger_csv(user: &AuthenticatedUser, lines: &[GeneralLedgerLine]) -> String {
+    let i18n = LocaleContext::new(&user.locale);
+
     let mut wtr = csv::Writer::from_writer(vec![]);
     wtr.write_record(&[
-        t("common-account"),
-        t("common-date"),
-        t("common-description"),
-        t("common-debit"),
-        t("common-credit"),
-        t("common-balance"),
+        i18n.t("common-account"),
+        i18n.t("common-date"),
+        i18n.t("common-description"),
+        i18n.t("common-debit"),
+        i18n.t("common-credit"),
+        i18n.t("common-balance"),
     ])
     .unwrap();
 
@@ -48,9 +50,11 @@ pub fn generate_general_ledger_typst(
     end_date: &NaiveDate,
     org: &Option<Organization>,
 ) -> String {
+    let i18n = LocaleContext::new(&user.locale);
+
     let mut typst_content = String::new();
     typst_content.push_str(&*build_table_header(
-        &[t("common-date"), t("common-description"), t("common-debit"), t("common-credit")],
+        &[i18n.t("common-date"), i18n.t("common-description"), i18n.t("common-debit"), i18n.t("common-credit")],
         &[false, false, true, true],
     ));
 
@@ -94,13 +98,16 @@ pub fn generate_general_ledger_typst(
     typst_content.push_str(")\n");
 
     let name = org.as_ref().map(|o| o.name.as_str());
-    let report_qual = t_args(
+
+    let start_date_str = i18n.format_date(*start_date);
+    let end_date_str = i18n.format_date(*end_date);
+    let report_qual = i18n.t_args(
         "general-ledger-export-period",
-        &fluent_args!["start_date" => start_date.format("%d %b %Y").to_string(), "end_date" => end_date.format("%d %b %Y").to_string()],
+        &fluent_args!["start_date" => start_date_str, "end_date" => end_date_str],
     );
     wrap_report_layout(
         name,
-        &t("account-ledger-export-title"),
+        &i18n.t("account-ledger-export-title"),
         &*report_qual,
         typst_content.as_str(),
     )

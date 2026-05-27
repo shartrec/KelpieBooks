@@ -19,8 +19,8 @@ use crate::components::partner_drawer::addresses_view::AddressesView;
 use crate::components::partner_drawer::contacts_view::ContactsView;
 use crate::components::partner_drawer::general_view::GeneralView;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use fluent::fluent_args;
-use shared_core::i18n::{t, t_args};
 use shared_core::models::partner::Partner;
 use shared_core::models::partner_address::PartnerAddress;
 use shared_core::models::partner_contact::PartnerContact;
@@ -50,6 +50,7 @@ pub struct PartnerDrawerProps {
 #[function_component(PartnerDrawer)]
 pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let navigator = use_navigator().unwrap();
     let active_tab = use_state(|| DrawerTab::General);
     let error = use_state(|| None::<String>);
@@ -72,11 +73,13 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
         let on_change = props.on_change.clone();
         let partner_id = props.partner.id;
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         let error = error.clone();
         Callback::from(move |req: UpdatePartnerRequest| {
             let on_change = on_change.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             let error = error.clone();
             wasm_bindgen_futures::spawn_local(async move {
@@ -91,11 +94,11 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
                     Ok(r) if r.ok() => {
                         on_change.emit(());
                     }
-                    Ok(r) => error.set(Some(t_args(
+                    Ok(r) => error.set(Some(i18n.t_args(
                         "partner-drawer-error-save",
                         &fluent_args!["status" => r.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -110,7 +113,7 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
                 <header class="drawer__header">
                     <h3>{ &props.partner.legal_name } </h3>
                         <button class="btn-close" type="button" onclick={on_close.clone()}>
-                            <img src="/images/x.svg" alt={t("common-close")} />
+                            <img src="/images/x.svg" alt={i18n.t("common-close")} />
                         </button>
                 </header>
                 <div class="drawer__tabs">
@@ -118,19 +121,19 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
                         class={classes!("tab-trigger", (*active_tab == DrawerTab::General).then_some("tab-trigger--active"))}
                         onclick={set_tab.reform(|_| DrawerTab::General)}
                     >
-                        { t("common-general") }
+                        { i18n.t("common-general") }
                     </button>
                     <button
                         class={classes!("tab-trigger", (*active_tab == DrawerTab::Addresses).then_some("tab-trigger--active"))}
                         onclick={set_tab.reform(|_| DrawerTab::Addresses)}
                     >
-                        { t("common-addresses") }
+                        { i18n.t("common-addresses") }
                     </button>
                     <button
                         class={classes!("tab-trigger", (*active_tab == DrawerTab::Contacts).then_some("tab-trigger--active"))}
                         onclick={set_tab.reform(|_| DrawerTab::Contacts)}
                     >
-                        { t("common-contacts") }
+                        { i18n.t("common-contacts") }
                     </button>
                 </div>
                 <div class="drawer__content">
@@ -163,7 +166,7 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
                     }
                 </div>
                 <footer class="drawer__footer">
-                    <button class="button-secondary" onclick={on_close.clone()}>{ t("common-close") }</button>
+                    <button class="button-secondary" onclick={on_close.clone()}>{ i18n.t("common-close") }</button>
                 </footer>
             </div>
         </div>

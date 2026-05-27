@@ -8,15 +8,14 @@
 use crate::api::Api;
 use crate::components::layout::Layout;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use crate::contexts::org_context::{OrgAction, OrgContextHandle};
 use crate::router::Route;
 use chrono::NaiveDate;
 use serde_json::json;
-use shared_core::i18n::t;
 use web_sys::{Event, HtmlInputElement};
 use yew::{function_component, html, use_context, use_state, Callback, Html, TargetCast};
 use yew_router::prelude::use_navigator;
-use crate::contexts::locale_context::use_locale;
 
 #[function_component(PeriodSettings)]
 pub fn period_settings() -> Html {
@@ -77,9 +76,9 @@ pub fn period_settings() -> Html {
 
     html! {
         <Layout>
-            <h1>{ t("period-settings-title") }</h1>
+            <h1>{ i18n.t("period-settings-title") }</h1>
             <div class="settings-card">
-                <p>{ t("period-settings-description") }</p>
+                <p>{ i18n.t("period-settings-description") }</p>
                 <div class="input-group">
                         <input
                             type="date"
@@ -91,14 +90,14 @@ pub fn period_settings() -> Html {
                             class="button-primary"
                             onclick={on_save_lock}
                         >
-                            { t("period-settings-update-button") }
+                            { i18n.t("period-settings-update-button") }
                         </button>
                     </div>
 
                     <p class="text-muted">
-                        { t("period-settings-current-lock") }
+                        { i18n.t("period-settings-current-lock") }
                         <strong>
-                            { org_ctx.locked_until.map(|d|{ i18n.format_date(d) }).unwrap_or_else(|| t("common-none")) }
+                            { org_ctx.locked_until.map(|d|{ i18n.format_date(d) }).unwrap_or_else(|| i18n.t("common-none")) }
                         </strong>
                     </p>
             </div>

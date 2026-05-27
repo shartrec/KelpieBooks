@@ -13,13 +13,13 @@ use crate::components::layout::Layout;
 use crate::components::report_options::ReportOptions;
 use crate::components::transaction_row::{TransactionGroup, TransactionRow};
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use crate::contexts::org_context::use_org_context;
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::pages::new_transaction::NewTransactionQuery;
 use crate::router::Route;
 use fluent::fluent_args;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
-use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
 use shared_core::requests::transaction::ReverseTransactionRequest;
 use std::collections::HashMap;
@@ -27,7 +27,6 @@ use std::rc::Rc;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::contexts::locale_context::use_locale;
 
 #[derive(Debug, Properties, PartialEq)]
 pub struct AccountLedgerPageProps {
@@ -37,6 +36,7 @@ pub struct AccountLedgerPageProps {
 #[function_component(AccountLedgerPage)]
 pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let report_ctx = use_report_context();
     let org_ctx = use_org_context();
     let navigator = use_navigator().unwrap();
@@ -93,6 +93,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         let account_id = props.account_id;
         let report_ctx = use_report_context();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         Callback::from(move |()| {
             let entries = entries.clone();
@@ -101,6 +102,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
             let start_date = report_ctx.date_range.start_date;
             let end_date = report_ctx.date_range.end_date;
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 loading.set(true);
@@ -114,17 +116,17 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<JournalEntryWithBalance>>().await {
                             Ok(data) => entries.set(Rc::new(data)),
-                            Err(e) => error.set(Some(t_args(
+                            Err(e) => error.set(Some(i18n.t_args(
                                 "ledger-error-parse-entries",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
                         }
                     }
-                    Ok(response) => error.set(Some(t_args(
+                    Ok(response) => error.set(Some(i18n.t_args(
                         "ledger-error-fetch-entries",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "coa-error-network",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -180,6 +182,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         let error = error.clone();
         let transaction_id = transaction_to_reverse.as_ref().map(|t| t.transaction_id);
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         Callback::from(move |description: String| {
             if let Some(id) = transaction_id {
@@ -187,6 +190,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                 let fetch_entries = fetch_entries.clone();
                 let error = error.clone();
                 let user_ctx = user_ctx.clone();
+                let i18n = i18n.clone();
                 let navigator = navigator.clone();
                 wasm_bindgen_futures::spawn_local(async move {
                     let url = format!("/api/transactions/{}/reverse", id);
@@ -198,11 +202,11 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                             on_modal_close.emit(());
                             fetch_entries.emit(());
                         }
-                        Ok(r) => error.set(Some(t_args(
+                        Ok(r) => error.set(Some(i18n.t_args(
                             "ledger-error-reverse-transaction",
                             &fluent_args!["status" => r.status()],
                         ))),
-                        Err(e) => error.set(Some(t_args(
+                        Err(e) => error.set(Some(i18n.t_args(
                             "coa-error-network",
                             &fluent_args!["error" => e.to_string()],
                         ))),
@@ -218,6 +222,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         let error = error.clone();
         let transaction_id = transaction_to_delete.as_ref().map(|t| t.transaction_id);
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         Callback::from(move |()| {
             if let Some(id) = transaction_id {
@@ -225,6 +230,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                 let fetch_entries = fetch_entries.clone();
                 let error = error.clone();
                 let user_ctx = user_ctx.clone();
+                let i18n = i18n.clone();
                 let navigator = navigator.clone();
                 wasm_bindgen_futures::spawn_local(async move {
                     let url = format!("/api/transactions/{}", id);
@@ -234,11 +240,11 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                             on_modal_close.emit(());
                             fetch_entries.emit(());
                         }
-                        Ok(r) => error.set(Some(t_args(
+                        Ok(r) => error.set(Some(i18n.t_args(
                             "ledger-error-delete-transaction",
                             &fluent_args!["status" => r.status()],
                         ))),
-                        Err(e) => error.set(Some(t_args(
+                        Err(e) => error.set(Some(i18n.t_args(
                             "coa-error-network",
                             &fluent_args!["error" => e.to_string()],
                         ))),
@@ -282,7 +288,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
     let transaction_groups = use_memo(entries.clone(), |entries| {
         let mut groups: HashMap<Uuid, TransactionGroup> = HashMap::new();
         for entry in entries.iter() {
-            if entry.description != Some(t("ledger-opening-balance")) {
+            if entry.description != Some(i18n.t("ledger-opening-balance")) {
                 groups.insert(
                     entry.transaction_id,
                     TransactionGroup {
@@ -301,23 +307,21 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
 
     let opening_balance_entry = entries
         .iter()
-        .find(|e| e.description == Some(t("ledger-opening-balance")));
-
-    let i18n = use_locale();
+        .find(|e| e.description == Some(i18n.t("ledger-opening-balance")));
 
     html! {
         <Layout>
             <div class="report-header">
-                <h3>{ t_args("ledger-title", &fluent_args!["name" => account_name]) }</h3>
+                <h3>{ i18n.t_args("ledger-title", &fluent_args!["name" => account_name]) }</h3>
                 <ReportOptions show_start_date={true} show_end_date={true} />
             </div>
             <div class="table-actions">
                 <Link<Route, NewTransactionQuery> to={Route::NewTransaction} query={query} classes="button">
-                    { t("ledger-add-transaction-button") }
+                    { i18n.t("ledger-add-transaction-button") }
                 </Link<Route, NewTransactionQuery>>
             </div>
             if *loading {
-                <p>{ t("common-loading") }</p>
+                <p>{ i18n.t("common-loading") }</p>
             } else if let Some(err) = &*error {
                 <div class="error">{ err }</div>
             } else {
@@ -328,11 +332,11 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                 <table class="report-table">
                     <thead>
                         <tr>
-                            <th class="table__text-col">{ t("common-date") }</th>
-                            <th class="table__text-col">{ t("common-description") }</th>
-                            <th class="table__value-col">{ t("common-debit") }</th>
-                            <th class="table__value-col">{ t("common-credit") }</th>
-                            <th class="table__value-col">{ t("common-balance") }</th>
+                            <th class="table__text-col">{ i18n.t("common-date") }</th>
+                            <th class="table__text-col">{ i18n.t("common-description") }</th>
+                            <th class="table__value-col">{ i18n.t("common-debit") }</th>
+                            <th class="table__value-col">{ i18n.t("common-credit") }</th>
+                            <th class="table__value-col">{ i18n.t("common-balance") }</th>
                             <th class="table__col-actions"></th>
                         </tr>
                     </thead>
@@ -340,7 +344,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                         if let Some(entry) = opening_balance_entry {
                             <tr>
                                 <td>{ i18n.format_date(entry.date) }</td>
-                                <td>{ t("ledger-opening-balance") }</td>
+                                <td>{ i18n.t("ledger-opening-balance") }</td>
                                 <td class="table__value-col">{ if entry.debit > 0 { i18n.format_currency(entry.debit) } else { "".to_string() } }</td>
                                 <td class="table__value-col">{ if entry.credit > 0 { i18n.format_currency(entry.credit) } else { "".to_string() } }</td>
                                 <td class="table__value-col">{ i18n.format_currency(entry.running_balance) }</td>

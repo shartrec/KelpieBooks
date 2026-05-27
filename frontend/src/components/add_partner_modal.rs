@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::i18n::t;
+use crate::contexts::locale_context::use_locale;
 use shared_core::requests::partner::CreatePartnerRequest;
 use uuid::Uuid;
 use yew::prelude::*;
@@ -21,6 +21,7 @@ pub struct AddPartnerModalProps {
 
 #[function_component(AddPartnerModal)]
 pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
+    let i18n = use_locale();
     let request = use_state(CreatePartnerRequest::default);
     let error = use_state(|| None::<String>);
 
@@ -131,42 +132,42 @@ pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
     html! {
         <div class="modal-overlay" onclick={on_overlay_click}>
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
-                <h2>{ t("add-partner-title") }</h2>
+                <h2>{ i18n.t("add-partner-title") }</h2>
                 <form onsubmit={on_form_submit} class="modal__form">
-                    <label>{t("add-partner-legal-name-label")}</label>
+                    <label>{i18n.t("add-partner-legal-name-label")}</label>
                     <input type="text" oninput={on_legal_name_input} required=true />
 
-                    <label>{t("add-partner-trade-name-label")}</label>
+                    <label>{i18n.t("add-partner-trade-name-label")}</label>
                     <input type="text" oninput={on_trade_name_input} />
 
-                    <label>{t("add-partner-tax-identifier-label")}</label>
+                    <label>{i18n.t("add-partner-tax-identifier-label")}</label>
                     <input type="text" oninput={on_tax_identifier_input} />
 
-                    <label>{t("add-partner-is-vendor-label")}</label>
+                    <label>{i18n.t("add-partner-is-vendor-label")}</label>
                     <input type="checkbox" onchange={on_is_vendor_change} />
 
-                    <label>{t("add-partner-is-customer-label")}</label>
+                    <label>{i18n.t("add-partner-is-customer-label")}</label>
                     <input type="checkbox" onchange={on_is_customer_change} />
 
-                    <label>{t("add-partner-default-ap-account-label")}</label>
+                    <label>{i18n.t("add-partner-default-ap-account-label")}</label>
                     <select onchange={on_ap_account_change}>
-                        <option value="" selected=true>{ t("common-none") }</option>
+                        <option value="" selected=true>{ i18n.t("common-none") }</option>
                         { for props.ap_accounts.iter().map(|(id, name)| html! {
                             <option value={id.to_string()}>{name}</option>
                         })}
                     </select>
 
-                    <label>{t("add-partner-default-ar-account-label")}</label>
+                    <label>{i18n.t("add-partner-default-ar-account-label")}</label>
                     <select onchange={on_ar_account_change}>
-                        <option value="" selected=true>{ t("common-none") }</option>
+                        <option value="" selected=true>{ i18n.t("common-none") }</option>
                         { for props.ar_accounts.iter().map(|(id, name)| html! {
                             <option value={id.to_string()}>{name}</option>
                         })}
                     </select>
 
                     <div class="modal__form__actions">
-                        <button type="button" onclick={on_cancel_click} class="button-secondary">{ t("common-cancel") }</button>
-                        <button type="submit">{ t("partner-list-add-partner-button") }</button>
+                        <button type="button" onclick={on_cancel_click} class="button-secondary">{ i18n.t("common-cancel") }</button>
+                        <button type="submit">{ i18n.t("partner-list-add-partner-button") }</button>
                     </div>
                     if let Some(err) = &*error {
                         <div class="error">{ err }</div>

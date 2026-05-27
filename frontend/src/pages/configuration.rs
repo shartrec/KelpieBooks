@@ -9,10 +9,10 @@
 use crate::api::Api;
 use crate::components::layout::Layout;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use crate::contexts::org_context::{OrgAction, OrgContextHandle, OrgState};
 use crate::router::Route;
 use fluent::fluent_args;
-use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
 use shared_core::models::organization::Organization;
 use shared_core::models::system_tag::SystemTag;
@@ -25,6 +25,7 @@ use yew_router::prelude::use_navigator;
 #[function_component(ConfigurationPage)]
 pub fn configuration_page() -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let accounts = use_state(Vec::new);
     let system_accounts = use_state(HashMap::new);
     let org_ctx = use_context::<OrgContextHandle>().expect("OrgContext not found");
@@ -40,6 +41,7 @@ pub fn configuration_page() -> Html {
         let loading = loading.clone();
         let details_error = details_error.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         let org_ctx = org_ctx.clone();
 
@@ -49,6 +51,7 @@ pub fn configuration_page() -> Html {
             let loading = loading.clone();
             let details_error = details_error.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             let org_ctx = org_ctx.clone();
 
@@ -83,13 +86,13 @@ pub fn configuration_page() -> Html {
                                     }));
                                     details_error.set(None);
                                 }
-                                _ => details_error.set(Some(t("configuration-error-parse"))),
+                                _ => details_error.set(Some(i18n.t("configuration-error-parse"))),
                             }
                         } else {
-                            details_error.set(Some(t("configuration-error-fetch")));
+                            details_error.set(Some(i18n.t("configuration-error-fetch")));
                         }
                     }
-                    _ => details_error.set(Some(t("common-network-error"))),
+                    _ => details_error.set(Some(i18n.t("common-network-error"))),
                 }
                 loading.set(false);
             });
@@ -105,6 +108,7 @@ pub fn configuration_page() -> Html {
         let success_state = details_success.clone();
         let navigator = navigator.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
 
         Callback::from(move |_| {
             let system_accounts = (*system_accounts).clone();
@@ -114,6 +118,7 @@ pub fn configuration_page() -> Html {
             let success_state = success_state.clone();
             let navigator = navigator.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
                 let req = UpdateConfigurationRequest {
@@ -131,13 +136,13 @@ pub fn configuration_page() -> Html {
                         navigator.push(&Route::Dashboard);
                     }
                     Ok(r) => {
-                        error_state.set(Some(t_args(
+                        error_state.set(Some(i18n.t_args(
                             "configuration-error-save",
                             &fluent_args!["status" => r.status()],
                         )));
                     }
                     Err(e) => {
-                        error_state.set(Some(t_args(
+                        error_state.set(Some(i18n.t_args(
                             "common-network-error",
                             &fluent_args!["error" => e.to_string()],
                         )));
@@ -169,24 +174,24 @@ pub fn configuration_page() -> Html {
     html! {
         <Layout>
             <div class="page">
-                <h3>{ t("configuration-title") }</h3>
+                <h3>{ i18n.t("configuration-title") }</h3>
                 if *loading {
-                    <p>{ t("common-loading") }</p>
+                    <p>{ i18n.t("common-loading") }</p>
                 } else {
                     <div class="data-form">
-                        <h4 class="data-form__full-width">{ t("configuration-org-settings-title") }</h4>
-                        <label for="strict_audit_mode">{ t("configuration-strict-audit-label") }</label>
+                        <h4 class="data-form__full-width">{ i18n.t("configuration-org-settings-title") }</h4>
+                        <label for="strict_audit_mode">{ i18n.t("configuration-strict-audit-label") }</label>
                         <input
                             type="checkbox"
                             id="strict_audit_mode"
                             checked={*strict_audit_mode}
                             onchange={on_audit_change}
                         />
-                        <small class="data-form__full-width">{ t("configuration-strict-audit-description") }</small>
+                        <small class="data-form__full-width">{ i18n.t("configuration-strict-audit-description") }</small>
                         <hr class="data-form__full-width"/>
 
-                        <h4>{ t("configuration-system-accounts-title") }</h4>
-                        <p> { t("configuration-system-accounts-description") } </p>
+                        <h4>{ i18n.t("configuration-system-accounts-title") }</h4>
+                        <p> { i18n.t("configuration-system-accounts-description") } </p>
                         { for SystemTag::iterator().map(|tag| {
                             let selected_account_id = system_accounts.get(&tag).map(|id| id.to_string());
                             html! {
@@ -204,7 +209,7 @@ pub fn configuration_page() -> Html {
                                         }
                                         value={selected_account_id}
                                     >
-                                        <option value="" disabled=true>{ t("configuration-select-account") }</option>
+                                        <option value="" disabled=true>{ i18n.t("configuration-select-account") }</option>
                                         { for accounts.iter().map(|acc| html! {
                                             <option
                                                 value={acc.id.to_string()}
@@ -218,10 +223,10 @@ pub fn configuration_page() -> Html {
                             }
                         })}
                         <div class="data-form__actions">
-                            <button onclick={on_save}>{ t("configuration-save-button") }</button>
+                            <button onclick={on_save}>{ i18n.t("configuration-save-button") }</button>
                         </div>
                         if *details_success {
-                            <div class="message message__success">{t("configuration-save-success")}</div>
+                            <div class="message message__success">{i18n.t("configuration-save-success")}</div>
                         }
                         if let Some(err) = (*details_error).clone() {
                             <div class="message message__error">{err}</div>

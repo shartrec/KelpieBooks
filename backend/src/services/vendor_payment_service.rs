@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::db::{account as account_db, vendor_payment as vendor_payment_db, vendor_payment_allocation as vendor_payment_allocation_db, vendor_invoice as vendor_invoice_db};
+use crate::db::{account as account_db, vendor_invoice as vendor_invoice_db, vendor_payment as vendor_payment_db, vendor_payment_allocation as vendor_payment_allocation_db};
 use crate::services::account_service;
 use crate::util::ApiError;
 use rocket_db_pools::sqlx::{self, PgConnection};

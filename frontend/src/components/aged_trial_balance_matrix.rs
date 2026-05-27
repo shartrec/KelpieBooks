@@ -8,18 +8,18 @@
 
 use crate::api::Api;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use chrono::Local;
 use fluent::fluent_args;
 use shared_core::dtos::aged_payable_summary::AgedPayableSummary;
-use shared_core::i18n::{t, t_args};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use crate::contexts::locale_context::use_locale;
 
 #[function_component(AgedTrialBalanceMatrix)]
 pub fn aged_trial_balance_matrix() -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let navigator = use_navigator().unwrap();
     let summary = use_state(Vec::new);
     let error = use_state(|| None::<String>);
@@ -31,12 +31,15 @@ pub fn aged_trial_balance_matrix() -> Html {
         let error = error.clone();
         let loading = loading.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
+        let i18n = i18n.clone();
         Callback::from(move |_: ()| {
             let summary = summary.clone();
             let error = error.clone();
             let loading = loading.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             loading.set(true);
             wasm_bindgen_futures::spawn_local(async move {
@@ -50,17 +53,17 @@ pub fn aged_trial_balance_matrix() -> Html {
                             Ok(data) => {
                                 summary.set(data);
                             }
-                            Err(e) => error.set(Some(t_args(
+                            Err(e) => error.set(Some(i18n.t_args(
                                 "aged-trial-balance-error-parse",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
                         }
                     }
-                    Ok(response) => error.set(Some(t_args(
+                    Ok(response) => error.set(Some(i18n.t_args(
                         "aged-trial-balance-error-fetch",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -88,25 +91,23 @@ pub fn aged_trial_balance_matrix() -> Html {
     };
 
     if *loading {
-        return html! { <p>{ t("common-loading") }</p> };
+        return html! { <p>{ i18n.t("common-loading") }</p> };
     }
     if let Some(err) = &*error {
         return html! { <div class="error">{ err }</div> };
     }
 
-    let i18n = use_locale();
-
     html! {
         <table class="table">
             <thead>
                 <tr>
-                    <th>{ t("common-vendor") }</th>
-                    <th class="table__value-col">{ t("aged-trial-balance-current") }</th>
-                    <th class="table__value-col">{ t("aged-trial-balance-1-30-days") }</th>
-                    <th class="table__value-col">{ t("aged-trial-balance-31-60-days") }</th>
-                    <th class="table__value-col">{ t("aged-trial-balance-61-90-days") }</th>
-                    <th class="table__value-col">{ t("aged-trial-balance-90-plus-days") }</th>
-                    <th class="table__value-col">{ t("common-total") }</th>
+                    <th>{ i18n.t("common-vendor") }</th>
+                    <th class="table__value-col">{ i18n.t("aged-trial-balance-current") }</th>
+                    <th class="table__value-col">{ i18n.t("aged-trial-balance-1-30-days") }</th>
+                    <th class="table__value-col">{ i18n.t("aged-trial-balance-31-60-days") }</th>
+                    <th class="table__value-col">{ i18n.t("aged-trial-balance-61-90-days") }</th>
+                    <th class="table__value-col">{ i18n.t("aged-trial-balance-90-plus-days") }</th>
+                    <th class="table__value-col">{ i18n.t("common-total") }</th>
                 </tr>
             </thead>
             <tbody>

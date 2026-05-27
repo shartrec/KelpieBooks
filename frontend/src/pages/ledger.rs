@@ -8,15 +8,17 @@
 
 use crate::components::chart_of_accounts_table::ChartOfAccountsTable;
 use crate::components::layout::Layout;
-use shared_core::i18n::t;
+use crate::contexts::locale_context::use_locale;
 use yew::prelude::*;
 
 #[function_component(LedgerPage)]
 pub fn ledger_page() -> Html {
+    let i18n = use_locale();
+
     html! {
         <Layout>
-            <h1>{ t("coa-title") }</h1>
-            <p>{ t("coa-description") }</p>
+            <h1>{ i18n.t("coa-title") }</h1>
+            <p>{ i18n.t("coa-description") }</p>
             <ChartOfAccountsTable />
         </Layout>
     }

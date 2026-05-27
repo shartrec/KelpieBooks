@@ -7,15 +7,15 @@
  */
 
 use crate::export::utils::{build_table_header, wrap_report_layout};
-use shared_core::i18n::{t, t_args};
+use crate::routes::security::AuthenticatedUser;
 use chrono::NaiveDate;
 use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::i18n::format_currency_icu_typ;
 use shared_core::models::{account_category::AccountCategory, organization::Organization};
 use std::collections::HashMap;
 use uuid::Uuid;
-use shared_core::util::format_currency_icu_typ;
-use crate::routes::security::AuthenticatedUser;
+use crate::util::locale_context::LocaleContext;
 
 #[derive(Clone, Debug)]
 pub struct AccountNode {
@@ -81,13 +81,15 @@ fn build_account_nodes(
 }
 
 pub fn generate_profit_loss_csv(user: &AuthenticatedUser, accounts: &[AccountWithBalance]) -> String {
+    let i18n = LocaleContext::new(&user.locale);
+
     let (revenue_nodes, expense_nodes, net_income) = build_account_nodes(accounts);
     let mut csv_content = String::new();
     csv_content.push_str(
         &format!(
             "{},{}\n",
-            t("common-account"),
-            t("common-balance"),
+            i18n.t("common-account"),
+            i18n.t("common-balance"),
         ));
 
     fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String, locale: Option<&str>) {
@@ -109,17 +111,17 @@ pub fn generate_profit_loss_csv(user: &AuthenticatedUser, accounts: &[AccountWit
         }
     }
 
-    csv_content.push_str(&t("profit-loss-export-revenue-header"));
+    csv_content.push_str(&i18n.t("profit-loss-export-revenue-header"));
     for node in &revenue_nodes {
         build_csv_rows(node, 0, &mut csv_content, Some(&user.locale));
     }
-    csv_content.push_str(&t("profit-loss-export-expenses-header"));
+    csv_content.push_str(&i18n.t("profit-loss-export-expenses-header"));
     for node in &expense_nodes {
         build_csv_rows(node, 0, &mut csv_content, Some(&user.locale));
     }
     csv_content.push_str(&format!(
         "\"{}\",\"{}\"\n",
-        t("profit-loss-net-income"),
+        i18n.t("profit-loss-net-income"),
         format_currency_icu_typ(net_income, Some(&user.locale))
     ));
     csv_content
@@ -132,10 +134,12 @@ pub fn generate_profit_loss_typst(
     end_date: &NaiveDate,
     org: &Option<Organization>,
 ) -> String {
+    let i18n = LocaleContext::new(&user.locale);
+
     let (revenue_nodes, expense_nodes, net_income) = build_account_nodes(accounts);
     let mut typst_content = String::new();
     typst_content.push_str(&*build_table_header(
-        &[t("common-account"), "".to_string(), "".to_string()],
+        &[i18n.t("common-account"), "".to_string(), "".to_string()],
         &vec![false, true, true],
     ));
 
@@ -166,25 +170,27 @@ pub fn generate_profit_loss_typst(
         }
     }
 
-    typst_content.push_str(&format!("[*{}*],[],[],\n", t("profit-loss-revenue-section")));
+    typst_content.push_str(&format!("[*{}*],[],[],\n", i18n.t("profit-loss-revenue-section")));
     for node in &revenue_nodes {
         build_typst_rows(node, 0, &mut typst_content, Some(&user.locale));
     }
-    typst_content.push_str(&format!("[*{}*],[],[],\n", t("profit-loss-expenses-section")));
+    typst_content.push_str(&format!("[*{}*],[],[],\n", i18n.t("profit-loss-expenses-section")));
     for node in &expense_nodes {
         build_typst_rows(node, 0, &mut typst_content, Some(&user.locale));
     }
     typst_content.push_str(&format!(
         "[*{}*], [], align(right)[{}]\n",
-        t("profit-loss-net-income"),
+        i18n.t("profit-loss-net-income"),
         format_currency_icu_typ(net_income, Some(&user.locale))
     ));
     typst_content.push_str(")\n");
 
     let name = org.as_ref().map(|o| o.name.as_str());
-    let report_qual = t_args(
+    let start_date_str = i18n.format_date(*start_date);
+    let end_date_str = i18n.format_date(*end_date);
+    let report_qual = i18n.t_args(
         "general-ledger-export-period",
-        &fluent_args!["start_date" => start_date.format("%d %b %Y").to_string(), "end_date" => end_date.format("%d %b %Y").to_string()],
+        &fluent_args!["start_date" => start_date_str, "end_date" => end_date_str],
     );
-    wrap_report_layout(name, &t("profit-loss-title"), &*report_qual, typst_content.as_str())
+    wrap_report_layout(name, &i18n.t("profit-loss-title"), &*report_qual, typst_content.as_str())
 }

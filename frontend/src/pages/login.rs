@@ -7,20 +7,21 @@
  */
 
 use crate::contexts::auth_context::UserContextHandle;
+use crate::contexts::locale_context::use_locale;
 use crate::router::Route;
+use crate::services::web::detect_browser_locale;
 use fluent::fluent_args;
 use gloo_net::http::Request;
 use shared_core::dtos::user_detail::UserDetail;
-use shared_core::i18n::{t, t_args};
 use shared_core::requests::auth::LoginRequest;
 use yew::function_component;
 use yew::html;
 use yew::prelude::*;
 use yew_router::hooks::use_navigator;
-use crate::services::web::detect_browser_locale;
 
 #[function_component(LoginPage)]
 pub fn login_page() -> Html {
+    let i18n = use_locale();
     let error_state = use_state(|| None::<String>);
     let is_login_success = use_state(|| false);
     let navigator = use_navigator().unwrap();
@@ -39,11 +40,13 @@ pub fn login_page() -> Html {
     let on_login_submit = {
         let error_state = error_state.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let is_login_success = is_login_success.clone();
 
         Callback::from(move |login_data: LoginRequest| {
             let error_state = error_state.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let is_login_success = is_login_success.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
@@ -59,17 +62,17 @@ pub fn login_page() -> Html {
                             user_ctx.dispatch(Some(user));
                             is_login_success.set(true);
                         } else {
-                            error_state.set(Some(t("login-error-parse-response")));
+                            error_state.set(Some(i18n.t("login-error-parse-response")));
                         }
                     }
                     Ok(r) => {
-                        error_state.set(Some(t_args(
+                        error_state.set(Some(i18n.t_args(
                             "login-error-failed",
                             &fluent_args!["status" => r.status()],
                         )));
                     }
                     Err(e) => {
-                        error_state.set(Some(t_args(
+                        error_state.set(Some(i18n.t_args(
                             "login-error-network",
                             &fluent_args!["error" => e.to_string()],
                         )));
@@ -84,16 +87,16 @@ pub fn login_page() -> Html {
             <div class="login-card">
                 <div class="login-brand">
                     // Pulling in your brand asset to establish identity
-                    <img src="/images/kelpiedog_120x120_transparent.png" alt={t("login-logo-alt-text")} class="login-logo" />
-                    <h1>{ t("branding-app-name") }</h1>
-                    <p class="subtitle">{ t("branding-app-subtitle") }</p>
+                    <img src="/images/kelpiedog_120x120_transparent.png" alt={i18n.t("login-logo-alt-text")} class="login-logo" />
+                    <h1>{ i18n.t("branding-app-name") }</h1>
+                    <p class="subtitle">{ i18n.t("branding-app-subtitle") }</p>
                 </div>
                 <LoginForm
                         on_login={on_login_submit}
                         error={(*error_state).clone()}
                     />
                 <div class="login-footer">
-                    <p>{ t("login-help-text") }</p>
+                    <p>{ i18n.t("login-help-text") }</p>
                 </div>
             </div>
         </div>
@@ -108,6 +111,8 @@ pub struct LoginFormProps {
 
 #[function_component(LoginForm)]
 pub fn login_form(props: &LoginFormProps) -> Html {
+    let i18n = use_locale();
+
     let user_email = use_state(|| "".to_string());
     let password = use_state(|| "".to_string());
     let error = props.error.clone();
@@ -145,15 +150,15 @@ pub fn login_form(props: &LoginFormProps) -> Html {
     html! {
         <form onsubmit={on_submit} class="login-form">
             <div class="input-field-group">
-                <label>{t("login-form-email-label")}</label>
+                <label>{i18n.t("login-form-email-label")}</label>
                 <input type="text" value={(*user_email).clone()} oninput={on_user_email_input} required=true autocomplete="username" />
             </div>
             <div class="input-field-group">
-                <label>{t("login-form-password-label")}</label>
+                <label>{i18n.t("login-form-password-label")}</label>
                 <input type="password" value={(*password).clone()} oninput={on_password_input} required=true autocomplete="current-password" />
             </div>
             <button type="submit" class="button-primary login-btn">
-                    { t("login-form-submit-button") }
+                    { i18n.t("login-form-submit-button") }
             </button>
             if let Some(err) = error {
                 <div class="login__form__error">{err}</div>

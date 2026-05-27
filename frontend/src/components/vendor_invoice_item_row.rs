@@ -7,7 +7,7 @@
  */
 
 use crate::components::currency_input::CurrencyInput;
-use shared_core::i18n::t;
+use crate::contexts::locale_context::use_locale;
 use shared_core::models::account::Account;
 use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
 use uuid::Uuid;
@@ -23,6 +23,8 @@ pub struct VendorInvoiceItemRowProps {
 
 #[function_component(VendorInvoiceItemRow)]
 pub fn vendor_invoice_item_row(props: &VendorInvoiceItemRowProps) -> Html {
+    let i18n = use_locale();
+
     let on_description_change = {
         let on_change = props.on_change.clone();
         let item = props.item.clone();
@@ -82,7 +84,7 @@ pub fn vendor_invoice_item_row(props: &VendorInvoiceItemRowProps) -> Html {
         <div class="voucher__entry-row">
             <input type="text" value={props.item.description.clone()} oninput={on_description_change} />
             <select onchange={on_account_change}>
-                <option value="" disabled=true selected={props.item.account_id.is_nil()}>{t("journal-entry-select-account")}</option>
+                <option value="" disabled=true selected={props.item.account_id.is_nil()}>{i18n.t("journal-entry-select-account")}</option>
                 { for props.accounts.iter().map(|acc| html! {
                     <option value={acc.id.to_string()} selected={props.item.account_id == acc.id}>{&acc.name}</option>
                 })}
@@ -91,7 +93,7 @@ pub fn vendor_invoice_item_row(props: &VendorInvoiceItemRowProps) -> Html {
             <CurrencyInput value={props.item.tax_amount} on_change={on_tax_amount_change} />
             <CurrencyInput value={props.item.total_amount} on_change={Callback::noop()} />
             <button class="icon-button btn-action" onclick={on_delete_click}>
-                <img src="/images/delete.svg" alt={t("common-delete")} />
+                <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
             </button>
 
         </div>

@@ -10,9 +10,9 @@ use crate::components::aged_trial_balance_matrix::AgedTrialBalanceMatrix;
 use crate::components::layout::Layout;
 use crate::components::vendor_invoice_filter::VendorInvoiceFilter;
 use crate::components::vendor_invoice_table::VendorInvoiceTable;
+use crate::contexts::locale_context::use_locale;
 use crate::contexts::vendor_invoice_filter_context::VendorInvoiceFilterProvider;
 use crate::router::Route;
-use shared_core::i18n::t;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
@@ -24,6 +24,7 @@ enum View {
 
 #[function_component(PayablesLedgerPage)]
 pub fn payables_ledger_page() -> Html {
+    let i18n = use_locale();
     let navigator = use_navigator().unwrap();
     let on_add_click = {
         let navigator = navigator.clone();
@@ -44,14 +45,14 @@ pub fn payables_ledger_page() -> Html {
         <Layout>
             <VendorInvoiceFilterProvider>
                 <div class="report-header">
-                    <h3>{ t("payables-ledger-title") }</h3>
+                    <h3>{ i18n.t("payables-ledger-title") }</h3>
                     <VendorInvoiceFilter />
                 </div>
                 <div class="table-actions">
-                    <button class="button-primary" onclick={on_add_click}>{ t("payables-ledger-new-invoice-button") }</button>
+                    <button class="button-primary" onclick={on_add_click}>{ i18n.t("payables-ledger-new-invoice-button") }</button>
                     <div class="view-toggle">
-                        <button class={if *view == View::List { "active" } else { "" }} onclick={set_view.reform(|_| View::List)}>{ t("common-list") }</button>
-                        <button class={if *view == View::Aged { "active" } else { "" }} onclick={set_view.reform(|_| View::Aged)}>{ t("common-aged") }</button>
+                        <button class={if *view == View::List { "active" } else { "" }} onclick={set_view.reform(|_| View::List)}>{ i18n.t("common-list") }</button>
+                        <button class={if *view == View::Aged { "active" } else { "" }} onclick={set_view.reform(|_| View::Aged)}>{ i18n.t("common-aged") }</button>
                     </div>
                 </div>
                 {

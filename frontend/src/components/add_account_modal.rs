@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::i18n::t;
+use crate::contexts::locale_context::use_locale;
 use shared_core::models::account_category::AccountCategory;
 use shared_core::requests::account::CreateAccountRequest;
 use std::str::FromStr;
@@ -22,6 +22,7 @@ pub struct AddAccountModalProps {
 
 #[function_component(AddAccountModal)]
 pub fn add_account_modal(props: &AddAccountModalProps) -> Html {
+    let i18n = use_locale();
     let request = use_state(CreateAccountRequest::default);
     let error = use_state(|| None::<String>);
 
@@ -109,37 +110,37 @@ pub fn add_account_modal(props: &AddAccountModalProps) -> Html {
     html! {
         <div class="modal-overlay" onclick={on_overlay_click}>
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
-                <h2>{ t("account-modal-add-title") }</h2>
+                <h2>{ i18n.t("account-modal-add-title") }</h2>
                 <form onsubmit={on_form_submit} class="modal__form">
-                    <label>{t("account-modal-code-label")}</label>
+                    <label>{i18n.t("account-modal-code-label")}</label>
                     <input type="text" oninput={on_code_input} required=true />
 
-                    <label>{t("account-modal-name-label")}</label>
+                    <label>{i18n.t("account-modal-name-label")}</label>
                     <input type="text" oninput={on_name_input} required=true />
 
-                    <label>{t("account-modal-category-label")}</label>
+                    <label>{i18n.t("account-modal-category-label")}</label>
                     <select onchange={on_category_change}>
-                        <option value="Asset" selected=true>{ t("account-category-asset") }</option>
-                        <option value="Liability">{ t("account-category-liability") }</option>
-                        <option value="Equity">{ t("account-category-equity") }</option>
-                        <option value="Revenue">{ t("account-category-revenue") }</option>
-                        <option value="Expense">{ t("account-category-expense") }</option>
+                        <option value="Asset" selected=true>{ i18n.t("account-category-asset") }</option>
+                        <option value="Liability">{ i18n.t("account-category-liability") }</option>
+                        <option value="Equity">{ i18n.t("account-category-equity") }</option>
+                        <option value="Revenue">{ i18n.t("account-category-revenue") }</option>
+                        <option value="Expense">{ i18n.t("account-category-expense") }</option>
                     </select>
 
-                    <label>{t("account-modal-parent-label")}</label>
+                    <label>{i18n.t("account-modal-parent-label")}</label>
                     <select onchange={on_parent_change}>
-                        <option value="" selected=true>{ t("account-modal-parent-none") }</option>
+                        <option value="" selected=true>{ i18n.t("account-modal-parent-none") }</option>
                         { for props.parent_accounts.iter().map(|(id, name)| html! {
                             <option value={id.to_string()}>{name}</option>
                         })}
                     </select>
 
-                    <label>{t("account-modal-is-group-label")}</label>
+                    <label>{i18n.t("account-modal-is-group-label")}</label>
                     <input type="checkbox" onchange={on_is_group_change} />
 
                     <div class="modal__form__actions">
-                        <button type="button" onclick={on_cancel_click} class="button-secondary">{ t("common-cancel") }</button>
-                        <button type="submit">{ t("account-modal-add-button") }</button>
+                        <button type="button" onclick={on_cancel_click} class="button-secondary">{ i18n.t("common-cancel") }</button>
+                        <button type="submit">{ i18n.t("account-modal-add-button") }</button>
                     </div>
                     if let Some(err) = &*error {
                         <div class="error">{ err }</div>

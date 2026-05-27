@@ -5,10 +5,11 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use chrono::{NaiveDate, Datelike};
-use yew::prelude::*;
-use shared_core::util::{format_currency_icu, format_date_icu};
 use crate::services::web::detect_browser_locale;
+use chrono::{Datelike, NaiveDate};
+use fluent::FluentArgs;
+use shared_core::i18n::{format_currency_icu, format_date_icu};
+use yew::prelude::*;
 // Your shared core!
 
 #[derive(Clone, PartialEq)]
@@ -23,6 +24,15 @@ impl LocaleContext {
 
     pub fn set(&self, new_locale: String) {
         self.current.set(new_locale);
+    }
+
+    pub fn t(&self, key: &str) -> String {
+        shared_core::i18n::t(key, Some(self.as_str()))
+    }
+
+    /// Dynamic translation with arguments pass-through
+    pub fn t_args(&self, key: &str, args: &FluentArgs) -> String {
+        shared_core::i18n::t_args(key, args, Some(self.as_str()))
     }
 
     // Pass-through wrapper for currency

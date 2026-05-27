@@ -9,9 +9,9 @@
 use crate::api::Api;
 use crate::components::currency_input::CurrencyInput;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use chrono::{Local, NaiveDate, Utc};
 use fluent::fluent_args;
-use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use shared_core::models::vendor_payment::VendorPayment;
@@ -21,7 +21,6 @@ use uuid::Uuid;
 use web_sys::{HtmlInputElement, HtmlSelectElement};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct PaymentsViewProps {
@@ -32,6 +31,7 @@ pub struct PaymentsViewProps {
 #[function_component(PaymentsView)]
 pub fn payments_view(props: &PaymentsViewProps) -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let navigator = use_navigator().unwrap();
     let payments = use_state(Vec::new);
     let accounts = use_state(Vec::new);
@@ -59,12 +59,14 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
         let payments = payments.clone();
         let error = error.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         let invoice_id = props.invoice.id;
         Callback::from(move |_: ()| {
             let payments = payments.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 let fetched_payments = Api::get(&format!("/api/vendor-invoices/{}/payments", invoice_id), user_ctx, navigator).await;
@@ -72,17 +74,17 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<VendorPayment>>().await {
                             Ok(data) => payments.set(data),
-                            Err(e) => error.set(Some(t_args(
+                            Err(e) => error.set(Some(i18n.t_args(
                                 "payments-view-error-parse-payments",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
                         }
                     }
-                    Ok(response) => error.set(Some(t_args(
+                    Ok(response) => error.set(Some(i18n.t_args(
                         "payments-view-error-fetch-payments",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -95,11 +97,13 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
         let accounts = accounts.clone();
         let error = error.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         Callback::from(move |_: ()| {
             let accounts = accounts.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 let fetched_accounts = Api::get("/api/accounts/payment-methods", user_ctx, navigator).await;
@@ -107,17 +111,17 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<Account>>().await {
                             Ok(data) => accounts.set(data),
-                            Err(e) => error.set(Some(t_args(
+                            Err(e) => error.set(Some(i18n.t_args(
                                 "payments-view-error-parse-accounts",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
                         }
                     }
-                    Ok(response) => error.set(Some(t_args(
+                    Ok(response) => error.set(Some(i18n.t_args(
                         "payments-view-error-fetch-accounts",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -180,6 +184,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
         let on_change = props.on_change.clone();
         let user_ctx = user_ctx.clone();
         let navigator = navigator.clone();
+        let i18n = i18n.clone();
         let error = error.clone();
         let fetch_payments = fetch_payments.clone();
         Callback::from(move |e: SubmitEvent| {
@@ -187,6 +192,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
             let request = request.clone();
             let on_change = on_change.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             let error = error.clone();
             let fetch_payments = fetch_payments.clone();
@@ -197,11 +203,11 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
                         on_change.emit(());
                         fetch_payments.emit(());
                     }
-                    Ok(r) => error.set(Some(t_args(
+                    Ok(r) => error.set(Some(i18n.t_args(
                         "payments-view-error-make-payment",
                         &fluent_args!["status" => r.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -216,37 +222,37 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
         <div class="payments-view">
             <form onsubmit={on_submit}>
                 <div class="data-form">
-                    <label>{t("payments-view-payment-date-label")}</label>
+                    <label>{i18n.t("payments-view-payment-date-label")}</label>
                     <input type="date" value={request.payment_date.format("%Y-%m-%d").to_string()} onchange={on_date_change(|r, v| r.payment_date = v)} required=true />
 
-                    <label>{t("payments-view-bank-account-label")}</label>
+                    <label>{i18n.t("payments-view-bank-account-label")}</label>
                     <select onchange={on_select_change(|r, v| r.bank_account_id = Uuid::parse_str(&v).unwrap_or_default())} required=true>
-                        <option value="" disabled=true selected=true>{t("journal-entry-select-account")}</option>
+                        <option value="" disabled=true selected=true>{i18n.t("journal-entry-select-account")}</option>
                         { for (*accounts).iter().map(|account| html! {
                             <option value={account.id.to_string()}>{&account.name}</option>
                         })}
                     </select>
 
-                    <label>{t("common-amount")}</label>
+                    <label>{i18n.t("common-amount")}</label>
                     <CurrencyInput value={request.amount} on_change={on_amount_change} />
 
-                    <label>{t("payments-view-reference-label")}</label>
+                    <label>{i18n.t("payments-view-reference-label")}</label>
                     <input type="text" value={request.reference.as_deref().unwrap_or("").to_string()} oninput={on_input(|r, v| r.reference = Some(v))} />
                 </div>
                 <div class="voucher-footer">
                     if let Some(e) = &*error {
                         <div class="error">{e}</div>
                     }
-                    <button type="submit" class="button-primary">{ t("payments-view-make-payment-button") }</button>
+                    <button type="submit" class="button-primary">{ i18n.t("payments-view-make-payment-button") }</button>
                 </div>
             </form>
 
             <table class="table">
                 <thead>
                     <tr>
-                        <th>{t("common-date")}</th>
-                        <th>{t("common-amount")}</th>
-                        <th>{t("payments-view-reference-label")}</th>
+                        <th>{i18n.t("common-date")}</th>
+                        <th>{i18n.t("common-amount")}</th>
+                        <th>{i18n.t("payments-view-reference-label")}</th>
                     </tr>
                 </thead>
                 <tbody>

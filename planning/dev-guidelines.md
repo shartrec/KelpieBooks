@@ -81,12 +81,45 @@ Good candidates for `shared_core` include:
 * Shared formatting or validation helpers
 
 ### Handling Currency values
-* 
-* Never use `f32` or `f64` for tracking financial values.
 * All monetary values must be represented as `i64` whole cents (e.g., `$10.50` is stored and calculated as `1050`).
+* __Never__ use `f32` or `f64` for tracking financial values.
 * All mathematical modifications must happen via safe integer calculations to completely eliminate rounding errors.
-* Use the available format_currency() function to format monetary values for display.
-* Use the CurrencyInput component in the front end for currency input.
+
+## i18n - Internationalization
+
+The back end and front end use similar techniques for internationalization.
+
+Translations and language files are all in the shared_core.
+
+### Frontend 
+
+* Use the LocalContext in each component that renders content
+* At the start of the component get the locale context
+```aiexclude
+let i18n = use_locale();
+```
+* In the html retrieve the text by key
+```aiexclude
+i18n.t("common-expand")
+```
+or if it has arguments
+```aiexclude
+i18n.t_args("vendor-invoice-drawer-inv-number", &fluent_args!["number" => props.invoice.invoice_number.clone()])
+```
+* Format dates and currencies
+```aiexclude
+i18n.format_date(primary_entry.date)
+i18n.format_currency(total_amount)
+```
+
+### Backend
+* Use the LocalContext where appropriate, e.g. pdf exports
+* At the start of the route create a Context using the data from the AuthenticatedUser
+```aiexclude
+let i18n = LocaleContext::new(&user.locale);
+```
+* Use the same techniques as above for translation and formatting.
+
 
 ### Keep Backend Layers Separate
 

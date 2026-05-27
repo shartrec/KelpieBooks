@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::i18n::t;
+use crate::contexts::locale_context::use_locale;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -19,6 +19,8 @@ pub struct GenericDeleteConfirmationModalProps {
 
 #[function_component(GenericDeleteConfirmationModal)]
 pub fn generic_delete_confirmation_modal(props: &GenericDeleteConfirmationModalProps) -> Html {
+    let i18n = use_locale();
+
     let on_cancel = {
         let on_cancel = props.on_cancel.clone();
         Callback::from(move |_| {
@@ -39,8 +41,8 @@ pub fn generic_delete_confirmation_modal(props: &GenericDeleteConfirmationModalP
                 <h2>{ &props.title }</h2>
                 <p>{ &props.message }</p>
                 <div class="modal__form__actions">
-                    <button type="button" onclick={on_cancel} class="button-secondary">{ t("common-cancel") }</button>
-                    <button type="button" onclick={on_confirm_delete} class="button-danger">{ t("common-confirm-delete-button") }</button>
+                    <button type="button" onclick={on_cancel} class="button-secondary">{ i18n.t("common-cancel") }</button>
+                    <button type="button" onclick={on_confirm_delete} class="button-danger">{ i18n.t("common-confirm-delete-button") }</button>
                 </div>
             </div>
         </div>

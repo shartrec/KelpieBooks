@@ -9,21 +9,21 @@
 use crate::api::Api;
 use crate::components::vendor_invoice_drawer::{InvoiceDrawerTab, VendorInvoiceDrawer};
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use crate::contexts::vendor_invoice_filter_context::{use_vendor_invoice_filter, PaymentStatusFilter};
 use fluent::fluent_args;
 use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
-use shared_core::i18n::{t, t_args};
 use shared_core::models::invoice_status::InvoiceStatus;
 use shared_core::models::partner::Partner;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use crate::contexts::locale_context::use_locale;
 
 #[function_component(VendorInvoiceTable)]
 pub fn vendor_invoice_table() -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let navigator = use_navigator().unwrap();
     let filter_ctx = use_vendor_invoice_filter();
     let invoices = use_state(Vec::new);
@@ -39,6 +39,7 @@ pub fn vendor_invoice_table() -> Html {
         let error = error.clone();
         let loading = loading.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         let filter_ctx = filter_ctx.clone();
         Callback::from(move |_: ()| {
@@ -46,6 +47,7 @@ pub fn vendor_invoice_table() -> Html {
             let error = error.clone();
             let loading = loading.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             let filter_ctx = filter_ctx.clone();
             loading.set(true);
@@ -77,17 +79,17 @@ pub fn vendor_invoice_table() -> Html {
                             Ok(data) => {
                                 invoices.set(data);
                             }
-                            Err(e) => error.set(Some(t_args(
+                            Err(e) => error.set(Some(i18n.t_args(
                                 "vendor-invoice-table-error-parse-invoices",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
                         }
                     }
-                    Ok(response) => error.set(Some(t_args(
+                    Ok(response) => error.set(Some(i18n.t_args(
                         "vendor-invoice-table-error-fetch-invoices",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -116,6 +118,7 @@ pub fn vendor_invoice_table() -> Html {
         let partner_to_edit = partner_to_edit.clone();
         let error = error.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         let initial_tab = initial_tab.clone();
         Callback::from(move |(id, tab): (Uuid, InvoiceDrawerTab)| {
@@ -123,6 +126,7 @@ pub fn vendor_invoice_table() -> Html {
             let partner_to_edit = partner_to_edit.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             initial_tab.set(tab);
             wasm_bindgen_futures::spawn_local(async move {
@@ -136,34 +140,34 @@ pub fn vendor_invoice_table() -> Html {
                                     Ok(pr) if pr.ok() => {
                                         match pr.json::<Partner>().await {
                                             Ok(partner) => partner_to_edit.set(Some(partner)),
-                                            Err(e) => error.set(Some(t_args(
+                                            Err(e) => error.set(Some(i18n.t_args(
                                                 "vendor-invoice-table-error-parse-partner",
                                                 &fluent_args!["error" => e.to_string()],
                                             ))),
                                         }
                                     }
-                                    Ok(pr) => error.set(Some(t_args(
+                                    Ok(pr) => error.set(Some(i18n.t_args(
                                         "vendor-invoice-table-error-fetch-partner",
                                         &fluent_args!["status" => pr.status()],
                                     ))),
-                                    Err(e) => error.set(Some(t_args(
+                                    Err(e) => error.set(Some(i18n.t_args(
                                         "common-network-error",
                                         &fluent_args!["error" => e.to_string()],
                                     ))),
                                 }
                                 invoice_to_edit.set(Some(invoice));
                             }
-                            Err(e) => error.set(Some(t_args(
+                            Err(e) => error.set(Some(i18n.t_args(
                                 "vendor-invoice-table-error-parse-invoice",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
                         }
                     }
-                    Ok(r) => error.set(Some(t_args(
+                    Ok(r) => error.set(Some(i18n.t_args(
                         "vendor-invoice-table-error-fetch-invoice",
                         &fluent_args!["status" => r.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -196,7 +200,7 @@ pub fn vendor_invoice_table() -> Html {
     let i18n = use_locale();
 
     if *loading {
-        return html! { <p>{ t("common-loading") }</p> };
+        return html! { <p>{ i18n.t("common-loading") }</p> };
     }
     if let Some(err) = &*error {
         return html! { <div class="error">{ err }</div> };
@@ -216,15 +220,15 @@ pub fn vendor_invoice_table() -> Html {
             <table class="table">
                 <thead>
                     <tr>
-                        <th class="table__text-col">{ t("common-vendor") }</th>
-                        <th class="table__text-col">{ t("vendor-invoice-table-invoice-number") }</th>
-                        <th class="table__value-col">{ t("vendor-invoice-table-invoice-date") }</th>
-                        <th class="table__value-col">{ t("common-due-date") }</th>
-                        <th class="table__value-col">{ t("common-net") }</th>
-                        <th class="table__value-col">{ t("common-tax") }</th>
-                        <th class="table__value-col">{ t("common-gross") }</th>
-                        <th class="table__value-col">{ t("vendor-invoice-table-balance-due") }</th>
-                        <th class="table__col-actions">{ t("common-actions") }</th>
+                        <th class="table__text-col">{ i18n.t("common-vendor") }</th>
+                        <th class="table__text-col">{ i18n.t("vendor-invoice-table-invoice-number") }</th>
+                        <th class="table__value-col">{ i18n.t("vendor-invoice-table-invoice-date") }</th>
+                        <th class="table__value-col">{ i18n.t("common-due-date") }</th>
+                        <th class="table__value-col">{ i18n.t("common-net") }</th>
+                        <th class="table__value-col">{ i18n.t("common-tax") }</th>
+                        <th class="table__value-col">{ i18n.t("common-gross") }</th>
+                        <th class="table__value-col">{ i18n.t("vendor-invoice-table-balance-due") }</th>
+                        <th class="table__col-actions">{ i18n.t("common-actions") }</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -269,21 +273,21 @@ pub fn vendor_invoice_table() -> Html {
                                         <span class="btn-pay-icon">
                                             <img src="/images/credit-card.svg" alt="" style="width:100%; height:100%;" />
                                         </span>
-                                        <span>{ t("common-pay") }</span>
+                                        <span>{ i18n.t("common-pay") }</span>
                                     </button>
                                     <div class="actions-dropdown">
-                                        <button class="icon-button" onclick={on_actions_toggle} title={t("common-actions")}>
-                                            <img src="/images/more-vertical.svg" alt={t("common-actions")} class="dropdown-trigger-icon" />
+                                        <button class="icon-button" onclick={on_actions_toggle} title={i18n.t("common-actions")}>
+                                            <img src="/images/more-vertical.svg" alt={i18n.t("common-actions")} class="dropdown-trigger-icon" />
                                         </button>
                                         if *show_actions == Some(invoice.id) {
                                             <div class="actions-dropdown__content">
                                                 <button class="dropdown-item" onclick={on_edit}>
-                                                    <img src="/images/view.svg" alt={t("common-view")} />
-                                                    <span>{ t("common-view") }</span>
+                                                    <img src="/images/view.svg" alt={i18n.t("common-view")} />
+                                                    <span>{ i18n.t("common-view") }</span>
                                                 </button>
                                                 <button class="dropdown-item">
-                                                    <img src="/images/delete.svg" alt={t("common-delete")} />
-                                                    <span>{ t("common-delete") }</span>
+                                                    <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
+                                                    <span>{ i18n.t("common-delete") }</span>
                                                 </button>
                                             </div>
                                         }

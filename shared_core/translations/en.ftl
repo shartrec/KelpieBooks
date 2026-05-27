@@ -1,5 +1,5 @@
 ##
-## Fluent Translation File for KelpieBooks (en-AU)
+## Fluent Translation File for KelpieBooks (en)
 ##
 
 # Branding
@@ -502,3 +502,8 @@ profit-loss-export-expenses-header = Expenses,
 
 # Trial Balance Export
 trial-balance-export-total = Total
+
+# Test keys
+test-key = Test Value
+test-key-override = Test Value 2
+test-key-args = Hello, { $name }!

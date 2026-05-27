@@ -5,13 +5,12 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use crate::contexts::locale_context::use_locale;
 use fluent::fluent_args;
 use gloo_net::http::Request;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::dtos::transaction_detail::TransactionDetail;
-use shared_core::i18n::{t, t_args};
 use yew::prelude::*;
-use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
 pub struct DeleteConfirmationModalProps {
@@ -22,6 +21,8 @@ pub struct DeleteConfirmationModalProps {
 
 #[function_component(DeleteConfirmationModal)]
 pub fn delete_confirmation_modal(props: &DeleteConfirmationModalProps) -> Html {
+    let i18n = use_locale();
+
     let transaction_detail = use_state(|| None::<TransactionDetail>);
     let error = use_state(|| None::<String>);
 
@@ -36,18 +37,18 @@ pub fn delete_confirmation_modal(props: &DeleteConfirmationModalProps) -> Html {
                 match resp {
                     Ok(r) if r.ok() => match r.json::<TransactionDetail>().await {
                         Ok(detail) => transaction_detail.set(Some(detail)),
-                        Err(e) => error.set(Some(t_args(
+                        Err(e) => error.set(Some(i18n.t_args(
                             "transaction-error-parse",
                             &fluent_args!["error" => e.to_string()],
                         ))),
                     },
                     Ok(r) => {
-                        error.set(Some(t_args(
+                        error.set(Some(i18n.t_args(
                             "transaction-error-fetch",
                             &fluent_args!["status" => r.status()],
                         )))
                     }
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "coa-error-network",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -76,22 +77,22 @@ pub fn delete_confirmation_modal(props: &DeleteConfirmationModalProps) -> Html {
     html! {
         <div class="modal-overlay" onclick={on_cancel.clone()}>
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
-                <h2>{ t("deletion-confirm-title") }</h2>
+                <h2>{ i18n.t("deletion-confirm-title") }</h2>
 
                 if let Some(detail) = &*transaction_detail {
                     <div class="transaction-details-summary">
                         <p>
-                            <strong>{ t("common-date") }</strong> { i18n.format_date(detail.transaction.date) }
+                            <strong>{ i18n.t("common-date") }</strong> { i18n.format_date(detail.transaction.date) }
                         </p>
                         if let Some(desc) = &detail.transaction.description {
-                             <p><strong>{ t("reversal-confirm-original-description") }</strong> { desc }</p>
+                             <p><strong>{ i18n.t("reversal-confirm-original-description") }</strong> { desc }</p>
                         }
                         <table class="table min-width-400">
                             <thead>
                                 <tr>
-                                    <th>{ t("common-account") }</th>
-                                    <th class="amount">{ t("common-debit") }</th>
-                                    <th class="amount">{ t("common-credit") }</th>
+                                    <th>{ i18n.t("common-account") }</th>
+                                    <th class="amount">{ i18n.t("common-debit") }</th>
+                                    <th class="amount">{ i18n.t("common-credit") }</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -108,15 +109,15 @@ pub fn delete_confirmation_modal(props: &DeleteConfirmationModalProps) -> Html {
                 } else if let Some(err) = &*error {
                     <p class="error">{ err }</p>
                 } else {
-                    <p>{ t("transaction-row-loading-details") }</p>
+                    <p>{ i18n.t("transaction-row-loading-details") }</p>
                 }
 
                 <p class="warning-text">
-                    { t("deletion-confirm-warning") }
+                    { i18n.t("deletion-confirm-warning") }
                 </p>
                 <div class="form-actions">
-                    <button type="button" onclick={on_cancel} class="button-secondary">{ t("common-cancel") }</button>
-                    <button type="button" onclick={on_confirm_delete} class="button-danger">{ t("common-confirm-delete-button") }</button>
+                    <button type="button" onclick={on_cancel} class="button-secondary">{ i18n.t("common-cancel") }</button>
+                    <button type="button" onclick={on_confirm_delete} class="button-danger">{ i18n.t("common-confirm-delete-button") }</button>
                 </div>
             </div>
         </div>

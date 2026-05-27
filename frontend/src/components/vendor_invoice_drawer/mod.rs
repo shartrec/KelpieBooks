@@ -14,14 +14,11 @@ pub mod item_edit_card;
 use crate::components::vendor_invoice_drawer::details_view::DetailsView;
 use crate::components::vendor_invoice_drawer::items_view::ItemsView;
 use crate::components::vendor_invoice_drawer::payments_view::PaymentsView;
-use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use fluent::fluent_args;
-use shared_core::i18n::{t, t_args};
 use shared_core::models::partner::Partner;
 use shared_core::models::vendor_invoice::VendorInvoice;
 use yew::prelude::*;
-use yew_router::prelude::use_navigator;
-use crate::contexts::locale_context::use_locale;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InvoiceDrawerTab {
@@ -69,26 +66,26 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
                     // Vendor Identity Context Line
                     <h3 class="payment-context-banner__vendor">{ &props.partner.trade_name.clone().unwrap_or(props.partner.legal_name.clone()) } </h3>
                         <button class="btn-close" type="button" onclick={on_close.clone()}>
-                            <img src="/images/x.svg" alt={t("common-close")} />
+                            <img src="/images/x.svg" alt={i18n.t("common-close")} />
                         </button>
                 </header>
 
                 <div class="payment-context-banner">
                     // Metadata & Financial Reconciliation Badges
                     <div class="payment-context-banner__details">
-                        <span>{ t_args("vendor-invoice-drawer-inv-number", &fluent_args!["number" => props.invoice.invoice_number.clone()]) }</span>
+                        <span>{ i18n.t_args("vendor-invoice-drawer-inv-number", &fluent_args!["number" => props.invoice.invoice_number.clone()]) }</span>
                         <span style="color: var(--border-color, #cbd5e1);">{"|"}</span>
 
                         // Always display the true historical original invoice gross liability
                         <span class="amount-badge amount-badge--gross">
-                            { t_args("vendor-invoice-drawer-gross", &fluent_args!["amount" => i18n.format_currency(total_gross)]) }
+                            { i18n.t_args("vendor-invoice-drawer-gross", &fluent_args!["amount" => i18n.format_currency(total_gross)]) }
                         </span>
 
                         // Conditionally mount outstanding balances if a partial pay variance exists
                         { if balance_remaining != total_gross {
                             html! {
                                 <span class="amount-badge amount-badge--outstanding">
-                                    { t_args("vendor-invoice-drawer-outstanding-balance", &fluent_args!["amount" => i18n.format_currency(balance_remaining)]) }
+                                    { i18n.t_args("vendor-invoice-drawer-outstanding-balance", &fluent_args!["amount" => i18n.format_currency(balance_remaining)]) }
                                 </span>
                             }
                         } else {
@@ -102,19 +99,19 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
                         class={classes!("tab-trigger", (*active_tab == InvoiceDrawerTab::General).then_some("tab-trigger--active"))}
                         onclick={set_tab.reform(|_| InvoiceDrawerTab::General)}
                     >
-                        { t("common-general") }
+                        { i18n.t("common-general") }
                     </button>
                     <button
                         class={classes!("tab-trigger", (*active_tab == InvoiceDrawerTab::Items).then_some("tab-trigger--active"))}
                         onclick={set_tab.reform(|_| InvoiceDrawerTab::Items)}
                     >
-                        { t("common-items") }
+                        { i18n.t("common-items") }
                     </button>
                     <button
                         class={classes!("tab-trigger", (*active_tab == InvoiceDrawerTab::Payments).then_some("tab-trigger--active"))}
                         onclick={set_tab.reform(|_| InvoiceDrawerTab::Payments)}
                     >
-                        { t("common-payments") }
+                        { i18n.t("common-payments") }
                     </button>
                 </div>
                 <div class="drawer__content">
@@ -127,7 +124,7 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
                     }
                 </div>
                 <footer class="drawer__footer">
-                    <button class="button-secondary" onclick={on_close.clone()}>{ t("common-close") }</button>
+                    <button class="button-secondary" onclick={on_close.clone()}>{ i18n.t("common-close") }</button>
                 </footer>
             </div>
         </div>

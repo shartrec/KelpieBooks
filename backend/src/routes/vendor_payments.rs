@@ -7,6 +7,7 @@
  */
 
 use crate::routes::security::AuthenticatedUser;
+use crate::services::vendor_payment_service;
 use crate::util::ApiError;
 use crate::DbKelpie;
 use rocket::serde::json::Json;
@@ -14,7 +15,6 @@ use rocket::{post, routes, Route};
 use rocket_db_pools::Connection;
 use shared_core::models::vendor_payment::VendorPayment;
 use shared_core::requests::vendor_payment::CreateVendorPaymentRequest;
-use crate::services::vendor_payment_service;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![

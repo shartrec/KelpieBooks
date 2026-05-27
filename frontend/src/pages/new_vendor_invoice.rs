@@ -10,23 +10,24 @@ use crate::api::Api;
 use crate::components::layout::Layout;
 use crate::components::vendor_invoice_item_row::VendorInvoiceItemRow;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use crate::router::Route;
 use chrono::{Local, NaiveDate};
 use fluent::fluent_args;
 use shared_core::dtos::partner_list_item::PartnerListItem;
-use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
+use shared_core::models::account_category::AccountCategory;
 use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
 use shared_core::requests::vendor_invoice::CreateVendorInvoiceRequest;
 use uuid::Uuid;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::models::account_category::AccountCategory;
 
 #[function_component(NewVendorInvoicePage)]
 pub fn new_vendor_invoice_page() -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let navigator = use_navigator().unwrap();
     let request = use_state(|| {
         let today = Local::now().date_naive();
@@ -54,12 +55,14 @@ pub fn new_vendor_invoice_page() -> Html {
         let accounts = accounts.clone();
         let error = error.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         Callback::from(move |_: ()| {
             let vendors = vendors.clone();
             let accounts = accounts.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 let fetched_vendors = Api::get("/api/partners", user_ctx.clone(), navigator.clone()).await;
@@ -67,17 +70,17 @@ pub fn new_vendor_invoice_page() -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<PartnerListItem>>().await {
                             Ok(data) => vendors.set(data.into_iter().filter(|p| p.is_vendor).collect()),
-                            Err(e) => error.set(Some(t_args(
+                            Err(e) => error.set(Some(i18n.t_args(
                                 "new-vendor-invoice-error-parse-vendors",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
                         }
                     }
-                    Ok(response) => error.set(Some(t_args(
+                    Ok(response) => error.set(Some(i18n.t_args(
                         "new-vendor-invoice-error-fetch-vendors",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -89,17 +92,17 @@ pub fn new_vendor_invoice_page() -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<Account>>().await {
                             Ok(data) => accounts.set(data),
-                            Err(e) => error.set(Some(t_args(
+                            Err(e) => error.set(Some(i18n.t_args(
                                 "new-vendor-invoice-error-parse-accounts",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
                         }
                     }
-                    Ok(response) => error.set(Some(t_args(
+                    Ok(response) => error.set(Some(i18n.t_args(
                         "new-vendor-invoice-error-fetch-accounts",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -185,12 +188,14 @@ pub fn new_vendor_invoice_page() -> Html {
     let on_submit = {
         let request = request.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         let error = error.clone();
         Callback::from(move |e: SubmitEvent| {
             e.prevent_default();
             let request = request.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             let error = error.clone();
             wasm_bindgen_futures::spawn_local(async move {
@@ -199,11 +204,11 @@ pub fn new_vendor_invoice_page() -> Html {
                     Ok(r) if r.ok() => {
                         navigator.push(&Route::Payables);
                     }
-                    Ok(r) => error.set(Some(t_args(
+                    Ok(r) => error.set(Some(i18n.t_args(
                         "new-vendor-invoice-error-create-invoice",
                         &fluent_args!["status" => r.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -214,34 +219,34 @@ pub fn new_vendor_invoice_page() -> Html {
 
     html! {
         <Layout>
-            <h1>{ t("new-vendor-invoice-title") }</h1>
+            <h1>{ i18n.t("new-vendor-invoice-title") }</h1>
             <form onsubmit={on_submit} class="voucher__form">
                 <div class="data-form">
-                    <label>{t("common-vendor")}</label>
+                    <label>{i18n.t("common-vendor")}</label>
                     <select onchange={on_partner_change} required=true>
-                        <option value="" disabled=true selected=true>{t("new-vendor-invoice-select-vendor")}</option>
+                        <option value="" disabled=true selected=true>{i18n.t("new-vendor-invoice-select-vendor")}</option>
                         { for (*vendors).iter().map(|vendor| html! {
                             <option value={vendor.id.to_string()}>{&vendor.legal_name}</option>
                         })}
                     </select>
 
-                    <label>{t("new-vendor-invoice-number-label")}</label>
+                    <label>{i18n.t("new-vendor-invoice-number-label")}</label>
                     <input type="text" class="voucher__form__invoice" oninput={on_input(|r, v| r.invoice_number = v)} required=true />
 
-                    <label>{t("new-vendor-invoice-date-label")}</label>
+                    <label>{i18n.t("new-vendor-invoice-date-label")}</label>
                     <input type="date" value={request.issue_date.format("%Y-%m-%d").to_string()} onchange={on_date_change(|r, v| r.issue_date = v)} required=true />
 
-                    <label>{t("new-vendor-invoice-due-date-label")}</label>
+                    <label>{i18n.t("new-vendor-invoice-due-date-label")}</label>
                     <input type="date" value={request.due_date.format("%Y-%m-%d").to_string()} onchange={on_date_change(|r, v| r.due_date = v)} required=true />
                 </div>
 
                 <div class="voucher__entries">
                     <div class="voucher__entry-header">
-                                <span>{t("common-description")}</span>
-                                <span>{t("common-account")}</span>
-                                <span>{t("new-vendor-invoice-net-amount")}</span>
-                                <span>{t("new-vendor-invoice-tax-amount")}</span>
-                                <span>{t("common-total")}</span>
+                                <span>{i18n.t("common-description")}</span>
+                                <span>{i18n.t("common-account")}</span>
+                                <span>{i18n.t("new-vendor-invoice-net-amount")}</span>
+                                <span>{i18n.t("new-vendor-invoice-tax-amount")}</span>
+                                <span>{i18n.t("common-total")}</span>
                                 <span></span>
                     </div>
                             { for request.items.iter().map(|item| html! {
@@ -254,13 +259,13 @@ pub fn new_vendor_invoice_page() -> Html {
                             })}
                 </div>
                 <div class="table-actions">
-                    <button type="button" class="button-primary" onclick={add_item}>{ t("new-vendor-invoice-add-line-button") }</button>
+                    <button type="button" class="button-primary" onclick={add_item}>{ i18n.t("new-vendor-invoice-add-line-button") }</button>
                 </div>
                 <div class="voucher-footer">
                     if let Some(e) = &*error {
                         <div class="error">{e}</div>
                     }
-                    <button type="submit" class="button-primary">{ t("new-vendor-invoice-save-button") }</button>
+                    <button type="submit" class="button-primary">{ i18n.t("new-vendor-invoice-save-button") }</button>
                 </div>
             </form>
         </Layout>

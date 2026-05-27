@@ -8,6 +8,7 @@
 
 use crate::components::layout::Layout;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use crate::contexts::org_context::use_org_context;
 use crate::router::Route;
 use crate::services::dashboard::{
@@ -18,10 +19,8 @@ use shared_core::dtos::dashboard::FinancialHealth;
 use shared_core::dtos::expense_breakdown::ExpenseBreakdown;
 use shared_core::dtos::recent_transaction::RecentTransaction;
 use shared_core::dtos::top_payable::TopPayable;
-use shared_core::i18n::{t, t_args};
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::contexts::locale_context::use_locale;
 
 #[function_component(DashboardPage)]
 pub fn dashboard_page() -> Html {
@@ -91,34 +90,34 @@ pub fn dashboard_page() -> Html {
         <Layout>
             <div class="dashboard-container">
                 <header class="dashboard-header-flex">
-                    <h1>{ t("dashboard-title") }</h1>
+                    <h1>{ i18n.t("dashboard-title") }</h1>
                     if let Some(lock_date) = org_context.locked_until {
                         <span class="period-badge">
-                            { t_args("dashboard-period-locked", &fluent_args!["date" =>{ i18n.format_date(lock_date) }]) }
+                            { i18n.t_args("dashboard-period-locked", &fluent_args!["date" =>{ i18n.format_date(lock_date) }]) }
                         </span>
                     } else {
-                        <span class="period-badge warning">{ t("dashboard-period-open") }</span>
+                        <span class="period-badge warning">{ i18n.t("dashboard-period-open") }</span>
                     }
                 </header>
 
                 <section class="dashboard-grid">
                     if let Some(health) = &*financial_health_state {
-                        <FinancialCard title={t("dashboard-net-profit-ytd")} value={health.net_profit_ytd} />
-                        <FinancialCard title={t("dashboard-operating-bank")} value={health.bank_balance} />
-                        <FinancialCard title={t("dashboard-receivables")} value={health.accounts_receivable} />
-                        <FinancialCard title={t("dashboard-payables")} value={health.accounts_payable} />
+                        <FinancialCard title={i18n.t("dashboard-net-profit-ytd")} value={health.net_profit_ytd} />
+                        <FinancialCard title={i18n.t("dashboard-operating-bank")} value={health.bank_balance} />
+                        <FinancialCard title={i18n.t("dashboard-receivables")} value={health.accounts_receivable} />
+                        <FinancialCard title={i18n.t("dashboard-payables")} value={health.accounts_payable} />
                     }
                 </section>
 
                 <div class="dashboard-columns">
                     <section class="card shadow-sm p-4">
-                        <h3>{ t("dashboard-recent-ledger-activity") }</h3>
+                        <h3>{ i18n.t("dashboard-recent-ledger-activity") }</h3>
                         <table class="audit-table">
                             <thead>
                                 <tr>
-                                    <th>{ t("common-date") }</th>
-                                    <th>{ t("common-description") }</th>
-                                    <th style="text-align: right">{ t("common-amount") }</th>
+                                    <th>{ i18n.t("common-date") }</th>
+                                    <th>{ i18n.t("common-description") }</th>
+                                    <th style="text-align: right">{ i18n.t("common-amount") }</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -142,13 +141,13 @@ pub fn dashboard_page() -> Html {
                         </table>
                     </section>
                     <section class="card shadow-sm p-4">
-                        <h3>{ t("dashboard-top-5-payables") }</h3>
+                        <h3>{ i18n.t("dashboard-top-5-payables") }</h3>
                         <table class="audit-table">
                             <thead>
                                 <tr>
-                                    <th>{ t("common-vendor") }</th>
-                                    <th>{ t("common-due-date") }</th>
-                                    <th style="text-align: right">{ t("common-amount") }</th>
+                                    <th>{ i18n.t("common-vendor") }</th>
+                                    <th>{ i18n.t("common-due-date") }</th>
+                                    <th style="text-align: right">{ i18n.t("common-amount") }</th>
                                 </tr>
                             </thead>
                             <tbody>

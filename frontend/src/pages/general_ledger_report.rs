@@ -10,18 +10,18 @@ use crate::api::Api;
 use crate::components::layout::Layout;
 use crate::components::report_options::ReportOptions;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use crate::contexts::report_context::{use_report_context, ReportAction};
 use crate::router::Route;
 use fluent::fluent_args;
 use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
-use shared_core::i18n::{t, t_args};
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::contexts::locale_context::use_locale;
 
 #[function_component(GeneralLedgerReportPage)]
 pub fn general_ledger_report_page() -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let navigator = use_navigator().unwrap();
     let report_ctx = use_report_context();
     let report_data = use_state(|| Vec::<GeneralLedgerLine>::new());
@@ -126,19 +126,19 @@ pub fn general_ledger_report_page() -> Html {
                                         report_data.set(data);
                                         error.set(None);
                                     }
-                                    Err(e) => error.set(Some(t_args(
+                                    Err(e) => error.set(Some(i18n.t_args(
                                         "general-ledger-error-parse",
                                         &fluent_args!["error" => e.to_string()],
                                     ))),
                                 }
                             } else {
-                                error.set(Some(t_args(
+                                error.set(Some(i18n.t_args(
                                     "general-ledger-error-fetch",
                                     &fluent_args!["status" => resp.status()],
                                 )));
                             }
                         }
-                        Err(e) => error.set(Some(t_args(
+                        Err(e) => error.set(Some(i18n.t_args(
                             "common-network-error",
                             &fluent_args!["error" => e.to_string()],
                         ))),
@@ -167,22 +167,22 @@ pub fn general_ledger_report_page() -> Html {
         <Layout>
             <div class="report-page">
                 <div class="report-header">
-                    <h3>{ t("general-ledger-title") }</h3>
+                    <h3>{ i18n.t("general-ledger-title") }</h3>
                     <ReportOptions show_start_date={true} show_end_date={true} show_advanced_filters={true} />
                 </div>
                 if *loading {
-                    <p>{ t("common-loading") }</p>
+                    <p>{ i18n.t("common-loading") }</p>
                 } else if let Some(err) = &*error {
                     <div class="error">{ err }</div>
                 } else {
                     <table class="report-table">
                         <thead>
                             <tr>
-                                <th>{ t("common-date") }</th>
-                                <th>{ t("common-description") }</th>
-                                <th class="text-amount">{ t("common-debit") }</th>
-                                <th class="text-amount">{ t("common-credit") }</th>
-                                <th class="text-amount">{ t("common-balance") }</th>
+                                <th>{ i18n.t("common-date") }</th>
+                                <th>{ i18n.t("common-description") }</th>
+                                <th class="text-amount">{ i18n.t("common-debit") }</th>
+                                <th class="text-amount">{ i18n.t("common-credit") }</th>
+                                <th class="text-amount">{ i18n.t("common-balance") }</th>
                             </tr>
                         </thead>
                         <tbody>

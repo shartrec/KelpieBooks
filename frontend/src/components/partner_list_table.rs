@@ -12,9 +12,9 @@ use crate::components::delete_partner_confirmation_modal::DeletePartnerConfirmat
 use crate::components::partner_drawer::PartnerDrawer;
 use crate::components::partner_row::PartnerRow;
 use crate::contexts::auth_context::use_user_context;
+use crate::contexts::locale_context::use_locale;
 use fluent::fluent_args;
 use shared_core::dtos::partner_list_item::PartnerListItem;
-use shared_core::i18n::{t, t_args};
 use shared_core::models::account::Account;
 use shared_core::models::account_category::AccountCategory;
 use shared_core::models::partner::Partner;
@@ -28,6 +28,7 @@ use yew_router::prelude::use_navigator;
 #[function_component(PartnerListTable)]
 pub fn partner_list_table() -> Html {
     let user_ctx = use_user_context();
+    let i18n = use_locale();
     let navigator = use_navigator().unwrap();
     let partners = use_state(Vec::new);
     let accounts = use_state(Vec::new);
@@ -45,6 +46,7 @@ pub fn partner_list_table() -> Html {
         let error = error.clone();
         let loading = loading.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         Callback::from(move |_: ()| {
             let partners = partners.clone();
@@ -52,6 +54,7 @@ pub fn partner_list_table() -> Html {
             let error = error.clone();
             let loading = loading.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             loading.set(true);
             wasm_bindgen_futures::spawn_local(async move {
@@ -61,17 +64,17 @@ pub fn partner_list_table() -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<PartnerListItem>>().await {
                             Ok(data) => partners.set(data),
-                            Err(e) => error.set(Some(t_args(
+                            Err(e) => error.set(Some(i18n.t_args(
                                 "partner-list-error-parse-partners",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
                         }
                     }
-                    Ok(response) => error.set(Some(t_args(
+                    Ok(response) => error.set(Some(i18n.t_args(
                         "partner-list-error-fetch-partners",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -83,17 +86,17 @@ pub fn partner_list_table() -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<Account>>().await {
                             Ok(data) => accounts.set(data),
-                            Err(e) => error.set(Some(t_args(
+                            Err(e) => error.set(Some(i18n.t_args(
                                 "partner-list-error-parse-accounts",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
                         }
                     }
-                    Ok(response) => error.set(Some(t_args(
+                    Ok(response) => error.set(Some(i18n.t_args(
                         "partner-list-error-fetch-accounts",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -131,6 +134,7 @@ pub fn partner_list_table() -> Html {
         let partner_contacts = partner_contacts.clone();
         let error = error.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         Callback::from(move |id: Uuid| {
             let partner_to_edit = partner_to_edit.clone();
@@ -138,6 +142,7 @@ pub fn partner_list_table() -> Html {
             let partner_contacts = partner_contacts.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 let resp = Api::get(
@@ -149,16 +154,16 @@ pub fn partner_list_table() -> Html {
                 match resp {
                     Ok(r) if r.ok() => match r.json::<Partner>().await {
                         Ok(partner) => partner_to_edit.set(Some(partner)),
-                        Err(e) => error.set(Some(t_args(
+                        Err(e) => error.set(Some(i18n.t_args(
                             "partner-list-error-parse-partner",
                             &fluent_args!["error" => e.to_string()],
                         ))),
                     },
-                    Ok(r) => error.set(Some(t_args(
+                    Ok(r) => error.set(Some(i18n.t_args(
                         "partner-list-error-fetch-partner",
                         &fluent_args!["status" => r.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -173,16 +178,16 @@ pub fn partner_list_table() -> Html {
                 match resp {
                     Ok(r) if r.ok() => match r.json::<Vec<PartnerAddress>>().await {
                         Ok(addresses) => partner_addresses.set(addresses),
-                        Err(e) => error.set(Some(t_args(
+                        Err(e) => error.set(Some(i18n.t_args(
                             "partner-list-error-parse-addresses",
                             &fluent_args!["error" => e.to_string()],
                         ))),
                     },
-                    Ok(r) => error.set(Some(t_args(
+                    Ok(r) => error.set(Some(i18n.t_args(
                         "partner-list-error-fetch-addresses",
                         &fluent_args!["status" => r.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -197,16 +202,16 @@ pub fn partner_list_table() -> Html {
                 match resp {
                     Ok(r) if r.ok() => match r.json::<Vec<PartnerContact>>().await {
                         Ok(contacts) => partner_contacts.set(contacts),
-                        Err(e) => error.set(Some(t_args(
+                        Err(e) => error.set(Some(i18n.t_args(
                             "partner-list-error-parse-contacts",
                             &fluent_args!["error" => e.to_string()],
                         ))),
                     },
-                    Ok(r) => error.set(Some(t_args(
+                    Ok(r) => error.set(Some(i18n.t_args(
                         "partner-list-error-fetch-contacts",
                         &fluent_args!["status" => r.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -229,12 +234,14 @@ pub fn partner_list_table() -> Html {
         let error = error.clone();
         let fetch_data = fetch_data.clone();
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         Callback::from(move |req: CreatePartnerRequest| {
             let on_modal_close = on_modal_close.clone();
             let error = error.clone();
             let fetch_data = fetch_data.clone();
             let user_ctx = user_ctx.clone();
+            let i18n = i18n.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 let resp = Api::post("/api/partners", &req, user_ctx, navigator).await;
@@ -243,11 +250,11 @@ pub fn partner_list_table() -> Html {
                         on_modal_close.emit(());
                         fetch_data.emit(());
                     }
-                    Ok(r) => error.set(Some(t_args(
+                    Ok(r) => error.set(Some(i18n.t_args(
                         "partner-list-error-add-partner",
                         &fluent_args!["status" => r.status()],
                     ))),
-                    Err(e) => error.set(Some(t_args(
+                    Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
                     ))),
@@ -272,6 +279,7 @@ pub fn partner_list_table() -> Html {
         let fetch_data = fetch_data.clone();
         let partner_id = partner_to_delete.as_ref().map(|p| p.id);
         let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
         let navigator = navigator.clone();
         Callback::from(move |_: ()| {
             if let Some(id) = partner_id {
@@ -279,6 +287,7 @@ pub fn partner_list_table() -> Html {
                 let error = error.clone();
                 let fetch_data = fetch_data.clone();
                 let user_ctx = user_ctx.clone();
+                let i18n = i18n.clone();
                 let navigator = navigator.clone();
                 wasm_bindgen_futures::spawn_local(async move {
                     let resp =
@@ -289,12 +298,12 @@ pub fn partner_list_table() -> Html {
                             fetch_data.emit(());
                         }
                         Ok(r) => {
-                            error.set(Some(t_args(
+                            error.set(Some(i18n.t_args(
                                 "partner-list-error-delete-partner",
                                 &fluent_args!["status" => r.status()],
                             )))
                         }
-                        Err(e) => error.set(Some(t_args(
+                        Err(e) => error.set(Some(i18n.t_args(
                             "common-network-error",
                             &fluent_args!["error" => e.to_string()],
                         ))),
@@ -316,7 +325,7 @@ pub fn partner_list_table() -> Html {
         .collect();
 
     if *loading {
-        return html! { <p>{ t("common-loading") }</p> };
+        return html! { <p>{ i18n.t("common-loading") }</p> };
     }
     if let Some(err) = &*error {
         return html! { <div class="error">{ err }</div> };
@@ -325,7 +334,7 @@ pub fn partner_list_table() -> Html {
     html! {
         <>
             <div class="table-actions">
-                <button onclick={on_add_click}>{ t("partner-list-add-partner-button") }</button>
+                <button onclick={on_add_click}>{ i18n.t("partner-list-add-partner-button") }</button>
             </div>
 
             if *show_add_modal {
@@ -358,10 +367,10 @@ pub fn partner_list_table() -> Html {
             <table class="table">
                 <thead>
                     <tr>
-                        <th class="table__text-col">{ t("partner-list-legal-name") }</th>
-                        <th class="table__text-col">{ t("partner-list-trade-name") }</th>
-                        <th class="table__text-col">{ t("common-type") }</th>
-                        <th class="table__col-actions">{ t("common-actions") }</th>
+                        <th class="table__text-col">{ i18n.t("partner-list-legal-name") }</th>
+                        <th class="table__text-col">{ i18n.t("partner-list-trade-name") }</th>
+                        <th class="table__text-col">{ i18n.t("common-type") }</th>
+                        <th class="table__col-actions">{ i18n.t("common-actions") }</th>
                     </tr>
                 </thead>
                 <tbody>

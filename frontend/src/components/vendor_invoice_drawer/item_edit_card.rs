@@ -7,13 +7,12 @@
  */
 
 use crate::components::currency_input::CurrencyInput;
-use shared_core::i18n::t;
+use crate::contexts::locale_context::use_locale;
 use shared_core::models::account::Account;
 use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
 use uuid::Uuid;
 use web_sys::{HtmlInputElement, HtmlSelectElement};
 use yew::prelude::*;
-use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct ItemEditCardProps {
@@ -89,37 +88,37 @@ pub fn item_edit_card(props: &ItemEditCardProps) -> Html {
             <div class="card__meta-line" style="margin-bottom: 0.75rem;">
                 <div class="card__title">
                     <strong style="font-size: 0.85rem; text-transform: uppercase; color: var(--brand-dark);">
-                        { if props.item.description.is_empty() { t("item-edit-card-add-title") } else { t("item-edit-card-edit-title") } }
+                        { if props.item.description.is_empty() { i18n.t("item-edit-card-add-title") } else { i18n.t("item-edit-card-edit-title") } }
                     </strong>
                 </div>
             </div>
 
             <div class="card-form-compact">
-                    <label>{t("common-description")}</label>
+                    <label>{i18n.t("common-description")}</label>
                     <input type="text" value={item.description.clone()} oninput={on_input(|i, v| i.description = v)} />
 
-                    <label>{t("common-account")}</label>
+                    <label>{i18n.t("common-account")}</label>
                     <select onchange={on_select_change(|i, v| i.account_id = Uuid::parse_str(&v).unwrap_or_default())}>
-                        <option value="" disabled=true selected={item.account_id.is_nil()}>{t("journal-entry-select-account")}</option>
+                        <option value="" disabled=true selected={item.account_id.is_nil()}>{i18n.t("journal-entry-select-account")}</option>
                         { for props.accounts.iter().map(|account| html! {
                             <option value={account.id.to_string()} selected={item.account_id == account.id}>{&account.name}</option>
                         })}
                     </select>
 
-                    <label>{t("item-edit-card-net-amount-label")}</label>
+                    <label>{i18n.t("item-edit-card-net-amount-label")}</label>
                     <CurrencyInput value={item.net_amount} on_change={on_net_amount_change} />
 
-                    <label>{t("item-edit-card-tax-amount-label")}</label>
+                    <label>{i18n.t("item-edit-card-tax-amount-label")}</label>
                     <CurrencyInput value={item.tax_amount} on_change={on_tax_amount_change} />
 
-                    <label>{t("common-total")}</label>
+                    <label>{i18n.t("common-total")}</label>
                     <div class="total-amount">
                         {i18n.format_currency(item.total_amount)}
                     </div>
             </div>
             <div class="card-footer">
-                <button class="button-primary" onclick={on_save}>{ t("common-save") }</button>
-                <button class="button-secondary" onclick={on_cancel}>{ t("common-cancel") }</button>
+                <button class="button-primary" onclick={on_save}>{ i18n.t("common-save") }</button>
+                <button class="button-secondary" onclick={on_cancel}>{ i18n.t("common-cancel") }</button>
             </div>
         </div>
     }

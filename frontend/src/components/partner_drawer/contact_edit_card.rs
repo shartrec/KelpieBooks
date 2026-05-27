@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::i18n::t;
+use crate::contexts::locale_context::use_locale;
 use shared_core::models::partner_contact::PartnerContact;
 use uuid::Uuid;
 use yew::prelude::*;
@@ -20,6 +20,8 @@ pub struct ContactEditCardProps {
 
 #[function_component(ContactEditCard)]
 pub fn contact_edit_card(props: &ContactEditCardProps) -> Html {
+    let i18n = use_locale();
+
     let contact_state = use_state(|| {
         props.contact.clone().unwrap_or_else(|| PartnerContact {
             id: Uuid::nil(),
@@ -79,30 +81,30 @@ pub fn contact_edit_card(props: &ContactEditCardProps) -> Html {
             <div class="card__meta-line" style="margin-bottom: 0.75rem;">
                 <div class="card__title">
                     <strong style="font-size: 0.85rem; text-transform: uppercase; color: var(--brand-dark);">
-                        { if props.contact.is_some() { t("contact-edit-card-edit-title") } else { t("contact-edit-card-add-title") } }
+                        { if props.contact.is_some() { i18n.t("contact-edit-card-edit-title") } else { i18n.t("contact-edit-card-add-title") } }
                                 </strong>
                 </div>
             </div>
             <div class="card-form-compact">
-                    <label>{t("contact-edit-card-full-name-label")}</label>
-                    <input type="text" placeholder={t("contact-edit-card-full-name-label")} value={contact_state.full_name.clone()} oninput={on_input(|c, v| c.full_name = v)} />
-                    <label>{t("contact-edit-card-preferred-name-label")}</label>
-                    <input type="text" placeholder={t("contact-edit-card-preferred-name-label")} value={contact_state.preferred_name.clone()} oninput={on_input(|c, v| c.preferred_name = v)} />
-                    <label>{t("contact-edit-card-email-label")}</label>
-                    <input type="email"  placeholder={t("contact-edit-card-email-placeholder")} value={contact_state.email.clone().unwrap_or_default()} oninput={on_input(|c, v| c.email = Some(v))} />
-                    <label>{t("contact-edit-card-phone-label")}</label>
-                    <input type="tel"  placeholder={t("contact-edit-card-phone-placeholder")} value={contact_state.phone.clone().unwrap_or_default()} oninput={on_input(|c, v| c.phone = Some(v))} />
-                    <label>{t("contact-edit-card-role-title-label")}</label>
+                    <label>{i18n.t("contact-edit-card-full-name-label")}</label>
+                    <input type="text" placeholder={i18n.t("contact-edit-card-full-name-label")} value={contact_state.full_name.clone()} oninput={on_input(|c, v| c.full_name = v)} />
+                    <label>{i18n.t("contact-edit-card-preferred-name-label")}</label>
+                    <input type="text" placeholder={i18n.t("contact-edit-card-preferred-name-label")} value={contact_state.preferred_name.clone()} oninput={on_input(|c, v| c.preferred_name = v)} />
+                    <label>{i18n.t("contact-edit-card-email-label")}</label>
+                    <input type="email"  placeholder={i18n.t("contact-edit-card-email-placeholder")} value={contact_state.email.clone().unwrap_or_default()} oninput={on_input(|c, v| c.email = Some(v))} />
+                    <label>{i18n.t("contact-edit-card-phone-label")}</label>
+                    <input type="tel"  placeholder={i18n.t("contact-edit-card-phone-placeholder")} value={contact_state.phone.clone().unwrap_or_default()} oninput={on_input(|c, v| c.phone = Some(v))} />
+                    <label>{i18n.t("contact-edit-card-role-title-label")}</label>
                     <input type="text" value={contact_state.role_title.clone().unwrap_or_default()} oninput={on_input(|c, v| c.role_title = Some(v))} />
                     <label class="checkbox-label-compact" for="is_primary">
                         <input type="checkbox" id="is_primary_contact" checked={contact_state.is_primary} onchange={on_primary_change} />
-                        <span>{t("common-primary")}</span>
+                        <span>{i18n.t("common-primary")}</span>
                     </label>
             </div>
             // Tightly bundled actionable context footer links
             <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed rgba(0,0,0,0.05);">
-                <button class="button-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick={on_cancel_click}>{ t("common-cancel") }</button>
-                <button class="button-primary" style="padding: 4px 10px; font-size: 0.8rem;" onclick={on_save_click}>{ t("contact-edit-card-save-button") }</button>
+                <button class="button-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick={on_cancel_click}>{ i18n.t("common-cancel") }</button>
+                <button class="button-primary" style="padding: 4px 10px; font-size: 0.8rem;" onclick={on_save_click}>{ i18n.t("contact-edit-card-save-button") }</button>
             </div>
         </div>
     }
