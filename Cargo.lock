@@ -5838,6 +5838,7 @@ dependencies = [
  "once_cell",
  "serde",
  "serde_json",
+ "typst-assets 0.14.2",
  "typst-library",
  "typst-syntax",
  "typst-timing",
