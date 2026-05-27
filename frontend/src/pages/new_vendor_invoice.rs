@@ -172,10 +172,11 @@ pub fn new_vendor_invoice_page() -> Html {
         let request = request.clone();
         Callback::from(move |_| {
             let mut req = (*request).clone();
+            let last_account_id = req.items.last().map_or(Uuid::nil(), |item| item.account_id);
             req.items.push(VendorInvoiceItem {
                 id: Uuid::new_v4(),
                 vendor_invoice_id: Uuid::nil(),
-                account_id: Uuid::nil(),
+                account_id: last_account_id,
                 description: String::new(),
                 net_amount: 0,
                 tax_amount: 0,
