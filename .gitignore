@@ -12,3 +12,4 @@
 /backend/.sqlx
 /backend/static/
 /logs/
+/.docs/public/
