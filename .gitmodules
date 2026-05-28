@@ -1,0 +1,6 @@
+[submodule ".docs/themes/portio-zola"]
+	path = .docs/themes/portio-zola
+	url = https://github.com/quentin-rodriguez/portio-zola.git
+[submodule ".docs/themes/EasyDocs"]
+	path = .docs/themes/EasyDocs
+	url = https://github.com/codeandmedia/zola_easydocs_theme
