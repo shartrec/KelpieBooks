@@ -19,12 +19,14 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v6.0.1
+        with:
+          submodules: 'recursive' # <-- Critical for fetching EasyDocs
 
       - name: Build Zola + upload Pages artifact
         uses: getzola/github-pages@066755243e69f508fd1a74739fbf1a65f656c790
         with:
           zola_version: v0.22.0
-          working_directory: .docs
+          working_directory: .docs # <-- Double check if this should be docs2
 
   deploy:
     runs-on: ubuntu-latest
