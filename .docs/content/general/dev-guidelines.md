@@ -1,10 +1,17 @@
++++
+title = "Development Guidelines"
+weight = 60
++++
+
 # Developer Guidelines
 
-This document summarises the current project layout, application structure, and styling conventions used in KelpieBooks. It is intended to help contributors make changes that fit naturally with the existing codebase.
+This document summarises the current project layout, application structure, and styling conventions used in KelpieBooks.
+It is intended to help contributors make changes that fit naturally with the existing codebase.
 
 ## Project Overview
 
-KelpieBooks is organised as a Rust workspace with separate backend, frontend, shared domain code, planning documents, and deployment/configuration assets.
+KelpieBooks is organised as a Rust workspace with separate backend, frontend, shared domain code, documentation,
+planning documents, and deployment/configuration assets.
 
 ## Top-Level Directories
 
@@ -15,7 +22,8 @@ The backend contains the Rocket-based server application.
 Key areas:
 
 * `backend/src/main.rs`: Application entry point and server setup.
-* `backend/src/db/`: Database access layer. Files are grouped by domain concept, such as accounts, users, organisations, transactions, journal entries, and security.
+* `backend/src/db/`: Database access layer. Files are grouped by domain concept, such as accounts, users, organisations,
+  transactions, journal entries, and security.
 * `backend/src/routes/`: HTTP route handlers grouped by feature area.
 * `backend/src/services/`: Business logic that sits between routes and database access.
 * `backend/src/util/`: Shared backend utilities, such as logging and common types.
@@ -31,8 +39,10 @@ Key areas:
 * `frontend/src/main.rs`: Frontend application entry point.
 * `frontend/src/lib.rs`: Main frontend library module.
 * `frontend/src/auth.rs`: Frontend authentication-related logic.
-* `frontend/src/components/`: Reusable UI components such as layout, sidebar, header, account rows, journal entry rows, and modal dialogs.
-* `frontend/src/pages/`: Route-level page components such as dashboard, login, register, profile, ledger, account ledger, and transaction entry pages.
+* `frontend/src/components/`: Reusable UI components such as layout, sidebar, header, account rows, journal entry rows,
+  and modal dialogs.
+* `frontend/src/pages/`: Route-level page components such as dashboard, login, register, profile, ledger, account
+  ledger, and transaction entry pages.
 * `frontend/assets/`: Static frontend assets, including images and CSS assets.
 * `frontend/styles/kelpie.css`: Primary shared stylesheet for the frontend.
 * `frontend/index.html`: HTML entry point used by Trunk.
@@ -52,11 +62,21 @@ Typical responsibilities include:
 
 Use this crate for types that must remain consistent between client and server.
 
-### planning/
+### .docs/
+
+The home of all our documentation source
+
+This is divided into
+
+* `general`: Overall documentation about all aspects of the project
+* `user`: The end user documentation a.k.a. the user manual
+
+### .planning/
 
 Project planning and design documentation.
 
-Current documents include onboarding and ledger planning notes. New design, architecture, feature, and implementation planning documents should be added here.
+Current documents include onboarding and ledger planning notes. New design, architecture, feature, and implementation
+planning documents should be added here.
 
 ### templates/
 
@@ -81,6 +101,7 @@ Good candidates for `shared_core` include:
 * Shared formatting or validation helpers
 
 ### Handling Currency values
+
 * All monetary values must be represented as `i64` whole cents (e.g., `$10.50` is stored and calculated as `1050`).
 * __Never__ use `f32` or `f64` for tracking financial values.
 * All mathematical modifications must happen via safe integer calculations to completely eliminate rounding errors.
@@ -91,35 +112,44 @@ The back end and front end use similar techniques for internationalization.
 
 Translations and language files are all in the shared_core.
 
-### Frontend 
+### Frontend
 
 * Use the LocalContext in each component that renders content
 * At the start of the component get the locale context
+
 ```aiexclude
 let i18n = use_locale();
 ```
+
 * In the html retrieve the text by key
+
 ```aiexclude
 i18n.t("common-expand")
 ```
+
 or if it has arguments
+
 ```aiexclude
 i18n.t_args("vendor-invoice-drawer-inv-number", &fluent_args!["number" => props.invoice.invoice_number.clone()])
 ```
+
 * Format dates and currencies
+
 ```aiexclude
 i18n.format_date(primary_entry.date)
 i18n.format_currency(total_amount)
 ```
 
 ### Backend
+
 * Use the LocalContext where appropriate, e.g. pdf exports
 * At the start of the route create a Context using the data from the AuthenticatedUser
+
 ```aiexclude
 let i18n = LocaleContext::new(&user.locale);
 ```
-* Use the same techniques as above for translation and formatting.
 
+* Use the same techniques as above for translation and formatting.
 
 ### Keep Backend Layers Separate
 
@@ -150,6 +180,10 @@ Use each layer for its intended purpose:
 
 Avoid placing complex business logic directly inside route handlers or database functions.
 
+Use __transactions__ where appropriate. Any route that makes multiple transaction entries, that must remain in balance
+in the accounts, __must__ be placed in a transaction.
+Most of the database updates are write only so there is generally little need to consider deadlocks in this situation.
+
 ### Keep Frontend Components Focused
 
 Frontend code is split into:
@@ -161,7 +195,8 @@ Frontend code is split into:
 
 A page should compose components rather than becoming one large component itself.
 
-Reusable UI patterns, such as modals, rows, layout wrappers, and navigation elements, should live in `frontend/src/components/`.
+Reusable UI patterns, such as modals, rows, layout wrappers, and navigation elements, should live in
+`frontend/src/components/`.
 
 ## Frontend Layout Guidelines
 
@@ -184,13 +219,15 @@ The general structure is:
 +----------+---------------------------------------+
 ```
 
-When adding authenticated/dashboard pages, they should fit inside the existing layout rather than creating independent page chrome.
+When adding authenticated/dashboard pages, they should fit inside the existing layout rather than creating independent
+page chrome.
 
 Authentication pages may use centred form layouts instead of the dashboard layout where appropriate.
 
 ## Styling Guidelines
 
-The frontend uses a central stylesheet. Key colour variables are defined in `frontend/assets/scss/base/_variables.scss` and should be used to maintain consistency.
+The frontend uses a central stylesheet. Key colour variables are defined in `frontend/assets/scss/base/_variables.scss`
+and should be used to maintain consistency.
 
 ```scss
 // Example from _variables.scss
@@ -282,6 +319,7 @@ Guidelines:
 
 * Align labels consistently.
 * Use existing error and success message styles.
+
 - Avoid inline styles for validation states.
 - Prefer semantic form elements.
 
@@ -412,7 +450,8 @@ Examples:
 
 ### Frontend Components
 
-Frontend component files should be named after the component or UI element they contain, using `PascalCase`. The files themselves should be `snake_case`.
+Frontend component files should be named after the component or UI element they contain, using `PascalCase`. The files
+themselves should be `snake_case`.
 
 Examples:
 
@@ -421,7 +460,8 @@ Examples:
 
 ### CSS Classes
 
-Prefer descriptive class names over abbreviated names unless the abbreviation is already established, such as `coa-table`. Use BEM (Block, Element, Modifier) naming conventions for clarity where appropriate.
+Prefer descriptive class names over abbreviated names unless the abbreviation is already established, such as
+`coa-table`. Use BEM (Block, Element, Modifier) naming conventions for clarity where appropriate.
 
 Examples:
 
@@ -449,8 +489,10 @@ When modifying styles:
 
 * Use SCSS variables for colours, fonts, and spacing from `frontend/assets/scss/base/_variables.scss`.
 * Reuse existing utility and component classes before creating new ones.
-* Avoid creating new classes for one-off situations. Consider utility classes or inline styles if the style is not reusable.
-* Use the BEM (Block, Element, Modifier) naming convention for new CSS classes to keep styles scoped and understandable. For example: `.card__header--large`.
+* Avoid creating new classes for one-off situations. Consider utility classes or inline styles if the style is not
+  reusable.
+* Use the BEM (Block, Element, Modifier) naming convention for new CSS classes to keep styles scoped and understandable.
+  For example: `.card__header--large`.
 
 ## Consistency Checklist
 
