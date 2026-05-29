@@ -16,6 +16,7 @@ use shared_core::dtos::transaction_detail::TransactionDetail;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use crate::components::transaction_row::_TransactionRowProps::org_ctx;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TransactionGroup {
@@ -36,6 +37,7 @@ pub struct TransactionRowProps {
 
 #[function_component(TransactionRow)]
 pub fn transaction_row(props: &TransactionRowProps) -> Html {
+    let org_state = use_context::<OrgContextHandle>();
     let expanded = use_state(|| false);
     let transaction_detail = use_state(|| None::<TransactionDetail>);
     let loading_details = use_state(|| false);
@@ -119,6 +121,23 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
 
     let i18n = use_locale();
 
+    let strict = if let Some(org_state) = &org_state {
+        org_state.strict_audit_mode
+    } else {
+        true
+    };
+    let locked_until= if let Some(org_state) = &org_state {
+        org_state.locked_until
+    } else {
+        None
+    };
+    let current = if let Some(locked_date) = locked_until {
+        primary_entry.date > locked_date
+    } else {
+        true
+    };
+    let can_update = !strict && current;
+
     html! {
         <>
             <tr class="transaction-summary-row">
@@ -143,12 +162,12 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                         </button>
                         if *dropdown_open {
                             <div class="actions-dropdown__content">
-                                if strict_audit_mode {
-                                    <button class="dropdown-item" onclick={on_reverse_click} disabled={is_locked}>
-                                        <img src="/images/reverse.svg" alt={i18n.t("transaction-row-reverse")} />
-                                        <span>{ i18n.t("transaction-row-reverse") }</span>
-                                    </button>
-                                } else {
+
+                                <button class="dropdown-item" onclick={on_reverse_click} disabled={is_locked}>
+                                    <img src="/images/reverse.svg" alt={i18n.t("transaction-row-reverse")} />
+                                    <span>{ i18n.t("transaction-row-reverse") }</span>
+                                </button>
+                                if can_update {
                                     <button class="dropdown-item" onclick={on_edit_click} disabled={is_locked}>
                                         <img src="/images/edit.svg" alt={i18n.t("common-edit")} />
                                         <span>{ i18n.t("common-edit") }</span>
