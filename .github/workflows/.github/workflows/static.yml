@@ -1,8 +1,0 @@
-name: Ghost Buster
-on:
-  workflow_dispatch: # This ensures it ONLY runs if you manually click a button!
-jobs:
-  clear:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Clearing stale hooks"
