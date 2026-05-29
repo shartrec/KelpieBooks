@@ -1,6 +1,6 @@
 +++
 title = "Screenshots Asset Bundle"
-render = false
+render = true
 weight = 1
 +++
 

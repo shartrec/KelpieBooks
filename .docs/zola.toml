@@ -16,4 +16,4 @@ theme = "catppuccin-mocha"
 
 [extra]
 # Put all your custom variables here
-logo = "images/Logo-120.png"
+logo = "./images/Logo-120.png"
