@@ -9,7 +9,7 @@ weight = 3
 To add a new account, you begin by clicking the **Add Account** button on the
 main [Chart of Accounts](../chart-of-accounts/) page. This will open the "Add New Account" modal dialog.
 
-![Add Account Screenshot](../screenshots/add-account.png)
+![Add Account Screenshot](../../../screenshots/accounts/add-account.png)
 
 ## Account Fields
 

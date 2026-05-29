@@ -10,7 +10,7 @@ To delete an account, click the **Delete** button in the "Actions" column of the
 main [Chart of Accounts](./../chart-of-accounts/) page. This will open a confirmation modal to prevent accidental
 deletions.
 
-![Delete Account Screenshot](../screenshots/delete-account.png)
+![Delete Account Screenshot](../../screenshots/accounts/delete-account.png)
 
 ## Confirmation
 

@@ -9,7 +9,7 @@ weight = 4
 To edit an existing account, click the **Edit** button in the "Actions" column of the account you wish to change on the
 main [Chart of Accounts](./../chart-of-accounts/) page. This will open the "Edit Account" modal dialog.
 
-![Edit Account Screenshot](../screenshots/edit-account.png)
+![Edit Account Screenshot](../../screenshots/accounts/edit-account.png)
 
 ## Modifying Account Details
 

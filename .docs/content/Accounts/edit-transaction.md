@@ -8,7 +8,7 @@ weight = 8
 
 You can edit an existing transaction by clicking the **Edit** button (the pencil icon) on the [Account Ledger](./../account-ledger/) page. This will open the transaction in the "Edit Journal Transaction" screen.
 
-![Edit Transaction Screenshot](../screenshots/edit-transaction.png)
+![Edit Transaction Screenshot](../../screenshots/accounts/edit-transaction.png)
 
 ## Conditions for Editing
 

@@ -1,6 +1,7 @@
 +++
 title = "KelpieBooks Documentation"
 description = "Documentation for the KelpieBooks accounting application."
+sort_by = "weight"
 +++
 
 
@@ -16,7 +17,3 @@ They were generally very much single user systems.
 
 I feel it is time for something new built on today's technologies. Something that will fresh and modern and be designed from the ground up as **multi-user**.
 
-## Documentation Sections
-
-- [**General Information**](general/) - Learn about the project, its architecture, and how to contribute.
-- [**User Documentation**](user/) - Find out how to use the application.

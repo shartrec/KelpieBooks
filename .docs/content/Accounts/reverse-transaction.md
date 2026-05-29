@@ -10,7 +10,7 @@ Reversing a transaction is the correct accounting procedure for correcting an er
 
 To reverse a transaction, click the **Reverse** button (the undo icon) on the [Account Ledger](./../account-ledger/) page. This will open a confirmation modal.
 
-![Reverse Transaction Screenshot](../screenshots/reverse-transaction.png)
+![Reverse Transaction Screenshot](../../screenshots/accounts/reverse-transaction.png)
 
 ## Confirmation
 

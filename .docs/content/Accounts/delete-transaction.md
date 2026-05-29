@@ -8,7 +8,7 @@ weight = 10
 
 In some cases, you may need to delete a transaction entirely. To do this, click the **Delete** button (the trash can icon) on the [Account Ledger](./../account-ledger/) page. This will open a confirmation modal.
 
-![Delete Transaction Screenshot](../screenshots/delete-transaction.png)
+![Delete Transaction Screenshot](../../screenshots/accounts/delete-transaction.png)
 
 ## Conditions for Deleting
 

@@ -24,7 +24,7 @@ will not be merged:
 * All monetary values must be represented as `i64` whole cents (e.g., `$10.50` is stored and calculated as `1050`).
 * All mathematical modifications must happen via safe integer calculations to completely eliminate rounding errors.
 * Use the available i18n module for all currency and date formatting. See
-  the [Developer Guidelines](@/general/dev-guidelines.md)
+  the [Developer Guidelines](@/General/dev-guidelines.md)
 
 ### Rule B: WebAssembly Isolation (`shared_core`)
 

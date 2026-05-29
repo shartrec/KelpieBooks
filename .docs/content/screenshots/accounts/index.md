@@ -1,8 +1,8 @@
 +++
 title = "Screenshots Asset Bundle"
-render = true
+render = false
 weight = 1
 +++
 
-![Dashboard Preview](dashboard.png)
+
 

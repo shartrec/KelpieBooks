@@ -9,7 +9,7 @@ weight = 1
 The Dashboard is the first screen you see when you log into KelpieBooks. It provides a high-level overview of your
 business's financial health at a glance.
 
-![Dashboard Screenshot](../screenshots/dashboard.png)
+![Dashboard Screenshot](../../screenshots/dashboard.png)
 
 ## Key Metrics
 

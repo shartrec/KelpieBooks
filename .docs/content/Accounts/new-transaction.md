@@ -8,7 +8,7 @@ weight = 7
 
 The "New Transaction" screen allows you to create a new journal entry. You can access this page by clicking the **Add New Transaction** button on the [Account Ledger](./../account-ledger/) page or from other parts of the application.
 
-![New Transaction Screenshot](../screenshots/new-transaction.png)
+![New Transaction Screenshot](../../screenshots/accounts/new-transaction.png)
 
 ## Transaction Fields
 
