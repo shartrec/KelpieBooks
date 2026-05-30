@@ -85,6 +85,7 @@ sidebar-trial-balance = Balance de vérification
 sidebar-profit-loss = Compte de résultat
 sidebar-balance-sheet = Bilan
 sidebar-general-ledger = Grand livre
+sidebar-aged-payables = Dettes fournisseurs âgées
 sidebar-tasks = Tâches
 sidebar-close-year = Clôturer l’exercice
 sidebar-period-settings = Paramètres de période

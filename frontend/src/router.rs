@@ -27,6 +27,8 @@ pub enum Route {
     Payables,
     #[at("/payables/new")]
     NewVendorInvoice,
+    #[at("/payables/reports/aged-payables")]
+    AgedPayables,
     #[at("/reports/trial-balance")]
     TrialBalance,
     #[at("/reports/profit-loss")]

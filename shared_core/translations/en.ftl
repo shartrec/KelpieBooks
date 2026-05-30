@@ -84,6 +84,7 @@ sidebar-trial-balance = Trial Balance
 sidebar-profit-loss = Profit & Loss
 sidebar-balance-sheet = Balance Sheet
 sidebar-general-ledger = General Ledger
+sidebar-aged-payables = Aged Payables
 sidebar-tasks = Tasks
 sidebar-close-year = Close Year
 sidebar-period-settings = Period Settings

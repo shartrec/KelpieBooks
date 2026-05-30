@@ -7,6 +7,7 @@
  */
 
 pub mod account_ledger;
+pub mod aged_payables;
 pub mod balance_sheet;
 pub mod close_year;
 pub mod configuration;

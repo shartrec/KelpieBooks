@@ -11,6 +11,7 @@ use frontend::contexts::locale_context::LocaleProvider;
 use frontend::contexts::org_context::{OrgAction, OrgContextHandle, OrgState};
 use frontend::contexts::report_context::ReportContextProvider;
 use frontend::pages::account_ledger::AccountLedgerPage;
+use frontend::pages::aged_payables::AgedPayablesPage;
 use frontend::pages::balance_sheet::BalanceSheetPage;
 use frontend::pages::close_year::CloseYearPage;
 use frontend::pages::configuration::ConfigurationPage;
@@ -119,6 +120,7 @@ fn switch(routes: Route) -> Html {
         Route::PartnerList => html! { <PartnerListPage /> },
         Route::Payables => html! { <PayablesLedgerPage /> },
         Route::NewVendorInvoice => html! { <NewVendorInvoicePage /> },
+        Route::AgedPayables => html! { <AgedPayablesPage /> },
         Route::TrialBalance => html! { <TrialBalancePage /> },
         Route::ProfitLoss => html! { <ProfitLossPage /> },
         Route::BalanceSheet => html! { <BalanceSheetPage /> },

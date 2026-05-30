@@ -18,6 +18,7 @@ pub fn sidebar() -> Html {
     let accounts_open = use_state(|| false);
     let accounts_reports_open = use_state(|| false);
     let payables_open = use_state(|| false);
+    let payables_reports_open = use_state(|| false);
     let partners_open = use_state(|| false);
     let tasks_open = use_state(|| false);
 
@@ -37,24 +38,21 @@ pub fn sidebar() -> Html {
                 <ul>
                     <li><Link<Route> to={Route::Dashboard}>{ i18n.t("sidebar-dashboard") }</Link<Route>></li>
 
-                    // Accounts Group (Level 0)
+                    // Accounts Group
                     <li class="sidebar__group">
                         <div class="sidebar__group-header" onclick={toggle_state(accounts_open.clone())}>
                             <span>{ i18n.t("sidebar-accounts") }</span>
                             <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *accounts_open { "is-rotated" } else { "" }} />
                         </div>
                         if *accounts_open {
-                            // Level 1 Sub-nav
                             <ul class="sidebar__sub-nav" style="--depth: 1;">
                                 <li><Link<Route> to={Route::Ledger}>{ i18n.t("coa-title") }</Link<Route>></li>
-
                                 <li class="sidebar__group">
                                     <div class="sidebar__group-header" onclick={toggle_state(accounts_reports_open.clone())}>
                                         <span>{ i18n.t("sidebar-reports") }</span>
                                         <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *accounts_reports_open { "is-rotated" } else { "" }} />
                                     </div>
                                     if *accounts_reports_open {
-                                        // Level 2 Sub-nav -> This evaluates to 15px + (2 * 20px) = 55px padding-left!
                                         <ul class="sidebar__sub-nav" style="--depth: 2;">
                                             <li><Link<Route> to={Route::TrialBalance}>{ i18n.t("sidebar-trial-balance") }</Link<Route>></li>
                                             <li><Link<Route> to={Route::ProfitLoss}>{ i18n.t("sidebar-profit-loss") }</Link<Route>></li>
@@ -76,11 +74,48 @@ pub fn sidebar() -> Html {
                         if *payables_open {
                             <ul class="sidebar__sub-nav" style="--depth: 1;">
                                 <li><Link<Route> to={Route::Payables}>{ i18n.t("payables-ledger-title") }</Link<Route>></li>
+                                <li class="sidebar__group">
+                                    <div class="sidebar__group-header" onclick={toggle_state(payables_reports_open.clone())}>
+                                        <span>{ i18n.t("sidebar-reports") }</span>
+                                        <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *payables_reports_open { "is-rotated" } else { "" }} />
+                                    </div>
+                                    if *payables_reports_open {
+                                        <ul class="sidebar__sub-nav" style="--depth: 2;">
+                                            <li><Link<Route> to={Route::AgedPayables}>{ i18n.t("sidebar-aged-payables") }</Link<Route>></li>
+                                        </ul>
+                                    }
+                                </li>
                             </ul>
                         }
                     </li>
 
-                    // ... Repeat style="--depth: 1;" on remaining primary dropdown ul elements!
+                    // Partners Group
+                    <li class="sidebar__group">
+                        <div class="sidebar__group-header" onclick={toggle_state(partners_open.clone())}>
+                            <span>{ i18n.t("sidebar-partners") }</span>
+                            <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *partners_open { "is-rotated" } else { "" }} />
+                        </div>
+                        if *partners_open {
+                            <ul class="sidebar__sub-nav" style="--depth: 1;">
+                                <li><Link<Route> to={Route::PartnerList}>{ i18n.t("partner-list-title") }</Link<Route>></li>
+                            </ul>
+                        }
+                    </li>
+
+                    // Tasks Group
+                    <li class="sidebar__group">
+                        <div class="sidebar__group-header" onclick={toggle_state(tasks_open.clone())}>
+                            <span>{ i18n.t("sidebar-tasks") }</span>
+                            <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *tasks_open { "is-rotated" } else { "" }} />
+                        </div>
+                        if *tasks_open {
+                            <ul class="sidebar__sub-nav" style="--depth: 1;">
+                                <li><Link<Route> to={Route::CloseYear}>{ i18n.t("sidebar-close-year") }</Link<Route>></li>
+                                <li><Link<Route> to={Route::PeriodSettings}>{ i18n.t("sidebar-period-settings") }</Link<Route>></li>
+                                <li><Link<Route> to={Route::Configuration}>{ i18n.t("sidebar-configuration") }</Link<Route>></li>
+                            </ul>
+                        }
+                    </li>
                 </ul>
             </nav>
         </aside>
