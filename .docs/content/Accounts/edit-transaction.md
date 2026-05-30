@@ -10,14 +10,13 @@ You can edit an existing transaction by clicking the **Edit** button (the pencil
 
 ![Edit Transaction Screenshot](../../screenshots/accounts/edit-transaction.png)
 
-## Conditions for Editing
-
-You can only edit a transaction if the following conditions are met:
+{% warning() %}You can only edit a transaction if the following conditions are met:
 
 - The transaction occurred within the **current, open accounting period**.
 - **Strict Audit Mode** is turned **off** in the organization's settings.
 
 If these conditions are not met, the "Edit" button will be disabled.
+{% end %}
 
 ## Modifying the Transaction
 

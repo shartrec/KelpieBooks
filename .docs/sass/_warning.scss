@@ -1,0 +1,39 @@
+/*!
+ * Copyright (c) 2026.
+ *
+ * This file is part of KelpieBooks. For terms of use, please see the file
+ * called LICENSE at the top level of the KelpieBooks source tree
+ *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
+ */
+
+.warning-card {
+  display: flex;
+  gap: 1rem;
+  background-color: #fff9f0; /* Soft amber/yellow tint */
+  border-left: 4px solid #d97706; /* Solid amber left border edge */
+  border-radius: 4px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  .warning-card-icon {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .warning-card-content {
+    color: #78350f; /* High-contrast dark amber text for readability */
+    font-size: 0.95rem;
+    line-height: 1.6;
+
+    // Removes excess default spacing if Zola wraps paragraph tags inside the block
+    p {
+      margin: 0;
+    }
+
+    // Keeps your strong text looking unified inside the box
+    strong {
+      color: #451a03;
+    }
+  }
+}

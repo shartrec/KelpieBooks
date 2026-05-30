@@ -12,12 +12,14 @@ In some cases, you may need to delete a transaction entirely. To do this, click 
 
 ## Conditions for Deleting
 
+{% warning() %}
 You can only delete a transaction if the following conditions are met:
 
 - The transaction occurred within the **current, open accounting period**.
 - **Strict Audit Mode** is turned **off** in the organization's settings.
 
 If these conditions are not met, the "Delete" button will be disabled. This is a critical safety feature to prevent unauthorized or accidental changes to your financial records.
+{% end %}
 
 ## Confirmation
 
