@@ -1,16 +1,9 @@
-/*!
- * Copyright (c) 2026.
- *
- * This file is part of KelpieBooks. For terms of use, please see the file
- * called LICENSE at the top level of the KelpieBooks source tree
- *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
- */
-
+/* _sidebar.scss */
 @use '../abstracts/variables' as *;
 
 .sidebar {
   width: 250px;
-  background-color: $brand-primary; // Using unified variable
+  background-color: $brand-primary;
   color: $text-main;
   display: flex;
   flex-direction: column;
@@ -21,7 +14,6 @@
     margin: 0 0 1rem 0;
     background-color: $brand-primary;
     text-align: center;
-    align-content: start;
     display: flex;
     gap: 0.5rem;
 
@@ -43,49 +35,46 @@
       padding: 0;
     }
 
-    a {
-      display: block;
-      padding: 10px;
+    // 💡 TARGET BOTH SELECTIONS UNIQUELY AT THE LI LEVEL
+    li > a,
+    li > .sidebar__group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px; // Generous tap target padding
       color: $text-main;
       text-decoration: none;
-      transition: background-color 0.3s;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%; // Force full layout width usage
+      box-sizing: border-box; // Keep padding inside the width calculation
+
+      /* Compute padding-left using base 15px + (20px * depth level) */
+      padding-left: calc(15px + var(--depth, 0) * 20px);
 
       &:hover {
-        background-color: #3498db; // $link-hover-bg
+        background-color: rgba(255, 255, 255, 0.15); // Consistent hover tint across links & headers
       }
     }
-  }
 
-  // Handle nested groups (Collapsible sections)
-  &__group-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-
-    &:hover {
-      background-color: #3498db;
-    }
-
+    // Lock chevron configurations
     img {
-      width: 16px;
-      height: 16px;
-      transition: transform 0.2s;
-      filter: invert(1);
+      flex-shrink: 0; // 💡 CRUCIAL: Stops the arrow from wrapping or shrinking!
+      margin-left: auto; // Pushes chevron firmly to the right side
+      transition: transform 0.2s ease-in-out;
 
       &.is-rotated {
-        transform: rotate(90deg); // For open/close states
+        transform: rotate(90deg);
       }
     }
   }
 
+  /* Sub-nav background banding */
   &__sub-nav {
-    background-color: rgba(0, 0, 0, 0.1);
-
-    li a {
-      padding-left: 20px; // Indent sub-items
-    }
+    background-color: rgba(0, 0, 0, 0.05); // Slight tint variant per level depths
+  }
+  /* Sub-nav wrappers pass a deeper level calculation downwards */
+  &__sub-nav {
+    background-color: rgba(0, 0, 0, 0.04);
   }
 }

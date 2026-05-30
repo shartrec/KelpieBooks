@@ -10,26 +10,20 @@ use crate::contexts::locale_context::use_locale;
 use crate::router::Route;
 use yew::prelude::*;
 use yew_router::prelude::*;
-// Assuming your router's Route enum is in lib.rs or main.rs
 
 #[function_component(Sidebar)]
 pub fn sidebar() -> Html {
     let i18n = use_locale();
 
-    let reports_open = use_state(|| false);
+    let accounts_open = use_state(|| false);
+    let accounts_reports_open = use_state(|| false);
+    let payables_open = use_state(|| false);
+    let partners_open = use_state(|| false);
     let tasks_open = use_state(|| false);
 
-    let toggle_reports = {
-        let reports_open = reports_open.clone();
+    let toggle_state = |state: UseStateHandle<bool>| {
         Callback::from(move |_| {
-            reports_open.set(!*reports_open);
-        })
-    };
-
-    let toggle_tasks = {
-        let tasks_open = tasks_open.clone();
-        Callback::from(move |_| {
-            tasks_open.set(!*tasks_open);
+            state.set(!*state);
         })
     };
 
@@ -42,44 +36,51 @@ pub fn sidebar() -> Html {
             <nav class="sidebar__nav">
                 <ul>
                     <li><Link<Route> to={Route::Dashboard}>{ i18n.t("sidebar-dashboard") }</Link<Route>></li>
-                    <li><Link<Route> to={Route::Ledger}>{ i18n.t("sidebar-accounts") }</Link<Route>></li>
-                    <li><Link<Route> to={Route::Payables}>{ i18n.t("sidebar-payables") }</Link<Route>></li>
-                    <li><Link<Route> to={Route::PartnerList}>{ i18n.t("sidebar-partners") }</Link<Route>></li>
+
+                    // Accounts Group (Level 0)
                     <li class="sidebar__group">
-                        <div class="sidebar__group-header" onclick={toggle_reports}>
-                            <span>{ i18n.t("sidebar-reports") }</span>
-                            <img
-                                src="/images/chevron-right.svg"
-                                alt={i18n.t("common-toggle")}
-                                class={if *reports_open { "rotated" } else { "" }}
-                            />
+                        <div class="sidebar__group-header" onclick={toggle_state(accounts_open.clone())}>
+                            <span>{ i18n.t("sidebar-accounts") }</span>
+                            <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *accounts_open { "is-rotated" } else { "" }} />
                         </div>
-                        if *reports_open {
-                            <ul class="sidebar__sub-nav">
-                                <li><Link<Route> to={Route::TrialBalance}>{ i18n.t("sidebar-trial-balance") }</Link<Route>></li>
-                                <li><Link<Route> to={Route::ProfitLoss}>{ i18n.t("sidebar-profit-loss") }</Link<Route>></li>
-                                <li><Link<Route> to={Route::BalanceSheet}>{ i18n.t("sidebar-balance-sheet") }</Link<Route>></li>
-                                <li><Link<Route> to={Route::GeneralLedger}>{ i18n.t("sidebar-general-ledger") }</Link<Route>></li>
+                        if *accounts_open {
+                            // Level 1 Sub-nav
+                            <ul class="sidebar__sub-nav" style="--depth: 1;">
+                                <li><Link<Route> to={Route::Ledger}>{ i18n.t("coa-title") }</Link<Route>></li>
+
+                                <li class="sidebar__group">
+                                    <div class="sidebar__group-header" onclick={toggle_state(accounts_reports_open.clone())}>
+                                        <span>{ i18n.t("sidebar-reports") }</span>
+                                        <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *accounts_reports_open { "is-rotated" } else { "" }} />
+                                    </div>
+                                    if *accounts_reports_open {
+                                        // Level 2 Sub-nav -> This evaluates to 15px + (2 * 20px) = 55px padding-left!
+                                        <ul class="sidebar__sub-nav" style="--depth: 2;">
+                                            <li><Link<Route> to={Route::TrialBalance}>{ i18n.t("sidebar-trial-balance") }</Link<Route>></li>
+                                            <li><Link<Route> to={Route::ProfitLoss}>{ i18n.t("sidebar-profit-loss") }</Link<Route>></li>
+                                            <li><Link<Route> to={Route::BalanceSheet}>{ i18n.t("sidebar-balance-sheet") }</Link<Route>></li>
+                                            <li><Link<Route> to={Route::GeneralLedger}>{ i18n.t("sidebar-general-ledger") }</Link<Route>></li>
+                                        </ul>
+                                    }
+                                </li>
                             </ul>
                         }
                     </li>
+
+                    // Payables Group
                     <li class="sidebar__group">
-                        <div class="sidebar__group-header" onclick={toggle_tasks}>
-                            <span>{ i18n.t("sidebar-tasks") }</span>
-                            <img
-                                src="/images/chevron-right.svg"
-                                alt={i18n.t("common-toggle")}
-                                class={if *tasks_open { "rotated" } else { "" }}
-                            />
+                        <div class="sidebar__group-header" onclick={toggle_state(payables_open.clone())}>
+                            <span>{ i18n.t("sidebar-payables") }</span>
+                            <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *payables_open { "is-rotated" } else { "" }} />
                         </div>
-                        if *tasks_open {
-                            <ul class="sidebar__sub-nav">
-                                <li><Link<Route> to={Route::CloseYear}>{ i18n.t("sidebar-close-year") }</Link<Route>></li>
-                                <li><Link<Route> to={Route::PeriodSettings}>{ i18n.t("sidebar-period-settings") }</Link<Route>></li>
-                                <li><Link<Route> to={Route::Configuration}>{ i18n.t("sidebar-configuration") }</Link<Route>></li>
+                        if *payables_open {
+                            <ul class="sidebar__sub-nav" style="--depth: 1;">
+                                <li><Link<Route> to={Route::Payables}>{ i18n.t("payables-ledger-title") }</Link<Route>></li>
                             </ul>
                         }
                     </li>
+
+                    // ... Repeat style="--depth: 1;" on remaining primary dropdown ul elements!
                 </ul>
             </nav>
         </aside>
