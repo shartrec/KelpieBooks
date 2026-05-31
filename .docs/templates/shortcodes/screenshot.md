@@ -1,0 +1,1 @@
+<div class="screenshot-frame"><div class="screenshot-wrapper">{{ body | markdown(inline=true) | safe }}</div></div>

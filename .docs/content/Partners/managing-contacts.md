@@ -9,7 +9,9 @@ weight = 6
 The **Contacts** tab in the Partner Drawer allows you to manage the contact people associated with a customer or vendor.
 This is useful for keeping track of who to call for billing questions, who to send marketing materials to, and so on.
 
+{% screenshot() %}
 ![Managing Contacts Screenshot](../../screenshots/partners/manage-contacts.png)
+{% end %}
 
 ## Adding a Contact
 

@@ -197,7 +197,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                     on_save={on_save_item}
                     on_cancel={on_cancel_edit}
                 />
-            } else {
+            }
                 <form onsubmit={on_submit}>
                     { for (*items).iter().map(|item| {
                         let on_edit = {
@@ -267,7 +267,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                         <button type="submit" class="button-primary">{ i18n.t("account-modal-save-button") }</button>
                     </div>
                 </form>
-            }
+
             if let Some(item) = &*item_to_delete {
                 <GenericDeleteConfirmationModal
                     title={i18n.t("items-view-delete-item-title")}

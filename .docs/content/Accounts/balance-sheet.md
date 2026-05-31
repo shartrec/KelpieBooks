@@ -1,7 +1,7 @@
 +++
 title = "Balance Sheet"
 description = "Understanding the Balance Sheet report."
-weight = 3
+weight = 83
 +++
 
 # Balance Sheet Report
@@ -12,7 +12,7 @@ The fundamental accounting equation is always at the heart of the Balance Sheet:
 **Assets = Liabilities + Equity**
 
 {% screenshot() %}
-![Balance Sheet Screenshot](../../screenshots/reports/balance-sheet.png)
+![Balance Sheet Screenshot](../../screenshots/accounts/balance-sheet.png)
 {% end %}
 
 ## Generating the Report

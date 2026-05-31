@@ -1,7 +1,7 @@
 +++
 title = "General Ledger Report"
 description = "Understanding the General Ledger Detail report."
-weight = 4
+weight = 88
 +++
 
 # General Ledger Report
@@ -9,7 +9,7 @@ weight = 4
 The General Ledger Detail report provides a comprehensive listing of all transactions posted to your accounts over a specific period. It is one of the most detailed reports and serves as a complete record of all financial activity.
 
 {% screenshot() %}
-![General Ledger Report Screenshot](../../screenshots/reports/general-ledger.png)
+![General Ledger Report Screenshot](../../screenshots/accounts/general-ledger.png)
 {% end %}
 
 ## Generating the Report

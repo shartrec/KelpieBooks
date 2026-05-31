@@ -55,9 +55,9 @@ async fn get_accounts(
 async fn get_accounts_by_category(
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
-    category: String,
+    category: &str,
 ) -> Result<Json<Vec<Account>>, ApiError> {
-    if let Ok(category) = AccountCategory::from_str(&category) {
+    if let Ok(category) = AccountCategory::from_str(category) {
         let accounts = account_service::get_accounts_by_category(
             &mut pool,
             user.organization_id,

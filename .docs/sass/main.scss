@@ -44,9 +44,15 @@ a {
   }
 }
 
+h1 {
+  font-family: DejaVu Sans, system-ui, -apple-system, sans-serif;
+}
+
 h2,
 h3,
 h4 {
+  font-family: DejaVu Sans, system-ui, -apple-system, sans-serif;
+
   .anchor {
     visibility: hidden;
     text-decoration: none;
@@ -410,3 +416,4 @@ blockquote.markdown-alert-caution {
 @import "fabric-icons-inline";
 @import "search";
 @import "warning";
+@import "screenshot";

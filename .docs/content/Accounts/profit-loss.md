@@ -1,7 +1,7 @@
 +++
 title = "Profit & Loss Statement"
 description = "Understanding the Profit & Loss (P&L) statement."
-weight = 2
+weight = 81
 +++
 
 # Profit & Loss Statement
@@ -9,7 +9,7 @@ weight = 2
 The Profit & Loss (P&L) statement, also known as the Income Statement, summarizes your company's revenues and expenses over a specific period of time to show its profitability.
 
 {% screenshot() %}
-![Profit & Loss Screenshot](../../screenshots/reports/profit-loss.png)
+![Profit & Loss Screenshot](../../screenshots/accounts/profit-and-loss.png)
 {% end %}
 
 ## Generating the Report

@@ -8,7 +8,11 @@ weight = 6
 
 The Account Ledger provides a detailed view of all transactions for a single account over a specific period. It is the best place to see the detailed history of an account's activity.
 
+{% screenshot() %}
+
 ![Account Ledger Screenshot](../../screenshots/accounts/account-ledger.png)
+
+{% end %}
 
 ## Navigating to the Ledger
 

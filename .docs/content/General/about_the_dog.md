@@ -5,7 +5,9 @@ weight = 99
 
 # About the dog
 
+{% screenshot() %}
 ![Kelpie Dog](/images/Logo-240.png)
+{% end %}
 
 The __Australian Kelpie__ was developed in rural Australia during the late 1800s as a hard-working sheepdog suited to the
 harsh climate and enormous grazing properties of the colonies.

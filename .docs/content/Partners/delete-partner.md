@@ -9,7 +9,9 @@ weight = 4
 To delete a partner, click the **Delete** button in the "Actions" column of the partner you wish to remove on the
 main [Partner List](../partners/) page. This will open a confirmation modal.
 
+{% screenshot() %}
 ![Delete Partner Screenshot](../../screenshots/partners/delete-partner.png)
+{% end %}
 
 ## Confirmation
 
