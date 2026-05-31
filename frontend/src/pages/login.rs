@@ -148,7 +148,7 @@ pub fn login_form(props: &LoginFormProps) -> Html {
     };
 
     html! {
-        <form onsubmit={on_submit} class="login-form">
+        <form onsubmit={on_submit} class="auth-form">
             <div class="input-field-group">
                 <label>{i18n.t("login-form-email-label")}</label>
                 <input type="text" value={(*user_email).clone()} oninput={on_user_email_input} required=true autocomplete="username" />

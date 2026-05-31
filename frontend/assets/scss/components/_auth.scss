@@ -1,0 +1,172 @@
+/* Add this inside your auth/login scss module file */
+@use '../abstracts/variables' as *;
+
+// Wrap both login-wrapper and register-wrapper patterns into a common framework
+.login-wrapper,
+.register-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: darken($bg-main, 3%);
+  padding: 40px 20px; // Generous breathing room for larger forms
+  box-sizing: border-box;
+
+  .login-card,
+  .register-card {
+    background: white;
+    width: 100%;
+    max-width: 500px; // Slightly wider than login to look balanced with multi-column or longer fields
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border-top: 5px solid $color-success; // Signature KelpieBooks brand line
+  }
+
+  .login-brand {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    .login-logo {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: $text-main;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      color: lighten($text-main, 30%);
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+  }
+
+  .register-brand {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    .register-logo {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: $text-main;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin: 0;
+    }
+
+    .subtitle {
+      color: lighten($text-main, 30%);
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+  }
+
+  // Bind register forms to match input-field-group structures perfectly
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+
+    .input-field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: lighten($text-main, 15%);
+      }
+
+      input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid $border-color;
+        border-radius: 6px;
+        background: $bg-main;
+        font-size: 0.95rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-sizing: border-box;
+
+        &:focus {
+          outline: none;
+          border-color: $color-success;
+          box-shadow: 0 0 0 3px rgba($color-success, 0.15);
+          background: white;
+        }
+      }
+    }
+
+    .login-btn {
+      margin-top: 0.5rem;
+      padding: 0.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      // Leverages the default .button-primary styles you have set up
+    }
+    .register-btn {
+      margin-top: 0.5rem;
+      padding: 0.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      background-color: $color-success; // Standard Primary Action button color accent
+      color: white;
+      border: none;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: darken($color-success, 5%);
+      }
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: lighten($text-main, 40%);
+    }
+
+    .error {
+      background-color: #fff5f5;
+      color: #e53e3e;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      border: 1px solid #fed7d7;
+      font-size: 0.85rem;
+    }
+  }
+
+  .register-footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: lighten($text-main, 40%);
+
+    a {
+      color: $color-success;
+      text-decoration: none;
+      font-weight: 600;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}

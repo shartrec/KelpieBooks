@@ -6,6 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+/* register.rs */
 use crate::contexts::locale_context::use_locale;
 use crate::router::Route;
 use fluent::fluent_args;
@@ -15,6 +16,7 @@ use yew::function_component;
 use yew::html;
 use yew::prelude::*;
 use yew_router::hooks::use_navigator;
+use yew_router::prelude::Link; // Ensure Link helper is imported
 
 #[function_component(RegisterPage)]
 pub fn register_page() -> Html {
@@ -61,12 +63,24 @@ pub fn register_page() -> Html {
     };
 
     html! {
-        <div class="page-container">
-            <h1>{i18n.t("register-title")}</h1>
-            <RegisterForm
-                on_register={on_register_submit}
-                error={(*error_state).clone()}
-            />
+        <div class="register-wrapper">
+            <div class="register-card">
+                <div class="register-brand">
+                    <img src="/images/kelpiedog_120x120_transparent.png" alt={i18n.t("login-logo-alt-text")} class="register-logo" />
+                    <h1>{ i18n.t("branding-app-name") }</h1>
+                    <p class="subtitle">{ "Create a new organization cluster" }</p>
+                </div>
+
+                <RegisterForm
+                    on_register={on_register_submit}
+                    error={(*error_state).clone()}
+                />
+
+                <div class="register-footer">
+                    <p>{ "Looking to join an existing team? Contact your system administrator for access." }</p>
+                    <p><Link<Route> to={Route::Login}>{ "Back to Login" }</Link<Route>></p>
+                </div>
+            </div>
         </div>
     }
 }
@@ -132,7 +146,6 @@ pub fn register_form(props: &RegisterFormProps) -> Html {
     };
 
     let on_submit = {
-        // Clone all the state handles before the `move` closure
         let user_email = user_email.clone();
         let password = password.clone();
         let full_name = full_name.clone();
@@ -143,7 +156,6 @@ pub fn register_form(props: &RegisterFormProps) -> Html {
 
         Callback::from(move |e: SubmitEvent| {
             e.prevent_default();
-            // The closure now owns the clones, leaving the originals for the html! macro
             let register_req = OnboardingRequest {
                 user_email: (*user_email).clone(),
                 user_password: (*password).clone(),
@@ -162,27 +174,40 @@ pub fn register_form(props: &RegisterFormProps) -> Html {
 
     html! {
         <form onsubmit={on_submit} class="auth-form">
-            <label>{i18n.t("register-org-name-label")}</label>
-            <input type="text" value={(*organisation).clone()} oninput={on_organisation_input} required=true />
-
-            <label>{i18n.t("register-full-name-label")}</label>
-            <input type="text" value={(*full_name).clone()} oninput={on_full_name_input} required=true />
-
-            <label>{i18n.t("register-display-name-label")}</label>
-            <input type="text" value={(*display_name).clone()} oninput={on_display_name_input} />
-
-            <label>{i18n.t("register-email-label")}</label>
-            <input type="email" value={(*user_email).clone()} oninput={on_user_email_input} required=true autocomplete="email" />
-
-            <label>{i18n.t("register-password-label")}</label>
-            <input type="password" value={(*password).clone()} oninput={on_password_input} required=true autocomplete="new-password" />
-
-            <label>{i18n.t("register-coa-template-label")}</label>
-            <input type="text" value={(*coa_template_id).clone()} oninput={on_coa_template_id_input} required=true />
-
-            <div class="form-actions">
-                <button type="submit">{i18n.t("register-submit-button")}</button>
+            <div class="input-field-group">
+                <label>{i18n.t("register-org-name-label")}</label>
+                <input type="text" value={(*organisation).clone()} oninput={on_organisation_input} required=true />
             </div>
+
+            <div class="input-field-group">
+                <label>{i18n.t("register-full-name-label")}</label>
+                <input type="text" value={(*full_name).clone()} oninput={on_full_name_input} required=true />
+            </div>
+
+            <div class="input-field-group">
+                <label>{i18n.t("register-display-name-label")}</label>
+                <input type="text" value={(*display_name).clone()} oninput={on_display_name_input} />
+            </div>
+
+            <div class="input-field-group">
+                <label>{i18n.t("register-email-label")}</label>
+                <input type="email" value={(*user_email).clone()} oninput={on_user_email_input} required=true autocomplete="email" />
+            </div>
+
+            <div class="input-field-group">
+                <label>{i18n.t("register-password-label")}</label>
+                <input type="password" value={(*password).clone()} oninput={on_password_input} required=true autocomplete="new-password" />
+            </div>
+
+            <div class="input-field-group">
+                <label>{i18n.t("register-coa-template-label")}</label>
+                <input type="text" value={(*coa_template_id).clone()} oninput={on_coa_template_id_input} required=true />
+            </div>
+
+            <button type="submit" class="register-btn">
+                {i18n.t("register-submit-button")}
+            </button>
+
             if let Some(err) = error {
                 <div class="error">{err}</div>
             }
