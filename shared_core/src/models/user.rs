@@ -18,5 +18,6 @@ pub struct User {
     pub full_name: String,
     pub display_name: Option<String>,
     pub password_hash: String,
+    pub role_id: Option<Uuid>,
     pub created_at: DateTime<Utc>,
 }

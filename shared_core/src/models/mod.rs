@@ -9,12 +9,14 @@
 pub mod account;
 pub mod account_category;
 pub mod address_type;
+pub mod auth;
 pub mod invoice_status;
 pub mod journal_entry;
 pub mod organization;
 pub mod partner;
 pub mod partner_address;
 pub mod partner_contact;
+pub mod role;
 pub mod system_tag;
 pub mod transaction;
 pub mod user;

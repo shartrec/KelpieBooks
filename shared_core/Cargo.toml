@@ -3,6 +3,11 @@ name = "shared_core"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+default = []
+# 💡 Define a specialized feature boundary for server targets
+backend = ["dep:sqlx"]
+
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { workspace = true }
@@ -16,8 +21,11 @@ icu_decimal = "1.5"
 icu_provider = "1.5"
 icu_provider_blob = "1.5"
 zerovec = "0.11.3-dev" # for databake
-
 serde = { version = "1.0", features = ["derive"] }
+
+# Make sqlx optional so it remains omitted from default WASM builds
+sqlx = { workspace = true, optional = true }
+
 strum = { version = "0.26", features = ["derive"] }
 unic-langid = { version = "0.9", features = ["serde", "macros"] }
 once_cell = "1.19"

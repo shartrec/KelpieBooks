@@ -6,9 +6,10 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use crate::models::role::Role;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct UserWithOrg {
@@ -21,4 +22,5 @@ pub struct UserWithOrg {
     pub created_at: DateTime<Utc>,
     pub organisation_name: String,
     pub strict_audit_mode: bool,
+    pub role: Role,
 }

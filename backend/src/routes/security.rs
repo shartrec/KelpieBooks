@@ -5,7 +5,6 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use crate::routes::Role;
 use crate::util::ApiError;
 use bcrypt::{hash, BcryptError, DEFAULT_COST};
 use jsonwebtoken::{
@@ -18,6 +17,7 @@ use shared_core::requests::auth::LoginRequest;
 use std::sync::OnceLock;
 
 use crate::db::user;
+use crate::db::roles as role_db;
 use crate::DbKelpie;
 use base64::{engine::general_purpose, Engine as _};
 use rand::{rngs::OsRng, RngCore};
@@ -27,6 +27,7 @@ use rocket::serde::json::Json;
 use rocket::serde::{Deserialize, Serialize};
 use rocket_db_pools::Connection;
 use uuid::Uuid;
+use shared_core::models::role::Role;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![login, me, logout]
@@ -60,7 +61,7 @@ async fn login(
                 username: user.email.clone(),
                 full_name: user.full_name.clone(),
                 display_name: user.display_name.clone(),
-                role: Role::User,
+                role: user.role,
                 organisation_name: user.organisation_name.clone(),
                 locale: user_locale,
             };
@@ -72,7 +73,7 @@ async fn login(
                 email: user.email,
                 full_name: user.full_name,
                 display_name: user.display_name,
-                role: auth_user.role.to_string(),
+                role: auth_user.role.name,
                 organization_id: user.organization_id,
             };
 
@@ -90,7 +91,7 @@ async fn me(user: AuthenticatedUser) -> Json<UserDetail> {
         email: user.username,
         full_name: user.full_name,
         display_name: user.display_name,
-        role: user.role.to_string(),
+        role: user.role.name,
         organization_id: user.organization_id,
     })
 }
@@ -119,8 +120,11 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         if let Some(cookie) = request.cookies().get("session") {
-            if let Some(user) = validate_session_token(cookie.value()) {
-                return Outcome::Success(user);
+            let outcome = request.guard::<Connection<DbKelpie>>().await;
+            if let Outcome::Success(mut db) = outcome {
+                if let Some(user) = validate_session_token(cookie.value(), &mut db).await {
+                    return Outcome::Success(user);
+                }
             }
         }
         Outcome::Error((Status::Unauthorized, ()))
@@ -135,7 +139,7 @@ struct Claims {
     username: String,
     full_name: String,
     display_name: Option<String>,
-    role: String,
+    role_id: String,
     exp: usize,
     organisation_name: String,
     locale: Option<String>
@@ -170,7 +174,7 @@ fn generate_session_token(user: &AuthenticatedUser) -> String {
         username: user.username.clone(),
         full_name: user.full_name.clone(),
         display_name: user.display_name.clone(),
-        role: user.role.to_string(),
+        role_id: user.role.id.to_string(),
         exp: expiration,
         organisation_name: user.organisation_name.clone(),
         locale: Some(user.locale.clone()),
@@ -184,31 +188,33 @@ fn generate_session_token(user: &AuthenticatedUser) -> String {
     .expect("Failed to generate token")
 }
 
-pub(crate) fn validate_session_token(token: &str) -> Option<AuthenticatedUser> {
+pub(crate) async fn validate_session_token(token: &str, db: &mut Connection<DbKelpie>) -> Option<AuthenticatedUser> {
     let validation = Validation::default();
     let token_data: Result<TokenData<Claims>, JwtError> = decode(
         token,
         &DecodingKey::from_secret(get_secret_key().as_ref()),
         &validation,
     );
-    match token_data {
-        Ok(data) => {
-            if data.claims.exp > chrono::Utc::now().timestamp() as usize {
-                Some(AuthenticatedUser {
+
+    if let Ok(data) = token_data {
+        if data.claims.exp > chrono::Utc::now().timestamp() as usize {
+            let role_id = Uuid::parse_str(&data.claims.role_id).unwrap();
+            let org_id = Uuid::parse_str(&data.claims.organization_id).unwrap();
+
+            if let Ok(Some(role)) = role_db::find_by_id(db, org_id, role_id).await {
+                return Some(AuthenticatedUser {
                     user_id: Uuid::parse_str(&data.claims.user_id).unwrap(),
-                    organization_id: Uuid::parse_str(&data.claims.organization_id).unwrap(),
+                    organization_id: org_id,
                     strict_audit_mode: data.claims.strict_audit_mode,
                     username: data.claims.username,
                     full_name: data.claims.full_name,
                     display_name: data.claims.display_name,
-                    role: Role::from(&data.claims.role).unwrap_or(Role::Guest),
+                    role,
                     organisation_name: data.claims.organisation_name,
-                    locale: data.claims.locale.unwrap_or("en-GB".to_string()),
-                })
-            } else {
-                None
+                    locale: data.claims.locale.unwrap_or_else(|| "en-GB".to_string()),
+                });
             }
         }
-        Err(_) => None,
     }
+    None
 }

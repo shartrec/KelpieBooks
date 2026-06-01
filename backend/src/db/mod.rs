@@ -11,6 +11,7 @@ pub(crate) mod chart_of_accounts;
 pub(crate) mod journal_entry;
 pub(crate) mod organization;
 pub(crate) mod partner;
+pub(crate) mod roles;
 pub(crate) mod transaction;
 pub(crate) mod user;
 pub(crate) mod vendor_invoice;

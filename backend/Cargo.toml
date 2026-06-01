@@ -5,7 +5,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-shared_core = { path = "../shared_core" }
+shared_core = { path = "../shared_core", features = ["backend"] }
 
 base64 = "0.22.1"
 bcrypt = "0.17.0"

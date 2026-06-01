@@ -65,7 +65,7 @@ pub(crate) async fn update_me(
         email: updated_user.email,
         full_name: updated_user.full_name,
         display_name: updated_user.display_name,
-        role: auth_user.role.to_string(),
+        role: auth_user.role.name,
         organization_id: auth_user.organization_id,
     };
 

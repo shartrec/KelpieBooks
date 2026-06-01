@@ -9,7 +9,7 @@
 use crate::db;
 use crate::util::ApiError;
 use chrono::NaiveDate;
-use rocket_db_pools::sqlx::PgConnection;
+use rocket_db_pools::sqlx::{PgConnection, Row};
 use shared_core::dtos::account_with_balance::AccountWithBalance;
 use shared_core::dtos::aged_payable_summary::AgedPayableSummary;
 use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
@@ -27,30 +27,27 @@ pub async fn get_profit_loss(
 ) -> Result<Vec<AccountWithBalance>, ApiError> {
     let accounts = db::account::get_all_by_org(pool, organization_id).await?;
 
-    // We need to fetch journal entries within the date range
-    let entries = sqlx::query!(
+    let entries = sqlx::query(
         r#"
         SELECT je.account_id, je.debit, je.credit
         FROM journal_entries je
         JOIN transactions t ON je.transaction_id = t.id
         WHERE t.organization_id = $1 AND t.date >= $2 AND t.date <= $3
         "#,
-        organization_id,
-        start_date,
-        end_date
     )
+    .bind(organization_id)
+    .bind(start_date)
+    .bind(end_date)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
 
     let mut balances: HashMap<Uuid, i64> = HashMap::new();
 
-    // 1. Calculate the direct balance for each account from its journal entries.
     for entry in &entries {
-        *balances.entry(entry.account_id).or_insert(0) += entry.debit - entry.credit;
+        *balances.entry(entry.get("account_id")).or_insert(0) += entry.get::<i64, _>("debit") - entry.get::<i64, _>("credit");
     }
 
-    // 2. Build a map of parent to children and child counts for topological sort.
     let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
     let mut child_count: HashMap<Uuid, usize> = HashMap::new();
 
@@ -62,7 +59,6 @@ pub async fn get_profit_loss(
         }
     }
 
-    // 3. Use Dependency-Driven Roll-up (topological sort from leaves to roots).
     let mut queue: VecDeque<Uuid> = child_count
         .iter()
         .filter(|(_, &count)| count == 0)
@@ -83,7 +79,6 @@ pub async fn get_profit_loss(
         }
     }
 
-    // 4. Map to the final DTO, filtering for Revenue and Expense.
     let result = accounts
         .into_iter()
         .filter(|acc| {
@@ -115,17 +110,17 @@ pub async fn get_expense_breakdown(
 ) -> Result<Vec<AccountWithBalance>, ApiError> {
     let accounts = db::account::get_all_by_org(pool, organization_id).await?;
 
-    let entries = sqlx::query!(
+    let entries = sqlx::query(
         r#"
         SELECT je.account_id, je.debit, je.credit
         FROM journal_entries je
         JOIN transactions t ON je.transaction_id = t.id
         WHERE t.organization_id = $1 AND t.date >= $2 AND t.date <= $3
         "#,
-        organization_id,
-        start_date,
-        end_date
     )
+    .bind(organization_id)
+    .bind(start_date)
+    .bind(end_date)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
@@ -133,7 +128,7 @@ pub async fn get_expense_breakdown(
     let mut balances: HashMap<Uuid, i64> = HashMap::new();
 
     for entry in &entries {
-        *balances.entry(entry.account_id).or_insert(0) += entry.debit - entry.credit;
+        *balances.entry(entry.get("account_id")).or_insert(0) += entry.get::<i64, _>("debit") - entry.get::<i64, _>("credit");
     }
 
     let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
@@ -195,16 +190,16 @@ pub async fn get_balance_sheet(
 ) -> Result<BalanceSheet, ApiError> {
     let accounts = db::account::get_all_by_org(pool, organization_id).await?;
 
-    let entries = sqlx::query!(
+    let entries = sqlx::query(
         r#"
         SELECT je.account_id, je.debit, je.credit
         FROM journal_entries je
         JOIN transactions t ON je.transaction_id = t.id
         WHERE t.organization_id = $1 AND t.date <= $2
         "#,
-        organization_id,
-        date
     )
+    .bind(organization_id)
+    .bind(date)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
@@ -212,9 +207,9 @@ pub async fn get_balance_sheet(
     let mut balances: HashMap<Uuid, i64> = HashMap::new();
 
     for entry in &entries {
-        let debit = i64::from(entry.debit);
-        let credit = i64::from(entry.credit);
-        *balances.entry(entry.account_id).or_insert(0) += debit - credit;
+        let debit: i64 = entry.get("debit");
+        let credit: i64 = entry.get("credit");
+        *balances.entry(entry.get("account_id")).or_insert(0) += debit - credit;
     }
 
     let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
@@ -314,16 +309,16 @@ pub async fn get_trial_balance(
 ) -> Result<Vec<AccountWithBalance>, ApiError> {
     let accounts = db::account::get_all_by_org(pool, organization_id).await?;
 
-    let entries = sqlx::query!(
+    let entries = sqlx::query(
         r#"
         SELECT je.account_id, je.debit, je.credit
         FROM journal_entries je
         JOIN transactions t ON je.transaction_id = t.id
         WHERE t.organization_id = $1 AND t.date <= $2
         "#,
-        organization_id,
-        date
     )
+    .bind(organization_id)
+    .bind(date)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
@@ -331,7 +326,7 @@ pub async fn get_trial_balance(
     let mut balances: HashMap<Uuid, i64> = HashMap::new();
 
     for entry in &entries {
-        *balances.entry(entry.account_id).or_insert(0) += entry.debit - entry.credit;
+        *balances.entry(entry.get("account_id")).or_insert(0) += entry.get::<i64, _>("debit") - entry.get::<i64, _>("credit");
     }
 
     let result = accounts
@@ -365,7 +360,7 @@ pub async fn get_general_ledger(
     let account_ids = account_ids.unwrap_or_default();
     let min_amount = min_amount.unwrap_or(0);
 
-    let rows = sqlx::query!(
+    let rows = sqlx::query(
         r#"
         SELECT
             t.id as transaction_id,
@@ -387,12 +382,12 @@ pub async fn get_general_ledger(
           AND (je.debit >= $5 OR je.credit >= $5)
         ORDER BY a.code ASC, t.date ASC
         "#,
-        organization_id,
-        start_date,
-        end_date,
-        &account_ids,
-        min_amount
     )
+    .bind(organization_id)
+    .bind(start_date)
+    .bind(end_date)
+    .bind(&account_ids)
+    .bind(min_amount)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
@@ -401,18 +396,18 @@ pub async fn get_general_ledger(
     let mut balances: HashMap<Uuid, i64> = HashMap::new();
 
     for row in rows {
-        let balance = balances.entry(row.account_id).or_insert(0);
-        *balance += row.debit - row.credit;
+        let balance = balances.entry(row.get("account_id")).or_insert(0);
+        *balance += row.get::<i64, _>("debit") - row.get::<i64, _>("credit");
 
         result.push(GeneralLedgerLine {
-            transaction_id: row.transaction_id,
-            journal_entry_id: row.journal_entry_id,
-            date: row.date,
-            account_id: row.account_id,
-            account_name: row.account_name,
-            description: row.description,
-            debit: row.debit,
-            credit: row.credit,
+            transaction_id: row.get("transaction_id"),
+            journal_entry_id: row.get("journal_entry_id"),
+            date: row.get("date"),
+            account_id: row.get("account_id"),
+            account_name: row.get("account_name"),
+            description: row.get("description"),
+            debit: row.get("debit"),
+            credit: row.get("credit"),
             balance: *balance,
         });
     }

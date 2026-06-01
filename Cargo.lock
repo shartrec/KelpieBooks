@@ -4704,6 +4704,7 @@ dependencies = [
  "include_dir",
  "once_cell",
  "serde",
+ "sqlx",
  "strum 0.26.3",
  "unic-langid",
  "uuid",

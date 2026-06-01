@@ -6,10 +6,12 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-pub mod account_service;
-pub mod partner_service;
-pub mod period_end_service;
-pub mod report_service;
-pub mod vendor_invoice_service;
-pub mod vendor_payment_service;
-pub mod onboarding;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Role {
+    pub id: Uuid,
+    pub name: String,
+    pub privileges: Vec<String>,
+}
