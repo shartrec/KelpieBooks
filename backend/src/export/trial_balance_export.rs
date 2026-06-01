@@ -8,14 +8,13 @@
 
 use crate::export::utils::{build_table_header, wrap_report_layout};
 use crate::routes::security::AuthenticatedUser;
+use crate::util::locale_context::LocaleContext;
 use chrono::NaiveDate;
 use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
-use shared_core::i18n::format_currency_icu_typ;
 use shared_core::models::{account_category::AccountCategory, organization::Organization};
 use std::collections::HashMap;
 use uuid::Uuid;
-use crate::util::locale_context::LocaleContext;
 
 #[derive(Clone, Debug)]
 pub struct AccountNode {
@@ -82,16 +81,16 @@ pub fn generate_trial_balance_csv(user: &AuthenticatedUser, accounts: &[AccountW
             i18n.t("common-credit"),
         ));
 
-    fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String, locale: Option<&str> ) {
+    fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String, i18n: &LocaleContext ) {
         let indent = " ".repeat(depth * 2);
         let (debit_display, credit_display) = match node.account.category {
             AccountCategory::Asset | AccountCategory::Expense => {
                 if node.account.balance >= 0 {
-                    (format_currency_icu_typ(node.account.balance, locale), "".to_string())
+                    (i18n.format_money(node.account.balance), "".to_string())
                 } else {
                     (
                         "".to_string(),
-                        format_currency_icu_typ(node.account.balance.abs(), locale),
+                        i18n.format_money(node.account.balance.abs()),
                     )
                 }
             }
@@ -99,10 +98,10 @@ pub fn generate_trial_balance_csv(user: &AuthenticatedUser, accounts: &[AccountW
                 if node.account.balance <= 0 {
                     (
                         "".to_string(),
-                        format_currency_icu_typ(node.account.balance.abs(), locale),
+                        i18n.format_money(node.account.balance.abs()),
                     )
                 } else {
-                    (format_currency_icu_typ(node.account.balance, locale), "".to_string())
+                    (i18n.format_money(node.account.balance), "".to_string())
                 }
             }
         };
@@ -111,15 +110,15 @@ pub fn generate_trial_balance_csv(user: &AuthenticatedUser, accounts: &[AccountW
             indent, node.account.name, debit_display, credit_display
         ));
         for child in &node.children {
-            build_csv_rows(child, depth + 1, content, locale);
+            build_csv_rows(child, depth + 1, content, &i18n);
         }
     }
 
     for node in &account_nodes {
-        build_csv_rows(node, 0, &mut csv_content, Some(&user.locale));
+        build_csv_rows(node, 0, &mut csv_content, &i18n);
     }
-    let debit = format_currency_icu_typ(total_debit, Some(&user.locale));
-    let credit = format_currency_icu_typ(total_credit, Some(&user.locale));
+    let debit = i18n.format_money(total_debit);
+    let credit = i18n.format_money(total_credit);
     csv_content.push_str(&format!("\"{}\",\"{}\",\"{}\"\n", i18n.t("trial-balance-export-total"), debit, credit));
     csv_content
 }
@@ -141,16 +140,16 @@ pub fn generate_trial_balance_typst(
         &[false, true, true],
     ));
 
-    fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String, locale: Option<&str>) {
+    fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String, i18n: &LocaleContext) {
         let indent = "#h(2.0em)".repeat(depth);
         let (debit_display, credit_display) = match node.account.category {
             AccountCategory::Asset | AccountCategory::Expense => {
                 if node.account.balance >= 0 {
-                    (format_currency_icu_typ(node.account.balance, locale), "".to_string())
+                    (i18n.format_money_typ(node.account.balance), "".to_string())
                 } else {
                     (
                         "".to_string(),
-                        format_currency_icu_typ(node.account.balance.abs(), locale),
+                        i18n.format_money_typ(node.account.balance.abs()),
                     )
                 }
             }
@@ -158,10 +157,10 @@ pub fn generate_trial_balance_typst(
                 if node.account.balance <= 0 {
                     (
                         "".to_string(),
-                        format_currency_icu_typ(node.account.balance.abs(), locale),
+                        i18n.format_money_typ(node.account.balance.abs()),
                     )
                 } else {
-                    (format_currency_icu_typ(node.account.balance, locale), "".to_string())
+                    (i18n.format_money_typ(node.account.balance), "".to_string())
                 }
             }
         };
@@ -170,12 +169,12 @@ pub fn generate_trial_balance_typst(
             indent, node.account.name, debit_display, credit_display
         ));
         for child in &node.children {
-            build_typst_rows(child, depth + 1, content, locale);
+            build_typst_rows(child, depth + 1, content, &i18n);
         }
     }
 
     for node in &account_nodes {
-        build_typst_rows(node, 0, &mut typst_content, Some(&user.locale));
+        build_typst_rows(node, 0, &mut typst_content, &i18n);
     }
     typst_content.push_str(&format!(
         "  [*{}*], align(right)[*{}*], align(right)[*{}*],\n",

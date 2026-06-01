@@ -8,12 +8,12 @@
 
 use crate::export::utils::{build_table_header, wrap_report_layout};
 use crate::routes::security::AuthenticatedUser;
+use crate::util::locale_context::LocaleContext;
 use chrono::NaiveDate;
 use fluent::fluent_args;
 use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
 use shared_core::i18n::format_currency_icu_typ;
 use shared_core::models::organization::Organization;
-use crate::util::locale_context::LocaleContext;
 
 pub fn generate_general_ledger_csv(user: &AuthenticatedUser, lines: &[GeneralLedgerLine]) -> String {
     let i18n = LocaleContext::new(&user.locale);
@@ -34,9 +34,9 @@ pub fn generate_general_ledger_csv(user: &AuthenticatedUser, lines: &[GeneralLed
             line.account_name.clone(),
             line.date.to_string(),
             line.description.clone().unwrap_or_default(),
-            (line.debit as f64 / 100.0).to_string(),
-            (line.credit as f64 / 100.0).to_string(),
-            (line.balance as f64 / 100.0).to_string(),
+            i18n.format_money(line.debit),
+            i18n.format_money(line.credit),
+            i18n.format_money(line.balance),
         ])
         .unwrap();
     }

@@ -7,12 +7,11 @@
  */
 use crate::export::utils::{build_table_header, wrap_report_layout};
 use crate::routes::security::AuthenticatedUser;
+use crate::util::locale_context::LocaleContext;
 use chrono::NaiveDate;
 use fluent::fluent_args;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
-use shared_core::i18n::format_currency_icu_typ;
 use shared_core::models::organization::Organization;
-use crate::util::locale_context::LocaleContext;
 
 pub fn generate_ledger_csv(user: &AuthenticatedUser, entries: &[JournalEntryWithBalance]) -> String {
     let i18n = LocaleContext::new(&user.locale);
@@ -30,16 +29,16 @@ pub fn generate_ledger_csv(user: &AuthenticatedUser, entries: &[JournalEntryWith
 
     for entry in entries.iter() {
         let debit = if entry.debit > 0 {
-            format_currency_icu_typ(entry.debit, Some(&user.locale))
+            i18n.format_money(entry.debit)
         } else {
             "".to_string()
         };
         let credit = if entry.credit > 0 {
-            format_currency_icu_typ(entry.credit, Some(&user.locale))
+            i18n.format_money(entry.credit)
         } else {
             "".to_string()
         };
-        let balance = format_currency_icu_typ(entry.debit - entry.credit, Some(&user.locale));
+        let balance = i18n.format_money(entry.debit - entry.credit);
         csv_content.push_str(&format!(
             "{},\"{}\",{},{},{}\n",
             entry.date,
@@ -75,16 +74,16 @@ pub fn generate_ledger_typst(
 
     for entry in entries.iter() {
         let debit = if entry.debit > 0 {
-            format_currency_icu_typ(entry.debit, Some(&user.locale))
+            i18n.format_money_typ(entry.debit)
         } else {
             "".to_string()
         };
         let credit = if entry.credit > 0 {
-            format_currency_icu_typ(entry.credit, Some(&user.locale))
+            i18n.format_money_typ(entry.credit)
         } else {
             "".to_string()
         };
-        let balance = format_currency_icu_typ(entry.debit - entry.credit, Some(&user.locale));
+        let balance = i18n.format_money_typ(entry.debit - entry.credit);
         typst_content.push_str(&format!(
             "[{}], [{}], align(right)[{}], align(right)[{}], align(right)[{}],\n",
             entry.date,

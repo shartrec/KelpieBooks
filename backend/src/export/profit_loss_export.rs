@@ -8,14 +8,13 @@
 
 use crate::export::utils::{build_table_header, wrap_report_layout};
 use crate::routes::security::AuthenticatedUser;
+use crate::util::locale_context::LocaleContext;
 use chrono::NaiveDate;
 use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
-use shared_core::i18n::format_currency_icu_typ;
 use shared_core::models::{account_category::AccountCategory, organization::Organization};
 use std::collections::HashMap;
 use uuid::Uuid;
-use crate::util::locale_context::LocaleContext;
 
 #[derive(Clone, Debug)]
 pub struct AccountNode {
@@ -92,7 +91,7 @@ pub fn generate_profit_loss_csv(user: &AuthenticatedUser, accounts: &[AccountWit
             i18n.t("common-balance"),
         ));
 
-    fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String, locale: Option<&str>) {
+    fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String, i18n: &LocaleContext) {
         let indent = " ".repeat(depth * 2);
         let display_balance = if node.account.category == AccountCategory::Revenue {
             -node.account.balance
@@ -104,25 +103,26 @@ pub fn generate_profit_loss_csv(user: &AuthenticatedUser, accounts: &[AccountWit
             "\"{}{}\",\"{}\"\n",
             indent,
             node.account.name,
-            format_currency_icu_typ(display_balance, locale)
+            i18n.format_money(display_balance)
         ));
         for child in &node.children {
-            build_csv_rows(child, depth + 1, content, locale);
+            build_csv_rows(child, depth + 1, content, &i18n
+            );
         }
     }
 
     csv_content.push_str(&i18n.t("profit-loss-export-revenue-header"));
     for node in &revenue_nodes {
-        build_csv_rows(node, 0, &mut csv_content, Some(&user.locale));
+        build_csv_rows(node, 0, &mut csv_content, &i18n);
     }
     csv_content.push_str(&i18n.t("profit-loss-export-expenses-header"));
     for node in &expense_nodes {
-        build_csv_rows(node, 0, &mut csv_content, Some(&user.locale));
+        build_csv_rows(node, 0, &mut csv_content, &i18n);
     }
     csv_content.push_str(&format!(
         "\"{}\",\"{}\"\n",
         i18n.t("profit-loss-net-income"),
-        format_currency_icu_typ(net_income, Some(&user.locale))
+        i18n.format_money(net_income)
     ));
     csv_content
 }
@@ -143,7 +143,7 @@ pub fn generate_profit_loss_typst(
         &vec![false, true, true],
     ));
 
-    fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String, locale: Option<&str>) {
+    fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String, i18n: &LocaleContext) {
         let indent = "#h(2.0em)".repeat(depth);
         let display_balance = if node.account.category == AccountCategory::Revenue {
             -node.account.balance
@@ -155,33 +155,33 @@ pub fn generate_profit_loss_typst(
                 "[{} {}], [], align(right)[{}],\n",
                 indent,
                 node.account.name,
-                format_currency_icu_typ(display_balance, locale)
+                i18n.format_money_typ(display_balance)
             ));
         } else {
             content.push_str(&format!(
                 "  [{} {}], align(right)[{}], [],\n",
                 indent,
                 node.account.name,
-                format_currency_icu_typ(display_balance, locale)
+                i18n.format_money_typ(display_balance)
             ));
         }
         for child in &node.children {
-            build_typst_rows(child, depth + 1, content, locale);
+            build_typst_rows(child, depth + 1, content, &i18n);
         }
     }
 
     typst_content.push_str(&format!("[*{}*],[],[],\n", i18n.t("profit-loss-revenue-section")));
     for node in &revenue_nodes {
-        build_typst_rows(node, 0, &mut typst_content, Some(&user.locale));
+        build_typst_rows(node, 0, &mut typst_content, &i18n);
     }
     typst_content.push_str(&format!("[*{}*],[],[],\n", i18n.t("profit-loss-expenses-section")));
     for node in &expense_nodes {
-        build_typst_rows(node, 0, &mut typst_content, Some(&user.locale));
+        build_typst_rows(node, 0, &mut typst_content, &i18n);
     }
     typst_content.push_str(&format!(
         "[*{}*], [], align(right)[{}]\n",
         i18n.t("profit-loss-net-income"),
-        format_currency_icu_typ(net_income, Some(&user.locale))
+        i18n.format_money_typ(net_income)
     ));
     typst_content.push_str(")\n");
 

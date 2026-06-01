@@ -8,15 +8,14 @@
 
 use crate::export::utils::{build_table_header, wrap_report_layout};
 use crate::routes::security::AuthenticatedUser;
+use crate::util::locale_context::LocaleContext;
 use chrono::NaiveDate;
 use fluent::fluent_args;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
-use shared_core::i18n::format_currency_icu_typ;
 use shared_core::models::organization::Organization;
 use shared_core::reports::balance_sheet::BalanceSheet;
 use std::collections::HashMap;
 use uuid::Uuid;
-use crate::util::locale_context::LocaleContext;
 
 #[derive(Clone, Debug)]
 pub struct AccountNode {
@@ -80,57 +79,57 @@ pub fn generate_balance_sheet_csv(user: &AuthenticatedUser, balance_sheet: &Bala
             i18n.t("common-balance"),
         ));
 
-    fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String) {
+    fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String, i18n: &LocaleContext) {
         let indent = " ".repeat(depth * 2);
         content.push_str(&format!(
             "\"{}{}\",\"{}\"\n",
             indent,
             node.account.name,
-            (node.account.balance as f64) / 100.0
+            i18n.format_money(node.account.balance)
         ));
         for child in &node.children {
-            build_csv_rows(child, depth + 1, content);
+            build_csv_rows(child, depth + 1, content, &i18n);
         }
     }
 
     csv_content.push_str(&i18n.t("balance-sheet-export-assets-header"));
     for node in &asset_nodes {
-        build_csv_rows(node, 0, &mut csv_content);
+        build_csv_rows(node, 0, &mut csv_content, &i18n);
     }
     csv_content.push_str(&format!(
         "\"{}\",\"{}\"\n",
         i18n.t("balance-sheet-export-total-assets"),
-        (balance_sheet.total_assets as f64) / 100.0
+        i18n.format_money(balance_sheet.total_assets)
     ));
 
     csv_content.push_str(&i18n.t("balance-sheet-export-liabilities-header"));
     for node in &liability_nodes {
-        build_csv_rows(node, 0, &mut csv_content);
+        build_csv_rows(node, 0, &mut csv_content, &i18n);
     }
     csv_content.push_str(&format!(
         "\"{}\",\"{}\"\n",
         i18n.t("balance-sheet-export-total-liabilities"),
-        (balance_sheet.total_liabilities as f64) / 100.0
+        i18n.format_money(balance_sheet.total_liabilities)
     ));
 
     csv_content.push_str(&i18n.t("balance-sheet-export-equity-header"));
     for node in &equity_nodes {
-        build_csv_rows(node, 0, &mut csv_content);
+        build_csv_rows(node, 0, &mut csv_content, &i18n);
     }
     csv_content.push_str(&format!(
         "\"{}\",\"{}\"\n",
         i18n.t("balance-sheet-export-current-year-earnings"),
-        (balance_sheet.net_income as f64) / 100.0
+        i18n.format_money(balance_sheet.net_income)
     ));
     csv_content.push_str(&format!(
         "\"{}\",\"{}\"\n",
         i18n.t("balance-sheet-export-total-equity"),
-        (balance_sheet.total_equity as f64) / 100.0
+        i18n.format_money(balance_sheet.total_equity)
     ));
     csv_content.push_str(&format!(
         "\"{}\",\"{}\"\n",
         i18n.t("balance-sheet-export-total-liabilities-equity"),
-        ((balance_sheet.total_liabilities + balance_sheet.total_equity) as f64) / 100.0
+        i18n.format_money(balance_sheet.total_liabilities + balance_sheet.total_equity)
     ));
     csv_content
 }
@@ -154,59 +153,59 @@ pub fn generate_balance_sheet_typst(
         &[false, true, true],
     ));
 
-    fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String, locale: Option<&str>) {
+    fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String, i18n: &LocaleContext) {
         let indent = "#h(2.0em)".repeat(depth);
 
         content.push_str(&format!(
             "  [{} {}], align(right)[{}],[],\n",
             indent,
             node.account.name,
-            format_currency_icu_typ(node.account.balance, locale)
+            i18n.format_money_typ(node.account.balance)
         ));
         for child in &node.children {
-            build_typst_rows(child, depth + 1, content, locale);
+            build_typst_rows(child, depth + 1, content, &i18n);
         }
     }
 
     typst_content.push_str(&format!("[*{}*],[],[],\n", i18n.t("balance-sheet-assets-section")));
     for node in &asset_nodes {
-        build_typst_rows(node, 0, &mut typst_content, Some(&user.locale));
+        build_typst_rows(node, 0, &mut typst_content, &i18n);
     }
     typst_content.push_str(&format!(
         "align(right)[*{}*],[],align(right)[*{}*],\n",
         i18n.t("balance-sheet-total-assets"),
-        format_currency_icu_typ(balance_sheet.total_assets, Some(&user.locale))
+        i18n.format_money_typ(balance_sheet.total_assets)
     ));
 
     typst_content.push_str(&format!("[*{}*],[],[],\n", i18n.t("balance-sheet-liabilities-section")));
     for node in &liability_nodes {
-        build_typst_rows(node, 0, &mut typst_content, Some(&user.locale));
+        build_typst_rows(node, 0, &mut typst_content, &i18n);
     }
     typst_content.push_str(&format!(
         "align(right)[*{}*],[],align(right)[*{}*],\n",
         i18n.t("balance-sheet-total-liabilities"),
-        format_currency_icu_typ(balance_sheet.total_liabilities, Some(&user.locale))
+        i18n.format_money_typ(balance_sheet.total_liabilities)
     ));
 
     typst_content.push_str(&format!("[*{}*],[],[],\n", i18n.t("balance-sheet-equity-section")));
     for node in &equity_nodes {
-        build_typst_rows(node, 0, &mut typst_content, Some(&user.locale));
+        build_typst_rows(node, 0, &mut typst_content, &i18n);
     }
     typst_content.push_str(&format!(
         "[{}],align(right)[{}],[],",
         i18n.t("balance-sheet-current-year-earnings"),
-        format_currency_icu_typ(balance_sheet.net_income, Some(&user.locale))
+        i18n.format_money_typ(balance_sheet.net_income)
     ));
 
     typst_content.push_str(&format!(
         "align(right)[*{}*],[],align(right)[*{}*],\n",
         i18n.t("balance-sheet-total-equity"),
-        format_currency_icu_typ(balance_sheet.total_equity, Some(&user.locale))
+        i18n.format_money_typ(balance_sheet.total_equity)
     ));
     typst_content.push_str(&format!(
         "align(right)[*{}*],[],align(right)[*{}*],\n",
         i18n.t("balance-sheet-total-liabilities-equity"),
-        format_currency_icu_typ(balance_sheet.total_liabilities + balance_sheet.total_equity, Some(&user.locale))
+        i18n.format_money_typ(balance_sheet.total_liabilities + balance_sheet.total_equity)
     ));
 
     typst_content.push_str(")\n");
