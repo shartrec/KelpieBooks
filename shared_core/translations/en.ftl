@@ -2,6 +2,39 @@
 ## Fluent Translation File for KelpieBooks (en)
 ##
 
+# Privileges
+# Organization Administrator Role (Bootstrap)
+sys-privilege-org_admin-name = Organization Administrator
+sys-privilege-org_admin-description = Root administration role with full, uninhibited configuration and data modification access across the entire organization cluster.
+
+# Accounts Module
+sys-privilege-use_accounts-name = View Accounts
+sys-privilege-use_accounts-description = Permits viewing the Chart of Accounts, tracking operational account histories, ledger summaries, and real-time balances.
+
+sys-privilege-manage_accounts-name = Manage Accounts
+sys-privilege-manage_accounts-description = Permits creating, rewriting parameters, re-structuring, or deactivating entries in the general Chart of Accounts.
+
+# Partners Module
+sys-privilege-use_partners-name = View Partners
+sys-privilege-use_partners-description = Permits viewing profiles, contact parameters, and transaction histories for vendors, clients, and counterparties.
+
+sys-privilege-manage_partners-name = Manage Partners
+sys-privilege-manage_partners-description = Permits initializing new partner files, rewriting metadata details, or safely soft-deleting partner records.
+
+# Transactions Module
+sys-privilege-use_transactions-name = Record Transactions
+sys-privilege-use_transactions-description = Permits inputting general journal entries, staging transaction drafts, and preparing data for verification.
+
+sys-privilege-manage_transactions-name = Post & Modify Transactions
+sys-privilege-manage_transactions-description = Permits finalizing journal entries, posting to the ledger, and issuing structural transaction reversals (subject to Strict Audit Mode).
+
+# Administrative Tools
+sys-privilege-manage_users-name = Manage Users & Team Roles
+sys-privilege-manage_users-description = Permits inviting team members, adjusting individual access levels, configuring dynamic roles, or deactivating accounts.
+
+sys-privilege-manage_organization-name = Manage Organization Settings
+sys-privilege-manage_organization-description = Permits altering core workspace parameters, toggling Strict Audit Mode, opening/closing accounting periods, and locking historical fiscal years.
+
 # Branding
 branding-app-name = KelpieBooks
 branding-app-subtitle = SME Accounting Engine

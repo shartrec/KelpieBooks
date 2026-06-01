@@ -2,6 +2,39 @@
 ## Fichier de traduction Fluent pour KelpieBooks (fr)
 ##
 
+# Privileges
+# Admin de l'organisation
+sys-privilege-org_admin-name = Administrateur de l'organisation
+sys-privilege-org_admin-description = Rôle d'administration racine avec un accès complet et non restreint à la configuration et à la modification des données de tout l'espace de l'entreprise.
+
+# Module Comptes
+sys-privilege-use_accounts-name = Consulter les comptes
+sys-privilege-use_accounts-description = Permet de consulter le plan de comptes, de suivre l'historique des comptes opérationnels, les synthèses du grand livre et les soldes en temps réel.
+
+sys-privilege-manage_accounts-name = Gérer les comptes
+sys-privilege-manage_accounts-description = Permet de créer, de modifier les paramètres, de restructurer ou de désactiver des entrées dans le plan de comptes général.
+
+# Module Partenaires
+sys-privilege-use_partners-name = Consulter les partenaires
+sys-privilege-use_partners-description = Permet de consulter les profils, les coordonnées et l'historique des transactions des fournisseurs, clients et contreparties.
+
+sys-privilege-manage_partners-name = Gérer les partenaires
+sys-privilege-manage_partners-description = Permet d'initialiser de nouvelles fiches partenaires, de modifier les métadonnées ou de procéder à la suppression logique sécurisée des profils.
+
+# Module Transactions
+sys-privilege-use_transactions-name = Saisir les écritures
+sys-privilege-use_transactions-description = Permet de saisir les écritures de journal général, de préparer des brouillons de transaction et de structurer les données avant validation.
+
+sys-privilege-manage_transactions-name = Valider et modifier les écritures
+sys-privilege-manage_transactions-description = Permet de finaliser les écritures de journal, de les valider dans le grand livre et de générer des extournes structurelles (sous réserve du mode d'audit strict).
+
+# Outils Administratifs
+sys-privilege-manage_users-name = Gérer les utilisateurs et rôles
+sys-privilege-manage_users-description = Permet d'inviter des collaborateurs, d'ajuster les niveaux d'accès individuels, de configurer des rôles dynamiques ou de désactiver des comptes.
+
+sys-privilege-manage_organization-name = Gérer les paramètres de l'entreprise
+sys-privilege-manage_organization-description = Permet de modifier les paramètres de l'espace de travail, d'activer le mode d'audit strict, d'ouvrir/clôturer des périodes comptables et de verrouiller les exercices financiers passés.
+
 # Branding
 branding-app-name = KelpieBooks
 branding-app-subtitle = Moteur comptable PME
