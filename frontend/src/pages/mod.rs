@@ -25,3 +25,4 @@ pub mod profit_loss;
 pub mod register;
 pub mod style_guide;
 pub mod trial_balance;
+pub mod users;

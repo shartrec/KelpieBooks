@@ -122,6 +122,8 @@ sidebar-tasks = Tasks
 sidebar-close-year = Close Year
 sidebar-period-settings = Period Settings
 sidebar-configuration = Configuration
+sidebar-admin = Admin
+sidebar-users = Users
 
 # Header
 header-toggle-menu-alt = Toggle menu
@@ -536,6 +538,18 @@ profit-loss-export-expenses-header = Expenses,
 
 # Trial Balance Export
 trial-balance-export-total = Total
+
+# Users Page
+users-title = Users
+users-list-description = This is a list of all the users in your organization.
+users-add-button = Add User
+users-header-email = Email
+users-header-full-name = Full Name
+users-header-display-name = Display Name
+users-header-role = Role
+users-error-parse = Failed to parse users: { $error }
+users-error-fetch = Failed to fetch users: { $status }
+users-error-delete = Failed to delete user: { $error }
 
 # Test keys
 test-key = Test Value

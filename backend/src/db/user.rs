@@ -11,11 +11,13 @@ use shared_core::models::role::Role;
 use shared_core::models::user::User;
 use shared_core::models::user_with_org::UserWithOrg;
 use uuid::Uuid;
+use shared_core::models::auth::SystemPrivilege;
+use crate::util::ApiError;
 
 fn from_row_to_user_with_org(row: &sqlx::postgres::PgRow) -> UserWithOrg {
     let role = Role {
-        id: row.get("id"),
-        name: row.get("name"),
+        id: row.get("role_id"),
+        name: row.get("role_name"),
         privileges: vec![],
     };
 
@@ -96,22 +98,48 @@ pub(crate) async fn update(
     })
 }
 
-pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, sqlx::Error> {
+pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, ApiError> {
     let result = sqlx::query("DELETE FROM users WHERE id = $1")
         .bind(id)
         .execute(pool)
         .await?;
+
     Ok(result.rows_affected())
 }
+
+pub(crate) async fn check_org_admin_remains(pool: &mut PgConnection)  -> Result<(), ApiError> {
+    let admin_count = sqlx::query(r#"SELECT Count(u.id) FROM users u
+            JOIN roles r ON u.role_id = r.id
+            JOIN role_privileges rp ON r.id = rp.role_id
+            WHERE rp.privilege_id = $1
+        "#)
+        .bind(SystemPrivilege::org_admin.as_str())
+        .fetch_one(pool)
+        .await
+        .map(|row| row.get::<i64, &str>("count"));
+    match admin_count {
+        Ok(count) if count == 0 => {
+            Err(ApiError::Conflict("You cannot perform this action. At least One Organisation Administrator must remain.".to_string()))
+        }
+        Ok(_) => Ok(()),
+        Err(e) => Err(ApiError::Db(e))
+    }
+
+}
+
+const SQL: &'static str = r#"SELECT u.id, u.organization_id, u.email, u.password_hash, u.created_at as user_created_at,
+       u.full_name, u.display_name, u.role_id , o.name as organisation_name, o.strict_audit_mode,
+       r.id as role_id, r.organization_id as role_org, r.name as role_name, r.created_at as role_created_at
+        FROM users u
+            JOIN organizations o ON u.organization_id = o.id
+            JOIN roles r ON u.role_id = r.id
+       "#;
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
     id: Uuid,
 ) -> Result<Option<UserWithOrg>, sqlx::Error> {
-    sqlx::query("SELECT u.*, o.name as organisation_name, o.strict_audit_mode, r.name as role_name FROM users u
-        JOIN organizations o ON u.organization_id = o.id
-        JOIN roles r ON u.role_id = r.id WHERE u.id = $1"
-    )
+    sqlx::query(format!("{} {} ", SQL, "WHERE u.id = $1").as_str())
         .bind(id)
         .fetch_optional(pool)
         .await
@@ -122,14 +150,7 @@ pub(crate) async fn get_by_email(
     pool: &mut PgConnection,
     email: &str,
 ) -> Result<Option<UserWithOrg>, sqlx::Error> {
-    sqlx::query(r#"SELECT u.id, u.organization_id, u.email, u.password_hash, u.created_at as user_created_at,
-       u.full_name, u.display_name, u.role_id , o.name as organisation_name, o.strict_audit_mode,
-       r.id, r.organization_id, r.name, r.created_at as role_created_at
-        FROM users u
-            JOIN organizations o ON u.organization_id = o.id
-            JOIN roles r ON u.role_id = r.id
-            WHERE u.email = $1
-        "#)
+    sqlx::query(format!("{} {} ", SQL, "WHERE u.email = $1").as_str())
         .bind(email)
         .fetch_optional(pool)
         .await
@@ -140,7 +161,7 @@ pub(crate) async fn get_all(
     pool: &mut PgConnection,
     organization_id: Uuid,
 ) -> Result<Vec<UserWithOrg>, sqlx::Error> {
-    sqlx::query("SELECT u.*, o.name as organisation_name, o.strict_audit_mode FROM users u JOIN organizations o ON u.organization_id = o.id WHERE u.organization_id = $1 ORDER BY u.email")
+    sqlx::query(format!("{} {} ", SQL, "WHERE u.organization_id = $1").as_str())
         .bind(organization_id)
         .fetch_all(pool)
         .await

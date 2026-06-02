@@ -47,6 +47,8 @@ pub enum Route {
     PeriodSettings,
     #[at("/tasks/configuration")]
     Configuration,
+    #[at("/users")]
+    Users,
     #[at("/")]
     Home,
 

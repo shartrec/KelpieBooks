@@ -123,6 +123,8 @@ sidebar-tasks = Tâches
 sidebar-close-year = Clôturer l’exercice
 sidebar-period-settings = Paramètres de période
 sidebar-configuration = Configuration
+sidebar-admin = Administration
+sidebar-users = Utilisateurs
 
 # Header
 header-toggle-menu-alt = Basculer le menu
@@ -537,6 +539,18 @@ profit-loss-export-expenses-header = Charges,
 
 # Trial Balance Export
 trial-balance-export-total = Total
+
+# Users Page
+users-title = Utilisateurs
+users-list-description = Voici la liste de tous les utilisateurs de votre organisation.
+users-add-button = Ajouter un utilisateur
+users-header-email = E-mail
+users-header-full-name = Nom complet
+users-header-display-name = Nom d'affichage
+users-header-role = Rôle
+users-error-parse = Impossible d'analyser les utilisateurs: { $error }
+users-error-fetch = Impossible de récupérer les utilisateurs: { $status }
+users-error-delete = Impossible de supprimer l'utilisateur: { $status }
 
 # Test keys
 test-key = Valeur de test

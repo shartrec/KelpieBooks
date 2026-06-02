@@ -18,6 +18,7 @@ use rocket::serde::json::Json;
 use rocket::serde::Serialize;
 use rocket::{Request, Response};
 use rocket_db_pools::sqlx;
+use shared_core::dtos::ApiErrorMessage;
 
 #[derive(Debug)]
 pub(crate) enum ApiError {
@@ -42,16 +43,12 @@ impl From<bcrypt::BcryptError> for ApiError {
     }
 }
 
-#[derive(Debug, Serialize)]
-pub(crate) struct ApiErrorMessage {
-    pub(crate) error: String,
-}
-
 impl<'r> Responder<'r, 'static> for ApiError {
-    fn respond_to(self, _: &'r Request<'_>) -> rocket::response::Result<'static> {
-        // Log the full error details before creating the response
+    fn respond_to(self, req: &'r Request<'_>) -> rocket::response::Result<'static> {
+        // 1. Log full debug attributes securely on the server console
         error!("API Error: {:?}", self);
 
+        // 2. Resolve internal variants to an HTTP code status and structural string
         let (status, msg) = match self {
             ApiError::NotFound(msg) => (Status::NotFound, msg),
             ApiError::Forbidden(msg) => (Status::Forbidden, msg),
@@ -64,14 +61,15 @@ impl<'r> Responder<'r, 'static> for ApiError {
                 format!("Password hashing error: {}", e),
             ),
         };
-        let body = Json(ApiErrorMessage { error: msg });
-        Response::build()
+
+        // 3. Create our actual structural error body
+        let error_body = ApiErrorMessage { error: msg };
+
+        // 4. Delegate to Rocket's native JSON responder wrapper!
+        // This automatically serializes the struct keys to a valid json string `{"error":"..."}`
+        // and safely configures the sizing and ContentType::JSON headers under the hood.
+        Response::build_from(Json(error_body).respond_to(req)?)
             .status(status)
-            .header(rocket::http::ContentType::JSON)
-            .sized_body(
-                body.0.error.len(),
-                std::io::Cursor::new(body.0.error.to_string()),
-            )
             .ok()
     }
 }

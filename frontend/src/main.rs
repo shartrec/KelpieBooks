@@ -29,6 +29,7 @@ use frontend::pages::profit_loss::ProfitLossPage;
 use frontend::pages::register::RegisterPage;
 use frontend::pages::style_guide::StyleGuide;
 use frontend::pages::trial_balance::TrialBalancePage;
+use frontend::pages::users::UsersPage;
 use frontend::router::Route;
 use gloo_net::http::Request;
 use log::info;
@@ -130,6 +131,7 @@ fn switch(routes: Route) -> Html {
         Route::CloseYear => html! { <CloseYearPage /> },
         Route::PeriodSettings => html! { <PeriodSettings /> },
         Route::Configuration => html! { <ConfigurationPage /> },
+        Route::Users => html! { <UsersPage /> },
         Route::Home => html! { <LoginPage /> },
         Route::StyleGuide => html! {<StyleGuide />},
     }

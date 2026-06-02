@@ -15,6 +15,7 @@ use rocket::serde::json::Json;
 use rocket::{delete, get, put, routes, Route};
 use rocket_db_pools::Connection;
 use serde::Deserialize;
+use sqlx::Acquire;
 use shared_core::dtos::user_detail::UserDetail;
 
 #[derive(Deserialize)]
@@ -115,7 +116,7 @@ pub(crate) async fn get_all_users(
             email: user.email,
             full_name: user.full_name,
             display_name: user.display_name,
-            role: "User".to_string(), // Placeholder
+            role: user.role.name, // Placeholder
             organization_id: user.organization_id,
         })
         .collect();
@@ -148,6 +149,13 @@ pub(crate) async fn delete_user(
     id: PathUuid,
     mut pool: Connection<DbKelpie>,
 ) -> Result<&'static str, ApiError> {
-    user::delete(&mut *pool, *id).await?;
+
+    let mut tx = pool.begin().await?;
+
+    user::delete(&mut *tx, *id).await?;
+    // You can't delete the last administrator.
+    user::check_org_admin_remains(&mut *tx).await?;
+
+    let _ = tx.commit().await;
     Ok("OK")
 }

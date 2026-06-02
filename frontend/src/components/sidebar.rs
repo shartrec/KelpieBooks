@@ -21,6 +21,7 @@ pub fn sidebar() -> Html {
     let payables_reports_open = use_state(|| false);
     let partners_open = use_state(|| false);
     let tasks_open = use_state(|| false);
+    let admin_open = use_state(|| false);
 
     let toggle_state = |state: UseStateHandle<bool>| {
         Callback::from(move |_| {
@@ -113,6 +114,19 @@ pub fn sidebar() -> Html {
                                 <li><Link<Route> to={Route::CloseYear}>{ i18n.t("sidebar-close-year") }</Link<Route>></li>
                                 <li><Link<Route> to={Route::PeriodSettings}>{ i18n.t("sidebar-period-settings") }</Link<Route>></li>
                                 <li><Link<Route> to={Route::Configuration}>{ i18n.t("sidebar-configuration") }</Link<Route>></li>
+                            </ul>
+                        }
+                    </li>
+
+                    // Admin Group
+                    <li class="sidebar__group">
+                        <div class="sidebar__group-header" onclick={toggle_state(admin_open.clone())}>
+                            <span>{ i18n.t("sidebar-admin") }</span>
+                            <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *admin_open { "is-rotated" } else { "" }} />
+                        </div>
+                        if *admin_open {
+                            <ul class="sidebar__sub-nav" style="--depth: 1;">
+                                <li><Link<Route> to={Route::Users}>{ i18n.t("sidebar-users") }</Link<Route>></li>
                             </ul>
                         }
                     </li>

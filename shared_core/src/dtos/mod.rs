@@ -5,6 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use serde::{Deserialize, Serialize};
 
 pub mod account_with_balance;
 pub mod aged_payable_summary;
@@ -20,3 +21,9 @@ pub mod top_payable;
 pub mod transaction_detail;
 pub mod user_detail;
 pub mod vendor_invoice_list_item;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ApiErrorMessage {
+    pub error: String,
+}
+
