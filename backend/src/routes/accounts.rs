@@ -26,6 +26,8 @@ use shared_core::models::account::Account;
 use shared_core::models::account_category::AccountCategory;
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 use std::str::FromStr;
+use shared_core::models::auth::SystemPrivilege;
+use crate::security::{ManageAccounts, RequirePrivilege, UseAccounts};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -44,6 +46,7 @@ pub(crate) fn routes() -> Vec<Route> {
 
 #[get("/api/accounts")]
 async fn get_accounts(
+    auth: RequirePrivilege<UseAccounts>,
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
 ) -> Result<Json<Vec<Account>>, ApiError> {
@@ -53,6 +56,7 @@ async fn get_accounts(
 
 #[get("/api/accounts_by_category/<category>")]
 async fn get_accounts_by_category(
+    auth: RequirePrivilege<UseAccounts>,
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
     category: &str,
@@ -71,6 +75,7 @@ async fn get_accounts_by_category(
 
 #[get("/api/accounts_with_balances")]
 async fn get_accounts_with_balances(
+    auth: RequirePrivilege<UseAccounts>,
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
 ) -> Result<Json<Vec<AccountWithBalance>>, ApiError> {
@@ -91,6 +96,7 @@ async fn get_payment_methods(
 
 #[get("/api/accounts/<id>")]
 async fn get_account(
+    auth: RequirePrivilege<UseAccounts>,
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
 ) -> Result<Json<Account>, ApiError> {
@@ -102,6 +108,7 @@ async fn get_account(
 
 #[get("/api/accounts/<id>/entries?<start>&<end>")]
 async fn get_account_entries(
+    auth: RequirePrivilege<UseAccounts>,
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
     start: String,
@@ -120,6 +127,7 @@ async fn get_account_entries(
 
 #[post("/api/accounts", data = "<req>")]
 async fn create_account(
+    auth: RequirePrivilege<ManageAccounts>,
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
     req: Json<CreateAccountRequest>,
@@ -142,6 +150,7 @@ async fn create_account(
 
 #[put("/api/accounts/<id>", data = "<req>")]
 async fn update_account(
+    auth: RequirePrivilege<ManageAccounts>,
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
     req: Json<UpdateAccountRequest>,
@@ -164,6 +173,7 @@ async fn update_account(
 
 #[delete("/api/accounts/<id>")]
 async fn delete_account(
+    auth: RequirePrivilege<ManageAccounts>,
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
 ) -> Result<&'static str, ApiError> {
@@ -183,6 +193,7 @@ async fn delete_account(
 
 #[get("/api/accounts/<id>/export/<format>?<start>&<end>")]
 async fn export_account_ledger(
+    auth: RequirePrivilege<UseAccounts>,
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
     id: PathUuid,

@@ -14,8 +14,11 @@ use shared_core::models::user::User;
 use shared_core::models::user_with_org::UserWithOrg;
 use uuid::Uuid;
 
+/* backend/src/db/user.rs */
+
 fn from_row_to_user_with_org(row: &sqlx::postgres::PgRow) -> UserWithOrg {
     let role = if row.get::<Option<Uuid>, _>("role_id").is_some() {
+
         Some(Role {
             id: row.get("role_id"),
             name: row.get("role_name"),
@@ -35,7 +38,7 @@ fn from_row_to_user_with_org(row: &sqlx::postgres::PgRow) -> UserWithOrg {
         created_at: row.get("user_created_at"),
         organisation_name: row.get("organisation_name"),
         strict_audit_mode: row.get("strict_audit_mode"),
-        role
+        role,
     }
 }
 
@@ -162,31 +165,74 @@ pub(crate) async fn get(
     pool: &mut PgConnection,
     id: Uuid,
 ) -> Result<Option<UserWithOrg>, sqlx::Error> {
-    sqlx::query(format!("{} {} ", SQL, "WHERE u.id = $1").as_str())
+    let row = sqlx::query(format!("{} {} ", SQL, "WHERE u.id = $1").as_str())
         .bind(id)
-        .fetch_optional(pool)
-        .await
-        .map(|row| row.map(|r| from_row_to_user_with_org(&r)))
+        .fetch_optional(&mut *pool)
+        .await?;
+
+    if let Some(r) = row {
+        let mut user = from_row_to_user_with_org(&r);
+        // 💡 Asynchronously hydrate privileges if a role is associated
+        if let Some(ref mut role) = user.role {
+            role.privileges = get_privileges_for_role(pool, role.id).await;
+        }
+        Ok(Some(user))
+    } else {
+        Ok(None)
+    }
 }
 
 pub(crate) async fn get_by_email(
     pool: &mut PgConnection,
     email: &str,
 ) -> Result<Option<UserWithOrg>, sqlx::Error> {
-    sqlx::query(format!("{} {} ", SQL, "WHERE u.email = $1").as_str())
+    let row = sqlx::query(format!("{} {} ", SQL, "WHERE u.email = $1").as_str())
         .bind(email)
-        .fetch_optional(pool)
-        .await
-        .map(|row| row.map(|r| from_row_to_user_with_org(&r)))
+        .fetch_optional(&mut *pool)
+        .await?;
+
+    if let Some(r) = row {
+        let mut user = from_row_to_user_with_org(&r);
+        if let Some(ref mut role) = user.role {
+            role.privileges = get_privileges_for_role(pool, role.id).await;
+        }
+        Ok(Some(user))
+    } else {
+        Ok(None)
+    }
 }
 
 pub(crate) async fn get_all(
     pool: &mut PgConnection,
     organization_id: Uuid,
 ) -> Result<Vec<UserWithOrg>, sqlx::Error> {
-    sqlx::query(format!("{} {} ", SQL, "WHERE u.organization_id = $1").as_str())
+    let rows = sqlx::query(format!("{} {} ", SQL, "WHERE u.organization_id = $1").as_str())
         .bind(organization_id)
+        .fetch_all(&mut *pool)
+        .await?;
+
+    let mut users = vec![];
+    for r in rows {
+        let mut user = from_row_to_user_with_org(&r);
+        if let Some(ref mut role) = user.role {
+            role.privileges = get_privileges_for_role(pool, role.id).await;
+        }
+        users.push(user);
+    }
+
+    Ok(users)
+}
+/* backend/src/db/user.rs */
+
+async fn get_privileges_for_role(pool: &mut PgConnection, role_id: Uuid) -> Vec<SystemPrivilege> {
+    sqlx::query("SELECT privilege_id FROM role_privileges WHERE role_id = $1")
+        .bind(role_id)
         .fetch_all(pool)
         .await
-        .map(|rows| rows.iter().map(from_row_to_user_with_org).collect())
+        .map(|rows| {
+            rows.iter()
+                .map(|row| row.get::<SystemPrivilege, _>("privilege_id"))
+                .collect()
+        })
+        .unwrap_or_else(|_| vec![])
 }

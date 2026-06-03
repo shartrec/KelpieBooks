@@ -9,7 +9,7 @@
 
 use crate::routes::{
     accounts, configurations, dashboard, onboarding, organization, partners, period_end, privileges, reports,
-    roles, security, transactions, users, vendor_invoices, vendor_payments,
+    roles, security as security_routes, transactions, users, vendor_invoices, vendor_payments,
 };
 use crate::util::logging::setup_logging;
 use rocket::fs::{relative, FileServer, NamedFile};
@@ -21,6 +21,7 @@ mod export;
 mod routes;
 mod services;
 mod util;
+pub mod security;
 
 #[derive(Database)]
 #[database("kelpie_db")]
@@ -39,7 +40,7 @@ fn rocket() -> _ {
 
     let rocket = rocket::build()
         .attach(DbKelpie::init())
-        .mount("/", security::routes())
+        .mount("/", security_routes::routes())
         .mount("/", onboarding::routes())
         .mount("/", users::routes())
         .mount("/", accounts::routes())
