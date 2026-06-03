@@ -7,7 +7,7 @@
  */
 
 use crate::db;
-use crate::routes::security::AuthenticatedUser;
+use crate::security::{ManageTransactions, RequirePrivilege, UseTransactions};
 use crate::services::account_service;
 use crate::util::types::PathUuid;
 use crate::util::ApiError;
@@ -35,8 +35,12 @@ pub(crate) fn routes() -> Vec<Route> {
 async fn get_transaction(
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
+    guard: RequirePrivilege<UseTransactions>,
 ) -> Result<Json<TransactionDetail>, ApiError> {
-    let transaction = db::transaction::get(&mut pool, *id)
+
+    let user = guard.0;
+
+    let transaction = db::transaction::get(&mut pool, *id, user.organization_id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 
@@ -51,10 +55,11 @@ async fn get_transaction(
 #[delete("/api/transactions/<id>")]
 async fn delete_transaction(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<ManageTransactions>,
     id: PathUuid,
 ) -> Result<&'static str, ApiError> {
-    let transaction = db::transaction::get(&mut pool, *id)
+    let user = guard.0;
+    let transaction = db::transaction::get(&mut pool, *id, user.organization_id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 
@@ -76,7 +81,7 @@ async fn delete_transaction(
         ));
     }
 
-    db::transaction::delete(&mut pool, *id).await?;
+    db::transaction::delete(&mut pool, *id, user.organization_id).await?;
 
     Ok("Transaction deleted successfully.")
 }
@@ -84,10 +89,12 @@ async fn delete_transaction(
 #[put("/api/transactions/<id>", data = "<req>")]
 async fn update_transaction(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<ManageTransactions>,
     id: PathUuid,
     req: Json<UpdateTransactionRequest>,
 ) -> Result<&'static str, ApiError> {
+    let user = guard.0;
+
     let total_debits: i64 = req.entries.iter().map(|e| e.debit).sum();
     let total_credits: i64 = req.entries.iter().map(|e| e.credit).sum();
 
@@ -101,7 +108,7 @@ async fn update_transaction(
         .await?
         .ok_or_else(|| ApiError::NotFound("Organization not found".to_string()))?;
 
-    let original_transaction = db::transaction::get(&mut pool, *id)
+    let original_transaction = db::transaction::get(&mut pool, *id, user.organization_id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 
@@ -123,7 +130,7 @@ async fn update_transaction(
 
     let mut tx = pool.begin().await?;
 
-    db::transaction::delete(&mut tx, *id).await?;
+    db::transaction::delete(&mut tx, *id, user.organization_id).await?;
 
     let transaction_id = db::transaction::insert(
         &mut tx,
@@ -154,11 +161,12 @@ async fn update_transaction(
 #[post("/api/transactions/<id>/reverse", data = "<req>")]
 async fn reverse_transaction(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<ManageTransactions>,
     id: PathUuid,
     req: Json<ReverseTransactionRequest>,
 ) -> Result<&'static str, ApiError> {
-    let original_transaction = db::transaction::get(&mut pool, *id)
+    let user = guard.0;
+    let original_transaction = db::transaction::get(&mut pool, *id, user.organization_id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 
@@ -213,9 +221,10 @@ async fn reverse_transaction(
 #[post("/api/transactions", data = "<req>")]
 async fn create_transaction(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<ManageTransactions>,
     req: Json<CreateTransactionRequest>,
 ) -> Result<&'static str, ApiError> {
+    let user = guard.0;
     account_service::create_transaction(&mut pool, user.organization_id, &req).await?;
     Ok("Transaction created successfully.")
 }

@@ -40,13 +40,14 @@ pub async fn get_accounts_by_category(
 pub async fn get_account_with_balance(
     pool: &mut PgConnection,
     account_id: Uuid,
+    organization_id: Uuid,
 ) -> Result<AccountWithBalance, ApiError> {
-    let account = db::account::get(pool, account_id)
+    let account = db::account::get(pool, account_id, organization_id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Account not found".to_string()))?;
 
     let balance =
-        db::journal_entry::get_balance_up_to_date(pool, account_id, Local::now().date_naive())
+        db::journal_entry::get_balance_up_to_date(pool, account_id, organization_id, Local::now().date_naive())
             .await?;
 
     Ok(AccountWithBalance {
@@ -147,13 +148,14 @@ pub async fn get_payment_methods(
 pub async fn get_journal_entries_with_running_balance(
     pool: &mut PgConnection,
     account_id: Uuid,
+    org_id: Uuid,
     start_date: NaiveDate,
     end_date: NaiveDate,
 ) -> Result<Vec<JournalEntryWithBalance>, ApiError> {
     let opening_balance =
-        db::journal_entry::get_balance_before_date(pool, account_id, start_date).await?;
+        db::journal_entry::get_balance_before_date(pool, account_id, org_id, start_date).await?;
     let entries =
-        db::journal_entry::get_all_by_account_in_date_range(pool, account_id, start_date, end_date)
+        db::journal_entry::get_all_by_account_in_date_range(pool, account_id, org_id, start_date, end_date)
             .await?;
 
     let mut running_balance = opening_balance;

@@ -17,6 +17,7 @@ use fluent::fluent_args;
 use shared_core::dtos::partner_list_item::PartnerListItem;
 use shared_core::models::account::Account;
 use shared_core::models::account_category::AccountCategory;
+use shared_core::models::auth::SystemPrivilege;
 use shared_core::models::partner::Partner;
 use shared_core::models::partner_address::PartnerAddress;
 use shared_core::models::partner_contact::PartnerContact;
@@ -334,7 +335,13 @@ pub fn partner_list_table() -> Html {
     html! {
         <>
             <div class="table-actions">
-                <button onclick={on_add_click}>{ i18n.t("partner-list-add-partner-button") }</button>
+                { if user_ctx.has_privilege(&SystemPrivilege::manage_partners) {
+                    html! {
+                        <button onclick={on_add_click}>{ i18n.t("partner-list-add-partner-button") }</button>
+                    }
+                } else {
+                    html! {}
+                }}
             </div>
 
             if *show_add_modal {

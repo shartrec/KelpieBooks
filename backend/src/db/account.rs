@@ -48,7 +48,7 @@ fn from_row_to_account(row: &sqlx::postgres::PgRow) -> Account {
     }
 }
 
-pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<Account>, sqlx::Error> {
+pub(crate) async fn get(pool: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<Option<Account>, sqlx::Error> {
     sqlx::query(
         r#"
         SELECT
@@ -64,9 +64,11 @@ pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<Acco
             created_at
         FROM accounts
         WHERE id = $1
+        AND organization_id = $2
         "#,
     )
     .bind(id)
+    .bind(org_id)
     .fetch_optional(pool)
     .await
     .map(|row| row.map(|r| from_row_to_account(&r)))
@@ -128,6 +130,7 @@ pub(crate) async fn insert(
 pub(crate) async fn update(
     pool: &mut PgConnection,
     id: Uuid,
+    org_id: Uuid,
     req: &UpdateAccountRequest,
 ) -> Result<Account, sqlx::Error> {
     let row = sqlx::query(
@@ -135,6 +138,7 @@ pub(crate) async fn update(
         UPDATE accounts
         SET name = $1, code = $2, category = $3::account_category, is_group = $4, is_bank_account = $5, system_tag = $6::system_tag
         WHERE id = $7
+        AND organization_id = $8
         RETURNING id, organization_id, parent_id, code, name, category::TEXT as category, is_group, is_bank_account, system_tag::TEXT as system_tag, created_at
         "#,
     )
@@ -145,6 +149,7 @@ pub(crate) async fn update(
     .bind(req.is_bank_account)
     .bind(req.system_tag.map(|s| s.to_string()))
     .bind(id)
+    .bind(org_id)
     .fetch_one(pool)
     .await?;
     Ok(from_row_to_account(&row))
@@ -162,9 +167,10 @@ pub(crate) async fn has_journal_entries(
     Ok(count > 0)
 }
 
-pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query("DELETE FROM accounts WHERE id = $1")
+pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<u64, sqlx::Error> {
+    let result = sqlx::query("DELETE FROM accounts WHERE id = $1 AND organization_id = $2")
         .bind(id)
+        .bind(org_id)
         .execute(pool)
         .await?;
     Ok(result.rows_affected())

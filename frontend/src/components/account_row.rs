@@ -6,9 +6,11 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+use crate::contexts::auth_context::use_user_context;
 use crate::contexts::locale_context::use_locale;
 use crate::router::Route;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::models::auth::SystemPrivilege;
 use std::collections::HashSet;
 use uuid::Uuid;
 use yew::prelude::*;
@@ -31,6 +33,7 @@ pub struct AccountRowProps {
 
 #[function_component(AccountRow)]
 pub fn account_row(props: &AccountRowProps) -> Html {
+    let user_ctx = use_user_context();
     let is_parent = !props.node.children.is_empty();
     let is_collapsed = props.collapsed_nodes.contains(&props.node.account.id);
 
@@ -69,14 +72,15 @@ pub fn account_row(props: &AccountRowProps) -> Html {
 
     let account_name_display = if props.node.account.is_group {
         html! { { &props.node.account.name } }
-    } else {
+    } else if user_ctx.has_privilege(&SystemPrivilege::use_transactions) {
         html! {
             <Link<Route> to={Route::AccountLedger { id: props.node.account.id }}>
                 { &props.node.account.name }
             </Link<Route>>
         }
+    } else {
+        html! { { &props.node.account.name } }
     };
-
 
     html! {
         <>
@@ -98,14 +102,22 @@ pub fn account_row(props: &AccountRowProps) -> Html {
                 <td style="text-align: right;">{ i18n.format_currency(props.node.account.balance) }</td>
                 <td class="table__col-actions">
                     <div class="actions-wrapper">
-                        <button class="icon-button btn-action" onclick={on_edit_click}>
-                            <img src="/images/edit.svg" alt={i18n.t("common-edit")} />
-                        </button>
-                        if !is_parent && props.node.account.balance == 0 {
-                            <button class="icon-button btn-action" onclick={on_delete_click}>
-                                <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
-                            </button>
-                        }
+                        { if user_ctx.has_privilege(&SystemPrivilege::manage_accounts) {
+                            html! {
+                                <>
+                                    <button class="icon-button btn-action" onclick={on_edit_click}>
+                                        <img src="/images/edit.svg" alt={i18n.t("common-edit")} />
+                                    </button>
+                                    if !is_parent && props.node.account.balance == 0 {
+                                        <button class="icon-button btn-action" onclick={on_delete_click}>
+                                            <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
+                                        </button>
+                                    }
+                                </>
+                            }
+                        } else {
+                            html! {}
+                        }}
                     </div>
                 </td>
             </tr>

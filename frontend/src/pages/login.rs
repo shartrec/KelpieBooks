@@ -12,7 +12,7 @@ use crate::router::Route;
 use crate::services::web::detect_browser_locale;
 use fluent::fluent_args;
 use gloo_net::http::Request;
-use shared_core::dtos::user_detail::UserDetail;
+use shared_core::dtos::user_detail::{AuthUserDetail, UserDetail};
 use shared_core::requests::auth::LoginRequest;
 use yew::function_component;
 use yew::html;
@@ -58,7 +58,7 @@ pub fn login_page() -> Html {
 
                 match resp {
                     Ok(r) if r.ok() => {
-                        if let Ok(user) = r.json::<UserDetail>().await {
+                        if let Ok(user) = r.json::<AuthUserDetail>().await {
                             user_ctx.dispatch(Some(user));
                             is_login_success.set(true);
                         } else {

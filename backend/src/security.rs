@@ -8,7 +8,6 @@
 #[rustfmt::skip]  // This is to stop all the markers from being reformatted.
 
 use std::marker::PhantomData;
-use log::warn;
 use rocket::http::Status;
 use rocket::Request;
 use rocket::request::{FromRequest, Outcome};
@@ -20,8 +19,8 @@ pub(crate) trait GuardPrivilege {
 }
 
 // Create structural markers
-pub(crate) struct OrgAdmin;
-impl GuardPrivilege for OrgAdmin { const VALUE: SystemPrivilege = SystemPrivilege::security_admin; }
+pub(crate) struct SecurityAdmin;
+impl GuardPrivilege for SecurityAdmin { const VALUE: SystemPrivilege = SystemPrivilege::security_admin; }
 
 pub(crate) struct UseAccounts;
 impl GuardPrivilege for UseAccounts { const VALUE: SystemPrivilege = SystemPrivilege::use_accounts; }

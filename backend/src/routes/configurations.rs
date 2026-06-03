@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::routes::security::AuthenticatedUser;
+use crate::security::{ManageAccounts, RequirePrivilege, UseAccounts};
 use crate::services::account_service;
 use crate::DbKelpie;
 use rocket::serde::json::Json;
@@ -28,8 +28,9 @@ pub fn routes() -> Vec<rocket::Route> {
 #[get("/api/configurations/system-accounts")]
 async fn get_system_accounts(
     mut db: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseAccounts>,
 ) -> Result<Json<HashMap<SystemTag, Uuid>>, rocket::http::Status> {
+    let user = guard.0;
     match account_service::get_system_accounts(&mut db, user.organization_id).await {
         Ok(accounts) => Ok(Json(accounts)),
         Err(_) => Err(rocket::http::Status::InternalServerError),
@@ -39,9 +40,10 @@ async fn get_system_accounts(
 #[post("/api/configurations/system-accounts", data = "<system_accounts>")]
 async fn set_system_accounts(
     mut db: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<ManageAccounts>,
     system_accounts: Json<HashMap<SystemTag, Uuid>>,
 ) -> Result<Json<HashMap<SystemTag, Uuid>>, rocket::http::Status> {
+    let user = guard.0;
     match account_service::update_system_accounts(
         &mut db,
         user.organization_id,
@@ -57,9 +59,10 @@ async fn set_system_accounts(
 #[put("/api/configurations", data = "<req>")]
 async fn update_configuration(
     mut db: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<ManageAccounts>,
     req: Json<UpdateConfigurationRequest>,
 ) -> Result<(), rocket::http::Status> {
+    let user = guard.0;
     match account_service::update_configuration(&mut db, user.organization_id, &req.into_inner())
         .await
     {

@@ -12,11 +12,10 @@ use jsonwebtoken::{
     Validation,
 };
 use rocket::{get, post, routes, Route};
-use shared_core::dtos::user_detail::UserDetail;
+use shared_core::dtos::user_detail::{AuthUserDetail, UserDetail};
 use shared_core::requests::auth::LoginRequest;
 use std::sync::OnceLock;
 
-use crate::db::roles as role_db;
 use crate::db::user;
 use crate::DbKelpie;
 use base64::{engine::general_purpose, Engine as _};
@@ -38,7 +37,7 @@ async fn login(
     mut pool: Connection<DbKelpie>,
     cookies: &CookieJar<'_>,
     login_request: Json<LoginRequest>,
-) -> Result<Json<UserDetail>, Status> {
+) -> Result<Json<AuthUserDetail>, Status> {
     let db_user = user::get_by_email(&mut pool, &login_request.email).await;
 
     match db_user {
@@ -68,13 +67,20 @@ async fn login(
             let token = generate_session_token(&auth_user);
             cookies.add(Cookie::build(("session", token)).http_only(false));
 
-            let user_detail = UserDetail {
+            let role  = auth_user.role.as_ref().map(|r| r.name.clone());
+            // 💡 Map the SystemPrivilege enum variants directly into string flags
+            let privileges = auth_user.role
+                .map(|r| r.privileges.iter().map(|p| format!("{:?}", p)).collect())
+                .unwrap_or_else(Vec::new);
+
+            let user_detail = AuthUserDetail {
                 id: user.id,
                 email: user.email,
                 full_name: user.full_name,
                 display_name: user.display_name,
-                role: auth_user.role.map(|r| r.name),
+                role: role,
                 organization_id: user.organization_id,
+                privileges: privileges
             };
 
             Ok(Json(user_detail))
@@ -85,14 +91,22 @@ async fn login(
 }
 
 #[get("/api/auth/me")]
-async fn me(user: AuthenticatedUser) -> Json<UserDetail> {
-    Json(UserDetail {
+async fn me(user: AuthenticatedUser) -> Json<AuthUserDetail> {
+
+    let role  = user.role.as_ref().map(|r| r.name.clone());
+    // 💡 Map the SystemPrivilege enum variants directly into string flags
+    let privileges = user.role
+        .map(|r| r.privileges.iter().map(|p| format!("{:?}", p)).collect())
+        .unwrap_or_else(Vec::new);
+
+    Json(AuthUserDetail {
         id: user.user_id,
         email: user.username,
         full_name: user.full_name,
         display_name: user.display_name,
-        role: user.role.map(|r| r.name),
+        role: role,
         organization_id: user.organization_id,
+        privileges: privileges
     })
 }
 
@@ -121,7 +135,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         if let Some(cookie) = request.cookies().get("session") {
             let outcome = request.guard::<Connection<DbKelpie>>().await;
-            if let Outcome::Success(mut db) = outcome {
+            if let Outcome::Success(_) = outcome {
                 if let Some(user) = validate_session_token(cookie.value()).await {
                     return Outcome::Success(user);
                 }

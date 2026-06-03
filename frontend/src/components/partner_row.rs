@@ -5,8 +5,10 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use crate::contexts::auth_context::use_user_context;
 use crate::contexts::locale_context::use_locale;
 use shared_core::dtos::partner_list_item::PartnerListItem;
+use shared_core::models::auth::SystemPrivilege;
 use uuid::Uuid;
 use yew::prelude::*;
 
@@ -19,6 +21,7 @@ pub struct PartnerRowProps {
 
 #[function_component(PartnerRow)]
 pub fn partner_row(props: &PartnerRowProps) -> Html {
+    let user_ctx = use_user_context();
     let i18n = use_locale();
 
     let partner_type = if props.partner.is_vendor && props.partner.is_customer {
@@ -54,12 +57,20 @@ pub fn partner_row(props: &PartnerRowProps) -> Html {
             <td>{ partner_type }</td>
             <td class="table__col-actions">
                 <div class="actions-wrapper">
-                    <button class="icon-button btn-action" onclick={on_edit}>
-                        <img src="/images/view.svg" alt={i18n.t("common-view")} />
-                    </button>
-                    <button class="icon-button btn-action" onclick={on_delete} disabled={!props.partner.can_delete}>
-                        <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
-                    </button>
+                    { if user_ctx.has_privilege(&SystemPrivilege::manage_partners) {
+                        html! {
+                            <>
+                                <button class="icon-button btn-action" onclick={on_edit}>
+                                    <img src="/images/view.svg" alt={i18n.t("common-view")} />
+                                </button>
+                                <button class="icon-button btn-action" onclick={on_delete} disabled={!props.partner.can_delete}>
+                                    <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
+                                </button>
+                            </>
+                        }
+                    } else {
+                        html!{}
+                    }}
                 </div>
             </td>
         </tr>

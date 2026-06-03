@@ -34,7 +34,7 @@ use frontend::pages::users::UsersPage;
 use frontend::router::Route;
 use gloo_net::http::Request;
 use log::info;
-use shared_core::dtos::user_detail::UserDetail;
+use shared_core::dtos::user_detail::AuthUserDetail;
 use shared_core::models::organization::Organization;
 use yew::prelude::*;
 use yew_router::prelude::*;
@@ -61,7 +61,7 @@ fn app() -> Html {
             wasm_bindgen_futures::spawn_local(async move {
                 if let Ok(resp) = Request::get("/api/auth/me").send().await {
                     if resp.ok() {
-                        if let Ok(user) = resp.json::<UserDetail>().await {
+                        if let Ok(user) = resp.json::<AuthUserDetail>().await {
                             user_ctx.dispatch(Some(user));
                         } else {
                             return;

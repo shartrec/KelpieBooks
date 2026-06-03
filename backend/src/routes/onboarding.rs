@@ -6,9 +6,6 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::db;
-use crate::db::chart_of_accounts::ChartOfAccountsTemplate;
-use crate::routes::security::hash_pwd;
 use crate::services::onboarding;
 use crate::util::ApiError;
 use crate::DbKelpie;
@@ -16,8 +13,6 @@ use rocket::serde::json::Json;
 use rocket::{post, routes, Route};
 use rocket_db_pools::Connection;
 use shared_core::requests::onboard::OnboardingRequest;
-use sqlx::Acquire;
-use std::fs;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![register]

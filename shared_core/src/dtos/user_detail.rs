@@ -8,6 +8,7 @@
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use crate::models::auth::SystemPrivilege;
 
 /// A Data Transfer Object representing the user details that are safe
 /// to send to the frontend. This struct explicitly omits sensitive
@@ -20,4 +21,15 @@ pub struct UserDetail {
     pub display_name: Option<String>,
     pub role: Option<String>,
     pub organization_id: Uuid,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct AuthUserDetail {
+    pub id: Uuid,
+    pub email: String,
+    pub full_name: String,
+    pub display_name: Option<String>,
+    pub role: Option<String>,
+    pub organization_id: Uuid,
+    pub privileges: Vec<String>
 }

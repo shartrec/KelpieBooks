@@ -39,7 +39,7 @@ pub async fn close_financial_year(
     )
     .await?;
     for account in income_accounts {
-        let balance = db::journal_entry::get_balance_up_to_date(pool, account.id, year_end).await?;
+        let balance = db::journal_entry::get_balance_up_to_date(pool, account.id, organization_id, year_end).await?;
         if balance != 0 {
             let (debit, credit) = if balance > 0 {
                 (0, balance)

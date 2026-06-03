@@ -18,7 +18,7 @@ use crate::export::trial_balance_export::{
 };
 use crate::export::utils::compile_typst_to_pdf;
 use crate::export::DownloadFile;
-use crate::routes::security::AuthenticatedUser;
+use crate::security::{RequirePrivilege, UseTransactions, UseVendorInvoices};
 use crate::services::report_service;
 use crate::util::ApiError;
 use crate::DbKelpie;
@@ -32,6 +32,7 @@ use shared_core::dtos::aged_payable_summary::AgedPayableSummary;
 use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
 use shared_core::reports::balance_sheet::BalanceSheet;
 use uuid::Uuid;
+use crate::util::locale_context::LocaleContext;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -50,10 +51,11 @@ pub(crate) fn routes() -> Vec<Route> {
 #[get("/api/reports/profit-loss?<start>&<end>")]
 async fn get_profit_loss(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseTransactions>,
     start: String,
     end: String,
 ) -> Result<Json<Vec<AccountWithBalance>>, ApiError> {
+    let user = guard.0;
     let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid start date".to_string()))?;
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
@@ -68,9 +70,10 @@ async fn get_profit_loss(
 #[get("/api/reports/balance-sheet?<date>")]
 async fn get_balance_sheet(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseTransactions>,
     date: String,
 ) -> Result<Json<BalanceSheet>, ApiError> {
+    let user = guard.0;
     let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid date".to_string()))?;
 
@@ -82,9 +85,10 @@ async fn get_balance_sheet(
 #[get("/api/reports/trial-balance?<date>")]
 async fn get_trial_balance(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseTransactions>,
     date: String,
 ) -> Result<Json<Vec<AccountWithBalance>>, ApiError> {
+    let user = guard.0;
     let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid date".to_string()))?;
 
@@ -96,12 +100,13 @@ async fn get_trial_balance(
 #[get("/api/reports/general-ledger?<start>&<end>&<accounts>&<min_amount>")]
 async fn get_general_ledger(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseTransactions>,
     start: String,
     end: String,
     accounts: Option<String>,
     min_amount: Option<i64>,
 ) -> Result<Json<Vec<GeneralLedgerLine>>, ApiError> {
+    let user = guard.0;
     let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid start date".to_string()))?;
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
@@ -128,9 +133,10 @@ async fn get_general_ledger(
 #[get("/api/reports/aged-payables?<date>")]
 async fn get_aged_payables(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseVendorInvoices>,
     date: String,
 ) -> Result<Json<Vec<AgedPayableSummary>>, ApiError> {
+    let user = guard.0;
     let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid date".to_string()))?;
 
@@ -142,10 +148,11 @@ async fn get_aged_payables(
 #[get("/api/reports/trial-balance/export/<format>?<date>")]
 async fn export_trial_balance(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseTransactions>,
     format: String,
     date: String,
 ) -> Result<DownloadFile, ApiError> {
+    let user = guard.0;
     let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid date".to_string()))?;
 
@@ -179,11 +186,12 @@ async fn export_trial_balance(
 #[get("/api/reports/profit-loss/export/<format>?<start>&<end>")]
 async fn export_profit_loss(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseTransactions>,
     format: String,
     start: String,
     end: String,
 ) -> Result<DownloadFile, ApiError> {
+    let user = guard.0;
     let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid start date".to_string()))?;
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
@@ -219,10 +227,11 @@ async fn export_profit_loss(
 #[get("/api/reports/balance-sheet/export/<format>?<date>")]
 async fn export_balance_sheet(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseTransactions>,
     format: String,
     date: String,
 ) -> Result<DownloadFile, ApiError> {
+    let user = guard.0;
     let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid date".to_string()))?;
 
@@ -255,13 +264,17 @@ async fn export_balance_sheet(
 #[get("/api/reports/general-ledger/export/<format>?<start>&<end>&<accounts>&<min_amount>")]
 async fn export_general_ledger(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseTransactions>,
     format: String,
     start: String,
     end: String,
     accounts: Option<String>,
     min_amount: Option<i64>,
 ) -> Result<DownloadFile, ApiError> {
+
+    let user = guard.0;
+    let i18n = LocaleContext::new(&user.locale);
+
     let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid start date".to_string()))?;
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
@@ -272,6 +285,18 @@ async fn export_general_ledger(
             .filter_map(|id| id.parse::<Uuid>().ok())
             .collect()
     });
+
+    //Validate the accounts are valid and in user organization
+    if let Some(ref ids) = account_ids {
+        for id in ids {
+            let account = crate::db::account::get(&mut pool, *id, user.organization_id).await?;
+            if let Some(acc) = account {
+                if acc.organization_id != user.organization_id {
+                    return Err(ApiError::NotFound(i18n.t("coa-error-not-found")));
+                }
+            }
+        }
+    }
 
     let lines = report_service::get_general_ledger(
         &mut pool,

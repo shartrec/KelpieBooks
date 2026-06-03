@@ -7,7 +7,7 @@
  */
 
 use crate::db;
-use crate::routes::security::AuthenticatedUser;
+use crate::security::{ManageOrganization, RequirePrivilege};
 use crate::util::types::PathUuid;
 use crate::util::ApiError;
 use crate::DbKelpie;
@@ -16,6 +16,7 @@ use rocket::{get, put, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::organization::{AuditModeRequest, LockDateRequest};
 use shared_core::models::organization::Organization;
+use crate::routes::security::AuthenticatedUser;
 
 pub fn routes() -> Vec<Route> {
     rocket::routes![get_organization, set_lock_date, set_audit_mode]
@@ -35,10 +36,11 @@ pub async fn get_organization(
 #[put("/api/organizations/<id>/lock", data = "<req>")]
 async fn set_lock_date(
     mut db: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<ManageOrganization>,
     id: PathUuid,
     req: Json<LockDateRequest>,
 ) -> rocket::http::Status {
+    let user = guard.0;
     if *id != user.organization_id {
         return rocket::http::Status::Forbidden;
     }
@@ -51,10 +53,11 @@ async fn set_lock_date(
 #[put("/api/organizations/<id>/audit_mode", data = "<req>")]
 async fn set_audit_mode(
     mut db: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<ManageOrganization>,
     id: PathUuid,
     req: Json<AuditModeRequest>,
 ) -> rocket::http::Status {
+    let user = guard.0;
     if *id != user.organization_id {
         return rocket::http::Status::Forbidden;
     }

@@ -16,6 +16,7 @@ use crate::contexts::locale_context::use_locale;
 use fluent::fluent_args;
 use log::info;
 use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::models::auth::SystemPrivilege;
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
@@ -302,7 +303,13 @@ pub fn chart_of_accounts_table() -> Html {
     html! {
         <>
             <div class="table-actions">
-                <button onclick={on_add_click}>{ i18n.t("coa-add-account-button") }</button>
+                { if user_ctx.has_privilege(&SystemPrivilege::manage_accounts) {
+                    html! {
+                        <button onclick={on_add_click}>{ i18n.t("coa-add-account-button") }</button>
+                    }
+                } else {
+                    html! {}
+                }}
             </div>
 
             if *show_add_modal { <AddAccountModal on_close={on_modal_close.clone()} on_submit={on_add_submit} parent_accounts={parent_accounts} /> }

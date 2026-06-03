@@ -8,7 +8,7 @@
 
 use crate::db::roles;
 use crate::db::user as db_user;
-use crate::routes::security::AuthenticatedUser;
+use crate::security::{SecurityAdmin, RequirePrivilege};
 use crate::util::types::PathUuid;
 use crate::util::ApiError;
 use crate::DbKelpie;
@@ -27,8 +27,9 @@ pub(crate) fn routes() -> Vec<Route> {
 #[get("/api/roles")]
 pub(crate) async fn get_all_roles(
     mut pool: Connection<DbKelpie>,
-    auth_user: AuthenticatedUser,
+    guard: RequirePrivilege<SecurityAdmin>,
 ) -> Result<Json<Vec<Role>>, ApiError> {
+    let auth_user = guard.0;
     let roles = roles::find_all_for_org(&mut *pool, auth_user.organization_id).await?;
     Ok(Json(roles))
 }
@@ -36,10 +37,10 @@ pub(crate) async fn get_all_roles(
 #[post("/api/roles", data = "<req>")]
 pub(crate) async fn create_role(
     mut pool: Connection<DbKelpie>,
-    auth_user: AuthenticatedUser,
+    guard: RequirePrivilege<SecurityAdmin>,
     req: Json<CreateRoleRequest>,
 ) -> Result<Json<Role>, ApiError> {
-
+    let auth_user = guard.0;
     let mut tx = pool.begin().await?;
 
     let role_id = roles::create(&mut tx, auth_user.organization_id, &req.name).await?;
@@ -57,10 +58,10 @@ pub(crate) async fn create_role(
 pub(crate) async fn update_role(
     id: PathUuid,
     mut pool: Connection<DbKelpie>,
-    auth_user: AuthenticatedUser,
+    guard: RequirePrivilege<SecurityAdmin>,
     req: Json<UpdateRoleRequest>,
 ) -> Result<Json<Role>, ApiError> {
-
+    let auth_user = guard.0;
     let i18n = LocaleContext::new(&auth_user.locale);
 
     let mut tx = pool.begin().await?;
@@ -84,9 +85,9 @@ pub(crate) async fn update_role(
 pub(crate) async fn delete_role(
     id: PathUuid,
     mut pool: Connection<DbKelpie>,
-    auth_user: AuthenticatedUser,
+    guard: RequirePrivilege<SecurityAdmin>,
 ) -> Result<&'static str, ApiError> {
-
+    let auth_user = guard.0;
     let i18n = LocaleContext::new(&auth_user.locale);
 
     let mut tx = pool.begin().await?;

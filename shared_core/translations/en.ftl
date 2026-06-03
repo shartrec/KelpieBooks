@@ -150,7 +150,8 @@ coa-error-parse-accounts = Failed to parse accounts: { $error }
 coa-error-fetch-accounts = Failed to fetch accounts: { $status }
 coa-error-add-account = Failed to add account: { $status }
 coa-error-update-account = Failed to update account: { $status }
-coa-error-delete-account = Failed to delete account: { $status }
+coa-error-not-found = Account not found
+
 
 # Add/Edit Account Modal
 account-modal-add-title = Add New Account

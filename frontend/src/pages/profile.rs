@@ -13,7 +13,7 @@ use crate::contexts::locale_context::use_locale;
 use crate::router::Route;
 use fluent::fluent_args;
 use serde::Serialize;
-use shared_core::dtos::user_detail::UserDetail;
+use shared_core::dtos::user_detail::{AuthUserDetail, UserDetail};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
@@ -121,7 +121,7 @@ pub fn profile_page() -> Html {
 
                 match resp {
                     Ok(r) if r.ok() => {
-                        if let Ok(updated_user) = r.json::<UserDetail>().await {
+                        if let Ok(updated_user) = r.json::<AuthUserDetail>().await {
                             user_ctx.dispatch(Some(updated_user));
                             success_state.set(true);
                             error_state.set(None);

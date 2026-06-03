@@ -113,7 +113,6 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
         ..Default::default()
     };
 
-    let strict_audit_mode = props.org_ctx.strict_audit_mode;
     let is_locked = props
         .org_ctx
         .locked_until

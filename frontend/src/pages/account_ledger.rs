@@ -21,6 +21,7 @@ use crate::router::Route;
 use fluent::fluent_args;
 use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::models::account::Account;
+use shared_core::models::auth::SystemPrivilege;
 use shared_core::requests::transaction::ReverseTransactionRequest;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -50,35 +51,38 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
     {
         let report_ctx = report_ctx.clone();
         let account_id = props.account_id;
+        let user_ctx = user_ctx.clone();
         use_effect_with((report_ctx.date_range.clone(),), move |_| {
-            let start_date = report_ctx.date_range.start_date;
-            let end_date = report_ctx.date_range.end_date;
-            report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(
-                move |_| {
-                    let url = format!(
-                        "/api/accounts/{}/export/csv?start={}&end={}",
-                        account_id, start_date, end_date
-                    );
-                    web_sys::window()
-                        .unwrap()
-                        .location()
-                        .set_href(&url)
-                        .unwrap();
-                },
-            ))));
-            report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(
-                move |_| {
-                    let url = format!(
-                        "/api/accounts/{}/export/pdf?start={}&end={}",
-                        account_id, start_date, end_date
-                    );
-                    web_sys::window()
-                        .unwrap()
-                        .location()
-                        .set_href(&url)
-                        .unwrap();
-                },
-            ))));
+            if user_ctx.has_privilege(&SystemPrivilege::use_transactions) {
+                let start_date = report_ctx.date_range.start_date;
+                let end_date = report_ctx.date_range.end_date;
+                report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(
+                    move |_| {
+                        let url = format!(
+                            "/api/accounts/{}/export/csv?start={}&end={}",
+                            account_id, start_date, end_date
+                        );
+                        web_sys::window()
+                            .unwrap()
+                            .location()
+                            .set_href(&url)
+                            .unwrap();
+                    },
+                ))));
+                report_ctx.dispatch(ReportAction::SetOnExportTypst(Some(Callback::from(
+                    move |_| {
+                        let url = format!(
+                            "/api/accounts/{}/export/pdf?start={}&end={}",
+                            account_id, start_date, end_date
+                        );
+                        web_sys::window()
+                            .unwrap()
+                            .location()
+                            .set_href(&url)
+                            .unwrap();
+                    },
+                ))));
+            }
             move || {
                 report_ctx.dispatch(ReportAction::SetOnExportCsv(None));
                 report_ctx.dispatch(ReportAction::SetOnExportTypst(None));
@@ -316,9 +320,15 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                 <ReportOptions show_start_date={true} show_end_date={true} />
             </div>
             <div class="table-actions">
-                <Link<Route, NewTransactionQuery> to={Route::NewTransaction} query={query} classes="button">
-                    { i18n.t("ledger-add-transaction-button") }
-                </Link<Route, NewTransactionQuery>>
+                { if user_ctx.has_privilege(&SystemPrivilege::manage_transactions) {
+                    html! {
+                        <Link<Route, NewTransactionQuery> to={Route::NewTransaction} query={query} classes="button">
+                            { i18n.t("ledger-add-transaction-button") }
+                        </Link<Route, NewTransactionQuery>>
+                    }
+                } else {
+                    html! {}
+                }}
             </div>
             if *loading {
                 <p>{ i18n.t("common-loading") }</p>

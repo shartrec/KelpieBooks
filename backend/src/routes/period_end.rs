@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::routes::security::AuthenticatedUser;
+use crate::security::{ManageAccounts, RequirePrivilege};
 use crate::services::period_end_service;
 use crate::util::ApiError;
 use crate::DbKelpie;
@@ -21,9 +21,10 @@ pub(crate) fn routes() -> Vec<Route> {
 #[post("/api/period-end/close-year?<year_end>")]
 async fn close_financial_year(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<ManageAccounts>,
     year_end: String,
 ) -> Result<&'static str, ApiError> {
+    let user = guard.0;
     let year_end_date = NaiveDate::parse_from_str(&year_end, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid year end date".to_string()))?;
 

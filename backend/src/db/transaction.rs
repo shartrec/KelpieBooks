@@ -25,9 +25,11 @@ fn from_row_to_transaction(row: &sqlx::postgres::PgRow) -> Transaction {
 pub(crate) async fn get(
     pool: &mut PgConnection,
     id: Uuid,
+    org_id: Uuid,
 ) -> Result<Option<Transaction>, sqlx::Error> {
-    sqlx::query("SELECT * FROM transactions WHERE id = $1")
+    sqlx::query("SELECT * FROM transactions WHERE id = $1 AND organization_id = $2")
         .bind(id)
+        .bind(org_id)
         .fetch_optional(pool)
         .await
         .map(|row| row.map(|r| from_row_to_transaction(&r)))
@@ -65,9 +67,10 @@ pub(crate) async fn insert(
     Ok(row.get("id"))
 }
 
-pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<(), sqlx::Error> {
-    sqlx::query("DELETE FROM transactions WHERE id = $1")
+pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<(), sqlx::Error> {
+    sqlx::query("DELETE FROM transactions WHERE id = $1 and organization_id = $2")
         .bind(id)
+        .bind(org_id)
         .execute(pool)
         .await?;
     Ok(())
