@@ -6,13 +6,17 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use crate::models::auth::SystemPrivilege;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Role {
-    pub id: Uuid,
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CreateRoleRequest {
+    pub name: String,
+    pub privileges: Vec<SystemPrivilege>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateRoleRequest {
     pub name: String,
     pub privileges: Vec<SystemPrivilege>,
 }

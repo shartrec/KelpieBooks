@@ -127,6 +127,7 @@ pub fn sidebar() -> Html {
                         if *admin_open {
                             <ul class="sidebar__sub-nav" style="--depth: 1;">
                                 <li><Link<Route> to={Route::Users}>{ i18n.t("sidebar-users") }</Link<Route>></li>
+                                <li><Link<Route> to={Route::Roles}>{ i18n.t("sidebar-roles") }</Link<Route>></li>
                             </ul>
                         }
                     </li>

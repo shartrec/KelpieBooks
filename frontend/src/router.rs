@@ -49,6 +49,8 @@ pub enum Route {
     Configuration,
     #[at("/users")]
     Users,
+    #[at("/roles")]
+    Roles,
     #[at("/")]
     Home,
 

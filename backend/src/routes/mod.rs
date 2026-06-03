@@ -15,6 +15,7 @@ pub(crate) mod partners;
 pub(crate) mod period_end;
 pub(crate) mod privileges;
 pub(crate) mod reports;
+pub(crate) mod roles;
 pub(crate) mod security;
 pub(crate) mod transactions;
 pub(crate) mod users;

@@ -6,10 +6,10 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::models::role::Role;
-use sqlx::{Acquire, PgConnection, Result, Row};
-use uuid::Uuid;
 use shared_core::models::auth::SystemPrivilege;
+use shared_core::models::role::Role;
+use sqlx::{PgConnection, Result, Row};
+use uuid::Uuid;
 
 pub async fn find_all_for_org(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<Role>> {
     let rows = sqlx::query(
@@ -28,10 +28,14 @@ pub async fn find_all_for_org(conn: &mut PgConnection, org_id: Uuid) -> Result<V
 
     let roles = rows
         .into_iter()
-        .map(|row| Role {
-            id: row.get("id"),
-            name: row.get("name"),
-            privileges: row.get("privileges"),
+        .map(|row| {
+            let privileges: Vec<SystemPrivilege> = row.get("privileges");
+            Role {
+
+                id: row.get("id"),
+                name: row.get("name"),
+                privileges: privileges,
+            }
         })
         .collect();
 
@@ -53,10 +57,14 @@ pub async fn find_by_id(conn: &mut PgConnection, org_id: Uuid, role_id: Uuid) ->
     .fetch_optional(conn)
     .await?;
 
-    Ok(row.map(|r| Role {
-        id: r.get("id"),
-        name: r.get("name"),
-        privileges: r.get("privileges"),
+    Ok(row.map(|row| {
+        let privileges: Vec<SystemPrivilege> = row.get("privileges");
+        Role {
+
+            id: row.get("id"),
+            name: row.get("name"),
+            privileges: privileges,
+        }
     }))
 }
 
@@ -65,15 +73,25 @@ pub async fn create(
     org_id: Uuid,
     name: &str,
 ) -> Result<Uuid> {
-    let mut tx = conn.begin().await?;
-
     let role_id = sqlx::query("INSERT INTO roles (organization_id, name) VALUES ($1, $2) RETURNING id")
         .bind(org_id)
         .bind(name)
-        .fetch_one(&mut *tx)
+        .fetch_one(&mut *conn)
         .await?
         .get("id");
     Ok(role_id)
+}
+pub async fn update(
+    conn: &mut PgConnection,
+    role_id: Uuid,
+    name: &str,
+) -> Result<()> {
+    let _ = sqlx::query("UPDATE roles SET name = $1 WHERE id = $2")
+        .bind(name)
+        .bind(role_id)
+        .execute(&mut *conn)
+        .await?;
+    Ok(())
 }
 
 pub async fn delete(conn: &mut PgConnection, org_id: Uuid, role_id: Uuid) -> Result<u64> {
@@ -86,7 +104,7 @@ pub async fn delete(conn: &mut PgConnection, org_id: Uuid, role_id: Uuid) -> Res
     Ok(result.rows_affected())
 }
 
-pub(crate) async fn add_privileges(conn: &mut PgConnection,role_id: Uuid, privileges: Vec<SystemPrivilege>) -> Result<()> {
+pub(crate) async fn add_privileges(conn: &mut PgConnection, role_id: Uuid, privileges: Vec<SystemPrivilege>) -> Result<()> {
 
     for privilege in privileges {
         sqlx::query(

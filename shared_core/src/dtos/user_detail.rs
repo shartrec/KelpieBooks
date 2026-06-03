@@ -18,6 +18,6 @@ pub struct UserDetail {
     pub email: String,
     pub full_name: String,
     pub display_name: Option<String>,
-    pub role: String,
+    pub role: Option<String>,
     pub organization_id: Uuid,
 }

@@ -27,6 +27,7 @@ use frontend::pages::period_settings::PeriodSettings;
 use frontend::pages::profile::ProfilePage;
 use frontend::pages::profit_loss::ProfitLossPage;
 use frontend::pages::register::RegisterPage;
+use frontend::pages::roles::RolesPage;
 use frontend::pages::style_guide::StyleGuide;
 use frontend::pages::trial_balance::TrialBalancePage;
 use frontend::pages::users::UsersPage;
@@ -132,6 +133,7 @@ fn switch(routes: Route) -> Html {
         Route::PeriodSettings => html! { <PeriodSettings /> },
         Route::Configuration => html! { <ConfigurationPage /> },
         Route::Users => html! { <UsersPage /> },
+        Route::Roles => html! { <RolesPage /> },
         Route::Home => html! { <LoginPage /> },
         Route::StyleGuide => html! {<StyleGuide />},
     }

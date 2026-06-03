@@ -16,11 +16,13 @@ use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator};
 #[cfg_attr(feature = "backend", sqlx(type_name = "system_privilege", rename_all = "snake_case"))]
 #[derive(AsRefStr)]
 pub enum SystemPrivilege {
-    org_admin,
+    security_admin,
     use_accounts,
     manage_accounts,
     use_partners,
     manage_partners,
+    use_vendor_invoices,
+    manage_vendor_invoices,
     use_transactions,
     manage_transactions,
     manage_users,
@@ -45,5 +47,14 @@ impl SystemPrivilege {
     /// Converts variant to its snake_case database value string representation for JWT payloads
     pub fn as_str(&self) -> &str {
         self.as_ref()
+    }
+}
+
+#[cfg(feature = "backend")]
+impl sqlx::postgres::PgHasArrayType for SystemPrivilege {
+    fn array_type_info() -> sqlx::postgres::PgTypeInfo {
+        // In PostgreSQL, array type names for custom types are always
+        // represented by prepended underscore syntax (e.g., '_system_privilege')
+        sqlx::postgres::PgTypeInfo::with_name("_system_privilege")
     }
 }

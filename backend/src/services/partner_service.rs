@@ -64,9 +64,7 @@ pub async fn update_partner(
     partner_id: Uuid,
     req: &UpdatePartnerRequest,
 ) -> Result<Partner, ApiError> {
-    let mut tx = pool.begin().await?;
-    let updated_partner = partner_db::update(&mut tx, partner_id, req).await?;
-    tx.commit().await?;
+    let updated_partner = partner_db::update(pool, organization_id, partner_id, req).await?;
     Ok(updated_partner)
 }
 

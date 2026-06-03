@@ -22,5 +22,5 @@ pub struct UserWithOrg {
     pub created_at: DateTime<Utc>,
     pub organisation_name: String,
     pub strict_audit_mode: bool,
-    pub role: Role,
+    pub role: Option<Role>,
 }

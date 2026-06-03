@@ -8,14 +8,13 @@
 
 // backend/src/services/onboarding.rs
 
-use sqlx::{Acquire, PgConnection, Postgres, Transaction};
-use uuid::Uuid;
-use shared_core::requests::onboard::OnboardingRequest;
-use shared_core::models::auth::SystemPrivilege;
-use shared_core::models::user::User;
 use crate::db::organization as db_org;
 use crate::db::roles as db_role;
 use crate::db::user as db_user;
+use shared_core::models::auth::SystemPrivilege;
+use shared_core::models::user::User;
+use shared_core::requests::onboard::OnboardingRequest;
+use sqlx::{Acquire, PgConnection, Postgres, Transaction};
 
 pub async fn bootstrap_tenant_organization(
     pool: &mut PgConnection,
@@ -29,7 +28,7 @@ pub async fn bootstrap_tenant_organization(
     let org = db_org::create(&mut tx, &req.organization_name).await?;
 
     // 3. Setup the initial omnipotent master identity record role ('org_admin')
-    let role_id = db_role::create(&mut tx, org.id, "org_admin").await?;
+    let role_id = db_role::create(&mut tx, org.id, "Administrator").await?;
 
     // 4. Collect ALL structural enum keys to populate the master matrix array
     let master_privileges : Vec<SystemPrivilege> = SystemPrivilege::iterator().collect();

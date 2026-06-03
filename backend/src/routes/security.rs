@@ -16,8 +16,8 @@ use shared_core::dtos::user_detail::UserDetail;
 use shared_core::requests::auth::LoginRequest;
 use std::sync::OnceLock;
 
-use crate::db::user;
 use crate::db::roles as role_db;
+use crate::db::user;
 use crate::DbKelpie;
 use base64::{engine::general_purpose, Engine as _};
 use rand::{rngs::OsRng, RngCore};
@@ -26,8 +26,8 @@ use rocket::request::{FromRequest, Outcome, Request};
 use rocket::serde::json::Json;
 use rocket::serde::{Deserialize, Serialize};
 use rocket_db_pools::Connection;
-use uuid::Uuid;
 use shared_core::models::role::Role;
+use uuid::Uuid;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![login, me, logout]
@@ -73,7 +73,7 @@ async fn login(
                 email: user.email,
                 full_name: user.full_name,
                 display_name: user.display_name,
-                role: auth_user.role.name,
+                role: auth_user.role.map(|r| r.name),
                 organization_id: user.organization_id,
             };
 
@@ -91,7 +91,7 @@ async fn me(user: AuthenticatedUser) -> Json<UserDetail> {
         email: user.username,
         full_name: user.full_name,
         display_name: user.display_name,
-        role: user.role.name,
+        role: user.role.map(|r| r.name),
         organization_id: user.organization_id,
     })
 }
@@ -109,7 +109,7 @@ pub(crate) struct AuthenticatedUser {
     pub(crate) username: String,
     pub(crate) full_name: String,
     pub(crate) display_name: Option<String>,
-    pub(crate) role: Role,
+    pub(crate) role: Option<Role>,
     pub(crate) organisation_name: String,
     pub(crate) locale: String,
 }
@@ -122,7 +122,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
         if let Some(cookie) = request.cookies().get("session") {
             let outcome = request.guard::<Connection<DbKelpie>>().await;
             if let Outcome::Success(mut db) = outcome {
-                if let Some(user) = validate_session_token(cookie.value(), &mut db).await {
+                if let Some(user) = validate_session_token(cookie.value()).await {
                     return Outcome::Success(user);
                 }
             }
@@ -140,6 +140,7 @@ struct Claims {
     full_name: String,
     display_name: Option<String>,
     role_id: String,
+    privileges: Vec<String>,
     exp: usize,
     organisation_name: String,
     locale: Option<String>
@@ -167,6 +168,12 @@ fn generate_session_token(user: &AuthenticatedUser) -> String {
         .expect("Failed to calculate expiration")
         .timestamp() as usize;
 
+    let role = user.role.as_ref().map(|r| r.id.to_string());
+
+    let privileges = user.role.as_ref()
+        .map(|r| r.privileges.iter().map(|p| p.as_str().to_string()).collect())
+        .unwrap_or_else(Vec::new);
+
     let claims = Claims {
         user_id: user.user_id.to_string(),
         organization_id: user.organization_id.to_string(),
@@ -174,7 +181,8 @@ fn generate_session_token(user: &AuthenticatedUser) -> String {
         username: user.username.clone(),
         full_name: user.full_name.clone(),
         display_name: user.display_name.clone(),
-        role_id: user.role.id.to_string(),
+        role_id: role.unwrap_or("".to_string()),
+        privileges,
         exp: expiration,
         organisation_name: user.organisation_name.clone(),
         locale: Some(user.locale.clone()),
@@ -188,7 +196,7 @@ fn generate_session_token(user: &AuthenticatedUser) -> String {
     .expect("Failed to generate token")
 }
 
-pub(crate) async fn validate_session_token(token: &str, db: &mut Connection<DbKelpie>) -> Option<AuthenticatedUser> {
+pub(crate) async fn validate_session_token(token: &str) -> Option<AuthenticatedUser> {
     let validation = Validation::default();
     let token_data: Result<TokenData<Claims>, JwtError> = decode(
         token,
@@ -198,22 +206,31 @@ pub(crate) async fn validate_session_token(token: &str, db: &mut Connection<DbKe
 
     if let Ok(data) = token_data {
         if data.claims.exp > chrono::Utc::now().timestamp() as usize {
-            let role_id = Uuid::parse_str(&data.claims.role_id).unwrap();
             let org_id = Uuid::parse_str(&data.claims.organization_id).unwrap();
+            let role_id = Uuid::parse_str(&data.claims.role_id).unwrap_or_default();
 
-            if let Ok(Some(role)) = role_db::find_by_id(db, org_id, role_id).await {
-                return Some(AuthenticatedUser {
-                    user_id: Uuid::parse_str(&data.claims.user_id).unwrap(),
-                    organization_id: org_id,
-                    strict_audit_mode: data.claims.strict_audit_mode,
-                    username: data.claims.username,
-                    full_name: data.claims.full_name,
-                    display_name: data.claims.display_name,
-                    role,
-                    organisation_name: data.claims.organisation_name,
-                    locale: data.claims.locale.unwrap_or_else(|| "en-GB".to_string()),
-                });
-            }
+            // 💡 Safely parse strings back to your SystemPrivilege enum variants
+            use std::str::FromStr;
+            let privileges: Vec<shared_core::models::auth::SystemPrivilege> = data.claims.privileges
+                .iter()
+                .filter_map(|p_str| shared_core::models::auth::SystemPrivilege::from_str(p_str).ok())
+                .collect();
+
+            return Some(AuthenticatedUser {
+                user_id: Uuid::parse_str(&data.claims.user_id).unwrap(),
+                organization_id: org_id,
+                strict_audit_mode: data.claims.strict_audit_mode,
+                username: data.claims.username,
+                full_name: data.claims.full_name,
+                display_name: data.claims.display_name,
+                role: Some(Role {
+                    id: role_id,
+                    name: "".to_string(), // You can also add role_name to claims if needed
+                    privileges,
+                }),
+                organisation_name: data.claims.organisation_name,
+                locale: data.claims.locale.unwrap_or_else(|| "en-GB".to_string()),
+            });
         }
     }
     None

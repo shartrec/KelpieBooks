@@ -16,11 +16,13 @@ CREATE TABLE privileges (
 
 -- Seed Initial Static Privileges Array
 CREATE TYPE system_privilege AS ENUM (
-    'org_admin'
+    'security_admin',
     'use_accounts',
     'manage_accounts',
     'use_partners',
     'manage_partners',
+    'use_vendor_invoices',
+    'manage_vendor_invoices',
     'use_transactions',
     'manage_transactions',
     'manage_users',

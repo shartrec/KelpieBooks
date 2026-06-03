@@ -9,11 +9,15 @@
 pub mod account_row;
 pub mod add_account_modal;
 pub mod add_partner_modal;
+pub mod add_role_modal;
+pub mod add_user_modal;
 pub mod chart_of_accounts_table;
 pub mod currency_input;
 pub mod delete_confirmation_modal;
 pub mod delete_partner_confirmation_modal;
 pub mod edit_account_modal;
+pub mod edit_role_modal;
+pub mod edit_user_modal;
 pub mod header;
 pub mod je_delete_confirmation_modal;
 pub mod je_reversal_confirmation_modal;

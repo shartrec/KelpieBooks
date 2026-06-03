@@ -4,8 +4,8 @@
 
 # Privileges
 # Organization Administrator Role (Bootstrap)
-sys-privilege-org_admin-name = Organization Administrator
-sys-privilege-org_admin-description = Root administration role with full, uninhibited configuration and data modification access across the entire organization cluster.
+sys-privilege-security_admin-name = Organization Administrator
+sys-privilege-security_admin-description = Root administration role with full, uninhibited configuration and data modification access across the entire organization cluster.
 
 # Accounts Module
 sys-privilege-use_accounts-name = View Accounts
@@ -20,6 +20,13 @@ sys-privilege-use_partners-description = Permits viewing profiles, contact param
 
 sys-privilege-manage_partners-name = Manage Partners
 sys-privilege-manage_partners-description = Permits initializing new partner files, rewriting metadata details, or safely soft-deleting partner records.
+
+# Payables Module
+sys-privilege-use_vendor_invoices-name = View Vendor invoices
+sys-privilege-use_vendor_invoices-description = Permits viewing vendor invoices.
+
+sys-privilege-manage_vendor_invoices-name = Manage Vendor Invoices
+sys-privilege-manage_vendor_invoices-description = Permits entering, updating and paying of vendor invoices.
 
 # Transactions Module
 sys-privilege-use_transactions-name = Record Transactions
@@ -124,6 +131,7 @@ sidebar-period-settings = Period Settings
 sidebar-configuration = Configuration
 sidebar-admin = Admin
 sidebar-users = Users
+sidebar-roles = Roles
 
 # Header
 header-toggle-menu-alt = Toggle menu
@@ -550,6 +558,46 @@ users-header-role = Role
 users-error-parse = Failed to parse users: { $error }
 users-error-fetch = Failed to fetch users: { $status }
 users-error-delete = Failed to delete user: { $error }
+users-error-add = Failed to add user: { $error }
+users-error-update = Failed to update user: { $error }
+
+# User Modals
+user-modal-add-title = Add New User
+user-modal-edit-title = Edit User
+user-modal-email-label = Email:
+user-modal-full-name-label = Full Name:
+user-modal-display-name-label = Display Name:
+user-modal-password-label = Password:
+user-modal-role-label = Role:
+user-modal-select-role = Select a role
+user-modal-add-button = Add User
+user-modal-save-button = Save Changes
+delete-user-confirm-title = Delete User
+delete-user-confirm-message = Are you sure you want to delete the user: { $user }?
+
+# Roles Page
+roles-title = User Roles
+roles-list-description = This is a list of all the user roles in your organization.
+roles-add-button = Add Role
+roles-header-name = Name
+roles-error-parse = Failed to parse roles: { $error }
+roles-error-fetch = Failed to fetch roles: { $status }
+roles-error-delete = Failed to delete role: { $error }
+roles-error-add = Failed to add role: { $error }
+roles-error-update = Failed to update role: { $error }
+
+# Role Modals
+role-modal-add-title = Add New Role
+role-modal-edit-title = Edit Role
+role-modal-name-label = Name:
+role-modal-privileges-label = Privileges:
+role-modal-add-button = Add Role
+role-modal-save-button = Save Changes
+delete-role-confirm-title = Delete Role
+delete-role-confirm-message = Are you sure you want to delete the role: { $role }?
+
+# Security
+security-error-no-admin = You cannot perform this action. At least one Security Administrator must remain.
 
 # Test keys
 test-key = Test Value

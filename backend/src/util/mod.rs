@@ -15,7 +15,6 @@ use log::error;
 use rocket::http::Status;
 use rocket::response::Responder;
 use rocket::serde::json::Json;
-use rocket::serde::Serialize;
 use rocket::{Request, Response};
 use rocket_db_pools::sqlx;
 use shared_core::dtos::ApiErrorMessage;

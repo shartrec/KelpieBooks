@@ -188,6 +188,7 @@ pub(crate) async fn insert(
 
 pub(crate) async fn update(
     pool: &mut PgConnection,
+    org_id: Uuid,
     id: Uuid,
     req: &UpdatePartnerRequest,
 ) -> Result<Partner, sqlx::Error> {
@@ -195,7 +196,7 @@ pub(crate) async fn update(
         r#"
         UPDATE partners
         SET legal_name = $1, trade_name = $2, tax_identifier = $3, is_vendor = $4, is_customer = $5, default_ap_account_id = $6, default_ar_account_id = $7
-        WHERE id = $8
+        WHERE id = $8 AND organization_id = $9
         RETURNING *
         "#,
     )
@@ -207,6 +208,7 @@ pub(crate) async fn update(
     .bind(req.default_ap_account_id)
     .bind(req.default_ar_account_id)
     .bind(id)
+    .bind(org_id)
     .fetch_one(pool)
     .await?;
     Ok(from_row_to_partner(&row))

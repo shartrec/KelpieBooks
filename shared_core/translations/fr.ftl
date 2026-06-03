@@ -4,8 +4,8 @@
 
 # Privileges
 # Admin de l'organisation
-sys-privilege-org_admin-name = Administrateur de l'organisation
-sys-privilege-org_admin-description = Rôle d'administration racine avec un accès complet et non restreint à la configuration et à la modification des données de tout l'espace de l'entreprise.
+sys-privilege-security_admin-name = Administrateur de l'organisation
+sys-privilege-security_admin-description = Rôle d'administration racine avec un accès complet et non restreint à la configuration et à la modification des données de tout l'espace de l'entreprise.
 
 # Module Comptes
 sys-privilege-use_accounts-name = Consulter les comptes
@@ -125,6 +125,7 @@ sidebar-period-settings = Paramètres de période
 sidebar-configuration = Configuration
 sidebar-admin = Administration
 sidebar-users = Utilisateurs
+sidebar-roles = Rôles
 
 # Header
 header-toggle-menu-alt = Basculer le menu
@@ -550,7 +551,44 @@ users-header-display-name = Nom d'affichage
 users-header-role = Rôle
 users-error-parse = Impossible d'analyser les utilisateurs: { $error }
 users-error-fetch = Impossible de récupérer les utilisateurs: { $status }
-users-error-delete = Impossible de supprimer l'utilisateur: { $status }
+users-error-delete = Impossible de supprimer l'utilisateur: { $error }
+users-error-add = Impossible d'ajouter l'utilisateur: { $error }
+users-error-update = Impossible de mettre à jour l'utilisateur: { $error }
+
+# User Modals
+user-modal-add-title = Ajouter un nouvel utilisateur
+user-modal-edit-title = Modifier l'utilisateur
+user-modal-email-label = E-mail :
+user-modal-full-name-label = Nom complet :
+user-modal-display-name-label = Nom d'affichage :
+user-modal-password-label = Mot de passe :
+user-modal-role-label = Rôle :
+user-modal-select-role = Sélectionner un rôle
+user-modal-add-button = Ajouter un utilisateur
+user-modal-save-button = Enregistrer les modifications
+delete-user-confirm-title = Supprimer l'utilisateur
+delete-user-confirm-message = Êtes-vous sûr de vouloir supprimer l'utilisateur : { $user } ?
+
+# Roles Page
+roles-title = Rôles
+roles-list-description = Voici la liste de tous les rôles de votre organisation.
+roles-add-button = Ajouter un rôle
+roles-header-name = Nom
+roles-error-parse = Impossible d'analyser les rôles : { $error }
+roles-error-fetch = Impossible de récupérer les rôles : { $status }
+roles-error-delete = Impossible de supprimer le rôle : { $error }
+roles-error-add = Impossible d'ajouter le rôle : { $error }
+roles-error-update = Impossible de mettre à jour le rôle : { $error }
+
+# Role Modals
+role-modal-add-title = Ajouter un nouveau rôle
+role-modal-edit-title = Modifier le rôle
+role-modal-name-label = Nom :
+role-modal-privileges-label = Privilèges :
+role-modal-add-button = Ajouter un rôle
+role-modal-save-button = Enregistrer les modifications
+delete-role-confirm-title = Supprimer le rôle
+delete-role-confirm-message = Êtes-vous sûr de vouloir supprimer le rôle : { $role } ?
 
 # Test keys
 test-key = Valeur de test
