@@ -214,9 +214,10 @@ pub(crate) async fn update(
     Ok(from_row_to_partner(&row))
 }
 
-pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query("DELETE FROM partners WHERE id = $1")
+pub(crate) async fn delete(pool: &mut PgConnection, org_id: Uuid, id: Uuid) -> Result<u64, sqlx::Error> {
+    let result = sqlx::query("DELETE FROM partners WHERE id = $1 AND organization_id = $2")
         .bind(id)
+        .bind(org_id)
         .execute(pool)
         .await?;
     Ok(result.rows_affected())
@@ -290,9 +291,10 @@ pub(crate) async fn update_address(
     Ok(from_row_to_partner_address(&row))
 }
 
-pub(crate) async fn delete_address(pool: &mut PgConnection, id: Uuid) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query("DELETE FROM partner_addresses WHERE id = $1")
+pub(crate) async fn delete_address(pool: &mut PgConnection, org_id: Uuid, id: Uuid) -> Result<u64, sqlx::Error> {
+    let result = sqlx::query("DELETE FROM partner_addresses WHERE id = $1 AND organization_id = $2")
         .bind(id)
+        .bind(org_id)
         .execute(pool)
         .await?;
     Ok(result.rows_affected())
@@ -362,9 +364,10 @@ pub(crate) async fn update_contact(
     Ok(from_row_to_partner_contact(&row))
 }
 
-pub(crate) async fn delete_contact(pool: &mut PgConnection, id: Uuid) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query("DELETE FROM partner_contacts WHERE id = $1")
+pub(crate) async fn delete_contact(pool: &mut PgConnection, org_id: Uuid, id: Uuid) -> Result<u64, sqlx::Error> {
+    let result = sqlx::query("DELETE FROM partner_contacts WHERE id = $1 AND organization_id = $2")
         .bind(id)
+        .bind(org_id)
         .execute(pool)
         .await?;
     Ok(result.rows_affected())

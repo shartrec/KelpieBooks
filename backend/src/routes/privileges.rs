@@ -5,21 +5,18 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use crate::routes::security::AuthenticatedUser;
-use crate::DbKelpie;
-use rocket::http::Status;
 use rocket::serde::json::Json;
 use rocket::{get, routes, Route};
-use rocket_db_pools::Connection;
 use shared_core::models::auth::SystemPrivilege;
+use crate::routes::security::AuthenticatedUser;
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![
-        get_privileges,
-    ]
+    routes![get_privileges]
 }
 
 #[get("/privileges")]
-pub async fn get_privileges() -> Result<Json<Vec<SystemPrivilege>>, Status> {
-    Ok(Json(SystemPrivilege::iterator().collect()))
+pub async fn get_privileges(
+    _user: AuthenticatedUser,
+) -> Json<Vec<SystemPrivilege>> {
+    Json(SystemPrivilege::iterator().collect())
 }

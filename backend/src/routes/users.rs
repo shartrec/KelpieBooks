@@ -7,7 +7,7 @@
  */
 
 use crate::db::user;
-use crate::routes::security::{hash_pwd, AuthenticatedUser};
+use crate::security::{ManageUsers, RequirePrivilege};
 use crate::util::types::PathUuid;
 use crate::util::ApiError;
 use crate::DbKelpie;
@@ -18,6 +18,7 @@ use serde::Deserialize;
 use shared_core::dtos::user_detail::UserDetail;
 use shared_core::requests::user::{CreateUserRequest, UpdateUserRequest};
 use sqlx::Acquire;
+use crate::routes::security::{hash_pwd, AuthenticatedUser};
 use crate::util::locale_context::LocaleContext;
 
 #[derive(Deserialize)]
@@ -41,9 +42,10 @@ pub(crate) fn routes() -> Vec<Route> {
 #[post("/api/users", data = "<create_data>")]
 pub(crate) async fn add_user(
     mut pool: Connection<DbKelpie>,
-    auth_user: AuthenticatedUser,
+    guard: RequirePrivilege<ManageUsers>,
     create_data: Json<CreateUserRequest>,
 ) -> Result<Json<UserDetail>, ApiError> {
+    let auth_user = guard.0;
     let password_hash = hash_pwd(&create_data.password)?;
 
     let new_user = user::insert(
@@ -57,7 +59,7 @@ pub(crate) async fn add_user(
     )
     .await?;
 
-    let user_with_org = user::get(&mut *pool, new_user.id).await?.unwrap();
+    let user_with_org = user::get(&mut *pool, new_user.id, ).await?.unwrap();
 
     let user_detail = UserDetail {
         id: user_with_org.id,
@@ -75,13 +77,13 @@ pub(crate) async fn add_user(
 pub(crate) async fn update_user(
     id: PathUuid,
     mut pool: Connection<DbKelpie>,
-    auth_user: AuthenticatedUser,
+    guard: RequirePrivilege<ManageUsers>,
     update_data: Json<UpdateUserRequest>,
 ) -> Result<Json<UserDetail>, ApiError> {
-
+    let auth_user = guard.0;
     let i18n = LocaleContext::new(&auth_user.locale);
 
-    let original_user = user::get(&mut *pool, *id)
+    let original_user = user::get(&mut *pool, *id, )
         .await?
         .ok_or_else(|| ApiError::NotFound("User not found".to_string()))?;
 
@@ -103,7 +105,7 @@ pub(crate) async fn update_user(
 
     tx.commit().await?;
 
-    let user_with_org = user::get(&mut *pool, updated_user.id).await?.unwrap();
+    let user_with_org = user::get(&mut *pool, updated_user.id, ).await?.unwrap();
 
     let user_detail = UserDetail {
         id: user_with_org.id,
@@ -123,7 +125,7 @@ pub(crate) async fn update_me(
     auth_user: AuthenticatedUser,
     update_data: Json<UpdateUserRequest>,
 ) -> Result<Json<UserDetail>, ApiError> {
-    let original_user = user::get(&mut *pool, auth_user.user_id)
+    let original_user = user::get(&mut *pool, auth_user.user_id, )
         .await?
         .ok_or_else(|| ApiError::NotFound("User not found".to_string()))?;
 
@@ -139,7 +141,7 @@ pub(crate) async fn update_me(
     )
     .await?;
 
-    let user_with_org = user::get(&mut *pool, updated_user.id).await?.unwrap();
+    let user_with_org = user::get(&mut *pool, updated_user.id, ).await?.unwrap();
 
     let user_detail = UserDetail {
         id: user_with_org.id,
@@ -159,7 +161,7 @@ pub(crate) async fn update_password(
     auth_user: AuthenticatedUser,
     password_data: Json<PasswordUpdateData>,
 ) -> Result<&'static str, ApiError> {
-    let original_user = user::get(&mut *pool, auth_user.user_id)
+    let original_user = user::get(&mut *pool, auth_user.user_id, )
         .await?
         .ok_or_else(|| ApiError::NotFound("User not found".to_string()))?;
 
@@ -183,8 +185,9 @@ pub(crate) async fn update_password(
 #[get("/api/users")]
 pub(crate) async fn get_all_users(
     mut pool: Connection<DbKelpie>,
-    auth_user: AuthenticatedUser,
+    guard: RequirePrivilege<ManageUsers>,
 ) -> Result<Json<Vec<UserDetail>>, ApiError> {
+    let auth_user = guard.0;
     let users = user::get_all(&mut *pool, auth_user.organization_id).await?;
     let user_details = users
         .into_iter()
@@ -204,8 +207,12 @@ pub(crate) async fn get_all_users(
 pub(crate) async fn get_user(
     id: PathUuid,
     mut pool: Connection<DbKelpie>,
+    guard: RequirePrivilege<ManageUsers>,
 ) -> Result<Json<UserDetail>, ApiError> {
-    match user::get(&mut *pool, *id).await? {
+
+    let user = guard.0;
+
+    match user::get(&mut *pool, *id, user.organization_id).await? {
         Some(user) => {
             let user_detail = UserDetail {
                 id: user.id,
@@ -225,9 +232,9 @@ pub(crate) async fn get_user(
 pub(crate) async fn delete_user(
     id: PathUuid,
     mut pool: Connection<DbKelpie>,
-    auth_user: AuthenticatedUser,
+    guard: RequirePrivilege<ManageUsers>,
 ) -> Result<&'static str, ApiError> {
-
+    let auth_user = guard.0;
     let i18n = LocaleContext::new(&auth_user.locale);
 
     let mut tx = pool.begin().await?;

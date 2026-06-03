@@ -10,7 +10,7 @@ use crate::db::account as account_db;
 use crate::export::account_ledger_export::{generate_ledger_csv, generate_ledger_typst};
 use crate::export::utils::compile_typst_to_pdf;
 use crate::export::DownloadFile;
-use crate::routes::security::AuthenticatedUser;
+use crate::security::{ManageAccounts, RequirePrivilege, UseAccounts};
 use crate::services::account_service;
 use crate::util::types::PathUuid;
 use crate::util::ApiError;
@@ -26,8 +26,6 @@ use shared_core::models::account::Account;
 use shared_core::models::account_category::AccountCategory;
 use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 use std::str::FromStr;
-use shared_core::models::auth::SystemPrivilege;
-use crate::security::{ManageAccounts, RequirePrivilege, UseAccounts};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -46,27 +44,25 @@ pub(crate) fn routes() -> Vec<Route> {
 
 #[get("/api/accounts")]
 async fn get_accounts(
-    auth: RequirePrivilege<UseAccounts>,
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseAccounts>,
 ) -> Result<Json<Vec<Account>>, ApiError> {
+    let user = guard.0;
     let accounts = account_service::get_accounts(&mut pool, user.organization_id).await?;
     Ok(Json(accounts))
 }
 
 #[get("/api/accounts_by_category/<category>")]
 async fn get_accounts_by_category(
-    auth: RequirePrivilege<UseAccounts>,
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseAccounts>,
     category: &str,
 ) -> Result<Json<Vec<Account>>, ApiError> {
+    let user = guard.0;
     if let Ok(category) = AccountCategory::from_str(category) {
-        let accounts = account_service::get_accounts_by_category(
-            &mut pool,
-            user.organization_id,
-            category
-        ).await?;
+        let accounts =
+            account_service::get_accounts_by_category(&mut pool, user.organization_id, category)
+                .await?;
         Ok(Json(accounts))
     } else {
         Err(ApiError::Internal(format!("Category {} not found", category)))
@@ -75,10 +71,10 @@ async fn get_accounts_by_category(
 
 #[get("/api/accounts_with_balances")]
 async fn get_accounts_with_balances(
-    auth: RequirePrivilege<UseAccounts>,
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseAccounts>,
 ) -> Result<Json<Vec<AccountWithBalance>>, ApiError> {
+    let user = guard.0;
     let accounts =
         account_service::get_accounts_with_balances(&mut pool, user.organization_id).await?;
     Ok(Json(accounts))
@@ -87,8 +83,9 @@ async fn get_accounts_with_balances(
 #[get("/api/accounts/payment-methods")]
 async fn get_payment_methods(
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseAccounts>,
 ) -> Result<Json<Vec<Account>>, ApiError> {
+    let user = guard.0;
     let accounts =
         account_service::get_payment_methods(&mut pool, user.organization_id).await?;
     Ok(Json(accounts))
@@ -96,11 +93,13 @@ async fn get_payment_methods(
 
 #[get("/api/accounts/<id>")]
 async fn get_account(
-    auth: RequirePrivilege<UseAccounts>,
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
+    guard: RequirePrivilege<UseAccounts>,
 ) -> Result<Json<Account>, ApiError> {
-    let account = account_db::get(&mut pool, *id)
+    let user = guard.0;
+
+    let account = account_db::get(&mut pool, *id, user.organization_id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Account not found".to_string()))?;
     Ok(Json(account))
@@ -108,18 +107,20 @@ async fn get_account(
 
 #[get("/api/accounts/<id>/entries?<start>&<end>")]
 async fn get_account_entries(
-    auth: RequirePrivilege<UseAccounts>,
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
     start: String,
     end: String,
+    guard: RequirePrivilege<UseAccounts>,
 ) -> Result<Json<Vec<JournalEntryWithBalance>>, ApiError> {
+    let user = guard.0;
+
     let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid start date".to_string()))?;
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid end date".to_string()))?;
     let entries = account_service::get_journal_entries_with_running_balance(
-        &mut pool, *id, start_date, end_date,
+        &mut pool, *id, user.organization_id, start_date, end_date
     )
     .await?;
     Ok(Json(entries))
@@ -127,11 +128,11 @@ async fn get_account_entries(
 
 #[post("/api/accounts", data = "<req>")]
 async fn create_account(
-    auth: RequirePrivilege<ManageAccounts>,
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<ManageAccounts>,
     req: Json<CreateAccountRequest>,
 ) -> Result<Json<AccountWithBalance>, ApiError> {
+    let user = guard.0;
     let new_account = account_db::insert(&mut pool, user.organization_id, &req).await?;
     Ok(Json(AccountWithBalance {
         id: new_account.id,
@@ -150,12 +151,14 @@ async fn create_account(
 
 #[put("/api/accounts/<id>", data = "<req>")]
 async fn update_account(
-    auth: RequirePrivilege<ManageAccounts>,
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
     req: Json<UpdateAccountRequest>,
+    guard: RequirePrivilege<ManageAccounts>,
 ) -> Result<Json<AccountWithBalance>, ApiError> {
-    let updated_account = account_db::update(&mut pool, *id, &req).await?;
+    let user = guard.0;
+
+    let updated_account = account_db::update(&mut pool, *id, user.organization_id, &req).await?;
     Ok(Json(AccountWithBalance {
         id: updated_account.id,
         organization_id: updated_account.organization_id,
@@ -173,17 +176,19 @@ async fn update_account(
 
 #[delete("/api/accounts/<id>")]
 async fn delete_account(
-    auth: RequirePrivilege<ManageAccounts>,
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
+    guard: RequirePrivilege<ManageAccounts>,
 ) -> Result<&'static str, ApiError> {
+    let user = guard.0;
+
     if account_db::has_journal_entries(&mut pool, *id).await? {
         return Err(ApiError::Conflict(
             "Cannot delete an account with journal entries.".to_string(),
         ));
     }
 
-    let rows_affected = account_db::delete(&mut pool, *id).await?;
+    let rows_affected = account_db::delete(&mut pool, *id, user.organization_id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Account not found.".to_string()));
     }
@@ -193,23 +198,23 @@ async fn delete_account(
 
 #[get("/api/accounts/<id>/export/<format>?<start>&<end>")]
 async fn export_account_ledger(
-    auth: RequirePrivilege<UseAccounts>,
     mut pool: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseAccounts>,
     id: PathUuid,
     format: String,
     start: String,
     end: String,
 ) -> Result<DownloadFile, ApiError> {
+    let user = guard.0;
     let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid start date".to_string()))?;
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid end date".to_string()))?;
 
-    let account = account_db::get(&mut pool, *id).await?;
+    let account = account_db::get(&mut pool, *id, user.organization_id).await?;
     if let Some(account) = account {
         let entries = account_service::get_journal_entries_with_running_balance(
-            &mut pool, *id, start_date, end_date,
+            &mut pool, *id, user.organization_id, start_date, end_date,
         )
         .await?;
         let org = crate::db::organization::get(&mut pool, user.organization_id).await?;

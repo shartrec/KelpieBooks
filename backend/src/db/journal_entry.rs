@@ -161,6 +161,7 @@ pub(crate) async fn insert(
 pub(crate) async fn get_balance_before_date(
     pool: &mut PgConnection,
     account_id: Uuid,
+    org_id: Uuid,
     date: NaiveDate,
 ) -> Result<i64, sqlx::Error> {
     let result = sqlx::query(
@@ -168,10 +169,12 @@ pub(crate) async fn get_balance_before_date(
         SELECT COALESCE(SUM(debit - credit), 0)::BIGINT as balance
         FROM journal_entries je
         JOIN transactions t ON je.transaction_id = t.id
-        WHERE je.account_id = $1 AND t.date < $2
+        JOIN accounts a ON je.account_id = a.id
+        WHERE je.account_id = $1 AND a.organization_id = $2 AND t.date < $3
         "#,
     )
     .bind(account_id)
+    .bind(org_id)
     .bind(date)
     .fetch_one(pool)
     .await?;
@@ -182,6 +185,7 @@ pub(crate) async fn get_balance_before_date(
 pub(crate) async fn get_all_by_account_in_date_range(
     pool: &mut PgConnection,
     account_id: Uuid,
+    org_id: Uuid,
     start_date: NaiveDate,
     end_date: NaiveDate,
 ) -> Result<Vec<JournalEntryWithDate>, sqlx::Error> {
@@ -198,11 +202,13 @@ pub(crate) async fn get_all_by_account_in_date_range(
             t.date
         FROM journal_entries je
         JOIN transactions t ON je.transaction_id = t.id
-        WHERE je.account_id = $1 AND t.date >= $2 AND t.date <= $3
+        JOIN accounts a ON je.account_id = a.id
+        WHERE je.account_id = $1  AND a.organization_id = $2 AND t.date >= $3 AND t.date <= $4
         ORDER BY t.date, je.created_at
         "#,
     )
     .bind(account_id)
+    .bind(org_id)
     .bind(start_date)
     .bind(end_date)
     .fetch_all(pool)
@@ -217,6 +223,7 @@ pub(crate) async fn get_all_by_account_in_date_range(
 pub(crate) async fn get_balance_up_to_date(
     pool: &mut PgConnection,
     account_id: Uuid,
+    org_id: Uuid,
     date: NaiveDate,
 ) -> Result<i64, sqlx::Error> {
     let result = sqlx::query(
@@ -224,10 +231,12 @@ pub(crate) async fn get_balance_up_to_date(
         SELECT COALESCE(SUM(debit - credit), 0)::BIGINT as balance
         FROM journal_entries je
         JOIN transactions t ON je.transaction_id = t.id
-        WHERE je.account_id = $1 AND t.date <= $2
+        JOIN accounts a ON je.account_id = a.id
+        WHERE je.account_id = $1  AND a.organization_id = $2 AND t.date <= $3
         "#,
     )
     .bind(account_id)
+    .bind(org_id)
     .bind(date)
     .fetch_one(pool)
     .await?;

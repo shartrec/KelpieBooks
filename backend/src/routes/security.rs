@@ -16,7 +16,6 @@ use shared_core::dtos::user_detail::UserDetail;
 use shared_core::requests::auth::LoginRequest;
 use std::sync::OnceLock;
 
-use crate::db::roles as role_db;
 use crate::db::user;
 use crate::DbKelpie;
 use base64::{engine::general_purpose, Engine as _};
@@ -121,7 +120,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         if let Some(cookie) = request.cookies().get("session") {
             let outcome = request.guard::<Connection<DbKelpie>>().await;
-            if let Outcome::Success(mut db) = outcome {
+            if let Outcome::Success(_) = outcome {
                 if let Some(user) = validate_session_token(cookie.value()).await {
                     return Outcome::Success(user);
                 }

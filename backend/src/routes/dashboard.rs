@@ -9,7 +9,7 @@
 use crate::db::journal_entry::get_all_by_transaction;
 use crate::db::transaction::get_recent_transactions as get_recent_transactions_from_db;
 use crate::db::vendor_invoice::get_top_payables as get_top_payables_from_db;
-use crate::routes::security::AuthenticatedUser;
+use crate::security::{RequirePrivilege, UseTransactions};
 use crate::services::account_service::{get_account_with_balance, get_system_accounts};
 use crate::services::report_service::{
     get_expense_breakdown as get_expense_breakdown_from_service, get_profit_loss,
@@ -29,8 +29,9 @@ use uuid::Uuid;
 #[get("/financial-health")]
 async fn get_financial_health(
     mut db: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseTransactions>,
 ) -> Result<Json<FinancialHealth>, rocket::http::Status> {
+    let user = guard.0;
     let org_id = user.organization_id;
 
     let today = Local::now().date_naive();
@@ -46,7 +47,7 @@ async fn get_financial_health(
     let bank_account_id = system_accounts.get(&SystemTag::CashAtBank).cloned();
 
     let accounts_receivable_balance = if let Some(id) = ar_account_id {
-        get_account_with_balance(&mut db, id)
+        get_account_with_balance(&mut db, id, user.organization_id)
             .await
             .map(|a| a.balance)
             .unwrap_or(-999)
@@ -54,7 +55,7 @@ async fn get_financial_health(
         0
     };
     let accounts_payable_balance = if let Some(id) = ap_account_id {
-        get_account_with_balance(&mut db, id)
+        get_account_with_balance(&mut db, id, user.organization_id)
             .await
             .map(|a| a.balance)
             .unwrap_or(-999)
@@ -63,7 +64,7 @@ async fn get_financial_health(
     };
 
     let bank_balance = if let Some(id) = bank_account_id {
-        get_account_with_balance(&mut db, id)
+        get_account_with_balance(&mut db, id, user.organization_id)
             .await
             .map(|a| a.balance)
             .unwrap_or(-999)
@@ -100,8 +101,9 @@ async fn get_financial_health(
 #[get("/recent-transactions")]
 async fn get_recent_transactions(
     mut db: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseTransactions>,
 ) -> Result<Json<Vec<RecentTransaction>>, rocket::http::Status> {
+    let user = guard.0;
     let org_id = user.organization_id;
 
     let transactions = get_recent_transactions_from_db(&mut db, org_id, 5)
@@ -131,8 +133,9 @@ async fn get_recent_transactions(
 #[get("/expense-breakdown")]
 async fn get_expense_breakdown(
     mut db: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseTransactions>,
 ) -> Result<Json<Vec<ExpenseBreakdown>>, rocket::http::Status> {
+    let user = guard.0;
     let org_id = user.organization_id;
     let today = Local::now().date_naive();
     let month_start = NaiveDate::from_ymd_opt(today.year(), today.month(), 1).unwrap();
@@ -153,8 +156,9 @@ async fn get_expense_breakdown(
 #[get("/top-payables")]
 async fn get_top_payables(
     mut db: Connection<DbKelpie>,
-    user: AuthenticatedUser,
+    guard: RequirePrivilege<UseTransactions>,
 ) -> Result<Json<Vec<TopPayable>>, rocket::http::Status> {
+    let user = guard.0;
     let org_id = user.organization_id;
 
     let date_before = Local::now().date_naive() + Duration::days(7);

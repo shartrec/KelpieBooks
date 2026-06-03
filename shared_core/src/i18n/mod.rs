@@ -9,7 +9,7 @@
 //! Internationalisation module
 use fixed_decimal::FixedDecimal;
 use fluent::concurrent::FluentBundle;
-use fluent::{FluentArgs, FluentError, FluentResource};
+use fluent::{FluentArgs, FluentResource};
 use icu_calendar::Date;
 use icu_datetime::options::length;
 use icu_datetime::DateFormatter;
