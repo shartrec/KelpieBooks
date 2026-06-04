@@ -151,6 +151,7 @@ coa-error-fetch-accounts = Failed to fetch accounts: { $status }
 coa-error-add-account = Failed to add account: { $status }
 coa-error-update-account = Failed to update account: { $status }
 coa-error-not-found = Account not found
+coa-error-delete-account = Failed to delete account: { $status }
 
 
 # Add/Edit Account Modal
@@ -244,6 +245,9 @@ register-email-label = Email:
 register-password-label = Password:
 register-coa-template-label = Chart of Accounts Template:
 register-submit-button = Register
+register-create-org-subtitle = Create a new organization cluster
+register-help-text = Looking to join an existing team? Contact your system administrator for access.
+register-back-to-login = Back to Login
 
 # Register Page Error Messages
 register-error-server = Server error: { $status }

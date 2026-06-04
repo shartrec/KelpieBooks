@@ -72,7 +72,6 @@ pub fn generate_trial_balance_csv(user: &AuthenticatedUser, accounts: &[AccountW
     let (total_debit, total_credit) = AccountWithBalance::calculate_totals(accounts);
 
     let mut csv_content = String::new();
-    csv_content.push_str("Account,Debit,Credit\n");
     csv_content.push_str(
         &format!(
             "{},{},{}\n",

@@ -68,7 +68,7 @@ pub fn register_page() -> Html {
                 <div class="register-brand">
                     <img src="/images/kelpiedog_120x120_transparent.png" alt={i18n.t("login-logo-alt-text")} class="register-logo" />
                     <h1>{ i18n.t("branding-app-name") }</h1>
-                    <p class="subtitle">{ "Create a new organization cluster" }</p>
+                    <p class="subtitle">{ i18n.t("register-create-org-subtitle") }</p>
                 </div>
 
                 <RegisterForm
@@ -77,8 +77,8 @@ pub fn register_page() -> Html {
                 />
 
                 <div class="register-footer">
-                    <p>{ "Looking to join an existing team? Contact your system administrator for access." }</p>
-                    <p><Link<Route> to={Route::Login}>{ "Back to Login" }</Link<Route>></p>
+                    <p>{ i18n.t("register-help-text") }</p>
+                    <p><Link<Route> to={Route::Login}>{ i18n.t("register-back-to-login") }</Link<Route>></p>
                 </div>
             </div>
         </div>
