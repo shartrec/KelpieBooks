@@ -13,7 +13,7 @@ use crate::contexts::locale_context::use_locale;
 use crate::router::Route;
 use fluent::fluent_args;
 use serde::Serialize;
-use shared_core::dtos::user_detail::{AuthUserDetail, UserDetail};
+use shared_core::dtos::user_detail::AuthUserDetail;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 

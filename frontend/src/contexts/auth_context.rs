@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::dtos::user_detail::{AuthUserDetail, UserDetail};
+use shared_core::dtos::user_detail::AuthUserDetail;
 use std::rc::Rc;
 use yew::prelude::*;
 use shared_core::models::auth::SystemPrivilege;

@@ -16,7 +16,6 @@ use shared_core::dtos::transaction_detail::TransactionDetail;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::components::transaction_row::_TransactionRowProps::org_ctx;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TransactionGroup {

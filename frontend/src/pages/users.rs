@@ -12,17 +12,15 @@ use crate::components::edit_user_modal::EditUserModal;
 use crate::components::generic_delete_confirmation_modal::GenericDeleteConfirmationModal;
 use crate::components::layout::Layout;
 use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::{use_locale, LocaleContext};
+use crate::contexts::locale_context::use_locale;
 use fluent::fluent_args;
 use shared_core::dtos::user_detail::UserDetail;
 use shared_core::models::role::Role;
 use shared_core::requests::user::{CreateUserRequest, UpdateUserRequest};
 use std::rc::Rc;
-use gloo_net::http::Response;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::dtos::ApiErrorMessage;
 use crate::pages;
 
 #[function_component(UsersPage)]

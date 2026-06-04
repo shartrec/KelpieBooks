@@ -12,7 +12,7 @@ use crate::router::Route;
 use crate::services::web::detect_browser_locale;
 use fluent::fluent_args;
 use gloo_net::http::Request;
-use shared_core::dtos::user_detail::{AuthUserDetail, UserDetail};
+use shared_core::dtos::user_detail::AuthUserDetail;
 use shared_core::requests::auth::LoginRequest;
 use yew::function_component;
 use yew::html;

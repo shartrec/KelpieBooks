@@ -8,7 +8,6 @@
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::models::auth::SystemPrivilege;
 
 /// A Data Transfer Object representing the user details that are safe
 /// to send to the frontend. This struct explicitly omits sensitive
