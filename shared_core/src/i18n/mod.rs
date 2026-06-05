@@ -7,14 +7,16 @@
  */
 
 //! Internationalisation module
-use fixed_decimal::FixedDecimal;
+
+use std::cell::RefCell;
 use fluent::concurrent::FluentBundle;
 use fluent::{FluentArgs, FluentResource};
 use icu_calendar::Date;
-use icu_datetime::options::length;
-use icu_datetime::DateFormatter;
-use icu_decimal::FixedDecimalFormatter;
-use icu_locid::{locale, Locale};
+use icu_datetime::DateTimeFormatter;
+use icu_datetime::fieldsets::YMD;
+use icu_decimal::input::Decimal;
+use icu_decimal::DecimalFormatter;
+use icu_provider::prelude::icu_locale_core::{locale, Locale};
 use include_dir::{include_dir, Dir};
 use std::collections::HashMap;
 use std::sync::LazyLock;
@@ -24,20 +26,28 @@ use unic_langid::LanguageIdentifier;
 // Define the directory where translation files are.
 static TRANSLATIONS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/translations");
 
+thread_local! {
+    static DECIMAL_FORMATTER_CACHE: RefCell<HashMap<Locale, DecimalFormatter>> =
+        RefCell::new(HashMap::new());
+    static DATE_FORMATTER_CACHE: RefCell<HashMap<Locale, DateTimeFormatter<YMD>>> =
+        RefCell::new(HashMap::new());
+}
+
 // Create a lazy static instance of the I18nManager.
 pub static I18N: LazyLock<I18nManager> = LazyLock::new(I18nManager::new);
 
 // The main struct to manage all translations.
 pub struct I18nManager {
     bundles: HashMap<LanguageIdentifier, FluentBundle<FluentResource>>,
-    default_locale: LanguageIdentifier,
+    default_locale: Locale,
+    default_lang_id: LanguageIdentifier,
 }
 
 // shared_core/src/i18n/mod.rs
 
 impl I18nManager {
     pub fn new() -> Self {
-        let default_locale = langid!("en-AU");
+        let default_langid = langid!("en-AU");
         let mut bundles = HashMap::new();
 
         // 1. First pass: Load all base language files (e.g., "en", "fr", "es")
@@ -103,7 +113,8 @@ impl I18nManager {
 
         I18nManager {
             bundles,
-            default_locale,
+            default_locale: locale!("en-AU"),
+            default_lang_id: default_langid,
         }
     }
 
@@ -130,7 +141,7 @@ impl I18nManager {
     }
 
     pub fn get_default_bundle(&self) -> &FluentBundle<FluentResource> {
-        self.bundles.get(&self.default_locale).expect("Default bundle not found!")
+        self.bundles.get(&self.default_lang_id).expect("Default bundle not found!")
     }
 }
 
@@ -230,23 +241,28 @@ impl I18n for I18nManager {
 /// Formats standard cents integers (i64) into localized decimals.
 /// e.g., 123456 -> "1,234.56" (en-AU) or "1 234,56" (fr-FR)
 pub fn format_currency_icu(amount_cents: i64, target_locale: Option<&str>) -> String {
-    // Parse targeted locale string or default dynamically to en-AU
-    let locale_ident: Locale = target_locale
-        .and_then(|l| l.parse::<Locale>().ok())
-        .unwrap_or_else(|| locale!("en-AU"));
+    let locale: Locale = target_locale
+        .and_then(|l| l.parse().ok())
+        .unwrap_or_else(|| I18N.default_locale.clone());
 
-    // Instantiate localized decimal formatter
-    let formatter = FixedDecimalFormatter::try_new(&locale_ident.into(), Default::default())
-        .expect("Failed to initialize ICU4X Decimal Formatter");
+    DECIMAL_FORMATTER_CACHE.with(|cache| {
+        let mut cache = cache.borrow_mut();
 
-    // Convert i64 cents to an explicit fixed-point scale representation
-    // to bypass potential floating-point rounding precision errors in accounting logs
-    let mut decimal = FixedDecimal::from(amount_cents);
-    decimal.multiply_pow10(-2);
+        // Evict if an attacker tries to flood the map with infinite dynamic variations
+        if cache.len() > 50 {
+            cache.clear();
+        }
 
-    let formatted_buffer = formatter.format_to_string(&decimal);
+        let formatter = cache.entry(locale.clone()).or_insert_with(|| {
+            DecimalFormatter::try_new(locale.into(), Default::default())
+                .expect("Failed to initialize ICU4X Decimal Formatter")
+        });
 
-    formatted_buffer
+        let mut decimal = Decimal::from(amount_cents);
+        decimal.multiply_pow10(-2);
+
+        formatter.format_to_string(&decimal)
+    })
 }
 
 /// Specialized wrapper for Typst reporting layouts
@@ -265,23 +281,28 @@ pub fn format_currency_icu_typ(amount_cents: i64, target_locale: Option<&str>) -
 /// Formats naive calendar variables into human-readable regional text streams
 /// e.g., (2026, 5, 25) -> "25 May 2026"
 pub fn format_date_icu(year: i32, month: u32, day: u32, target_locale: Option<&str>) -> String {
-    let locale_ident: Locale = target_locale
-        .and_then(|l| l.parse::<Locale>().ok())
-        .unwrap_or_else(|| locale!("en-AU"));
+    let locale: Locale = target_locale
+        .and_then(|l| l.parse().ok())
+        .unwrap_or_else(|| I18N.default_locale.clone());
 
-    // Initialize the thread-safe date compiler using native ISO calendar layout maps
-    let date_formatter = DateFormatter::try_new_with_length(
-        &locale_ident.into(),
-        length::Date::Medium,
-    )
-    .expect("Failed to construct ICU4X DateTime engine configuration context");
+    DATE_FORMATTER_CACHE.with(|cache| {
+        let mut cache = cache.borrow_mut();
 
-    // Build the isolated date object structure
-    let date_object = Date::try_new_iso_date(year, month as u8, day as u8)
-        .expect("Invalid Date integer bounds provided to ledger component system");
+        // Evict if an attacker tries to flood the map with infinite dynamic variations
+        if cache.len() > 50 {
+            cache.clear();
+        }
 
-    // Format immediately to a native safe string
-    date_formatter.format_to_string(&date_object.to_any()).expect("Failed to format date")
+        let formatter = cache.entry(locale.clone()).or_insert_with(|| {
+            DateTimeFormatter::try_new(locale.into(), YMD::medium())
+                .expect("Failed to construct ICU4X DateTime engine configuration context")
+        });
+
+        let date_object = Date::try_new_iso(year, month as u8, day as u8)
+            .expect("Invalid Date integer bounds provided to ledger component system");
+
+        formatter.format(&date_object).to_string()
+    })
 }
 
 #[cfg(test)]
@@ -339,5 +360,45 @@ mod tests {
         assert_eq!(format_date_icu(2026, 5, 25, Some("en-AU")), "25 May 2026");
         assert_eq!(format_date_icu(2026, 5, 25, Some("fr-FR")), "25 mai 2026");
         assert_eq!(format_date_icu(2026, 5, 25, None), "25 May 2026");
+    }
+
+    #[test]
+    fn audit_missing_translations() {
+        use std::fs;
+        use std::collections::HashSet;
+
+        let base_content = fs::read_to_string("translations/en.ftl")
+            .expect("Failed to read base en.ftl");
+
+        // Extract keys from base file
+        let base_keys: HashSet<&str> = base_content
+            .lines()
+            .filter(|line| line.contains('=') && !line.starts_with('#'))
+            .map(|line| line.split('=').next().unwrap().trim())
+            .collect();
+
+        // Iterate through other target files
+        let target_locales = vec!["translations/fr.ftl"];
+        for locale_path in target_locales {
+            let content = fs::read_to_string(locale_path).unwrap();
+            let current_keys: HashSet<&str> = content
+                .lines()
+                .filter(|line| line.contains('=') && !line.starts_with('#'))
+                .map(|line| line.split('=').next().unwrap().trim())
+                .collect();
+
+            let missing_keys: Vec<&&str> = base_keys.difference(&current_keys).collect();
+
+            if !missing_keys.is_empty() {
+                let mut error_message = format!(
+                    "🚨 Localization Leak: The following keys are missing from target file '{}':\n",
+                    locale_path
+                );
+                for key in missing_keys {
+                    error_message.push_str(&format!("- {}\n", key));
+                }
+                panic!("{}", error_message);
+            }
+        }
     }
 }
