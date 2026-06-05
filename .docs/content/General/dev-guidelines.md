@@ -100,11 +100,57 @@ Good candidates for `shared_core` include:
 * Enum values used by both frontend and backend
 * Shared formatting or validation helpers
 
+
+
 ### Handling Currency values
 
 * All monetary values must be represented as `i64` whole cents (e.g., `$10.50` is stored and calculated as `1050`).
 * __Never__ use `f32` or `f64` for tracking financial values.
 * All mathematical modifications must happen via safe integer calculations to completely eliminate rounding errors.
+
+## Security Model
+
+Our security model is based on a combination of users, roles, and privileges.
+
+*   **Users**: Individual accounts that can log in to the system.
+*   **Roles**: A collection of privileges. Each user is assigned a role, which determines what they are allowed to do.
+*   **Privileges**: Specific permissions that grant access to certain actions or data. These are defined as an enum in `shared_core/src/models/auth.rs`.
+
+### Backend
+
+In the backend, we use Rocket's request guards to enforce security. These guards are defined in `backend/src/security.rs`. Each route that requires authentication or specific privileges should use the appropriate guard.
+
+For example, to protect a route that requires the `manage_accounts` privilege, you would use the `RequirePrivilege<ManageAccounts>` guard:
+
+```rust
+#[get("/api/accounts")]
+async fn get_accounts(
+    mut pool: Connection<DbKelpie>,
+    guard: RequirePrivilege<ManageAccounts>,
+) -> Result<Json<Vec<Account>>, ApiError> {
+    // ...
+}
+```
+
+### Frontend
+
+In the frontend, the `UserContext` provides a `has_privilege` method to check if the current user has a specific privilege. This should be used to conditionally render UI elements that correspond to protected actions.
+
+For example, to only show a "Delete" button to users with the `manage_accounts` privilege:
+
+```rust
+{ if user_ctx.has_privilege(&SystemPrivilege::manage_accounts) {
+    html! {
+        <button class="icon-button btn-action" onclick={on_delete_click}>
+            <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
+        </button>
+    }
+} else {
+    html! {}
+}}
+```
+
+This ensures that the UI accurately reflects the user's permissions and prevents them from attempting actions they are not authorized to perform.
 
 ## i18n - Internationalization
 

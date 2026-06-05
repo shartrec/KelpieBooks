@@ -12,7 +12,7 @@ use jsonwebtoken::{
     Validation,
 };
 use rocket::{get, post, routes, Route};
-use shared_core::dtos::user_detail::{AuthUserDetail, UserDetail};
+use shared_core::dtos::user_detail::AuthUserDetail;
 use shared_core::requests::auth::LoginRequest;
 use std::sync::OnceLock;
 

@@ -208,7 +208,7 @@ pub(crate) async fn get_all(
     pool: &mut PgConnection,
     organization_id: Uuid,
 ) -> Result<Vec<UserWithOrg>, sqlx::Error> {
-    let rows = sqlx::query(format!("{} {} ", SQL, "WHERE u.organization_id = $1").as_str())
+    let rows = sqlx::query(format!("{} {} ", SQL, "WHERE u.organization_id = $1 ORDER BY u.display_name").as_str())
         .bind(organization_id)
         .fetch_all(&mut *pool)
         .await?;

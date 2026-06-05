@@ -30,7 +30,8 @@ will not be merged:
 
 * The `shared_core` crate is a database-agnostic domain layer shared directly with the frontend Yew app compiled to
   WASM.
-* **Do not** add `sqlx`, native networking, or file-system crate dependencies to `shared_core`.
+* **Keep** `sqlx`, native networking, or file-system crate dependencies out of the  `frontend`. If they need to be 
+* added to the `shared-core` make sure they are protected by the ```#[cfg_attr(feature = "backend")]```
 * Keep database-specific attributes, macros, and connections confined strictly to the `backend` server crate.
 
 ### Rule C: Multi-Tenant Scoping
