@@ -104,10 +104,10 @@ For a smooth development workflow, you should run the backend and frontend build
     The backend server will start on `http://localhost:8000`.
 
 -   **Terminal 2: Watch for Frontend Changes**
-    Navigate to the `frontend` directory and run `wasm-pack` in watch mode. This will automatically rebuild the WebAssembly package whenever you save a file.
+    Navigate to the `frontend` directory and run `trunk` in watch mode. This will automatically rebuild the WebAssembly package whenever you save a file.
     ```sh
     cd frontend
-    wasm-pack build --target web --out-name wasm --out-dir ./pkg --watch
+    trunk watch
     ```
 
 -   **Access the Application**:
