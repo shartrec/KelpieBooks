@@ -34,18 +34,18 @@ You can manage your accounts directly from this screen.
 
 To create a new account, click the **Add Account** button located at the top of the page.
 
-- For detailed instructions, see the [Add New Account](../add-account.md) page.
+- For detailed instructions, see the [Add New Account](../add-account/) page.
 
 ### Editing an Existing Account
 
 To modify an account's details (like its name or code), click the **Edit** button in the "Actions" column for that
 account row.
 
-- For detailed instructions, see the [Edit Account](../edit-account.md) page.
+- For detailed instructions, see the [Edit Account](../edit-account/) page.
 
 ### Deleting an Account
 
 To remove an account, click the **Delete** button in the "Actions" column. Please note that you can only delete accounts
 that have no transactions associated with them. This is a safety measure to prevent accidental data loss.
 
-- For more information, see the [Delete Account](../delete-account.md) page.
+- For more information, see the [Delete Account](../delete-account/) page.
