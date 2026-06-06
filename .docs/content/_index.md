@@ -9,7 +9,7 @@ sort_by = "weight"
 
 KelpieBooks is a modern, open-source accounting application designed for small to medium-sized enterprises (SMEs) and individuals. It is built entirely in Rust, leveraging a robust backend with Rocket and SQLx, and a reactive frontend with Yew and WebAssembly.
 
-![KelpieBooks Dashboard](user/screenshots/dashboard.png)
+![KelpieBooks Dashboard](../../screenshots/dashboard.png)
 
 There is an ongoing need for good modern accounting systems in the *open source* eco-system. The mainstays of
 open source accounting, such as GnuCash, are starting to look old and tired, even though they still work well. 
