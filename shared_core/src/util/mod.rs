@@ -6,9 +6,4 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-pub mod dtos;
-pub mod i18n;
-pub mod models;
-pub mod reports;
-pub mod requests;
-pub mod util;
+pub(crate) mod info;
