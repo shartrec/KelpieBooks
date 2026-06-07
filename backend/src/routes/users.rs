@@ -7,7 +7,9 @@
  */
 
 use crate::db::user;
+use crate::routes::security::{hash_pwd, AuthenticatedUser};
 use crate::security::{ManageUsers, RequirePrivilege};
+use crate::util::locale_context::LocaleContext;
 use crate::util::types::PathUuid;
 use crate::util::ApiError;
 use crate::DbKelpie;
@@ -18,11 +20,9 @@ use serde::Deserialize;
 use shared_core::dtos::user_detail::{AuthUserDetail, UserDetail};
 use shared_core::requests::user::{CreateUserRequest, UpdateUserRequest};
 use sqlx::Acquire;
-use crate::routes::security::{hash_pwd, AuthenticatedUser};
-use crate::util::locale_context::LocaleContext;
 
 #[derive(Deserialize)]
-pub struct PasswordUpdateData {
+pub(crate) struct PasswordUpdateData {
     old_password: String,
     new_password: String,
 }

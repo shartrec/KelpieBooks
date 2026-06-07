@@ -8,7 +8,8 @@
 
 use crate::db::roles;
 use crate::db::user as db_user;
-use crate::security::{SecurityAdmin, RequirePrivilege};
+use crate::security::{RequirePrivilege, SecurityAdmin};
+use crate::util::locale_context::LocaleContext;
 use crate::util::types::PathUuid;
 use crate::util::ApiError;
 use crate::DbKelpie;
@@ -18,7 +19,6 @@ use rocket_db_pools::Connection;
 use shared_core::models::role::Role;
 use shared_core::requests::role::{CreateRoleRequest, UpdateRoleRequest};
 use sqlx::Acquire;
-use crate::util::locale_context::LocaleContext;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![get_all_roles, create_role, update_role, delete_role]

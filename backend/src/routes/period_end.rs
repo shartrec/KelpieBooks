@@ -6,8 +6,8 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+use crate::ledger::services::period_end_service;
 use crate::security::{ManageAccounts, RequirePrivilege};
-use crate::services::period_end_service;
 use crate::util::ApiError;
 use crate::DbKelpie;
 use chrono::NaiveDate;

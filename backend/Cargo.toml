@@ -1,8 +1,19 @@
-
 [package]
 name = "backend"
 version = "0.1.0"
 edition = "2021"
+
+[features]
+# By default, maybe you only want the basic ledger core active
+default = ["ledger"]
+
+# Define your optional modules here
+ledger = ["shared_core/ledger"]
+partners = ["ledger", "shared_core/partners"]
+payables = ["ledger", "partners", "shared_core/payables"]
+sales = ["ledger", "partners", "shared_core/sales"]
+accounts_receivable = ["sales", "shared_core/accounts_receivable"]
+inventory = ["ledger", "shared_core/inventory"]
 
 [dependencies]
 shared_core = { path = "../shared_core", features = ["backend"] }

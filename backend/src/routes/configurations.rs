@@ -6,8 +6,8 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+use crate::ledger::services::account_service;
 use crate::security::{ManageAccounts, RequirePrivilege, UseAccounts};
-use crate::services::account_service;
 use crate::DbKelpie;
 use rocket::serde::json::Json;
 use rocket::{get, post, put, routes};
@@ -17,7 +17,7 @@ use shared_core::requests::configuration::UpdateConfigurationRequest;
 use std::collections::HashMap;
 use uuid::Uuid;
 
-pub fn routes() -> Vec<rocket::Route> {
+pub(crate) fn routes() -> Vec<rocket::Route> {
     routes![
         get_system_accounts,
         set_system_accounts,

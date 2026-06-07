@@ -166,7 +166,7 @@ pub(crate) fn hash_pwd(password: &str) -> Result<String, ApiError> {
 
 static SECRET_KEY: OnceLock<String> = OnceLock::new();
 
-pub fn init_secret_key() -> String {
+pub(crate) fn init_secret_key() -> String {
     let mut buf = [0u8; 32];
     OsRng.fill_bytes(&mut buf);
     general_purpose::STANDARD.encode(&buf)

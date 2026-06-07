@@ -15,7 +15,7 @@ use uuid::Uuid;
 /// A newtype wrapper for `Uuid` to implement `FromParam` and satisfy the orphan rule.
 /// This allows Rocket to parse `Uuid` values from URL path segments.
 #[derive(Clone, Copy)]
-pub struct PathUuid(pub Uuid);
+pub(crate) struct PathUuid(pub(crate) Uuid);
 
 /// Allows `PathUuid` to be used as a `Uuid` via dereferencing (e.g., `*id`).
 impl Deref for PathUuid {
@@ -46,8 +46,9 @@ impl<'r> FromFormField<'r> for PathUuid {
 
 /// A newtype wrapper for `NaiveDate` to implement `FromParam` and satisfy the orphan rule.
 /// This allows Rocket to parse `NaiveDate` values from URL path segments.
+#[allow(unused)]  // It isn't unused, but is only used by some things behind a feature flag for now
 #[derive(Clone, Copy)]
-pub struct PathDate(pub NaiveDate);
+pub(crate) struct PathDate(pub(crate) NaiveDate);
 
 /// Allows `PathDate` to be used as a `NaiveDate` via dereferencing (e.g., `*date`).
 impl Deref for PathDate {

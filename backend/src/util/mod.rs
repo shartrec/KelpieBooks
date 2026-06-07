@@ -6,9 +6,10 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-pub mod logging;
-pub mod types;
-pub mod locale_context;
+pub(crate) mod logging;
+pub(crate) mod types;
+pub(crate) mod locale_context;
+pub(crate) mod reports;
 
 use bcrypt;
 use log::error;

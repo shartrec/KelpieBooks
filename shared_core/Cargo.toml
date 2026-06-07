@@ -4,9 +4,17 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = []
-# 💡 Define a specialized feature boundary for server targets
+default = ["ledger"]
+
 backend = ["dep:sqlx"]
+
+# 💡 Define a specialized feature boundary for server targets
+ledger = []
+partners = ["ledger"]
+payables = ["ledger"]
+sales = ["ledger", "partners"]
+accounts_receivable = ["sales"]
+inventory = ["ledger"]
 
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }

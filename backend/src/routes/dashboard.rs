@@ -6,26 +6,43 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::db::journal_entry::get_all_by_transaction;
-use crate::db::transaction::get_recent_transactions as get_recent_transactions_from_db;
-use crate::db::vendor_invoice::get_top_payables as get_top_payables_from_db;
-use crate::security::{RequirePrivilege, UseTransactions, UseVendorInvoices};
-use crate::services::account_service::{get_account_with_balance, get_system_accounts};
-use crate::services::report_service::{
-    get_expense_breakdown as get_expense_breakdown_from_service, get_profit_loss,
+
+#[cfg(feature = "ledger")]
+use crate::ledger::{
+    db::{
+        journal_entry::get_all_by_transaction,
+        transaction::get_recent_transactions as get_recent_transactions_from_db,
+    },
+    services::{
+        account_service::{get_account_with_balance, get_system_accounts},
+        report_service::{
+            get_expense_breakdown as get_expense_breakdown_from_service, get_profit_loss,
+        }
+    }
 };
+
+#[cfg(feature = "payables")]
+use crate::payables::db::vendor_invoice::get_top_payables as get_top_payables_from_db;
+#[cfg(feature = "payables")]
+use crate::security::{UseVendorInvoices};
+#[cfg(feature = "payables")]
+use shared_core::dtos::top_payable::TopPayable;
+#[cfg(feature = "payables")]
+use chrono::{Duration};
+
+use crate::security::{RequirePrivilege, UseTransactions};
 use crate::DbKelpie;
-use chrono::{Datelike, Duration, Local, NaiveDate};
+use chrono::{Datelike, Local, NaiveDate};
 use rocket::serde::json::Json;
 use rocket::{get, routes, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::dashboard::FinancialHealth;
 use shared_core::dtos::expense_breakdown::ExpenseBreakdown;
 use shared_core::dtos::recent_transaction::RecentTransaction;
-use shared_core::dtos::top_payable::TopPayable;
 use shared_core::models::{account_category::AccountCategory, system_tag::SystemTag};
 use uuid::Uuid;
 
+#[cfg(feature = "ledger")]
 #[get("/financial-health")]
 async fn get_financial_health(
     mut db: Connection<DbKelpie>,
@@ -98,6 +115,7 @@ async fn get_financial_health(
     }))
 }
 
+#[cfg(feature = "ledger")]
 #[get("/recent-transactions")]
 async fn get_recent_transactions(
     mut db: Connection<DbKelpie>,
@@ -130,6 +148,7 @@ async fn get_recent_transactions(
     Ok(Json(recent_transactions))
 }
 
+#[cfg(feature = "ledger")]
 #[get("/expense-breakdown")]
 async fn get_expense_breakdown(
     mut db: Connection<DbKelpie>,
@@ -153,6 +172,7 @@ async fn get_expense_breakdown(
     Ok(Json(breakdown))
 }
 
+#[cfg(feature = "payables")]
 #[get("/top-payables")]
 async fn get_top_payables(
     mut db: Connection<DbKelpie>,
@@ -169,11 +189,27 @@ async fn get_top_payables(
     Ok(Json(payables))
 }
 
-pub fn routes() -> Vec<Route> {
-    routes![
+pub(crate) fn routes() -> Vec<Route> {
+
+    let mut routes = routes![];
+
+    #[cfg(feature = "ledger")]
+    {
+        let mut r1 = routes![
         get_financial_health,
         get_recent_transactions,
         get_expense_breakdown,
-        get_top_payables
-    ]
+        ];
+        routes.append(&mut r1);
+    }
+
+    #[cfg(feature = "payables")]
+    {
+        let mut r2 = routes![
+            get_top_payables
+        ];
+        routes.append(&mut r2);
+    }
+
+    routes
 }

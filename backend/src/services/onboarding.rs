@@ -16,7 +16,7 @@ use shared_core::models::user::User;
 use shared_core::requests::onboard::OnboardingRequest;
 use sqlx::{Acquire, PgConnection, Postgres, Transaction};
 
-pub async fn bootstrap_tenant_organization(
+pub(crate) async fn bootstrap_tenant_organization(
     pool: &mut PgConnection,
     req: &OnboardingRequest,
 ) -> Result<User, sqlx::Error> {

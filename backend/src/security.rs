@@ -5,14 +5,14 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use crate::routes::security::AuthenticatedUser;
+use rocket::http::Status;
+use rocket::request::{FromRequest, Outcome};
+use rocket::Request;
+use shared_core::models::auth::SystemPrivilege;
 #[rustfmt::skip]  // This is to stop all the markers from being reformatted.
 
 use std::marker::PhantomData;
-use rocket::http::Status;
-use rocket::Request;
-use rocket::request::{FromRequest, Outcome};
-use shared_core::models::auth::SystemPrivilege;
-use crate::routes::security::AuthenticatedUser;
 
 pub(crate) trait GuardPrivilege {
     const VALUE: SystemPrivilege;
@@ -28,15 +28,24 @@ impl GuardPrivilege for UseAccounts { const VALUE: SystemPrivilege = SystemPrivi
 pub(crate) struct ManageAccounts;
 impl GuardPrivilege for ManageAccounts { const VALUE: SystemPrivilege = SystemPrivilege::manage_accounts; }
 
+#[cfg(feature = "partners")]
 pub(crate) struct UsePartners;
+#[cfg(feature = "partners")]
 impl GuardPrivilege for UsePartners { const VALUE: SystemPrivilege = SystemPrivilege::use_partners; }
 
+#[cfg(feature = "partners")]
 pub(crate) struct ManagePartners;
+#[cfg(feature = "partners")]
 impl GuardPrivilege for ManagePartners { const VALUE: SystemPrivilege = SystemPrivilege::manage_partners; }
 
+
+#[cfg(feature = "payables")]
 pub(crate) struct UseVendorInvoices;
+#[cfg(feature = "payables")]
 impl GuardPrivilege for UseVendorInvoices { const VALUE: SystemPrivilege = SystemPrivilege::use_vendor_invoices; }
+#[cfg(feature = "payables")]
 pub(crate) struct ManageVendorInvoices;
+#[cfg(feature = "payables")]
 impl GuardPrivilege for ManageVendorInvoices { const VALUE: SystemPrivilege = SystemPrivilege::manage_vendor_invoices; }
 
 pub(crate) struct UseTransactions;

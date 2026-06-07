@@ -7,6 +7,7 @@
  */
 
 use crate::db;
+use crate::routes::security::AuthenticatedUser;
 use crate::security::{ManageOrganization, RequirePrivilege};
 use crate::util::types::PathUuid;
 use crate::util::ApiError;
@@ -16,14 +17,13 @@ use rocket::{get, put, Route};
 use rocket_db_pools::Connection;
 use shared_core::dtos::organization::{AuditModeRequest, LockDateRequest};
 use shared_core::models::organization::Organization;
-use crate::routes::security::AuthenticatedUser;
 
-pub fn routes() -> Vec<Route> {
+pub(crate) fn routes() -> Vec<Route> {
     rocket::routes![get_organization, set_lock_date, set_audit_mode]
 }
 
 #[get("/api/organization")]
-pub async fn get_organization(
+pub(crate) async fn get_organization(
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
 ) -> Result<Json<Organization>, ApiError> {

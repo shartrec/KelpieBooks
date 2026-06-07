@@ -8,21 +8,26 @@
 #![forbid(unsafe_code)]
 
 use crate::routes::{
-    accounts, configurations, dashboard, onboarding, organization, partners, period_end, privileges, reports,
-    roles, security as security_routes, transactions, users, vendor_invoices, vendor_payments,
+    configurations, dashboard, onboarding, organization, period_end, privileges, roles, security as security_routes, users,
 };
 use crate::util::logging::setup_logging;
+use rocket::fairing::AdHoc;
 use rocket::fs::{relative, FileServer, NamedFile};
 use rocket::{get, routes};
-use rocket::fairing::AdHoc;
 use rocket_db_pools::Database;
 
+#[cfg(feature = "ledger")]
+pub(crate) mod ledger;
+#[cfg(feature = "partners")]
+pub(crate) mod partners;
+#[cfg(feature = "payables")]
+pub(crate) mod payables;
+
 mod db;
-mod export;
 mod routes;
 mod services;
 mod util;
-pub mod security;
+pub(crate) mod security;
 
 #[derive(Database)]
 #[database("kelpie_db")]
@@ -59,18 +64,26 @@ fn rocket() -> _ {
         .mount("/", security_routes::routes())
         .mount("/", onboarding::routes())
         .mount("/", users::routes())
-        .mount("/", accounts::routes())
-        .mount("/", partners::routes())
-        .mount("/", reports::routes())
-        .mount("/", transactions::routes())
-        .mount("/", period_end::routes())
         .mount("/", configurations::routes())
         .mount("/", organization::routes())
-        .mount("/", vendor_invoices::routes())
-        .mount("/", vendor_payments::routes())
         .mount("/", privileges::routes())
         .mount("/", roles::routes())
-        .mount("/api/dashboard", dashboard::routes())
+        .mount("/api/dashboard", dashboard::routes());
+    #[cfg(feature = "ledger")]
+    let rocket = rocket
+        .mount("/", ledger::routes::accounts::routes())
+        .mount("/", ledger::routes::reports::routes())
+        .mount("/", ledger::routes::transactions::routes())
+        .mount("/", period_end::routes());
+    #[cfg(feature = "partners")]
+    let rocket = rocket
+        .mount("/", partners::routes::partners::routes());
+    #[cfg(feature = "payables")]
+    let rocket = rocket
+        .mount("/", payables::routes::reports::routes())
+        .mount("/", payables::routes::vendor_invoices::routes())
+        .mount("/", payables::routes::vendor_payments::routes());
+    let rocket = rocket
         .mount("/", FileServer::from(relative!("./static")))
         // 3. Mount the fallback route with a lower priority (rank 2)
         .mount("/", routes![spa_index]);

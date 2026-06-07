@@ -11,7 +11,7 @@ use shared_core::models::role::Role;
 use sqlx::{PgConnection, Result, Row};
 use uuid::Uuid;
 
-pub async fn find_all_for_org(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<Role>> {
+pub(crate) async fn find_all_for_org(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<Role>> {
     let rows = sqlx::query(
         r#"
         SELECT r.id, r.name, COALESCE(array_agg(rp.privilege_id) FILTER (WHERE rp.privilege_id IS NOT NULL), '{}') as privileges
@@ -42,7 +42,7 @@ pub async fn find_all_for_org(conn: &mut PgConnection, org_id: Uuid) -> Result<V
     Ok(roles)
 }
 
-pub async fn find_by_id(conn: &mut PgConnection, org_id: Uuid, role_id: Uuid) -> Result<Option<Role>> {
+pub(crate) async fn find_by_id(conn: &mut PgConnection, org_id: Uuid, role_id: Uuid) -> Result<Option<Role>> {
     let row = sqlx::query(
         r#"
         SELECT r.id, r.name, COALESCE(array_agg(rp.privilege_id) FILTER (WHERE rp.privilege_id IS NOT NULL), '{}') as privileges
@@ -68,7 +68,7 @@ pub async fn find_by_id(conn: &mut PgConnection, org_id: Uuid, role_id: Uuid) ->
     }))
 }
 
-pub async fn create(
+pub(crate) async fn create(
     conn: &mut PgConnection,
     org_id: Uuid,
     name: &str,
@@ -81,7 +81,7 @@ pub async fn create(
         .get("id");
     Ok(role_id)
 }
-pub async fn update(
+pub(crate) async fn update(
     conn: &mut PgConnection,
     role_id: Uuid,
     name: &str,
@@ -94,7 +94,7 @@ pub async fn update(
     Ok(())
 }
 
-pub async fn delete(conn: &mut PgConnection, org_id: Uuid, role_id: Uuid) -> Result<u64> {
+pub(crate) async fn delete(conn: &mut PgConnection, org_id: Uuid, role_id: Uuid) -> Result<u64> {
     let result = sqlx::query("DELETE FROM roles WHERE id = $1 AND organization_id = $2")
         .bind(role_id)
         .bind(org_id)
