@@ -6,17 +6,20 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-pub(crate) mod logging;
-pub(crate) mod types;
 pub(crate) mod locale_context;
+pub(crate) mod logging;
 pub(crate) mod reports;
+pub(crate) mod types;
 
 use bcrypt;
 use log::error;
-use rocket::http::Status;
-use rocket::response::Responder;
-use rocket::serde::json::Json;
-use rocket::{Request, Response};
+use rocket::{
+    http::Status,
+    response::Responder,
+    serde::json::Json,
+    Request,
+    Response,
+};
 use rocket_db_pools::sqlx;
 use shared_core::dtos::ApiErrorMessage;
 

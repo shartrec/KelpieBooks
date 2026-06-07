@@ -7,7 +7,10 @@
  */
 
 use chrono::NaiveDate;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
 
 /// A DTO representing a journal entry with its running balance at that point in time.

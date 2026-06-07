@@ -6,8 +6,15 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use serde::{Deserialize, Serialize};
-use strum::{Display, EnumIter, EnumString};
+use serde::{
+    Deserialize,
+    Serialize,
+};
+use strum::{
+    Display,
+    EnumIter,
+    EnumString,
+};
 
 #[derive(
     Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy,

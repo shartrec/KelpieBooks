@@ -6,7 +6,10 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 /// Represents the data required to create a new organization and its first user.
 #[derive(Debug, Serialize, Deserialize)]

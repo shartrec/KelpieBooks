@@ -6,20 +6,46 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::db::user;
-use crate::routes::security::{hash_pwd, AuthenticatedUser};
-use crate::security::{ManageUsers, RequirePrivilege};
-use crate::util::locale_context::LocaleContext;
-use crate::util::types::PathUuid;
-use crate::util::ApiError;
-use crate::DbKelpie;
-use rocket::serde::json::Json;
-use rocket::{delete, get, post, put, routes, Route};
+use rocket::{
+    delete,
+    get,
+    post,
+    put,
+    routes,
+    serde::json::Json,
+    Route,
+};
 use rocket_db_pools::Connection;
 use serde::Deserialize;
-use shared_core::dtos::user_detail::{AuthUserDetail, UserDetail};
-use shared_core::requests::user::{CreateUserRequest, UpdateUserRequest};
+use shared_core::{
+    dtos::user_detail::{
+        AuthUserDetail,
+        UserDetail,
+    },
+    requests::user::{
+        CreateUserRequest,
+        UpdateUserRequest,
+    },
+};
 use sqlx::Acquire;
+
+use crate::{
+    db::user,
+    routes::security::{
+        hash_pwd,
+        AuthenticatedUser,
+    },
+    security::{
+        ManageUsers,
+        RequirePrivilege,
+    },
+    util::{
+        locale_context::LocaleContext,
+        types::PathUuid,
+        ApiError,
+    },
+    DbKelpie,
+};
 
 #[derive(Deserialize)]
 pub(crate) struct PasswordUpdateData {
@@ -59,7 +85,9 @@ pub(crate) async fn add_user(
     )
     .await?;
 
-    let user_with_org = user::get(&mut *pool, new_user.id, auth_user.organization_id).await?.unwrap();
+    let user_with_org = user::get(&mut *pool, new_user.id, auth_user.organization_id)
+        .await?
+        .unwrap();
 
     let user_detail = UserDetail {
         id: user_with_org.id,
@@ -101,11 +129,15 @@ pub(crate) async fn update_user(
     .await?;
 
     // Check we haven't accidentally deleted our admin
-    let _ = crate::db::user::check_security_admin_remains(&mut tx, auth_user.organization_id, &i18n).await?;
+    let _ =
+        crate::db::user::check_security_admin_remains(&mut tx, auth_user.organization_id, &i18n)
+            .await?;
 
     tx.commit().await?;
 
-    let user_with_org = user::get(&mut *pool, updated_user.id, auth_user.organization_id).await?.unwrap();
+    let user_with_org = user::get(&mut *pool, updated_user.id, auth_user.organization_id)
+        .await?
+        .unwrap();
 
     let user_detail = UserDetail {
         id: user_with_org.id,
@@ -141,12 +173,14 @@ pub(crate) async fn update_me(
     )
     .await?;
 
-    let user_with_org = user::get(&mut *pool, updated_user.id, auth_user.organization_id).await?.unwrap();
-    let role  = user_with_org.role.as_ref().map(|r| r.name.clone());
-    let privileges = user_with_org.role
+    let user_with_org = user::get(&mut *pool, updated_user.id, auth_user.organization_id)
+        .await?
+        .unwrap();
+    let role = user_with_org.role.as_ref().map(|r| r.name.clone());
+    let privileges = user_with_org
+        .role
         .map(|r| r.privileges.iter().map(|p| format!("{:?}", p)).collect())
         .unwrap_or_else(Vec::new);
-
 
     let user_detail = AuthUserDetail {
         id: user_with_org.id,
@@ -178,12 +212,7 @@ pub(crate) async fn update_password(
 
     let new_password_hash = hash_pwd(&password_data.new_password)?;
 
-    user::update_password(
-        &mut *pool,
-        auth_user.user_id,
-        &new_password_hash,
-    )
-    .await?;
+    user::update_password(&mut *pool, auth_user.user_id, &new_password_hash).await?;
 
     Ok("Password updated successfully")
 }
@@ -215,7 +244,6 @@ pub(crate) async fn get_user(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageUsers>,
 ) -> Result<Json<UserDetail>, ApiError> {
-
     let user = guard.0;
 
     match user::get(&mut *pool, *id, user.organization_id).await? {

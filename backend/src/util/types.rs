@@ -6,10 +6,17 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use chrono::NaiveDate;
-use rocket::form::{self, FromFormField, ValueField};
-use rocket::request::FromParam;
 use std::ops::Deref;
+
+use chrono::NaiveDate;
+use rocket::{
+    form::{
+        self,
+        FromFormField,
+        ValueField,
+    },
+    request::FromParam,
+};
 use uuid::Uuid;
 
 /// A newtype wrapper for `Uuid` to implement `FromParam` and satisfy the orphan rule.
@@ -46,7 +53,7 @@ impl<'r> FromFormField<'r> for PathUuid {
 
 /// A newtype wrapper for `NaiveDate` to implement `FromParam` and satisfy the orphan rule.
 /// This allows Rocket to parse `NaiveDate` values from URL path segments.
-#[allow(unused)]  // It isn't unused, but is only used by some things behind a feature flag for now
+#[allow(unused)] // It isn't unused, but is only used by some things behind a feature flag for now
 #[derive(Clone, Copy)]
 pub(crate) struct PathDate(pub(crate) NaiveDate);
 

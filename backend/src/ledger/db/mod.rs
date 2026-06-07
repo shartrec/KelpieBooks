@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-pub(crate) mod chart_of_accounts;
 pub(crate) mod account;
-pub(crate) mod transaction;
+pub(crate) mod chart_of_accounts;
 pub(crate) mod journal_entry;
+pub(crate) mod transaction;

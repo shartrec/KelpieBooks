@@ -6,13 +6,27 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::ledger::models::account::Account;
-use shared_core::ledger::models::account_category::AccountCategory;
-use shared_core::ledger::models::system_tag::SystemTag;
-use shared_core::ledger::requests::account::{CreateAccountRequest, UpdateAccountRequest};
-use std::collections::HashMap;
-use std::str::FromStr;
+use std::{
+    collections::HashMap,
+    str::FromStr,
+};
+
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+    Row,
+};
+use shared_core::ledger::{
+    models::{
+        account::Account,
+        account_category::AccountCategory,
+        system_tag::SystemTag,
+    },
+    requests::account::{
+        CreateAccountRequest,
+        UpdateAccountRequest,
+    },
+};
 use uuid::Uuid;
 
 fn from_row_to_account(row: &sqlx::postgres::PgRow) -> Account {
@@ -48,7 +62,11 @@ fn from_row_to_account(row: &sqlx::postgres::PgRow) -> Account {
     }
 }
 
-pub(crate) async fn get(pool: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<Option<Account>, sqlx::Error> {
+pub(crate) async fn get(
+    pool: &mut PgConnection,
+    id: Uuid,
+    org_id: Uuid,
+) -> Result<Option<Account>, sqlx::Error> {
     sqlx::query(
         r#"
         SELECT
@@ -167,7 +185,11 @@ pub(crate) async fn has_journal_entries(
     Ok(count > 0)
 }
 
-pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<u64, sqlx::Error> {
+pub(crate) async fn delete(
+    pool: &mut PgConnection,
+    id: Uuid,
+    org_id: Uuid,
+) -> Result<u64, sqlx::Error> {
     let result = sqlx::query("DELETE FROM accounts WHERE id = $1 AND organization_id = $2")
         .bind(id)
         .bind(org_id)

@@ -6,7 +6,11 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use chrono::NaiveDate;
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+    Row,
+};
 use shared_core::models::organization::Organization;
 use uuid::Uuid;
 

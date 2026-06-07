@@ -10,8 +10,8 @@
 
 #[cfg(feature = "ledger")]
 pub(crate) mod db;
+pub(crate) mod reports;
 #[cfg(feature = "ledger")]
 pub(crate) mod routes;
 #[cfg(feature = "ledger")]
 pub(crate) mod services;
-pub(crate) mod reports;

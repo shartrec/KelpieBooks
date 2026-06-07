@@ -5,28 +5,65 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use crate::util::ApiError;
-use bcrypt::{hash, BcryptError, DEFAULT_COST};
-use jsonwebtoken::{
-    decode, encode, errors::Error as JwtError, DecodingKey, EncodingKey, Header, TokenData,
-    Validation,
-};
-use rocket::{get, post, routes, Route};
-use shared_core::dtos::user_detail::AuthUserDetail;
-use shared_core::requests::auth::LoginRequest;
 use std::sync::OnceLock;
 
-use crate::db::user;
-use crate::DbKelpie;
-use base64::{engine::general_purpose, Engine as _};
-use rand::{rngs::OsRng, RngCore};
-use rocket::http::{Cookie, CookieJar, Status};
-use rocket::request::{FromRequest, Outcome, Request};
-use rocket::serde::json::Json;
-use rocket::serde::{Deserialize, Serialize};
+use base64::{
+    engine::general_purpose,
+    Engine as _,
+};
+use bcrypt::{
+    hash,
+    BcryptError,
+    DEFAULT_COST,
+};
+use jsonwebtoken::{
+    decode,
+    encode,
+    errors::Error as JwtError,
+    DecodingKey,
+    EncodingKey,
+    Header,
+    TokenData,
+    Validation,
+};
+use rand::{
+    rngs::OsRng,
+    RngCore,
+};
+use rocket::{
+    get,
+    http::{
+        Cookie,
+        CookieJar,
+        Status,
+    },
+    post,
+    request::{
+        FromRequest,
+        Outcome,
+        Request,
+    },
+    routes,
+    serde::{
+        json::Json,
+        Deserialize,
+        Serialize,
+    },
+    Route,
+};
 use rocket_db_pools::Connection;
-use shared_core::models::role::Role;
+use shared_core::{
+    dtos::user_detail::AuthUserDetail,
+    models::role::Role,
+    requests::auth::LoginRequest,
+};
 use uuid::Uuid;
+
+use crate::{
+    db::user,
+    util::ApiError,
+    DbKelpie,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![login, me, logout]
@@ -67,9 +104,10 @@ async fn login(
             let token = generate_session_token(&auth_user);
             cookies.add(Cookie::build(("session", token)).http_only(false));
 
-            let role  = auth_user.role.as_ref().map(|r| r.name.clone());
+            let role = auth_user.role.as_ref().map(|r| r.name.clone());
             // 💡 Map the SystemPrivilege enum variants directly into string flags
-            let privileges = auth_user.role
+            let privileges = auth_user
+                .role
                 .map(|r| r.privileges.iter().map(|p| format!("{:?}", p)).collect())
                 .unwrap_or_else(Vec::new);
 
@@ -80,7 +118,7 @@ async fn login(
                 display_name: user.display_name,
                 role: role,
                 organization_id: user.organization_id,
-                privileges: privileges
+                privileges: privileges,
             };
 
             Ok(Json(user_detail))
@@ -92,10 +130,10 @@ async fn login(
 
 #[get("/api/auth/me")]
 async fn me(user: AuthenticatedUser) -> Json<AuthUserDetail> {
-
-    let role  = user.role.as_ref().map(|r| r.name.clone());
+    let role = user.role.as_ref().map(|r| r.name.clone());
     // 💡 Map the SystemPrivilege enum variants directly into string flags
-    let privileges = user.role
+    let privileges = user
+        .role
         .map(|r| r.privileges.iter().map(|p| format!("{:?}", p)).collect())
         .unwrap_or_else(Vec::new);
 
@@ -106,7 +144,7 @@ async fn me(user: AuthenticatedUser) -> Json<AuthUserDetail> {
         display_name: user.display_name,
         role: role,
         organization_id: user.organization_id,
-        privileges: privileges
+        privileges: privileges,
     })
 }
 
@@ -157,7 +195,7 @@ struct Claims {
     privileges: Vec<String>,
     exp: usize,
     organisation_name: String,
-    locale: Option<String>
+    locale: Option<String>,
 }
 
 pub(crate) fn hash_pwd(password: &str) -> Result<String, ApiError> {
@@ -184,8 +222,15 @@ fn generate_session_token(user: &AuthenticatedUser) -> String {
 
     let role = user.role.as_ref().map(|r| r.id.to_string());
 
-    let privileges = user.role.as_ref()
-        .map(|r| r.privileges.iter().map(|p| p.as_str().to_string()).collect())
+    let privileges = user
+        .role
+        .as_ref()
+        .map(|r| {
+            r.privileges
+                .iter()
+                .map(|p| p.as_str().to_string())
+                .collect()
+        })
         .unwrap_or_else(Vec::new);
 
     let claims = Claims {
@@ -225,9 +270,13 @@ pub(crate) async fn validate_session_token(token: &str) -> Option<AuthenticatedU
 
             // 💡 Safely parse strings back to your SystemPrivilege enum variants
             use std::str::FromStr;
-            let privileges: Vec<shared_core::models::auth::SystemPrivilege> = data.claims.privileges
+            let privileges: Vec<shared_core::models::auth::SystemPrivilege> = data
+                .claims
+                .privileges
                 .iter()
-                .filter_map(|p_str| shared_core::models::auth::SystemPrivilege::from_str(p_str).ok())
+                .filter_map(|p_str| {
+                    shared_core::models::auth::SystemPrivilege::from_str(p_str).ok()
+                })
                 .collect();
 
             return Some(AuthenticatedUser {

@@ -5,20 +5,28 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use crate::util::locale_context::LocaleContext;
-use crate::util::ApiError;
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::models::auth::SystemPrivilege;
-use shared_core::models::role::Role;
-use shared_core::models::user::User;
-use shared_core::models::user_with_org::UserWithOrg;
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+    Row,
+};
+use shared_core::models::{
+    auth::SystemPrivilege,
+    role::Role,
+    user::User,
+    user_with_org::UserWithOrg,
+};
 use uuid::Uuid;
+
+use crate::util::{
+    locale_context::LocaleContext,
+    ApiError,
+};
 
 /* backend/src/db/user.rs */
 
 fn from_row_to_user_with_org(row: &sqlx::postgres::PgRow) -> UserWithOrg {
     let role = if row.get::<Option<Uuid>, _>("role_id").is_some() {
-
         Some(Role {
             id: row.get("role_id"),
             name: row.get("role_name"),
@@ -112,13 +120,11 @@ pub(crate) async fn update_password(
     id: Uuid,
     password_hash: &str,
 ) -> Result<(), sqlx::Error> {
-    let _ = sqlx::query(
-        "UPDATE users SET password_hash=$1 WHERE id = $2"
-    )
-    .bind(password_hash)
-    .bind(id)
-    .execute(pool)
-    .await?;
+    let _ = sqlx::query("UPDATE users SET password_hash=$1 WHERE id = $2")
+        .bind(password_hash)
+        .bind(id)
+        .execute(pool)
+        .await?;
     Ok(())
 }
 
@@ -131,26 +137,29 @@ pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, Api
     Ok(result.rows_affected())
 }
 
-pub(crate) async fn check_security_admin_remains(pool: &mut PgConnection, org_id: Uuid, i18n: &LocaleContext<'_>) -> Result<(), ApiError> {
-    let admin_count = sqlx::query(r#"SELECT Count(u.id) FROM users u
+pub(crate) async fn check_security_admin_remains(
+    pool: &mut PgConnection,
+    org_id: Uuid,
+    i18n: &LocaleContext<'_>,
+) -> Result<(), ApiError> {
+    let admin_count = sqlx::query(
+        r#"SELECT Count(u.id) FROM users u
             JOIN roles r ON u.role_id = r.id
             JOIN role_privileges rp ON r.id = rp.role_id
             WHERE rp.privilege_id = $1
             AND u.organization_id = $2
-        "#)
-        .bind(SystemPrivilege::security_admin)
-        .bind(org_id)
-        .fetch_one(pool)
-        .await
-        .map(|row| row.get::<i64, &str>("count"));
+        "#,
+    )
+    .bind(SystemPrivilege::security_admin)
+    .bind(org_id)
+    .fetch_one(pool)
+    .await
+    .map(|row| row.get::<i64, &str>("count"));
     match admin_count {
-        Ok(count) if count == 0 => {
-            Err(ApiError::Forbidden(i18n.t("security-error-no-admin")))
-        }
+        Ok(count) if count == 0 => Err(ApiError::Forbidden(i18n.t("security-error-no-admin"))),
         Ok(_) => Ok(()),
-        Err(e) => Err(ApiError::Db(e))
+        Err(e) => Err(ApiError::Db(e)),
     }
-
 }
 
 const SQL: &'static str = r#"SELECT u.id, u.organization_id, u.email, u.password_hash, u.created_at as user_created_at,
@@ -166,11 +175,12 @@ pub(crate) async fn get(
     id: Uuid,
     org_id: Uuid,
 ) -> Result<Option<UserWithOrg>, sqlx::Error> {
-    let row = sqlx::query(format!("{} {} ", SQL, "WHERE u.id = $1 AND u.organization_id = $2").as_str())
-        .bind(id)
-        .bind(org_id)
-        .fetch_optional(&mut *pool)
-        .await?;
+    let row =
+        sqlx::query(format!("{} {} ", SQL, "WHERE u.id = $1 AND u.organization_id = $2").as_str())
+            .bind(id)
+            .bind(org_id)
+            .fetch_optional(&mut *pool)
+            .await?;
 
     if let Some(r) = row {
         let mut user = from_row_to_user_with_org(&r);
@@ -208,10 +218,16 @@ pub(crate) async fn get_all(
     pool: &mut PgConnection,
     organization_id: Uuid,
 ) -> Result<Vec<UserWithOrg>, sqlx::Error> {
-    let rows = sqlx::query(format!("{} {} ", SQL, "WHERE u.organization_id = $1 ORDER BY u.display_name").as_str())
-        .bind(organization_id)
-        .fetch_all(&mut *pool)
-        .await?;
+    let rows = sqlx::query(
+        format!(
+            "{} {} ",
+            SQL, "WHERE u.organization_id = $1 ORDER BY u.display_name"
+        )
+        .as_str(),
+    )
+    .bind(organization_id)
+    .fetch_all(&mut *pool)
+    .await?;
 
     let mut users = vec![];
     for r in rows {

@@ -6,15 +6,29 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use chrono::NaiveDate;
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::payables::dtos::top_payable::TopPayable;
-use shared_core::payables::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
-use shared_core::payables::models::invoice_status::InvoiceStatus;
-use shared_core::payables::models::vendor_invoice::VendorInvoice;
-use shared_core::payables::models::vendor_invoice_item::VendorInvoiceItem;
-use shared_core::payables::requests::vendor_invoice::{CreateVendorInvoiceRequest, UpdateVendorInvoiceRequest};
 use std::str::FromStr;
+
+use chrono::NaiveDate;
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+    Row,
+};
+use shared_core::payables::{
+    dtos::{
+        top_payable::TopPayable,
+        vendor_invoice_list_item::VendorInvoiceListItem,
+    },
+    models::{
+        invoice_status::InvoiceStatus,
+        vendor_invoice::VendorInvoice,
+        vendor_invoice_item::VendorInvoiceItem,
+    },
+    requests::vendor_invoice::{
+        CreateVendorInvoiceRequest,
+        UpdateVendorInvoiceRequest,
+    },
+};
 use uuid::Uuid;
 
 fn from_row_to_vendor_invoice(row: &sqlx::postgres::PgRow) -> VendorInvoice {
@@ -78,7 +92,10 @@ fn from_row_to_vendor_invoice_item(row: &sqlx::postgres::PgRow) -> VendorInvoice
     }
 }
 
-pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<VendorInvoice>, sqlx::Error> {
+pub(crate) async fn get(
+    pool: &mut PgConnection,
+    id: Uuid,
+) -> Result<Option<VendorInvoice>, sqlx::Error> {
     sqlx::query(
         r#"
         SELECT id, organization_id, partner_id, transaction_id, invoice_number, status::TEXT, issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at
@@ -118,7 +135,8 @@ pub(crate) async fn get_by_org(
     min_amount: Option<i64>,
     status: Option<String>,
 ) -> Result<Vec<VendorInvoiceListItem>, sqlx::Error> {
-    let mut query = String::from(r#"
+    let mut query = String::from(
+        r#"
         SELECT
             vi.id,
             vi.partner_id,
@@ -134,7 +152,8 @@ pub(crate) async fn get_by_org(
         FROM vendor_invoices vi
         JOIN partners p ON vi.partner_id = p.id
         WHERE vi.organization_id = $1
-    "#);
+    "#,
+    );
 
     let mut i = 2;
     if start_date.is_some() {
@@ -178,10 +197,11 @@ pub(crate) async fn get_by_org(
         query_builder = query_builder.bind(statuses);
     }
 
-    query_builder
-        .fetch_all(pool)
-        .await
-        .map(|rows| rows.iter().map(from_row_to_vendor_invoice_list_item).collect())
+    query_builder.fetch_all(pool).await.map(|rows| {
+        rows.iter()
+            .map(from_row_to_vendor_invoice_list_item)
+            .collect()
+    })
 }
 
 pub(crate) async fn get_top_payables(

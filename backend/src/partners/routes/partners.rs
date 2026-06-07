@@ -6,19 +6,42 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::partners::services::partner_service;
-use crate::security::{ManagePartners, RequirePrivilege, UsePartners};
-use crate::util::types::PathUuid;
-use crate::util::ApiError;
-use crate::DbKelpie;
-use rocket::serde::json::Json;
-use rocket::{delete, get, post, put, routes, Route};
+use rocket::{
+    delete,
+    get,
+    post,
+    put,
+    routes,
+    serde::json::Json,
+    Route,
+};
 use rocket_db_pools::Connection;
-use shared_core::partners::dtos::partner_list_item::PartnerListItem;
-use shared_core::partners::models::partner::Partner;
-use shared_core::partners::models::partner_address::PartnerAddress;
-use shared_core::partners::models::partner_contact::PartnerContact;
-use shared_core::partners::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
+use shared_core::partners::{
+    dtos::partner_list_item::PartnerListItem,
+    models::{
+        partner::Partner,
+        partner_address::PartnerAddress,
+        partner_contact::PartnerContact,
+    },
+    requests::partner::{
+        CreatePartnerRequest,
+        UpdatePartnerRequest,
+    },
+};
+
+use crate::{
+    partners::services::partner_service,
+    security::{
+        ManagePartners,
+        RequirePrivilege,
+        UsePartners,
+    },
+    util::{
+        types::PathUuid,
+        ApiError,
+    },
+    DbKelpie,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -111,10 +134,10 @@ async fn delete_partner(
     id: PathUuid,
     guard: RequirePrivilege<ManagePartners>,
 ) -> Result<&'static str, ApiError> {
-
     let user = guard.0;
 
-    let rows_affected = partner_service::delete_partner(&mut pool, user.organization_id, *id).await?;
+    let rows_affected =
+        partner_service::delete_partner(&mut pool, user.organization_id, *id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Partner not found.".to_string()));
     }
@@ -161,9 +184,9 @@ async fn delete_address(
     address_id: PathUuid,
     guard: RequirePrivilege<ManagePartners>,
 ) -> Result<&'static str, ApiError> {
-
     let user = guard.0;
-    let rows_affected = partner_service::delete_address(&mut pool, user.organization_id, *address_id).await?;
+    let rows_affected =
+        partner_service::delete_address(&mut pool, user.organization_id, *address_id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Address not found.".to_string()));
     }
@@ -209,10 +232,10 @@ async fn delete_contact(
     contact_id: PathUuid,
     guard: RequirePrivilege<ManagePartners>,
 ) -> Result<&'static str, ApiError> {
-
     let user = guard.0;
 
-    let rows_affected = partner_service::delete_contact(&mut pool, user.organization_id, *contact_id).await?;
+    let rows_affected =
+        partner_service::delete_contact(&mut pool, user.organization_id, *contact_id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Contact not found.".to_string()));
     }

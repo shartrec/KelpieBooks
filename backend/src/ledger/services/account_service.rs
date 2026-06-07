@@ -6,21 +6,48 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::db;
-use crate::ledger::db::account::{get, get_all_by_category, get_all_by_org};
-use crate::ledger::db::{account, journal_entry, transaction};
-use crate::util::ApiError;
-use chrono::{Local, NaiveDate};
+use std::collections::{
+    HashMap,
+    VecDeque,
+};
+
+use chrono::{
+    Local,
+    NaiveDate,
+};
 use rocket_db_pools::sqlx::PgConnection;
-use shared_core::ledger::dtos::account_with_balance::AccountWithBalance;
-use shared_core::ledger::dtos::journal_entry_with_balance::JournalEntryWithBalance;
-use shared_core::ledger::models::account_category::AccountCategory;
-use shared_core::ledger::models::{account::Account, system_tag::SystemTag};
-use shared_core::requests::configuration::UpdateConfigurationRequest;
-use shared_core::ledger::requests::transaction::CreateTransactionRequest;
+use shared_core::{
+    ledger::{
+        dtos::{
+            account_with_balance::AccountWithBalance,
+            journal_entry_with_balance::JournalEntryWithBalance,
+        },
+        models::{
+            account::Account,
+            account_category::AccountCategory,
+            system_tag::SystemTag,
+        },
+        requests::transaction::CreateTransactionRequest,
+    },
+    requests::configuration::UpdateConfigurationRequest,
+};
 use sqlx::Acquire;
-use std::collections::{HashMap, VecDeque};
 use uuid::Uuid;
+
+use crate::{
+    db,
+    ledger::db::{
+        account,
+        account::{
+            get,
+            get_all_by_category,
+            get_all_by_org,
+        },
+        journal_entry,
+        transaction,
+    },
+    util::ApiError,
+};
 
 pub(crate) async fn get_accounts(
     pool: &mut PgConnection,
@@ -48,9 +75,13 @@ pub(crate) async fn get_account_with_balance(
         .await?
         .ok_or_else(|| ApiError::NotFound("Account not found".to_string()))?;
 
-    let balance =
-        journal_entry::get_balance_up_to_date(pool, account_id, organization_id, Local::now().date_naive())
-            .await?;
+    let balance = journal_entry::get_balance_up_to_date(
+        pool,
+        account_id,
+        organization_id,
+        Local::now().date_naive(),
+    )
+    .await?;
 
     Ok(AccountWithBalance {
         balance,
@@ -156,9 +187,10 @@ pub(crate) async fn get_journal_entries_with_running_balance(
 ) -> Result<Vec<JournalEntryWithBalance>, ApiError> {
     let opening_balance =
         journal_entry::get_balance_before_date(pool, account_id, org_id, start_date).await?;
-    let entries =
-        journal_entry::get_all_by_account_in_date_range(pool, account_id, org_id, start_date, end_date)
-            .await?;
+    let entries = journal_entry::get_all_by_account_in_date_range(
+        pool, account_id, org_id, start_date, end_date,
+    )
+    .await?;
 
     let mut running_balance = opening_balance;
     let mut result = Vec::new();

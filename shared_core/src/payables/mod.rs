@@ -8,6 +8,6 @@
 
 // shared_core/src/payables/mod.rs
 
-pub mod models;
 pub mod dtos;
+pub mod models;
 pub mod requests;

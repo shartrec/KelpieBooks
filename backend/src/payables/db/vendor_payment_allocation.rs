@@ -6,7 +6,11 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+    Row,
+};
 use shared_core::payables::models::vendor_payment_allocation::VendorPaymentAllocation;
 use uuid::Uuid;
 

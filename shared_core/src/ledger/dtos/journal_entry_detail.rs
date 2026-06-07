@@ -7,7 +7,10 @@
  */
 
 use chrono::DateTime;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
 
 /// A DTO representing a journal entry line, including the name of the account.

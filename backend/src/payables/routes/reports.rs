@@ -6,19 +6,27 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use chrono::NaiveDate;
-use rocket::{get, routes, Route};
-use rocket::serde::json::Json;
+use rocket::{
+    get,
+    routes,
+    serde::json::Json,
+    Route,
+};
 use rocket_db_pools::Connection;
 use shared_core::payables::dtos::aged_payable_summary::AgedPayableSummary;
-use crate::DbKelpie;
-use crate::payables::services::report_service;
-use crate::security::{RequirePrivilege, UseVendorInvoices};
-use crate::util::ApiError;
+
+use crate::{
+    payables::services::report_service,
+    security::{
+        RequirePrivilege,
+        UseVendorInvoices,
+    },
+    util::ApiError,
+    DbKelpie,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![
-        get_aged_payables,
-    ]
+    routes![get_aged_payables,]
 }
 
 #[get("/api/reports/aged-payables?<date>")]
@@ -35,4 +43,3 @@ async fn get_aged_payables(
         report_service::get_aged_payables(&mut pool, user.organization_id, report_date).await?;
     Ok(Json(report))
 }
-

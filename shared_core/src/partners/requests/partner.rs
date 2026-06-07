@@ -6,12 +6,16 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+use serde::{
+    Deserialize,
+    Serialize,
+};
+use uuid::Uuid;
+
 use crate::partners::models::{
     partner_address::PartnerAddress,
     partner_contact::PartnerContact,
 };
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct CreatePartnerRequest {

@@ -6,8 +6,14 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use chrono::{NaiveDate, Utc};
-use serde::{Deserialize, Serialize};
+use chrono::{
+    NaiveDate,
+    Utc,
+};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]

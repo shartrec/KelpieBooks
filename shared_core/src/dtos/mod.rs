@@ -5,7 +5,10 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 pub mod organization;
 pub mod user_detail;
@@ -14,4 +17,3 @@ pub mod user_detail;
 pub struct ApiErrorMessage {
     pub error: String,
 }
-

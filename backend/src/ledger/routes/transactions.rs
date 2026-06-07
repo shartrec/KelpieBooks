@@ -6,21 +6,46 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::db;
-use crate::ledger::db::{journal_entry, transaction};
-use crate::ledger::services::account_service;
-use crate::security::{ManageTransactions, RequirePrivilege, UseTransactions};
-use crate::util::types::PathUuid;
-use crate::util::ApiError;
-use crate::DbKelpie;
-use rocket::serde::json::Json;
-use rocket::{delete, get, post, put, routes, Route};
+use rocket::{
+    delete,
+    get,
+    post,
+    put,
+    routes,
+    serde::json::Json,
+    Route,
+};
 use rocket_db_pools::Connection;
-use shared_core::ledger::dtos::transaction_detail::TransactionDetail;
-use shared_core::ledger::requests::transaction::{
-    CreateTransactionRequest, ReverseTransactionRequest, UpdateTransactionRequest,
+use shared_core::ledger::{
+    dtos::transaction_detail::TransactionDetail,
+    requests::transaction::{
+        CreateTransactionRequest,
+        ReverseTransactionRequest,
+        UpdateTransactionRequest,
+    },
 };
 use sqlx::Acquire;
+
+use crate::{
+    db,
+    ledger::{
+        db::{
+            journal_entry,
+            transaction,
+        },
+        services::account_service,
+    },
+    security::{
+        ManageTransactions,
+        RequirePrivilege,
+        UseTransactions,
+    },
+    util::{
+        types::PathUuid,
+        ApiError,
+    },
+    DbKelpie,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -38,7 +63,6 @@ async fn get_transaction(
     id: PathUuid,
     guard: RequirePrivilege<UseTransactions>,
 ) -> Result<Json<TransactionDetail>, ApiError> {
-
     let user = guard.0;
 
     let transaction = transaction::get(&mut pool, *id, user.organization_id)
@@ -205,11 +229,14 @@ async fn reverse_transaction(
             entry.account_id,
             entry.credit, // Swap debit and credit
             entry.debit,
-            Some(format!(
-                "{} - {}",
-                req.description,
-                entry.description.as_deref().unwrap_or("")
-            ).as_str()),
+            Some(
+                format!(
+                    "{} - {}",
+                    req.description,
+                    entry.description.as_deref().unwrap_or("")
+                )
+                .as_str(),
+            ),
         )
         .await?;
     }

@@ -6,8 +6,12 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
+
 use crate::models::auth::SystemPrivilege;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

@@ -6,13 +6,20 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::services::onboarding;
-use crate::util::ApiError;
-use crate::DbKelpie;
-use rocket::serde::json::Json;
-use rocket::{post, routes, Route};
+use rocket::{
+    post,
+    routes,
+    serde::json::Json,
+    Route,
+};
 use rocket_db_pools::Connection;
 use shared_core::requests::onboard::OnboardingRequest;
+
+use crate::{
+    services::onboarding,
+    util::ApiError,
+    DbKelpie,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![register]
@@ -23,7 +30,6 @@ async fn register(
     mut pool: Connection<DbKelpie>,
     request: Json<OnboardingRequest>,
 ) -> Result<&'static str, ApiError> {
-
     onboarding::bootstrap_tenant_organization(&mut pool, &request.into_inner()).await?;
 
     Ok("Organization, user, and chart of accounts created successfully.")

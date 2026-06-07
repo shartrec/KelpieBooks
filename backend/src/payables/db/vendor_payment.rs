@@ -6,9 +6,15 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::payables::models::vendor_payment::VendorPayment;
-use shared_core::payables::requests::vendor_payment::CreateVendorPaymentRequest;
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+    Row,
+};
+use shared_core::payables::{
+    models::vendor_payment::VendorPayment,
+    requests::vendor_payment::CreateVendorPaymentRequest,
+};
 use uuid::Uuid;
 
 fn from_row_to_vendor_payment(row: &sqlx::postgres::PgRow) -> VendorPayment {

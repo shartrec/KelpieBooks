@@ -5,11 +5,17 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use crate::routes::security::AuthenticatedUser;
-use rocket::http::Status;
-use rocket::request::{FromRequest, Outcome};
-use rocket::Request;
+use rocket::{
+    http::Status,
+    request::{
+        FromRequest,
+        Outcome,
+    },
+    Request,
+};
 use shared_core::models::auth::SystemPrivilege;
+
+use crate::routes::security::AuthenticatedUser;
 #[rustfmt::skip]  // This is to stop all the markers from being reformatted.
 
 use std::marker::PhantomData;
@@ -20,49 +26,72 @@ pub(crate) trait GuardPrivilege {
 
 // Create structural markers
 pub(crate) struct SecurityAdmin;
-impl GuardPrivilege for SecurityAdmin { const VALUE: SystemPrivilege = SystemPrivilege::security_admin; }
+impl GuardPrivilege for SecurityAdmin {
+    const VALUE: SystemPrivilege = SystemPrivilege::security_admin;
+}
 
 pub(crate) struct UseAccounts;
-impl GuardPrivilege for UseAccounts { const VALUE: SystemPrivilege = SystemPrivilege::use_accounts; }
+impl GuardPrivilege for UseAccounts {
+    const VALUE: SystemPrivilege = SystemPrivilege::use_accounts;
+}
 
 pub(crate) struct ManageAccounts;
-impl GuardPrivilege for ManageAccounts { const VALUE: SystemPrivilege = SystemPrivilege::manage_accounts; }
+impl GuardPrivilege for ManageAccounts {
+    const VALUE: SystemPrivilege = SystemPrivilege::manage_accounts;
+}
 
 #[cfg(feature = "partners")]
 pub(crate) struct UsePartners;
 #[cfg(feature = "partners")]
-impl GuardPrivilege for UsePartners { const VALUE: SystemPrivilege = SystemPrivilege::use_partners; }
+impl GuardPrivilege for UsePartners {
+    const VALUE: SystemPrivilege = SystemPrivilege::use_partners;
+}
 
 #[cfg(feature = "partners")]
 pub(crate) struct ManagePartners;
 #[cfg(feature = "partners")]
-impl GuardPrivilege for ManagePartners { const VALUE: SystemPrivilege = SystemPrivilege::manage_partners; }
-
+impl GuardPrivilege for ManagePartners {
+    const VALUE: SystemPrivilege = SystemPrivilege::manage_partners;
+}
 
 #[cfg(feature = "payables")]
 pub(crate) struct UseVendorInvoices;
 #[cfg(feature = "payables")]
-impl GuardPrivilege for UseVendorInvoices { const VALUE: SystemPrivilege = SystemPrivilege::use_vendor_invoices; }
+impl GuardPrivilege for UseVendorInvoices {
+    const VALUE: SystemPrivilege = SystemPrivilege::use_vendor_invoices;
+}
 #[cfg(feature = "payables")]
 pub(crate) struct ManageVendorInvoices;
 #[cfg(feature = "payables")]
-impl GuardPrivilege for ManageVendorInvoices { const VALUE: SystemPrivilege = SystemPrivilege::manage_vendor_invoices; }
+impl GuardPrivilege for ManageVendorInvoices {
+    const VALUE: SystemPrivilege = SystemPrivilege::manage_vendor_invoices;
+}
 
 pub(crate) struct UseTransactions;
-impl GuardPrivilege for UseTransactions { const VALUE: SystemPrivilege = SystemPrivilege::use_transactions; }
+impl GuardPrivilege for UseTransactions {
+    const VALUE: SystemPrivilege = SystemPrivilege::use_transactions;
+}
 
 pub(crate) struct ManageTransactions;
-impl GuardPrivilege for ManageTransactions { const VALUE: SystemPrivilege = SystemPrivilege::manage_transactions; }
+impl GuardPrivilege for ManageTransactions {
+    const VALUE: SystemPrivilege = SystemPrivilege::manage_transactions;
+}
 
 pub(crate) struct ManageUsers;
-impl GuardPrivilege for ManageUsers { const VALUE: SystemPrivilege = SystemPrivilege::manage_users; }
+impl GuardPrivilege for ManageUsers {
+    const VALUE: SystemPrivilege = SystemPrivilege::manage_users;
+}
 
 pub(crate) struct ManageOrganization;
-impl GuardPrivilege for ManageOrganization { const VALUE: SystemPrivilege = SystemPrivilege::manage_organization; }
-
+impl GuardPrivilege for ManageOrganization {
+    const VALUE: SystemPrivilege = SystemPrivilege::manage_organization;
+}
 
 // 💡 The Request Guard now takes the Trait Type instead of the Enum constant!
-pub(crate) struct RequirePrivilege<T: GuardPrivilege>(pub(crate) AuthenticatedUser, std::marker::PhantomData<T>);
+pub(crate) struct RequirePrivilege<T: GuardPrivilege>(
+    pub(crate) AuthenticatedUser,
+    std::marker::PhantomData<T>,
+);
 
 #[rocket::async_trait]
 impl<'r, T: GuardPrivilege> FromRequest<'r> for RequirePrivilege<T> {
@@ -84,7 +113,8 @@ impl<'r, T: GuardPrivilege> FromRequest<'r> for RequirePrivilege<T> {
                 // Security Audit Logging
                 rocket::error!(
                     "Unauthorized Access Blocked: User {} lacks required privilege {:?}",
-                    user.full_name, T::VALUE
+                    user.full_name,
+                    T::VALUE
                 );
                 Outcome::Error((Status::Forbidden, ()))
             }

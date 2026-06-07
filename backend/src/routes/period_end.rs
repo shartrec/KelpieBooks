@@ -6,13 +6,23 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::ledger::services::period_end_service;
-use crate::security::{ManageAccounts, RequirePrivilege};
-use crate::util::ApiError;
-use crate::DbKelpie;
 use chrono::NaiveDate;
-use rocket::{post, routes, Route};
+use rocket::{
+    post,
+    routes,
+    Route,
+};
 use rocket_db_pools::Connection;
+
+use crate::{
+    ledger::services::period_end_service,
+    security::{
+        ManageAccounts,
+        RequirePrivilege,
+    },
+    util::ApiError,
+    DbKelpie,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![close_financial_year]

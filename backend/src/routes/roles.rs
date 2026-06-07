@@ -6,19 +6,41 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::db::roles;
-use crate::db::user as db_user;
-use crate::security::{RequirePrivilege, SecurityAdmin};
-use crate::util::locale_context::LocaleContext;
-use crate::util::types::PathUuid;
-use crate::util::ApiError;
-use crate::DbKelpie;
-use rocket::serde::json::Json;
-use rocket::{delete, get, post, put, routes, Route};
+use rocket::{
+    delete,
+    get,
+    post,
+    put,
+    routes,
+    serde::json::Json,
+    Route,
+};
 use rocket_db_pools::Connection;
-use shared_core::models::role::Role;
-use shared_core::requests::role::{CreateRoleRequest, UpdateRoleRequest};
+use shared_core::{
+    models::role::Role,
+    requests::role::{
+        CreateRoleRequest,
+        UpdateRoleRequest,
+    },
+};
 use sqlx::Acquire;
+
+use crate::{
+    db::{
+        roles,
+        user as db_user,
+    },
+    security::{
+        RequirePrivilege,
+        SecurityAdmin,
+    },
+    util::{
+        locale_context::LocaleContext,
+        types::PathUuid,
+        ApiError,
+    },
+    DbKelpie,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![get_all_roles, create_role, update_role, delete_role]
@@ -71,7 +93,8 @@ pub(crate) async fn update_role(
     roles::add_privileges(&mut tx, *id, req.privileges.clone()).await?;
 
     // Check we haven't accidentally deleted our admin
-    let _ = db_user::check_security_admin_remains(&mut tx, auth_user.organization_id, &i18n).await?;
+    let _ =
+        db_user::check_security_admin_remains(&mut tx, auth_user.organization_id, &i18n).await?;
 
     tx.commit().await?;
 
@@ -94,7 +117,8 @@ pub(crate) async fn delete_role(
 
     roles::delete(&mut *tx, auth_user.organization_id, *id).await?;
     // Check we haven't accidentally deleted our admin
-    let _ = db_user::check_security_admin_remains(&mut tx, auth_user.organization_id, &i18n).await?;
+    let _ =
+        db_user::check_security_admin_remains(&mut tx, auth_user.organization_id, &i18n).await?;
 
     tx.commit().await?;
 

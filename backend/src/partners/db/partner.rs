@@ -6,14 +6,26 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::partners::dtos::partner_list_item::PartnerListItem;
-use shared_core::partners::models::address_type::AddressType;
-use shared_core::partners::models::partner::Partner;
-use shared_core::partners::models::partner_address::PartnerAddress;
-use shared_core::partners::models::partner_contact::PartnerContact;
-use shared_core::partners::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
 use std::str::FromStr;
+
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+    Row,
+};
+use shared_core::partners::{
+    dtos::partner_list_item::PartnerListItem,
+    models::{
+        address_type::AddressType,
+        partner::Partner,
+        partner_address::PartnerAddress,
+        partner_contact::PartnerContact,
+    },
+    requests::partner::{
+        CreatePartnerRequest,
+        UpdatePartnerRequest,
+    },
+};
 use uuid::Uuid;
 
 fn from_row_to_partner(row: &sqlx::postgres::PgRow) -> Partner {
@@ -214,7 +226,11 @@ pub(crate) async fn update(
     Ok(from_row_to_partner(&row))
 }
 
-pub(crate) async fn delete(pool: &mut PgConnection, org_id: Uuid, id: Uuid) -> Result<u64, sqlx::Error> {
+pub(crate) async fn delete(
+    pool: &mut PgConnection,
+    org_id: Uuid,
+    id: Uuid,
+) -> Result<u64, sqlx::Error> {
     let result = sqlx::query("DELETE FROM partners WHERE id = $1 AND organization_id = $2")
         .bind(id)
         .bind(org_id)
@@ -291,12 +307,17 @@ pub(crate) async fn update_address(
     Ok(from_row_to_partner_address(&row))
 }
 
-pub(crate) async fn delete_address(pool: &mut PgConnection, org_id: Uuid, id: Uuid) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query("DELETE FROM partner_addresses WHERE id = $1 AND organization_id = $2")
-        .bind(id)
-        .bind(org_id)
-        .execute(pool)
-        .await?;
+pub(crate) async fn delete_address(
+    pool: &mut PgConnection,
+    org_id: Uuid,
+    id: Uuid,
+) -> Result<u64, sqlx::Error> {
+    let result =
+        sqlx::query("DELETE FROM partner_addresses WHERE id = $1 AND organization_id = $2")
+            .bind(id)
+            .bind(org_id)
+            .execute(pool)
+            .await?;
     Ok(result.rows_affected())
 }
 
@@ -364,7 +385,11 @@ pub(crate) async fn update_contact(
     Ok(from_row_to_partner_contact(&row))
 }
 
-pub(crate) async fn delete_contact(pool: &mut PgConnection, org_id: Uuid, id: Uuid) -> Result<u64, sqlx::Error> {
+pub(crate) async fn delete_contact(
+    pool: &mut PgConnection,
+    org_id: Uuid,
+    id: Uuid,
+) -> Result<u64, sqlx::Error> {
     let result = sqlx::query("DELETE FROM partner_contacts WHERE id = $1 AND organization_id = $2")
         .bind(id)
         .bind(org_id)

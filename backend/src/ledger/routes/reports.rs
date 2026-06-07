@@ -6,26 +6,59 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::ledger::db::account;
-use crate::ledger::reports::balance_sheet_export::{generate_balance_sheet_csv, generate_balance_sheet_typst};
-use crate::ledger::reports::general_ledger_export::{generate_general_ledger_csv, generate_general_ledger_typst};
-use crate::ledger::reports::profit_loss_export::{generate_profit_loss_csv, generate_profit_loss_typst};
-use crate::ledger::reports::trial_balance_export::{generate_trial_balance_csv, generate_trial_balance_typst};
-use crate::ledger::services::report_service;
-use crate::security::{RequirePrivilege, UseTransactions};
-use crate::util::locale_context::LocaleContext;
-use crate::util::reports::{compile_typst_to_pdf, DownloadFile};
-use crate::util::ApiError;
-use crate::DbKelpie;
 use chrono::NaiveDate;
-use rocket::http::ContentType;
-use rocket::serde::json::Json;
-use rocket::{get, routes, Route};
+use rocket::{
+    get,
+    http::ContentType,
+    routes,
+    serde::json::Json,
+    Route,
+};
 use rocket_db_pools::Connection;
-use shared_core::ledger::dtos::account_with_balance::AccountWithBalance;
-use shared_core::ledger::dtos::general_ledger_line::GeneralLedgerLine;
-use shared_core::ledger::dtos::balance_sheet::BalanceSheet;
+use shared_core::ledger::dtos::{
+    account_with_balance::AccountWithBalance,
+    balance_sheet::BalanceSheet,
+    general_ledger_line::GeneralLedgerLine,
+};
 use uuid::Uuid;
+
+use crate::{
+    ledger::{
+        db::account,
+        reports::{
+            balance_sheet_export::{
+                generate_balance_sheet_csv,
+                generate_balance_sheet_typst,
+            },
+            general_ledger_export::{
+                generate_general_ledger_csv,
+                generate_general_ledger_typst,
+            },
+            profit_loss_export::{
+                generate_profit_loss_csv,
+                generate_profit_loss_typst,
+            },
+            trial_balance_export::{
+                generate_trial_balance_csv,
+                generate_trial_balance_typst,
+            },
+        },
+        services::report_service,
+    },
+    security::{
+        RequirePrivilege,
+        UseTransactions,
+    },
+    util::{
+        locale_context::LocaleContext,
+        reports::{
+            compile_typst_to_pdf,
+            DownloadFile,
+        },
+        ApiError,
+    },
+    DbKelpie,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -189,7 +222,8 @@ async fn export_profit_loss(
             )
         }
         "pdf" => {
-            let typst_data = generate_profit_loss_typst(&user, &accounts, &start_date, &end_date, &org);
+            let typst_data =
+                generate_profit_loss_typst(&user, &accounts, &start_date, &end_date, &org);
             match compile_typst_to_pdf(typst_data) {
                 Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
                 Err(e) => return Err(ApiError::Internal(e)),
@@ -226,7 +260,8 @@ async fn export_balance_sheet(
             )
         }
         "pdf" => {
-            let typst_data = generate_balance_sheet_typst(&user, &balance_sheet, &report_date, &org);
+            let typst_data =
+                generate_balance_sheet_typst(&user, &balance_sheet, &report_date, &org);
             match compile_typst_to_pdf(typst_data) {
                 Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
                 Err(e) => return Err(ApiError::Internal(e)),
@@ -248,7 +283,6 @@ async fn export_general_ledger(
     accounts: Option<String>,
     min_amount: Option<i64>,
 ) -> Result<DownloadFile, ApiError> {
-
     let user = guard.0;
     let i18n = LocaleContext::new(&user.locale);
 
@@ -296,7 +330,8 @@ async fn export_general_ledger(
             )
         }
         "pdf" => {
-            let typst_data = generate_general_ledger_typst(&user, &lines, &start_date, &end_date, &org);
+            let typst_data =
+                generate_general_ledger_typst(&user, &lines, &start_date, &end_date, &org);
             match compile_typst_to_pdf(typst_data) {
                 Ok(pdf_bytes) => (
                     pdf_bytes,

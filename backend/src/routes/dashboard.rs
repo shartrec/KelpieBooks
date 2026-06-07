@@ -6,6 +6,33 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+#[cfg(feature = "payables")]
+use chrono::Duration;
+use chrono::{
+    Datelike,
+    Local,
+    NaiveDate,
+};
+use rocket::{
+    get,
+    routes,
+    serde::json::Json,
+    Route,
+};
+use rocket_db_pools::Connection;
+#[cfg(feature = "ledger")]
+use shared_core::ledger::{
+    dtos::dashboard::FinancialHealth,
+    dtos::expense_breakdown::ExpenseBreakdown,
+    dtos::recent_transaction::RecentTransaction,
+    models::{
+        account_category::AccountCategory,
+        system_tag::SystemTag,
+    },
+};
+#[cfg(feature = "payables")]
+use shared_core::payables::dtos::top_payable::TopPayable;
+use uuid::Uuid;
 
 #[cfg(feature = "ledger")]
 use crate::ledger::{
@@ -14,39 +41,27 @@ use crate::ledger::{
         transaction::get_recent_transactions as get_recent_transactions_from_db,
     },
     services::{
-        account_service::{get_account_with_balance, get_system_accounts},
+        account_service::{
+            get_account_with_balance,
+            get_system_accounts,
+        },
         report_service::{
-            get_expense_breakdown as get_expense_breakdown_from_service, get_profit_loss,
-        }
-    }
+            get_expense_breakdown as get_expense_breakdown_from_service,
+            get_profit_loss,
+        },
+    },
 };
-
 #[cfg(feature = "payables")]
 use crate::payables::db::vendor_invoice::get_top_payables as get_top_payables_from_db;
 #[cfg(feature = "payables")]
-use crate::security::{UseVendorInvoices};
-#[cfg(feature = "payables")]
-use shared_core::payables::dtos::top_payable::TopPayable;
-#[cfg(feature = "ledger")]
-use shared_core::ledger::{
-    dtos::dashboard::FinancialHealth,
-    dtos::expense_breakdown::ExpenseBreakdown,
-    dtos::recent_transaction::RecentTransaction,
-    models::{
-        account_category::AccountCategory,
-        system_tag::SystemTag
+use crate::security::UseVendorInvoices;
+use crate::{
+    security::{
+        RequirePrivilege,
+        UseTransactions,
     },
+    DbKelpie,
 };
-
-#[cfg(feature = "payables")]
-use chrono::{Duration};
-use crate::security::{RequirePrivilege, UseTransactions};
-use crate::DbKelpie;
-use chrono::{Datelike, Local, NaiveDate};
-use rocket::serde::json::Json;
-use rocket::{get, routes, Route};
-use rocket_db_pools::Connection;
-use uuid::Uuid;
 
 #[cfg(feature = "ledger")]
 #[get("/financial-health")]
@@ -196,24 +211,21 @@ async fn get_top_payables(
 }
 
 pub(crate) fn routes() -> Vec<Route> {
-
     let mut routes = routes![];
 
     #[cfg(feature = "ledger")]
     {
         let mut r1 = routes![
-        get_financial_health,
-        get_recent_transactions,
-        get_expense_breakdown,
+            get_financial_health,
+            get_recent_transactions,
+            get_expense_breakdown,
         ];
         routes.append(&mut r1);
     }
 
     #[cfg(feature = "payables")]
     {
-        let mut r2 = routes![
-            get_top_payables
-        ];
+        let mut r2 = routes![get_top_payables];
         routes.append(&mut r2);
     }
 

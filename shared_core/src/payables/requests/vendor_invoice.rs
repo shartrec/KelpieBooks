@@ -6,10 +6,14 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::payables::models::vendor_invoice_item::VendorInvoiceItem;
 use chrono::NaiveDate;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
+
+use crate::payables::models::vendor_invoice_item::VendorInvoiceItem;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct CreateVendorInvoiceRequest {

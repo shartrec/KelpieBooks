@@ -6,10 +6,14 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::payables::models::vendor_payment_allocation::VendorPaymentAllocation;
 use chrono::NaiveDate;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
+
+use crate::payables::models::vendor_payment_allocation::VendorPaymentAllocation;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct CreateVendorPaymentRequest {

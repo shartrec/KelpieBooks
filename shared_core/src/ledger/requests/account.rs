@@ -6,10 +6,16 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::ledger::models::account_category::AccountCategory;
-use crate::ledger::models::system_tag::SystemTag;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
+
+use crate::ledger::models::{
+    account_category::AccountCategory,
+    system_tag::SystemTag,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateAccountRequest {

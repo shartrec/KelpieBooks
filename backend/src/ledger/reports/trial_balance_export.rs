@@ -6,16 +6,29 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::routes::security::AuthenticatedUser;
-use crate::util::locale_context::LocaleContext;
-use crate::util::reports::{build_table_header, wrap_report_layout};
+use std::collections::HashMap;
+
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use shared_core::ledger::dtos::account_with_balance::AccountWithBalance;
-use shared_core::ledger::models::account_category::AccountCategory;
-use shared_core::models::organization::Organization;
-use std::collections::HashMap;
+use shared_core::{
+    ledger::{
+        dtos::account_with_balance::AccountWithBalance,
+        models::account_category::AccountCategory,
+    },
+    models::organization::Organization,
+};
 use uuid::Uuid;
+
+use crate::{
+    routes::security::AuthenticatedUser,
+    util::{
+        locale_context::LocaleContext,
+        reports::{
+            build_table_header,
+            wrap_report_layout,
+        },
+    },
+};
 
 #[derive(Clone, Debug)]
 pub(crate) struct AccountNode {
@@ -65,23 +78,29 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
     root_nodes
 }
 
-pub(crate) fn generate_trial_balance_csv(user: &AuthenticatedUser, accounts: &[AccountWithBalance]) -> String {
-
+pub(crate) fn generate_trial_balance_csv(
+    user: &AuthenticatedUser,
+    accounts: &[AccountWithBalance],
+) -> String {
     let i18n = LocaleContext::new(&user.locale);
 
     let account_nodes = build_account_nodes(accounts);
     let (total_debit, total_credit) = AccountWithBalance::calculate_totals(accounts);
 
     let mut csv_content = String::new();
-    csv_content.push_str(
-        &format!(
-            "{},{},{}\n",
-            i18n.t("common-account"),
-            i18n.t("common-debit"),
-            i18n.t("common-credit"),
-        ));
+    csv_content.push_str(&format!(
+        "{},{},{}\n",
+        i18n.t("common-account"),
+        i18n.t("common-debit"),
+        i18n.t("common-credit"),
+    ));
 
-    fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String, i18n: &LocaleContext ) {
+    fn build_csv_rows(
+        node: &AccountNode,
+        depth: usize,
+        content: &mut String,
+        i18n: &LocaleContext,
+    ) {
         let indent = " ".repeat(depth * 2);
         let (debit_display, credit_display) = match node.account.category {
             AccountCategory::Asset | AccountCategory::Expense => {
@@ -119,7 +138,12 @@ pub(crate) fn generate_trial_balance_csv(user: &AuthenticatedUser, accounts: &[A
     }
     let debit = i18n.format_money(total_debit);
     let credit = i18n.format_money(total_credit);
-    csv_content.push_str(&format!("\"{}\",\"{}\",\"{}\"\n", i18n.t("trial-balance-export-total"), debit, credit));
+    csv_content.push_str(&format!(
+        "\"{}\",\"{}\",\"{}\"\n",
+        i18n.t("trial-balance-export-total"),
+        debit,
+        credit
+    ));
     csv_content
 }
 
@@ -136,11 +160,20 @@ pub(crate) fn generate_trial_balance_typst(
 
     let mut typst_content = String::new();
     typst_content.push_str(&*build_table_header(
-        &[i18n.t("common-account"), i18n.t("common-debit"), i18n.t("common-credit")],
+        &[
+            i18n.t("common-account"),
+            i18n.t("common-debit"),
+            i18n.t("common-credit"),
+        ],
         &[false, true, true],
     ));
 
-    fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String, i18n: &LocaleContext) {
+    fn build_typst_rows(
+        node: &AccountNode,
+        depth: usize,
+        content: &mut String,
+        i18n: &LocaleContext,
+    ) {
         let indent = "#h(2.0em)".repeat(depth);
         let (debit_display, credit_display) = match node.account.category {
             AccountCategory::Asset | AccountCategory::Expense => {
@@ -190,5 +223,10 @@ pub(crate) fn generate_trial_balance_typst(
         "balance-sheet-export-as-at",
         &fluent_args!["date" => report_date_str],
     );
-    wrap_report_layout(name, &i18n.t("trial-balance-title"), &*report_qual, typst_content.as_str())
+    wrap_report_layout(
+        name,
+        &i18n.t("trial-balance-title"),
+        &*report_qual,
+        typst_content.as_str(),
+    )
 }

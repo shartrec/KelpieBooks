@@ -5,27 +5,39 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use crate::routes::security::AuthenticatedUser;
-use crate::util::locale_context::LocaleContext;
-use crate::util::reports::{build_table_header, wrap_report_layout};
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use shared_core::ledger::dtos::journal_entry_with_balance::JournalEntryWithBalance;
-use shared_core::models::organization::Organization;
+use shared_core::{
+    ledger::dtos::journal_entry_with_balance::JournalEntryWithBalance,
+    models::organization::Organization,
+};
 
-pub(crate) fn generate_ledger_csv(user: &AuthenticatedUser, entries: &[JournalEntryWithBalance]) -> String {
+use crate::{
+    routes::security::AuthenticatedUser,
+    util::{
+        locale_context::LocaleContext,
+        reports::{
+            build_table_header,
+            wrap_report_layout,
+        },
+    },
+};
+
+pub(crate) fn generate_ledger_csv(
+    user: &AuthenticatedUser,
+    entries: &[JournalEntryWithBalance],
+) -> String {
     let i18n = LocaleContext::new(&user.locale);
 
     let mut csv_content = String::new();
-    csv_content.push_str(
-        &format!(
-            "{},{},{},{},{}\n",
-            i18n.t("common-date"),
-            i18n.t("common-description"),
-            i18n.t("common-debit"),
-            i18n.t("common-credit"),
-            i18n.t("common-balance"),
-        ));
+    csv_content.push_str(&format!(
+        "{},{},{},{},{}\n",
+        i18n.t("common-date"),
+        i18n.t("common-description"),
+        i18n.t("common-debit"),
+        i18n.t("common-credit"),
+        i18n.t("common-balance"),
+    ));
 
     for entry in entries.iter() {
         let debit = if entry.debit > 0 {
@@ -64,11 +76,13 @@ pub(crate) fn generate_ledger_typst(
     let mut typst_content = String::new();
 
     typst_content.push_str(&*build_table_header(
-        &[i18n.t("common-date"),
+        &[
+            i18n.t("common-date"),
             i18n.t("common-description"),
             i18n.t("common-debit"),
             i18n.t("common-credit"),
-            i18n.t("common-balance")],
+            i18n.t("common-balance"),
+        ],
         &[false, false, true, true, true],
     ));
 

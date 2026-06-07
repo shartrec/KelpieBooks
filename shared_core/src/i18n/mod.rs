@@ -8,20 +8,38 @@
 
 //! Internationalisation module
 
-use std::cell::RefCell;
-use fluent::concurrent::FluentBundle;
-use fluent::{FluentArgs, FluentResource};
+use std::{
+    cell::RefCell,
+    collections::HashMap,
+    sync::LazyLock,
+};
+
+use fluent::{
+    concurrent::FluentBundle,
+    FluentArgs,
+    FluentResource,
+};
 use icu_calendar::Date;
-use icu_datetime::DateTimeFormatter;
-use icu_datetime::fieldsets::YMD;
-use icu_decimal::input::Decimal;
-use icu_decimal::DecimalFormatter;
-use icu_provider::prelude::icu_locale_core::{locale, Locale};
-use include_dir::{include_dir, Dir};
-use std::collections::HashMap;
-use std::sync::LazyLock;
-use unic_langid::langid;
-use unic_langid::LanguageIdentifier;
+use icu_datetime::{
+    fieldsets::YMD,
+    DateTimeFormatter,
+};
+use icu_decimal::{
+    input::Decimal,
+    DecimalFormatter,
+};
+use icu_provider::prelude::icu_locale_core::{
+    locale,
+    Locale,
+};
+use include_dir::{
+    include_dir,
+    Dir,
+};
+use unic_langid::{
+    langid,
+    LanguageIdentifier,
+};
 
 // Define the directory where translation files are.
 static TRANSLATIONS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/translations");
@@ -63,7 +81,9 @@ impl I18nManager {
                             .expect("Failed to parse base FTL file.");
 
                         let mut bundle = FluentBundle::new_concurrent(vec![lang_id.clone()]);
-                        bundle.add_resource(resource).expect("Failed to add base resource.");
+                        bundle
+                            .add_resource(resource)
+                            .expect("Failed to add base resource.");
 
                         // Disable isolation markers if desired, or keep default
                         bundles.insert(lang_id, bundle);
@@ -84,19 +104,25 @@ impl I18nManager {
                             .expect("Failed to parse regional FTL file.");
 
                         // Create a specific bundle for the regional variant (e.g., en-AU)
-                        let mut regional_bundle = FluentBundle::new_concurrent(vec![lang_id.clone()]);
+                        let mut regional_bundle =
+                            FluentBundle::new_concurrent(vec![lang_id.clone()]);
 
                         // 🔥 THE MAGIC LAYER: Add the regional override resource FIRST so it takes priority
-                        regional_bundle.add_resource(regional_resource).expect("Failed to add regional resource.");
+                        regional_bundle
+                            .add_resource(regional_resource)
+                            .expect("Failed to add regional resource.");
 
                         // Find its matching base file content (e.g., "en") and append it as the fallback layer!
                         let mut base_id = lang_id.clone();
                         base_id.region = None;
 
-                        if let Some(base_file) = TRANSLATIONS_DIR.get_file(format!("{}.ftl", base_id)) {
+                        if let Some(base_file) =
+                            TRANSLATIONS_DIR.get_file(format!("{}.ftl", base_id))
+                        {
                             let base_ftl_string = base_file.contents_utf8().unwrap();
-                            let base_resource = FluentResource::try_new(base_ftl_string.to_string())
-                                .expect("Failed to parse shared base resource.");
+                            let base_resource =
+                                FluentResource::try_new(base_ftl_string.to_string())
+                                    .expect("Failed to parse shared base resource.");
 
                             // Append the base layer second. Fluent will only use this if the regional resource lacks the key!
                             match regional_bundle.add_resource(base_resource) {
@@ -141,7 +167,9 @@ impl I18nManager {
     }
 
     pub fn get_default_bundle(&self) -> &FluentBundle<FluentResource> {
-        self.bundles.get(&self.default_lang_id).expect("Default bundle not found!")
+        self.bundles
+            .get(&self.default_lang_id)
+            .expect("Default bundle not found!")
     }
 }
 
@@ -154,8 +182,8 @@ impl Default for I18nManager {
 // A smart function to get a message matching a dynamic targeted locale context
 pub fn t(key: &str, target_locale: Option<&str>) -> String {
     // 1. Try to parse the target string into a valid LanguageIdentifier
-    let lang_id: Option<LanguageIdentifier> = target_locale
-        .and_then(|l| l.parse::<LanguageIdentifier>().ok());
+    let lang_id: Option<LanguageIdentifier> =
+        target_locale.and_then(|l| l.parse::<LanguageIdentifier>().ok());
 
     // 2. Fetch the target bundle if it exists; otherwise fall back to default
     let bundle = lang_id
@@ -182,11 +210,11 @@ pub fn t(key: &str, target_locale: Option<&str>) -> String {
     }
 }
 
-    // A smart function to get a message with arguments matching a dynamic targeted locale context
+// A smart function to get a message with arguments matching a dynamic targeted locale context
 pub fn t_args<'a>(key: &str, args: &'a FluentArgs, target_locale: Option<&str>) -> String {
     // 1. Try to parse the target string into a valid LanguageIdentifier
-    let lang_id: Option<LanguageIdentifier> = target_locale
-        .and_then(|l| l.parse::<LanguageIdentifier>().ok());
+    let lang_id: Option<LanguageIdentifier> =
+        target_locale.and_then(|l| l.parse::<LanguageIdentifier>().ok());
 
     // 2. Fetch the target bundle if it exists; otherwise fall back to default
     let bundle = lang_id
@@ -212,7 +240,7 @@ pub fn t_args<'a>(key: &str, args: &'a FluentArgs, target_locale: Option<&str>) 
         }
     }
 }
-        // The trait might be useful later for dependency injection.
+// The trait might be useful later for dependency injection.
 pub trait I18n {
     fn text(&self, lang: &LanguageIdentifier, key: &str) -> String;
     fn text_args<'a>(&self, lang: &LanguageIdentifier, key: &str, args: &'a FluentArgs) -> String;
@@ -220,7 +248,9 @@ pub trait I18n {
 
 impl I18n for I18nManager {
     fn text(&self, lang: &LanguageIdentifier, key: &str) -> String {
-        let bundle = self.get_bundle(lang).unwrap_or_else(|| self.get_default_bundle());
+        let bundle = self
+            .get_bundle(lang)
+            .unwrap_or_else(|| self.get_default_bundle());
         let msg = bundle.get_message(key).expect("Message not found");
         let pattern = msg.value().expect("Message has no value");
         let mut errors = vec![];
@@ -229,7 +259,9 @@ impl I18n for I18nManager {
     }
 
     fn text_args<'a>(&self, lang: &LanguageIdentifier, key: &str, args: &'a FluentArgs) -> String {
-        let bundle = self.get_bundle(lang).unwrap_or_else(|| self.get_default_bundle());
+        let bundle = self
+            .get_bundle(lang)
+            .unwrap_or_else(|| self.get_default_bundle());
         let msg = bundle.get_message(key).expect("Message not found");
         let pattern = msg.value().expect("Message has no value");
         let mut errors = vec![];
@@ -307,8 +339,9 @@ pub fn format_date_icu(year: i32, month: u32, day: u32, target_locale: Option<&s
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use fluent::fluent_args;
+
+    use super::*;
     // Define a clear, readable alias for the Narrow No-Break Space character
     const NNBSP: &str = "\u{202f}";
 
@@ -364,11 +397,13 @@ mod tests {
 
     #[test]
     fn audit_missing_translations() {
-        use std::fs;
-        use std::collections::HashSet;
+        use std::{
+            collections::HashSet,
+            fs,
+        };
 
-        let base_content = fs::read_to_string("translations/en.ftl")
-            .expect("Failed to read base en.ftl");
+        let base_content =
+            fs::read_to_string("translations/en.ftl").expect("Failed to read base en.ftl");
 
         // Extract keys from base file
         let base_keys: HashSet<&str> = base_content

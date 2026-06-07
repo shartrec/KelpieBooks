@@ -6,16 +6,29 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::routes::security::AuthenticatedUser;
-use crate::util::locale_context::LocaleContext;
-use crate::util::reports::{build_table_header, wrap_report_layout};
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use shared_core::ledger::dtos::general_ledger_line::GeneralLedgerLine;
-use shared_core::i18n::format_currency_icu_typ;
-use shared_core::models::organization::Organization;
+use shared_core::{
+    i18n::format_currency_icu_typ,
+    ledger::dtos::general_ledger_line::GeneralLedgerLine,
+    models::organization::Organization,
+};
 
-pub(crate) fn generate_general_ledger_csv(user: &AuthenticatedUser, lines: &[GeneralLedgerLine]) -> String {
+use crate::{
+    routes::security::AuthenticatedUser,
+    util::{
+        locale_context::LocaleContext,
+        reports::{
+            build_table_header,
+            wrap_report_layout,
+        },
+    },
+};
+
+pub(crate) fn generate_general_ledger_csv(
+    user: &AuthenticatedUser,
+    lines: &[GeneralLedgerLine],
+) -> String {
     let i18n = LocaleContext::new(&user.locale);
 
     let mut wtr = csv::Writer::from_writer(vec![]);
@@ -54,7 +67,12 @@ pub(crate) fn generate_general_ledger_typst(
 
     let mut typst_content = String::new();
     typst_content.push_str(&*build_table_header(
-        &[i18n.t("common-date"), i18n.t("common-description"), i18n.t("common-debit"), i18n.t("common-credit")],
+        &[
+            i18n.t("common-date"),
+            i18n.t("common-description"),
+            i18n.t("common-debit"),
+            i18n.t("common-credit"),
+        ],
         &[false, false, true, true],
     ));
 

@@ -6,9 +6,13 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::payables::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
+
+use crate::payables::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct AgedPayableSummary {

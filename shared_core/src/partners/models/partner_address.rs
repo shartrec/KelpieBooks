@@ -6,10 +6,17 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::partners::models::address_type::AddressType;
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
+use chrono::{
+    DateTime,
+    Utc,
+};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
+
+use crate::partners::models::address_type::AddressType;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct PartnerAddress {

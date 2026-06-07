@@ -6,10 +6,15 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::ledger::models::system_tag::SystemTag;
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
+
+use crate::ledger::models::system_tag::SystemTag;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateConfigurationRequest {

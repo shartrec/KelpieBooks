@@ -6,16 +6,30 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::ledger::db::account::get_all_by_org;
-use crate::util::ApiError;
+use std::collections::{
+    HashMap,
+    VecDeque,
+};
+
 use chrono::NaiveDate;
-use rocket_db_pools::sqlx::{PgConnection, Row};
-use shared_core::ledger::dtos::account_with_balance::AccountWithBalance;
-use shared_core::ledger::dtos::general_ledger_line::GeneralLedgerLine;
-use shared_core::ledger::models::account_category::AccountCategory;
-use shared_core::ledger::dtos::balance_sheet::BalanceSheet;
-use std::collections::{HashMap, VecDeque};
+use rocket_db_pools::sqlx::{
+    PgConnection,
+    Row,
+};
+use shared_core::ledger::{
+    dtos::{
+        account_with_balance::AccountWithBalance,
+        balance_sheet::BalanceSheet,
+        general_ledger_line::GeneralLedgerLine,
+    },
+    models::account_category::AccountCategory,
+};
 use uuid::Uuid;
+
+use crate::{
+    ledger::db::account::get_all_by_org,
+    util::ApiError,
+};
 
 pub(crate) async fn get_profit_loss(
     pool: &mut PgConnection,
@@ -43,7 +57,8 @@ pub(crate) async fn get_profit_loss(
     let mut balances: HashMap<Uuid, i64> = HashMap::new();
 
     for entry in &entries {
-        *balances.entry(entry.get("account_id")).or_insert(0) += entry.get::<i64, _>("debit") - entry.get::<i64, _>("credit");
+        *balances.entry(entry.get("account_id")).or_insert(0) +=
+            entry.get::<i64, _>("debit") - entry.get::<i64, _>("credit");
     }
 
     let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
@@ -126,7 +141,8 @@ pub(crate) async fn get_expense_breakdown(
     let mut balances: HashMap<Uuid, i64> = HashMap::new();
 
     for entry in &entries {
-        *balances.entry(entry.get("account_id")).or_insert(0) += entry.get::<i64, _>("debit") - entry.get::<i64, _>("credit");
+        *balances.entry(entry.get("account_id")).or_insert(0) +=
+            entry.get::<i64, _>("debit") - entry.get::<i64, _>("credit");
     }
 
     let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
@@ -324,7 +340,8 @@ pub(crate) async fn get_trial_balance(
     let mut balances: HashMap<Uuid, i64> = HashMap::new();
 
     for entry in &entries {
-        *balances.entry(entry.get("account_id")).or_insert(0) += entry.get::<i64, _>("debit") - entry.get::<i64, _>("credit");
+        *balances.entry(entry.get("account_id")).or_insert(0) +=
+            entry.get::<i64, _>("debit") - entry.get::<i64, _>("credit");
     }
 
     let result = accounts
@@ -412,4 +429,3 @@ pub(crate) async fn get_general_ledger(
 
     Ok(result)
 }
-

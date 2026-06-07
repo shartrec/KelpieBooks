@@ -6,8 +6,12 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+use serde::{
+    Deserialize,
+    Serialize,
+};
+
 use crate::models::auth::SystemPrivilege;
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateRoleRequest {

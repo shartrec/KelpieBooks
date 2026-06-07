@@ -6,12 +6,16 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+use serde::{
+    Deserialize,
+    Serialize,
+};
+use uuid::Uuid;
+
 use crate::ledger::models::{
     account_category::AccountCategory,
     system_tag::SystemTag,
 };
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 /// A DTO that combines account data with its calculated balance.
 /// This is the structure that will be sent to the frontend.

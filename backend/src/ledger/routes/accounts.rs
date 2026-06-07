@@ -6,25 +6,59 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::ledger::db::account as account_db;
-use crate::ledger::reports::account_ledger_export::{generate_ledger_csv, generate_ledger_typst};
-use crate::ledger::services::account_service;
-use crate::security::{ManageAccounts, RequirePrivilege, UseAccounts};
-use crate::util::reports::{compile_typst_to_pdf, DownloadFile};
-use crate::util::types::PathUuid;
-use crate::util::ApiError;
-use crate::DbKelpie;
-use chrono::NaiveDate;
-use rocket::http::ContentType;
-use rocket::serde::json::Json;
-use rocket::{delete, get, post, put, routes, Route};
-use rocket_db_pools::Connection;
-use shared_core::ledger::dtos::account_with_balance::AccountWithBalance;
-use shared_core::ledger::dtos::journal_entry_with_balance::JournalEntryWithBalance;
-use shared_core::ledger::models::account::Account;
-use shared_core::ledger::models::account_category::AccountCategory;
-use shared_core::ledger::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 use std::str::FromStr;
+
+use chrono::NaiveDate;
+use rocket::{
+    delete,
+    get,
+    http::ContentType,
+    post,
+    put,
+    routes,
+    serde::json::Json,
+    Route,
+};
+use rocket_db_pools::Connection;
+use shared_core::ledger::{
+    dtos::{
+        account_with_balance::AccountWithBalance,
+        journal_entry_with_balance::JournalEntryWithBalance,
+    },
+    models::{
+        account::Account,
+        account_category::AccountCategory,
+    },
+    requests::account::{
+        CreateAccountRequest,
+        UpdateAccountRequest,
+    },
+};
+
+use crate::{
+    ledger::{
+        db::account as account_db,
+        reports::account_ledger_export::{
+            generate_ledger_csv,
+            generate_ledger_typst,
+        },
+        services::account_service,
+    },
+    security::{
+        ManageAccounts,
+        RequirePrivilege,
+        UseAccounts,
+    },
+    util::{
+        reports::{
+            compile_typst_to_pdf,
+            DownloadFile,
+        },
+        types::PathUuid,
+        ApiError,
+    },
+    DbKelpie,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -64,7 +98,10 @@ async fn get_accounts_by_category(
                 .await?;
         Ok(Json(accounts))
     } else {
-        Err(ApiError::Internal(format!("Category {} not found", category)))
+        Err(ApiError::Internal(format!(
+            "Category {} not found",
+            category
+        )))
     }
 }
 
@@ -85,8 +122,7 @@ async fn get_payment_methods(
     guard: RequirePrivilege<UseAccounts>,
 ) -> Result<Json<Vec<Account>>, ApiError> {
     let user = guard.0;
-    let accounts =
-        account_service::get_payment_methods(&mut pool, user.organization_id).await?;
+    let accounts = account_service::get_payment_methods(&mut pool, user.organization_id).await?;
     Ok(Json(accounts))
 }
 
@@ -119,7 +155,11 @@ async fn get_account_entries(
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
         .map_err(|_| ApiError::Invalid("Invalid end date".to_string()))?;
     let entries = account_service::get_journal_entries_with_running_balance(
-        &mut pool, *id, user.organization_id, start_date, end_date
+        &mut pool,
+        *id,
+        user.organization_id,
+        start_date,
+        end_date,
     )
     .await?;
     Ok(Json(entries))
@@ -213,7 +253,11 @@ async fn export_account_ledger(
     let account = account_db::get(&mut pool, *id, user.organization_id).await?;
     if let Some(account) = account {
         let entries = account_service::get_journal_entries_with_running_balance(
-            &mut pool, *id, user.organization_id, start_date, end_date,
+            &mut pool,
+            *id,
+            user.organization_id,
+            start_date,
+            end_date,
         )
         .await?;
         let org = crate::db::organization::get(&mut pool, user.organization_id).await?;

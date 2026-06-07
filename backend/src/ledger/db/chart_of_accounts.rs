@@ -6,12 +6,18 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection};
-use serde::Deserialize;
-use shared_core::ledger::models::account_category::AccountCategory;
-use shared_core::ledger::models::system_tag::SystemTag;
-use sqlx::Row;
 use std::collections::HashMap;
+
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+};
+use serde::Deserialize;
+use shared_core::ledger::models::{
+    account_category::AccountCategory,
+    system_tag::SystemTag,
+};
+use sqlx::Row;
 use uuid::Uuid;
 
 /// Represents the top-level structure of a TOML template file.

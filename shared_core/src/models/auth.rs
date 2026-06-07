@@ -8,12 +8,23 @@
 
 #![allow(non_camel_case_types)]
 
-use serde::{Deserialize, Serialize};
-use strum::{AsRefStr, EnumIter, EnumString, IntoEnumIterator};
+use serde::{
+    Deserialize,
+    Serialize,
+};
+use strum::{
+    AsRefStr,
+    EnumIter,
+    EnumString,
+    IntoEnumIterator,
+};
 
 #[derive(Debug, Clone, Copy, EnumString, EnumIter, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(type_name = "system_privilege", rename_all = "snake_case"))]
+#[cfg_attr(
+    feature = "backend",
+    sqlx(type_name = "system_privilege", rename_all = "snake_case")
+)]
 #[derive(AsRefStr)]
 pub enum SystemPrivilege {
     security_admin,

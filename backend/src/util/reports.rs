@@ -5,12 +5,21 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use rocket::http::{ContentType, Status};
-use rocket::response::Responder;
-use rocket::{Request, Response};
 use std::io::Cursor;
-use typst_as_lib::typst_kit_options::TypstKitFontOptions;
-use typst_as_lib::TypstEngine;
+
+use rocket::{
+    http::{
+        ContentType,
+        Status,
+    },
+    response::Responder,
+    Request,
+    Response,
+};
+use typst_as_lib::{
+    typst_kit_options::TypstKitFontOptions,
+    TypstEngine,
+};
 use typst_assets::fonts;
 
 pub(crate) struct DownloadFile {
@@ -193,4 +202,3 @@ pub(crate) fn compile_typst_to_pdf(source: String) -> Result<Vec<u8>, String> {
         Err(e) => Err(format!("typst::compile() returned an error!: {}", e)),
     }
 }
-

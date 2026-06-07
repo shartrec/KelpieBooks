@@ -6,7 +6,10 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
 
 /// A Data Transfer Object representing the user details that are safe
@@ -30,5 +33,5 @@ pub struct AuthUserDetail {
     pub display_name: Option<String>,
     pub role: Option<String>,
     pub organization_id: Uuid,
-    pub privileges: Vec<String>
+    pub privileges: Vec<String>,
 }

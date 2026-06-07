@@ -5,14 +5,20 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use crate::payables::db::vendor_invoice::get_by_org;
-use crate::util::ApiError;
-use chrono::NaiveDate;
-use shared_core::payables::dtos::aged_payable_summary::AgedPayableSummary;
-use shared_core::payables::models::invoice_status::InvoiceStatus;
-use sqlx::PgConnection;
 use std::collections::HashMap;
+
+use chrono::NaiveDate;
+use shared_core::payables::{
+    dtos::aged_payable_summary::AgedPayableSummary,
+    models::invoice_status::InvoiceStatus,
+};
+use sqlx::PgConnection;
 use uuid::Uuid;
+
+use crate::{
+    payables::db::vendor_invoice::get_by_org,
+    util::ApiError,
+};
 
 pub(crate) async fn get_aged_payables(
     pool: &mut PgConnection,
@@ -26,9 +32,13 @@ pub(crate) async fn get_aged_payables(
         None,
         None,
         None,
-        Some(format!("{},{}", InvoiceStatus::Open.as_str(), InvoiceStatus::PartiallyPaid.as_str())),
+        Some(format!(
+            "{},{}",
+            InvoiceStatus::Open.as_str(),
+            InvoiceStatus::PartiallyPaid.as_str()
+        )),
     )
-        .await?;
+    .await?;
 
     let mut summary_map: HashMap<Uuid, AgedPayableSummary> = HashMap::new();
 

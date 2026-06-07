@@ -6,16 +6,29 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::routes::security::AuthenticatedUser;
-use crate::util::locale_context::LocaleContext;
-use crate::util::reports::{build_table_header, wrap_report_layout};
+use std::collections::HashMap;
+
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use shared_core::ledger::dtos::account_with_balance::AccountWithBalance;
-use shared_core::ledger::models::account_category::AccountCategory;
-use shared_core::models:: organization::Organization;
-use std::collections::HashMap;
+use shared_core::{
+    ledger::{
+        dtos::account_with_balance::AccountWithBalance,
+        models::account_category::AccountCategory,
+    },
+    models::organization::Organization,
+};
 use uuid::Uuid;
+
+use crate::{
+    routes::security::AuthenticatedUser,
+    util::{
+        locale_context::LocaleContext,
+        reports::{
+            build_table_header,
+            wrap_report_layout,
+        },
+    },
+};
 
 #[derive(Clone, Debug)]
 pub(crate) struct AccountNode {
@@ -80,19 +93,26 @@ fn build_account_nodes(
     (rev_nodes, exp_nodes, (-revenue_total) - expense_total)
 }
 
-pub(crate) fn generate_profit_loss_csv(user: &AuthenticatedUser, accounts: &[AccountWithBalance]) -> String {
+pub(crate) fn generate_profit_loss_csv(
+    user: &AuthenticatedUser,
+    accounts: &[AccountWithBalance],
+) -> String {
     let i18n = LocaleContext::new(&user.locale);
 
     let (revenue_nodes, expense_nodes, net_income) = build_account_nodes(accounts);
     let mut csv_content = String::new();
-    csv_content.push_str(
-        &format!(
-            "{},{}\n",
-            i18n.t("common-account"),
-            i18n.t("common-balance"),
-        ));
+    csv_content.push_str(&format!(
+        "{},{}\n",
+        i18n.t("common-account"),
+        i18n.t("common-balance"),
+    ));
 
-    fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String, i18n: &LocaleContext) {
+    fn build_csv_rows(
+        node: &AccountNode,
+        depth: usize,
+        content: &mut String,
+        i18n: &LocaleContext,
+    ) {
         let indent = " ".repeat(depth * 2);
         let display_balance = if node.account.category == AccountCategory::Revenue {
             -node.account.balance
@@ -107,8 +127,7 @@ pub(crate) fn generate_profit_loss_csv(user: &AuthenticatedUser, accounts: &[Acc
             i18n.format_money(display_balance)
         ));
         for child in &node.children {
-            build_csv_rows(child, depth + 1, content, &i18n
-            );
+            build_csv_rows(child, depth + 1, content, &i18n);
         }
     }
 
@@ -144,7 +163,12 @@ pub(crate) fn generate_profit_loss_typst(
         &vec![false, true, true],
     ));
 
-    fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String, i18n: &LocaleContext) {
+    fn build_typst_rows(
+        node: &AccountNode,
+        depth: usize,
+        content: &mut String,
+        i18n: &LocaleContext,
+    ) {
         let indent = "#h(2.0em)".repeat(depth);
         let display_balance = if node.account.category == AccountCategory::Revenue {
             -node.account.balance
@@ -171,11 +195,17 @@ pub(crate) fn generate_profit_loss_typst(
         }
     }
 
-    typst_content.push_str(&format!("[*{}*],[],[],\n", i18n.t("profit-loss-revenue-section")));
+    typst_content.push_str(&format!(
+        "[*{}*],[],[],\n",
+        i18n.t("profit-loss-revenue-section")
+    ));
     for node in &revenue_nodes {
         build_typst_rows(node, 0, &mut typst_content, &i18n);
     }
-    typst_content.push_str(&format!("[*{}*],[],[],\n", i18n.t("profit-loss-expenses-section")));
+    typst_content.push_str(&format!(
+        "[*{}*],[],[],\n",
+        i18n.t("profit-loss-expenses-section")
+    ));
     for node in &expense_nodes {
         build_typst_rows(node, 0, &mut typst_content, &i18n);
     }
@@ -193,5 +223,10 @@ pub(crate) fn generate_profit_loss_typst(
         "general-ledger-export-period",
         &fluent_args!["start_date" => start_date_str, "end_date" => end_date_str],
     );
-    wrap_report_layout(name, &i18n.t("profit-loss-title"), &*report_qual, typst_content.as_str())
+    wrap_report_layout(
+        name,
+        &i18n.t("profit-loss-title"),
+        &*report_qual,
+        typst_content.as_str(),
+    )
 }

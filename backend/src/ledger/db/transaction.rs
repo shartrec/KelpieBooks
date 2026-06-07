@@ -7,7 +7,11 @@
  */
 
 use chrono::NaiveDate;
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+    Row,
+};
 use shared_core::ledger::models::transaction::Transaction;
 use uuid::Uuid;
 
@@ -67,7 +71,11 @@ pub(crate) async fn insert(
     Ok(row.get("id"))
 }
 
-pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<(), sqlx::Error> {
+pub(crate) async fn delete(
+    pool: &mut PgConnection,
+    id: Uuid,
+    org_id: Uuid,
+) -> Result<(), sqlx::Error> {
     sqlx::query("DELETE FROM transactions WHERE id = $1 and organization_id = $2")
         .bind(id)
         .bind(org_id)

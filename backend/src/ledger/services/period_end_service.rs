@@ -6,14 +6,21 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::db::organization;
-use crate::ledger::db::account::get_all_by_category;
-use crate::ledger::db::{account, journal_entry, transaction};
-use crate::util::ApiError;
 use chrono::NaiveDate;
 use rocket_db_pools::sqlx::PgConnection;
 use shared_core::ledger::models::account_category::AccountCategory;
 use uuid::Uuid;
+
+use crate::{
+    db::organization,
+    ledger::db::{
+        account,
+        account::get_all_by_category,
+        journal_entry,
+        transaction,
+    },
+    util::ApiError,
+};
 
 pub(crate) async fn close_financial_year(
     pool: &mut PgConnection,
@@ -41,7 +48,9 @@ pub(crate) async fn close_financial_year(
     )
     .await?;
     for account in income_accounts {
-        let balance = journal_entry::get_balance_up_to_date(pool, account.id, organization_id, year_end).await?;
+        let balance =
+            journal_entry::get_balance_up_to_date(pool, account.id, organization_id, year_end)
+                .await?;
         if balance != 0 {
             let (debit, credit) = if balance > 0 {
                 (0, balance)

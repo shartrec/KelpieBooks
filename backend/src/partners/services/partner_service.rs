@@ -6,15 +6,25 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::partners::db::partner as partner_db;
-use crate::util::ApiError;
 use rocket_db_pools::sqlx::PgConnection;
-use shared_core::partners::dtos::partner_list_item::PartnerListItem;
-use shared_core::partners::models::partner::Partner;
-use shared_core::partners::models::partner_address::PartnerAddress;
-use shared_core::partners::models::partner_contact::PartnerContact;
-use shared_core::partners::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
+use shared_core::partners::{
+    dtos::partner_list_item::PartnerListItem,
+    models::{
+        partner::Partner,
+        partner_address::PartnerAddress,
+        partner_contact::PartnerContact,
+    },
+    requests::partner::{
+        CreatePartnerRequest,
+        UpdatePartnerRequest,
+    },
+};
 use uuid::Uuid;
+
+use crate::{
+    partners::db::partner as partner_db,
+    util::ApiError,
+};
 
 pub(crate) async fn get_partners(
     pool: &mut PgConnection,
@@ -67,7 +77,11 @@ pub(crate) async fn update_partner(
     Ok(updated_partner)
 }
 
-pub(crate) async fn delete_partner(pool: &mut PgConnection, org_id: Uuid, partner_id: Uuid) -> Result<u64, ApiError> {
+pub(crate) async fn delete_partner(
+    pool: &mut PgConnection,
+    org_id: Uuid,
+    partner_id: Uuid,
+) -> Result<u64, ApiError> {
     let rows_affected = partner_db::delete(pool, org_id, partner_id).await?;
     Ok(rows_affected)
 }
@@ -94,7 +108,11 @@ pub(crate) async fn update_address(
     Ok(updated_address)
 }
 
-pub(crate) async fn delete_address(pool: &mut PgConnection, organization_id: Uuid, address_id: Uuid) -> Result<u64, ApiError> {
+pub(crate) async fn delete_address(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    address_id: Uuid,
+) -> Result<u64, ApiError> {
     let rows_affected = partner_db::delete_address(pool, organization_id, address_id).await?;
     Ok(rows_affected)
 }
@@ -121,7 +139,11 @@ pub(crate) async fn update_contact(
     Ok(updated_contact)
 }
 
-pub(crate) async fn delete_contact(pool: &mut PgConnection, organization_id: Uuid, contact_id: Uuid) -> Result<u64, ApiError> {
+pub(crate) async fn delete_contact(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    contact_id: Uuid,
+) -> Result<u64, ApiError> {
     let rows_affected = partner_db::delete_contact(pool, organization_id, contact_id).await?;
     Ok(rows_affected)
 }

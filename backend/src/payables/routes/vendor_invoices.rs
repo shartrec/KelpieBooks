@@ -6,22 +6,46 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::payables::services::{vendor_invoice_service, vendor_payment_service};
-use crate::security::{
-    ManageVendorInvoices, RequirePrivilege, UseVendorInvoices,
+use rocket::{
+    get,
+    post,
+    put,
+    routes,
+    serde::json::Json,
+    Route,
 };
-use crate::util::types::{PathDate, PathUuid};
-use crate::util::ApiError;
-use crate::DbKelpie;
-use rocket::serde::json::Json;
-use rocket::{get, post, put, routes, Route};
 use rocket_db_pools::Connection;
-use shared_core::payables::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
-use shared_core::payables::models::vendor_invoice::VendorInvoice;
-use shared_core::payables::models::vendor_invoice_item::VendorInvoiceItem;
-use shared_core::payables::models::vendor_payment::VendorPayment;
-use shared_core::payables::requests::vendor_invoice::{
-    CreateVendorInvoiceRequest, UpdateVendorInvoiceRequest,
+use shared_core::payables::{
+    dtos::vendor_invoice_list_item::VendorInvoiceListItem,
+    models::{
+        vendor_invoice::VendorInvoice,
+        vendor_invoice_item::VendorInvoiceItem,
+        vendor_payment::VendorPayment,
+    },
+    requests::vendor_invoice::{
+        CreateVendorInvoiceRequest,
+        UpdateVendorInvoiceRequest,
+    },
+};
+
+use crate::{
+    payables::services::{
+        vendor_invoice_service,
+        vendor_payment_service,
+    },
+    security::{
+        ManageVendorInvoices,
+        RequirePrivilege,
+        UseVendorInvoices,
+    },
+    util::{
+        types::{
+            PathDate,
+            PathUuid,
+        },
+        ApiError,
+    },
+    DbKelpie,
 };
 
 pub(crate) fn routes() -> Vec<Route> {
@@ -122,8 +146,12 @@ async fn update_vendor_invoice_items(
     req: Json<Vec<VendorInvoiceItem>>,
 ) -> Result<Json<Vec<VendorInvoiceItem>>, ApiError> {
     let user = guard.0;
-    let updated_items =
-        vendor_invoice_service::update_vendor_invoice_items(&mut pool, user.organization_id, *id, &req)
-            .await?;
+    let updated_items = vendor_invoice_service::update_vendor_invoice_items(
+        &mut pool,
+        user.organization_id,
+        *id,
+        &req,
+    )
+    .await?;
     Ok(Json(updated_items))
 }

@@ -6,4 +6,3 @@ pub mod vendor_invoice_item;
 pub mod vendor_invoice_payment;
 pub mod vendor_payment;
 pub mod vendor_payment_allocation;
-

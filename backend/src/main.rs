@@ -7,14 +7,32 @@
  */
 #![forbid(unsafe_code)]
 
-use crate::routes::{
-    configurations, dashboard, onboarding, organization, period_end, privileges, roles, security as security_routes, users,
+use rocket::{
+    fairing::AdHoc,
+    fs::{
+        relative,
+        FileServer,
+        NamedFile,
+    },
+    get,
+    routes,
 };
-use crate::util::logging::setup_logging;
-use rocket::fairing::AdHoc;
-use rocket::fs::{relative, FileServer, NamedFile};
-use rocket::{get, routes};
 use rocket_db_pools::Database;
+
+use crate::{
+    routes::{
+        configurations,
+        dashboard,
+        onboarding,
+        organization,
+        period_end,
+        privileges,
+        roles,
+        security as security_routes,
+        users,
+    },
+    util::logging::setup_logging,
+};
 
 #[cfg(feature = "ledger")]
 pub(crate) mod ledger;
@@ -25,9 +43,9 @@ pub(crate) mod payables;
 
 mod db;
 mod routes;
+pub(crate) mod security;
 mod services;
 mod util;
-pub(crate) mod security;
 
 #[derive(Database)]
 #[database("kelpie_db")]
@@ -41,8 +59,7 @@ async fn spa_index() -> Option<NamedFile> {
 
 fn run_migrations() -> AdHoc {
     AdHoc::try_on_ignite("SQLx Migrations", |rocket| async {
-        let db = DbKelpie::fetch(&rocket)
-            .expect("Database pool not initialized");
+        let db = DbKelpie::fetch(&rocket).expect("Database pool not initialized");
 
         sqlx::migrate!("./migrations")
             .run(&**db)
@@ -76,8 +93,7 @@ fn rocket() -> _ {
         .mount("/", ledger::routes::transactions::routes())
         .mount("/", period_end::routes());
     #[cfg(feature = "partners")]
-    let rocket = rocket
-        .mount("/", partners::routes::partners::routes());
+    let rocket = rocket.mount("/", partners::routes::partners::routes());
     #[cfg(feature = "payables")]
     let rocket = rocket
         .mount("/", payables::routes::reports::routes())

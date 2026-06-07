@@ -6,15 +6,27 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::payables::services::vendor_payment_service;
-use crate::security::{ManageVendorInvoices, RequirePrivilege};
-use crate::util::ApiError;
-use crate::DbKelpie;
-use rocket::serde::json::Json;
-use rocket::{post, routes, Route};
+use rocket::{
+    post,
+    routes,
+    serde::json::Json,
+    Route,
+};
 use rocket_db_pools::Connection;
-use shared_core::payables::models::vendor_payment::VendorPayment;
-use shared_core::payables::requests::vendor_payment::CreateVendorPaymentRequest;
+use shared_core::payables::{
+    models::vendor_payment::VendorPayment,
+    requests::vendor_payment::CreateVendorPaymentRequest,
+};
+
+use crate::{
+    payables::services::vendor_payment_service,
+    security::{
+        ManageVendorInvoices,
+        RequirePrivilege,
+    },
+    util::ApiError,
+    DbKelpie,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![create_vendor_payment]

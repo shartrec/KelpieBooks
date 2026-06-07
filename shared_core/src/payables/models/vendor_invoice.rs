@@ -6,13 +6,21 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+use chrono::{
+    DateTime,
+    NaiveDate,
+    Utc,
+};
+use serde::{
+    Deserialize,
+    Serialize,
+};
+use uuid::Uuid;
+
 use crate::payables::models::{
     invoice_status::InvoiceStatus,
-    vendor_invoice_item::VendorInvoiceItem
+    vendor_invoice_item::VendorInvoiceItem,
 };
-use chrono::{DateTime, NaiveDate, Utc};
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct VendorInvoice {

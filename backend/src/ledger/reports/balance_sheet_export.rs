@@ -6,16 +6,29 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::routes::security::AuthenticatedUser;
-use crate::util::locale_context::LocaleContext;
-use crate::util::reports::{build_table_header, wrap_report_layout};
+use std::collections::HashMap;
+
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use shared_core::ledger::dtos::account_with_balance::AccountWithBalance;
-use shared_core::models::organization::Organization;
-use shared_core::ledger::dtos::balance_sheet::BalanceSheet;
-use std::collections::HashMap;
+use shared_core::{
+    ledger::dtos::{
+        account_with_balance::AccountWithBalance,
+        balance_sheet::BalanceSheet,
+    },
+    models::organization::Organization,
+};
 use uuid::Uuid;
+
+use crate::{
+    routes::security::AuthenticatedUser,
+    util::{
+        locale_context::LocaleContext,
+        reports::{
+            build_table_header,
+            wrap_report_layout,
+        },
+    },
+};
 
 #[derive(Clone, Debug)]
 pub(crate) struct AccountNode {
@@ -65,21 +78,28 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
     root_nodes
 }
 
-pub(crate) fn generate_balance_sheet_csv(user: &AuthenticatedUser, balance_sheet: &BalanceSheet) -> String {
+pub(crate) fn generate_balance_sheet_csv(
+    user: &AuthenticatedUser,
+    balance_sheet: &BalanceSheet,
+) -> String {
     let i18n = LocaleContext::new(&user.locale);
 
     let asset_nodes = build_account_nodes(&balance_sheet.assets);
     let liability_nodes = build_account_nodes(&balance_sheet.liabilities);
     let equity_nodes = build_account_nodes(&balance_sheet.equity);
     let mut csv_content = String::new();
-    csv_content.push_str(
-        &format!(
-            "{},{}\n",
-            i18n.t("common-account"),
-            i18n.t("common-balance"),
-        ));
+    csv_content.push_str(&format!(
+        "{},{}\n",
+        i18n.t("common-account"),
+        i18n.t("common-balance"),
+    ));
 
-    fn build_csv_rows(node: &AccountNode, depth: usize, content: &mut String, i18n: &LocaleContext) {
+    fn build_csv_rows(
+        node: &AccountNode,
+        depth: usize,
+        content: &mut String,
+        i18n: &LocaleContext,
+    ) {
         let indent = " ".repeat(depth * 2);
         content.push_str(&format!(
             "\"{}{}\",\"{}\"\n",
@@ -153,7 +173,12 @@ pub(crate) fn generate_balance_sheet_typst(
         &[false, true, true],
     ));
 
-    fn build_typst_rows(node: &AccountNode, depth: usize, content: &mut String, i18n: &LocaleContext) {
+    fn build_typst_rows(
+        node: &AccountNode,
+        depth: usize,
+        content: &mut String,
+        i18n: &LocaleContext,
+    ) {
         let indent = "#h(2.0em)".repeat(depth);
 
         content.push_str(&format!(
@@ -167,7 +192,10 @@ pub(crate) fn generate_balance_sheet_typst(
         }
     }
 
-    typst_content.push_str(&format!("[*{}*],[],[],\n", i18n.t("balance-sheet-assets-section")));
+    typst_content.push_str(&format!(
+        "[*{}*],[],[],\n",
+        i18n.t("balance-sheet-assets-section")
+    ));
     for node in &asset_nodes {
         build_typst_rows(node, 0, &mut typst_content, &i18n);
     }
@@ -177,7 +205,10 @@ pub(crate) fn generate_balance_sheet_typst(
         i18n.format_money_typ(balance_sheet.total_assets)
     ));
 
-    typst_content.push_str(&format!("[*{}*],[],[],\n", i18n.t("balance-sheet-liabilities-section")));
+    typst_content.push_str(&format!(
+        "[*{}*],[],[],\n",
+        i18n.t("balance-sheet-liabilities-section")
+    ));
     for node in &liability_nodes {
         build_typst_rows(node, 0, &mut typst_content, &i18n);
     }
@@ -187,7 +218,10 @@ pub(crate) fn generate_balance_sheet_typst(
         i18n.format_money_typ(balance_sheet.total_liabilities)
     ));
 
-    typst_content.push_str(&format!("[*{}*],[],[],\n", i18n.t("balance-sheet-equity-section")));
+    typst_content.push_str(&format!(
+        "[*{}*],[],[],\n",
+        i18n.t("balance-sheet-equity-section")
+    ));
     for node in &equity_nodes {
         build_typst_rows(node, 0, &mut typst_content, &i18n);
     }
@@ -216,5 +250,10 @@ pub(crate) fn generate_balance_sheet_typst(
         "balance-sheet-export-as-at",
         &fluent_args!["date" => date_str],
     );
-    wrap_report_layout(name, &i18n.t("balance-sheet-title"), &*report_qual, typst_content.as_str())
+    wrap_report_layout(
+        name,
+        &i18n.t("balance-sheet-title"),
+        &*report_qual,
+        typst_content.as_str(),
+    )
 }

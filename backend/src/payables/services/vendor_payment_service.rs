@@ -6,26 +6,51 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::ledger::db::account as account_db;
-use crate::payables::db::{vendor_invoice as vendor_invoice_db, vendor_payment as vendor_payment_db, vendor_payment_allocation as vendor_payment_allocation_db};
-use crate::ledger::services::account_service;
-use crate::util::ApiError;
-use rocket_db_pools::sqlx::{self, PgConnection};
-use shared_core::ledger::models::system_tag::SystemTag;
-use shared_core::payables::models::vendor_payment::VendorPayment;
-use shared_core::ledger::requests::transaction::{CreateTransactionRequest, JournalEntryLine};
-use shared_core::payables::requests::vendor_payment::CreateVendorPaymentRequest;
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+};
+use shared_core::{
+    ledger::{
+        models::system_tag::SystemTag,
+        requests::transaction::{
+            CreateTransactionRequest,
+            JournalEntryLine,
+        },
+    },
+    payables::{
+        models::vendor_payment::VendorPayment,
+        requests::vendor_payment::CreateVendorPaymentRequest,
+    },
+};
 use sqlx::Acquire;
 use uuid::Uuid;
+
+use crate::{
+    ledger::{
+        db::account as account_db,
+        services::account_service,
+    },
+    payables::db::{
+        vendor_invoice as vendor_invoice_db,
+        vendor_payment as vendor_payment_db,
+        vendor_payment_allocation as vendor_payment_allocation_db,
+    },
+    util::ApiError,
+};
 
 pub(crate) async fn get_vendor_invoice_payments(
     pool: &mut PgConnection,
     organization_id: Uuid,
     invoice_id: Uuid,
 ) -> Result<Vec<VendorPayment>, ApiError> {
-    let invoice = vendor_invoice_db::get(pool, invoice_id).await?.ok_or_else(|| ApiError::NotFound("Invoice not found.".to_string()))?;
+    let invoice = vendor_invoice_db::get(pool, invoice_id)
+        .await?
+        .ok_or_else(|| ApiError::NotFound("Invoice not found.".to_string()))?;
     if invoice.organization_id != organization_id {
-        return Err(ApiError::Forbidden("You do not have permission to view this invoice.".to_string()));
+        return Err(ApiError::Forbidden(
+            "You do not have permission to view this invoice.".to_string(),
+        ));
     }
     let payments = vendor_payment_db::get_all_by_invoice(pool, invoice_id).await?;
     Ok(payments)
@@ -38,7 +63,13 @@ pub(crate) async fn create_vendor_payment(
 ) -> Result<VendorPayment, ApiError> {
     let mut tx = pool.begin().await?;
 
-    let ap_account = account_db::get_by_system_tag(&mut tx, organization_id, SystemTag::AccountsPayable.to_string().as_str()).await?.ok_or_else(|| ApiError::NotFound("Accounts Payable account not found.".to_string()))?;
+    let ap_account = account_db::get_by_system_tag(
+        &mut tx,
+        organization_id,
+        SystemTag::AccountsPayable.to_string().as_str(),
+    )
+    .await?
+    .ok_or_else(|| ApiError::NotFound("Accounts Payable account not found.".to_string()))?;
 
     let jels = vec![
         JournalEntryLine {
@@ -63,13 +94,20 @@ pub(crate) async fn create_vendor_payment(
         reference: req.reference.clone(),
         entries: jels,
     };
-    let transaction_id = account_service::create_transaction(&mut tx, organization_id, &ct_req).await?;
+    let transaction_id =
+        account_service::create_transaction(&mut tx, organization_id, &ct_req).await?;
 
-    let new_payment = vendor_payment_db::insert(&mut tx, organization_id, transaction_id, req).await?;
+    let new_payment =
+        vendor_payment_db::insert(&mut tx, organization_id, transaction_id, req).await?;
 
     for allocation in &req.allocations {
         vendor_payment_allocation_db::insert(&mut tx, new_payment.id, allocation).await?;
-        vendor_invoice_db::update_amount_remaining(&mut tx, allocation.vendor_invoice_id, -allocation.allocated_amount).await?;
+        vendor_invoice_db::update_amount_remaining(
+            &mut tx,
+            allocation.vendor_invoice_id,
+            -allocation.allocated_amount,
+        )
+        .await?;
     }
 
     tx.commit().await?;
