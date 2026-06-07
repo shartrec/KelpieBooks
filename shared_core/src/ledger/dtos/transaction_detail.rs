@@ -6,8 +6,8 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::dtos::journal_entry_detail::JournalEntryDetail;
-use crate::models::transaction::Transaction;
+use crate::ledger::dtos::journal_entry_detail::JournalEntryDetail;
+use crate::ledger::models::transaction::Transaction;
 use serde::{Deserialize, Serialize};
 
 /// A DTO representing a full transaction with all its journal entry lines.

@@ -16,11 +16,11 @@ use crate::DbKelpie;
 use rocket::serde::json::Json;
 use rocket::{get, post, put, routes, Route};
 use rocket_db_pools::Connection;
-use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
-use shared_core::models::vendor_invoice::VendorInvoice;
-use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
-use shared_core::models::vendor_payment::VendorPayment;
-use shared_core::requests::vendor_invoice::{
+use shared_core::payables::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
+use shared_core::payables::models::vendor_invoice::VendorInvoice;
+use shared_core::payables::models::vendor_invoice_item::VendorInvoiceItem;
+use shared_core::payables::models::vendor_payment::VendorPayment;
+use shared_core::payables::requests::vendor_invoice::{
     CreateVendorInvoiceRequest, UpdateVendorInvoiceRequest,
 };
 

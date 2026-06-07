@@ -11,7 +11,7 @@ use crate::util::locale_context::LocaleContext;
 use crate::util::reports::{build_table_header, wrap_report_layout};
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
+use shared_core::ledger::dtos::general_ledger_line::GeneralLedgerLine;
 use shared_core::i18n::format_currency_icu_typ;
 use shared_core::models::organization::Organization;
 

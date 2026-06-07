@@ -11,9 +11,9 @@ use crate::util::locale_context::LocaleContext;
 use crate::util::reports::{build_table_header, wrap_report_layout};
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::ledger::dtos::account_with_balance::AccountWithBalance;
 use shared_core::models::organization::Organization;
-use shared_core::reports::balance_sheet::BalanceSheet;
+use shared_core::ledger::dtos::balance_sheet::BalanceSheet;
 use std::collections::HashMap;
 use uuid::Uuid;
 

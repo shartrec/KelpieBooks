@@ -11,12 +11,12 @@ use crate::ledger::services::account_service;
 use crate::util::ApiError;
 use chrono::{Local, NaiveDate};
 use rocket_db_pools::sqlx::{self, PgConnection};
-use shared_core::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
-use shared_core::models::system_tag::SystemTag;
-use shared_core::models::vendor_invoice::VendorInvoice;
-use shared_core::models::vendor_invoice_item::VendorInvoiceItem;
-use shared_core::requests::transaction::{CreateTransactionRequest, JournalEntryLine};
-use shared_core::requests::vendor_invoice::{CreateVendorInvoiceRequest, UpdateVendorInvoiceRequest};
+use shared_core::ledger::models::system_tag::SystemTag;
+use shared_core::ledger::requests::transaction::{CreateTransactionRequest, JournalEntryLine};
+use shared_core::payables::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
+use shared_core::payables::models::vendor_invoice::VendorInvoice;
+use shared_core::payables::models::vendor_invoice_item::VendorInvoiceItem;
+use shared_core::payables::requests::vendor_invoice::{CreateVendorInvoiceRequest, UpdateVendorInvoiceRequest};
 use sqlx::Acquire;
 use uuid::Uuid;
 

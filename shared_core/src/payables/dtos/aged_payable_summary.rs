@@ -6,17 +6,19 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::models::vendor_payment_allocation::VendorPaymentAllocation;
-use chrono::NaiveDate;
+use crate::payables::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct CreateVendorPaymentRequest {
+pub struct AgedPayableSummary {
     pub partner_id: Uuid,
-    pub payment_date: NaiveDate,
-    pub bank_account_id: Uuid,
-    pub amount: i64,
-    pub reference: Option<String>,
-    pub allocations: Vec<VendorPaymentAllocation>,
+    pub partner_name: String,
+    pub current: i64,
+    pub days_30: i64,
+    pub days_60: i64,
+    pub days_90: i64,
+    pub days_90_plus: i64,
+    pub total: i64,
+    pub invoices: Vec<VendorInvoiceListItem>,
 }

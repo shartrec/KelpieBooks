@@ -14,11 +14,11 @@ use crate::DbKelpie;
 use rocket::serde::json::Json;
 use rocket::{delete, get, post, put, routes, Route};
 use rocket_db_pools::Connection;
-use shared_core::dtos::partner_list_item::PartnerListItem;
-use shared_core::models::partner::Partner;
-use shared_core::models::partner_address::PartnerAddress;
-use shared_core::models::partner_contact::PartnerContact;
-use shared_core::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
+use shared_core::partners::dtos::partner_list_item::PartnerListItem;
+use shared_core::partners::models::partner::Partner;
+use shared_core::partners::models::partner_address::PartnerAddress;
+use shared_core::partners::models::partner_contact::PartnerContact;
+use shared_core::partners::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![

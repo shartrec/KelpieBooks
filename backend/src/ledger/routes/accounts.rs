@@ -19,11 +19,11 @@ use rocket::http::ContentType;
 use rocket::serde::json::Json;
 use rocket::{delete, get, post, put, routes, Route};
 use rocket_db_pools::Connection;
-use shared_core::dtos::account_with_balance::AccountWithBalance;
-use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
-use shared_core::models::account::Account;
-use shared_core::models::account_category::AccountCategory;
-use shared_core::requests::account::{CreateAccountRequest, UpdateAccountRequest};
+use shared_core::ledger::dtos::account_with_balance::AccountWithBalance;
+use shared_core::ledger::dtos::journal_entry_with_balance::JournalEntryWithBalance;
+use shared_core::ledger::models::account::Account;
+use shared_core::ledger::models::account_category::AccountCategory;
+use shared_core::ledger::requests::account::{CreateAccountRequest, UpdateAccountRequest};
 use std::str::FromStr;
 
 pub(crate) fn routes() -> Vec<Route> {

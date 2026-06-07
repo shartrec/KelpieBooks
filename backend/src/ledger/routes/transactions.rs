@@ -16,8 +16,8 @@ use crate::DbKelpie;
 use rocket::serde::json::Json;
 use rocket::{delete, get, post, put, routes, Route};
 use rocket_db_pools::Connection;
-use shared_core::dtos::transaction_detail::TransactionDetail;
-use shared_core::requests::transaction::{
+use shared_core::ledger::dtos::transaction_detail::TransactionDetail;
+use shared_core::ledger::requests::transaction::{
     CreateTransactionRequest, ReverseTransactionRequest, UpdateTransactionRequest,
 };
 use sqlx::Acquire;

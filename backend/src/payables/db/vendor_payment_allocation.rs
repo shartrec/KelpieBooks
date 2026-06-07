@@ -7,7 +7,7 @@
  */
 
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::models::vendor_payment_allocation::VendorPaymentAllocation;
+use shared_core::payables::models::vendor_payment_allocation::VendorPaymentAllocation;
 use uuid::Uuid;
 
 fn from_row_to_vendor_payment_allocation(row: &sqlx::postgres::PgRow) -> VendorPaymentAllocation {

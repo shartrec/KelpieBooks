@@ -12,7 +12,7 @@ use crate::ledger::db::{account, journal_entry, transaction};
 use crate::util::ApiError;
 use chrono::NaiveDate;
 use rocket_db_pools::sqlx::PgConnection;
-use shared_core::models::account_category::AccountCategory;
+use shared_core::ledger::models::account_category::AccountCategory;
 use uuid::Uuid;
 
 pub(crate) async fn close_financial_year(

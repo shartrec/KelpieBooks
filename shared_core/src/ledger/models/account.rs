@@ -6,24 +6,24 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::models::address_type::AddressType;
+use crate::ledger::models::{
+    account_category::AccountCategory,
+    system_tag::SystemTag,
+};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct PartnerAddress {
+pub struct Account {
     pub id: Uuid,
     pub organization_id: Uuid,
-    pub partner_id: Uuid,
-    pub address_type: AddressType,
-    pub is_primary: bool,
-    pub address_line1: String,
-    pub address_line2: Option<String>,
-    pub city: String,
-    pub state_province: Option<String>,
-    pub postal_code: Option<String>,
-    pub country: String,
+    pub parent_id: Option<Uuid>,
+    pub code: String,
+    pub name: String,
+    pub category: AccountCategory,
+    pub is_group: bool,
+    pub is_bank_account: bool,
+    pub system_tag: Option<SystemTag>,
     pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
 }

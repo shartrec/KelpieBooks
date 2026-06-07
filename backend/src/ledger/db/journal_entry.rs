@@ -8,8 +8,8 @@
 
 use chrono::{DateTime, NaiveDate, Utc};
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::dtos::journal_entry_detail::JournalEntryDetail;
-use shared_core::models::journal_entry::JournalEntry;
+use shared_core::ledger::dtos::journal_entry_detail::JournalEntryDetail;
+use shared_core::ledger::models::journal_entry::JournalEntry;
 use uuid::Uuid;
 
 pub(crate) struct JournalEntryWithDate {

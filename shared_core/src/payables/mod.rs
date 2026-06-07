@@ -6,4 +6,8 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-pub mod balance_sheet;
+// shared_core/src/payables/mod.rs
+
+pub mod models;
+pub mod dtos;
+pub mod requests;

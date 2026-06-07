@@ -10,7 +10,7 @@ use crate::util::locale_context::LocaleContext;
 use crate::util::reports::{build_table_header, wrap_report_layout};
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use shared_core::dtos::journal_entry_with_balance::JournalEntryWithBalance;
+use shared_core::ledger::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::models::organization::Organization;
 
 pub(crate) fn generate_ledger_csv(user: &AuthenticatedUser, entries: &[JournalEntryWithBalance]) -> String {

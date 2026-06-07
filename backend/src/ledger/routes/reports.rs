@@ -22,9 +22,9 @@ use rocket::http::ContentType;
 use rocket::serde::json::Json;
 use rocket::{get, routes, Route};
 use rocket_db_pools::Connection;
-use shared_core::dtos::account_with_balance::AccountWithBalance;
-use shared_core::dtos::general_ledger_line::GeneralLedgerLine;
-use shared_core::reports::balance_sheet::BalanceSheet;
+use shared_core::ledger::dtos::account_with_balance::AccountWithBalance;
+use shared_core::ledger::dtos::general_ledger_line::GeneralLedgerLine;
+use shared_core::ledger::dtos::balance_sheet::BalanceSheet;
 use uuid::Uuid;
 
 pub(crate) fn routes() -> Vec<Route> {

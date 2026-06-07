@@ -7,12 +7,12 @@
  */
 
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::dtos::partner_list_item::PartnerListItem;
-use shared_core::models::address_type::AddressType;
-use shared_core::models::partner::Partner;
-use shared_core::models::partner_address::PartnerAddress;
-use shared_core::models::partner_contact::PartnerContact;
-use shared_core::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
+use shared_core::partners::dtos::partner_list_item::PartnerListItem;
+use shared_core::partners::models::address_type::AddressType;
+use shared_core::partners::models::partner::Partner;
+use shared_core::partners::models::partner_address::PartnerAddress;
+use shared_core::partners::models::partner_contact::PartnerContact;
+use shared_core::partners::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
 use std::str::FromStr;
 use uuid::Uuid;
 

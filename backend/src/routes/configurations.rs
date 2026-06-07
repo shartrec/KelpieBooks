@@ -12,7 +12,7 @@ use crate::DbKelpie;
 use rocket::serde::json::Json;
 use rocket::{get, post, put, routes};
 use rocket_db_pools::Connection;
-use shared_core::models::system_tag::SystemTag;
+use shared_core::ledger::models::system_tag::SystemTag;
 use shared_core::requests::configuration::UpdateConfigurationRequest;
 use std::collections::HashMap;
 use uuid::Uuid;

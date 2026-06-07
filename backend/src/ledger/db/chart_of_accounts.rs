@@ -8,8 +8,8 @@
 
 use rocket_db_pools::sqlx::{self, PgConnection};
 use serde::Deserialize;
-use shared_core::models::account_category::AccountCategory;
-use shared_core::models::system_tag::SystemTag;
+use shared_core::ledger::models::account_category::AccountCategory;
+use shared_core::ledger::models::system_tag::SystemTag;
 use sqlx::Row;
 use std::collections::HashMap;
 use uuid::Uuid;

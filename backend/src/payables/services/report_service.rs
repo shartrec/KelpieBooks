@@ -8,8 +8,8 @@
 use crate::payables::db::vendor_invoice::get_by_org;
 use crate::util::ApiError;
 use chrono::NaiveDate;
-use shared_core::dtos::aged_payable_summary::AgedPayableSummary;
-use shared_core::models::invoice_status::InvoiceStatus;
+use shared_core::payables::dtos::aged_payable_summary::AgedPayableSummary;
+use shared_core::payables::models::invoice_status::InvoiceStatus;
 use sqlx::PgConnection;
 use std::collections::HashMap;
 use uuid::Uuid;

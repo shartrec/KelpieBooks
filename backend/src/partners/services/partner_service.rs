@@ -9,11 +9,11 @@
 use crate::partners::db::partner as partner_db;
 use crate::util::ApiError;
 use rocket_db_pools::sqlx::PgConnection;
-use shared_core::dtos::partner_list_item::PartnerListItem;
-use shared_core::models::partner::Partner;
-use shared_core::models::partner_address::PartnerAddress;
-use shared_core::models::partner_contact::PartnerContact;
-use shared_core::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
+use shared_core::partners::dtos::partner_list_item::PartnerListItem;
+use shared_core::partners::models::partner::Partner;
+use shared_core::partners::models::partner_address::PartnerAddress;
+use shared_core::partners::models::partner_contact::PartnerContact;
+use shared_core::partners::requests::partner::{CreatePartnerRequest, UpdatePartnerRequest};
 use uuid::Uuid;
 
 pub(crate) async fn get_partners(

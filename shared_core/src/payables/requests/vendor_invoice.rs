@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::models::vendor_invoice_item::VendorInvoiceItem;
+use crate::payables::models::vendor_invoice_item::VendorInvoiceItem;
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

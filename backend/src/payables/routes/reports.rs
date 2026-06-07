@@ -9,7 +9,7 @@ use chrono::NaiveDate;
 use rocket::{get, routes, Route};
 use rocket::serde::json::Json;
 use rocket_db_pools::Connection;
-use shared_core::dtos::aged_payable_summary::AgedPayableSummary;
+use shared_core::payables::dtos::aged_payable_summary::AgedPayableSummary;
 use crate::DbKelpie;
 use crate::payables::services::report_service;
 use crate::security::{RequirePrivilege, UseVendorInvoices};

@@ -8,7 +8,7 @@
 
 use chrono::NaiveDate;
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::models::transaction::Transaction;
+use shared_core::ledger::models::transaction::Transaction;
 use uuid::Uuid;
 
 fn from_row_to_transaction(row: &sqlx::postgres::PgRow) -> Transaction {

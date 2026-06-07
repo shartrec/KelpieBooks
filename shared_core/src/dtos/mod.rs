@@ -7,20 +7,8 @@
  */
 use serde::{Deserialize, Serialize};
 
-pub mod account_with_balance;
-pub mod aged_payable_summary;
-pub mod dashboard;
-pub mod expense_breakdown;
-pub mod general_ledger_line;
-pub mod journal_entry_detail;
-pub mod journal_entry_with_balance;
 pub mod organization;
-pub mod partner_list_item;
-pub mod recent_transaction;
-pub mod top_payable;
-pub mod transaction_detail;
 pub mod user_detail;
-pub mod vendor_invoice_list_item;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ApiErrorMessage {

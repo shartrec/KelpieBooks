@@ -11,10 +11,10 @@ use crate::payables::db::{vendor_invoice as vendor_invoice_db, vendor_payment as
 use crate::ledger::services::account_service;
 use crate::util::ApiError;
 use rocket_db_pools::sqlx::{self, PgConnection};
-use shared_core::models::system_tag::SystemTag;
-use shared_core::models::vendor_payment::VendorPayment;
-use shared_core::requests::transaction::{CreateTransactionRequest, JournalEntryLine};
-use shared_core::requests::vendor_payment::CreateVendorPaymentRequest;
+use shared_core::ledger::models::system_tag::SystemTag;
+use shared_core::payables::models::vendor_payment::VendorPayment;
+use shared_core::ledger::requests::transaction::{CreateTransactionRequest, JournalEntryLine};
+use shared_core::payables::requests::vendor_payment::CreateVendorPaymentRequest;
 use sqlx::Acquire;
 use uuid::Uuid;
 

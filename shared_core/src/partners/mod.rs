@@ -6,15 +6,8 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-#[cfg(feature = "ledger")]
-pub mod ledger;
-#[cfg(feature = "partners")]
-pub mod partners;
-#[cfg(feature = "payables")]
-pub mod payables;
+// shared_core/src/partners/mod.rs
 
-pub mod dtos;
-pub mod i18n;
 pub mod models;
+pub mod dtos;
 pub mod requests;
-pub mod util;

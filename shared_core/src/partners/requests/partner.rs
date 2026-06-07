@@ -6,8 +6,10 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::models::partner_address::PartnerAddress;
-use crate::models::partner_contact::PartnerContact;
+use crate::partners::models::{
+    partner_address::PartnerAddress,
+    partner_contact::PartnerContact,
+};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
