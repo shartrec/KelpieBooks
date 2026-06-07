@@ -14,6 +14,7 @@ use crate::routes::{
 use crate::util::logging::setup_logging;
 use rocket::fs::{relative, FileServer, NamedFile};
 use rocket::{get, routes};
+use rocket::fairing::AdHoc;
 use rocket_db_pools::Database;
 
 mod db;
@@ -33,6 +34,20 @@ async fn spa_index() -> Option<NamedFile> {
     NamedFile::open(relative!("./static/index.html")).await.ok()
 }
 
+fn run_migrations() -> AdHoc {
+    AdHoc::try_on_ignite("SQLx Migrations", |rocket| async {
+        let db = DbKelpie::fetch(&rocket)
+            .expect("Database pool not initialized");
+
+        sqlx::migrate!("./migrations")
+            .run(&**db)
+            .await
+            .expect("Failed to run migrations");
+
+        Ok(rocket)
+    })
+}
+
 #[rocket::launch]
 fn rocket() -> _ {
     setup_logging();
@@ -40,6 +55,7 @@ fn rocket() -> _ {
 
     let rocket = rocket::build()
         .attach(DbKelpie::init())
+        .attach(run_migrations())
         .mount("/", security_routes::routes())
         .mount("/", onboarding::routes())
         .mount("/", users::routes())
