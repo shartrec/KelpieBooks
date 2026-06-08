@@ -18,21 +18,18 @@ use rocket::{
     routes,
 };
 use rocket_db_pools::Database;
-
-use crate::{
-    routes::{
-        configurations,
-        dashboard,
-        onboarding,
-        organization,
-        period_end,
-        privileges,
-        roles,
-        security as security_routes,
-        users,
-    },
-    util::logging::setup_logging,
+use core::routes::{
+    configurations,
+    dashboard,
+    onboarding,
+    organization,
+    period_end,
+    privileges,
+    roles,
+    security as security_routes,
+    users,
 };
+use crate::util::logging::setup_logging;
 
 #[cfg(feature = "ledger")]
 pub(crate) mod ledger;
@@ -41,11 +38,9 @@ pub(crate) mod partners;
 #[cfg(feature = "payables")]
 pub(crate) mod payables;
 
-mod db;
-mod routes;
 pub(crate) mod security;
-mod services;
 mod util;
+pub mod core;
 
 #[derive(Database)]
 #[database("kelpie_db")]

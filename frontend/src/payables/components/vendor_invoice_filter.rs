@@ -15,7 +15,7 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    components::currency_input::CurrencyInput,
+    core::components::currency_input::CurrencyInput,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,

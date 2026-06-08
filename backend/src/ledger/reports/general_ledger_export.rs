@@ -11,19 +11,16 @@ use fluent::fluent_args;
 use shared_core::{
     i18n::format_currency_icu_typ,
     ledger::dtos::general_ledger_line::GeneralLedgerLine,
-    models::organization::Organization,
 };
-
-use crate::{
-    routes::security::AuthenticatedUser,
-    util::{
-        locale_context::LocaleContext,
-        reports::{
-            build_table_header,
-            wrap_report_layout,
-        },
+use shared_core::core::models::organization::Organization;
+use crate::util::{
+    locale_context::LocaleContext,
+    reports::{
+        build_table_header,
+        wrap_report_layout,
     },
 };
+use crate::core::routes::security::AuthenticatedUser;
 
 pub(crate) fn generate_general_ledger_csv(
     user: &AuthenticatedUser,

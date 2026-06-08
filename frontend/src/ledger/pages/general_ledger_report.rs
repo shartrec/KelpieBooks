@@ -13,7 +13,7 @@ use yew_router::prelude::*;
 
 use crate::{
     api::Api,
-    components::{
+    core::components::{
         layout::Layout,
         report_options::ReportOptions,
     },

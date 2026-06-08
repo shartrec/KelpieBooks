@@ -13,8 +13,6 @@ pub mod partners;
 #[cfg(feature = "payables")]
 pub mod payables;
 
-pub mod dtos;
 pub mod i18n;
-pub mod models;
-pub mod requests;
 pub mod util;
+pub mod core;

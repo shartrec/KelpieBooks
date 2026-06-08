@@ -168,7 +168,7 @@ async fn export_trial_balance(
 
     let accounts =
         report_service::get_trial_balance(&mut pool, user.organization_id, report_date).await?;
-    let org = crate::db::organization::get(&mut pool, user.organization_id).await?;
+    let org = crate::core::db::organization::get(&mut pool, user.organization_id).await?;
 
     let (content, content_type, filename) = match format.as_str() {
         "csv" => {
@@ -210,7 +210,7 @@ async fn export_profit_loss(
     let accounts =
         report_service::get_profit_loss(&mut pool, user.organization_id, start_date, end_date)
             .await?;
-    let org = crate::db::organization::get(&mut pool, user.organization_id).await?;
+    let org = crate::core::db::organization::get(&mut pool, user.organization_id).await?;
 
     let (content, content_type, filename) = match format.as_str() {
         "csv" => {
@@ -248,7 +248,7 @@ async fn export_balance_sheet(
 
     let balance_sheet =
         report_service::get_balance_sheet(&mut pool, user.organization_id, report_date).await?;
-    let org = crate::db::organization::get(&mut pool, user.organization_id).await?;
+    let org = crate::core::db::organization::get(&mut pool, user.organization_id).await?;
 
     let (content, content_type, filename) = match format.as_str() {
         "csv" => {
@@ -318,7 +318,7 @@ async fn export_general_ledger(
         min_amount,
     )
     .await?;
-    let org = crate::db::organization::get(&mut pool, user.organization_id).await?;
+    let org = crate::core::db::organization::get(&mut pool, user.organization_id).await?;
 
     let (content, content_type, filename) = match format.as_str() {
         "csv" => {

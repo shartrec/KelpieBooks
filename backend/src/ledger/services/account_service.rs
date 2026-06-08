@@ -16,26 +16,22 @@ use chrono::{
     NaiveDate,
 };
 use rocket_db_pools::sqlx::PgConnection;
-use shared_core::{
-    ledger::{
-        dtos::{
-            account_with_balance::AccountWithBalance,
-            journal_entry_with_balance::JournalEntryWithBalance,
-        },
-        models::{
-            account::Account,
-            account_category::AccountCategory,
-            system_tag::SystemTag,
-        },
-        requests::transaction::CreateTransactionRequest,
+use shared_core::ledger::{
+    dtos::{
+        account_with_balance::AccountWithBalance,
+        journal_entry_with_balance::JournalEntryWithBalance,
     },
-    requests::configuration::UpdateConfigurationRequest,
+    models::{
+        account::Account,
+        account_category::AccountCategory,
+        system_tag::SystemTag,
+    },
+    requests::transaction::CreateTransactionRequest,
 };
 use sqlx::Acquire;
 use uuid::Uuid;
-
+use shared_core::core::requests::configuration::UpdateConfigurationRequest;
 use crate::{
-    db,
     ledger::db::{
         account,
         account::{
@@ -48,6 +44,7 @@ use crate::{
     },
     util::ApiError,
 };
+use crate::core::db;
 
 pub(crate) async fn get_accounts(
     pool: &mut PgConnection,

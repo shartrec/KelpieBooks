@@ -12,7 +12,6 @@ use shared_core::ledger::models::account_category::AccountCategory;
 use uuid::Uuid;
 
 use crate::{
-    db::organization,
     ledger::db::{
         account,
         account::get_all_by_category,
@@ -21,6 +20,7 @@ use crate::{
     },
     util::ApiError,
 };
+use crate::core::db::organization;
 
 pub(crate) async fn close_financial_year(
     pool: &mut PgConnection,

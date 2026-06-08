@@ -13,27 +13,24 @@ use std::collections::{
 
 use fluent::fluent_args;
 use log::info;
-use shared_core::{
-    ledger::{
-        dtos::account_with_balance::AccountWithBalance,
-        requests::account::{
-            CreateAccountRequest,
-            UpdateAccountRequest,
-        },
+use shared_core::ledger::{
+    dtos::account_with_balance::AccountWithBalance,
+    requests::account::{
+        CreateAccountRequest,
+        UpdateAccountRequest,
     },
-    models::auth::SystemPrivilege,
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-
+use shared_core::core::models::auth::SystemPrivilege;
 use crate::{
     api::Api,
-    components::delete_confirmation_modal::DeleteConfirmationModal,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
+    core::components::delete_confirmation_modal::DeleteConfirmationModal,
     ledger::components::{
         account_row::{
             AccountNode,

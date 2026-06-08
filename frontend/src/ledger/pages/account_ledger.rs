@@ -12,24 +12,17 @@ use std::{
 };
 
 use fluent::fluent_args;
-use shared_core::{
-    ledger::{
-        dtos::journal_entry_with_balance::JournalEntryWithBalance,
-        models::account::Account,
-        requests::transaction::ReverseTransactionRequest,
-    },
-    models::auth::SystemPrivilege,
+use shared_core::ledger::{
+    dtos::journal_entry_with_balance::JournalEntryWithBalance,
+    models::account::Account,
+    requests::transaction::ReverseTransactionRequest,
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-
+use shared_core::core::models::auth::SystemPrivilege;
 use crate::{
     api::Api,
-    components::{
-        layout::Layout,
-        report_options::ReportOptions,
-    },
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
@@ -38,6 +31,10 @@ use crate::{
             use_report_context,
             ReportAction,
         },
+    },
+    core::components::{
+        layout::Layout,
+        report_options::ReportOptions,
     },
     ledger::{
         components::{

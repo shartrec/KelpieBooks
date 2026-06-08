@@ -18,7 +18,7 @@ use web_sys::{
 use yew::prelude::*;
 
 use crate::{
-    components::currency_input::CurrencyInput,
+    core::components::currency_input::CurrencyInput,
     contexts::locale_context::use_locale,
 };
 

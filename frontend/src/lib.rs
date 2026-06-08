@@ -12,9 +12,8 @@ pub mod partners;
 #[cfg(feature = "payables")]
 pub mod payables;
 
+pub mod core;
 pub mod api;
-pub mod components;
 pub mod contexts;
-pub mod pages;
 pub mod router;
 pub mod services;

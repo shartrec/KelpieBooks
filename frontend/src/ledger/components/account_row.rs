@@ -8,14 +8,11 @@
 
 use std::collections::HashSet;
 
-use shared_core::{
-    ledger::dtos::account_with_balance::AccountWithBalance,
-    models::auth::SystemPrivilege,
-};
+use shared_core::ledger::dtos::account_with_balance::AccountWithBalance;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-
+use shared_core::core::models::auth::SystemPrivilege;
 use crate::{
     contexts::{
         auth_context::use_user_context,

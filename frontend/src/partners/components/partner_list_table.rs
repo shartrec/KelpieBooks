@@ -12,7 +12,6 @@ use shared_core::{
         account::Account,
         account_category::AccountCategory,
     },
-    models::auth::SystemPrivilege,
     partners::{
         dtos::partner_list_item::PartnerListItem,
         models::{
@@ -26,7 +25,7 @@ use shared_core::{
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-
+use shared_core::core::models::auth::SystemPrivilege;
 use crate::{
     api::Api,
     contexts::{

@@ -27,7 +27,6 @@ use shared_core::ledger::{
 use sqlx::Acquire;
 
 use crate::{
-    db,
     ledger::{
         db::{
             journal_entry,
@@ -46,6 +45,7 @@ use crate::{
     },
     DbKelpie,
 };
+use crate::core::db;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![

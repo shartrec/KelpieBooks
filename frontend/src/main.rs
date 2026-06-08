@@ -26,7 +26,7 @@ use frontend::ledger::pages::profit_loss::ProfitLossPage;
 #[cfg(feature = "ledger")]
 use frontend::ledger::pages::trial_balance::TrialBalancePage;
 #[cfg(feature = "ledger")]
-use frontend::pages::configuration::ConfigurationPage;
+use frontend::core::pages::configuration::ConfigurationPage;
 #[cfg(feature = "partners")]
 use frontend::partners::pages::partner_list_page::PartnerListPage;
 #[cfg(feature = "payables")]
@@ -49,7 +49,7 @@ use frontend::{
         },
         report_context::ReportContextProvider,
     },
-    pages::{
+    core::pages::{
         dashboard::DashboardPage,
         login::LoginPage,
         profile::ProfilePage,
@@ -62,12 +62,10 @@ use frontend::{
 };
 use gloo_net::http::Request;
 use log::info;
-use shared_core::{
-    dtos::user_detail::AuthUserDetail,
-    models::organization::Organization,
-};
+use shared_core::core::models::organization::Organization;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use shared_core::core::dtos::user_detail::AuthUserDetail;
 
 /// The component that contains the router and switches between pages.
 #[function_component(AppRouter)]

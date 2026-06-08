@@ -13,9 +13,9 @@ use rocket::{
     },
     Request,
 };
-use shared_core::models::auth::SystemPrivilege;
+use shared_core::core::models::auth::SystemPrivilege;
 
-use crate::routes::security::AuthenticatedUser;
+use crate::core::routes::security::AuthenticatedUser;
 #[rustfmt::skip]  // This is to stop all the markers from being reformatted.
 
 use std::marker::PhantomData;

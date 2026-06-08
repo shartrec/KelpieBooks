@@ -21,7 +21,7 @@ use rocket::{
     Response,
 };
 use rocket_db_pools::sqlx;
-use shared_core::dtos::ApiErrorMessage;
+use shared_core::core::dtos::ApiErrorMessage;
 
 #[derive(Debug)]
 pub(crate) enum ApiError {

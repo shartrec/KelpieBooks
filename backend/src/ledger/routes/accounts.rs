@@ -260,7 +260,7 @@ async fn export_account_ledger(
             end_date,
         )
         .await?;
-        let org = crate::db::organization::get(&mut pool, user.organization_id).await?;
+        let org = crate::core::db::organization::get(&mut pool, user.organization_id).await?;
 
         let (content, content_type, filename) = match format.as_str() {
             "csv" => {
