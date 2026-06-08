@@ -6,13 +6,18 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::contexts::auth_context::UserContextHandle;
-use crate::contexts::locale_context::use_locale;
-use crate::contexts::org_context::OrgContextHandle;
-use crate::router::Route;
 use gloo_net::http::Request;
 use yew::prelude::*;
 use yew_router::prelude::*;
+
+use crate::{
+    contexts::{
+        auth_context::UserContextHandle,
+        locale_context::use_locale,
+        org_context::OrgContextHandle,
+    },
+    router::Route,
+};
 
 #[function_component(Header)]
 pub fn header() -> Html {

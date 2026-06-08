@@ -5,11 +5,18 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use crate::services::web::detect_browser_locale;
-use chrono::{Datelike, NaiveDate};
+use chrono::{
+    Datelike,
+    NaiveDate,
+};
 use fluent::FluentArgs;
-use shared_core::i18n::{format_currency_icu, format_date_icu};
+use shared_core::i18n::{
+    format_currency_icu,
+    format_date_icu,
+};
 use yew::prelude::*;
+
+use crate::services::web::detect_browser_locale;
 // Your shared core!
 
 #[derive(Clone, PartialEq)]
@@ -42,7 +49,6 @@ impl LocaleContext {
 
     // Pass-through wrapper for dates
     pub fn format_date(&self, date: NaiveDate) -> String {
-
         format_date_icu(date.year(), date.month(), date.day(), Some(self.as_str()))
     }
 }

@@ -6,13 +6,20 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::api::Api;
-use crate::contexts::auth_context::UserContextHandle;
-use shared_core::dtos::dashboard::FinancialHealth;
-use shared_core::dtos::expense_breakdown::ExpenseBreakdown;
-use shared_core::dtos::recent_transaction::RecentTransaction;
-use shared_core::dtos::top_payable::TopPayable;
+#[cfg(feature = "ledger")]
+use shared_core::ledger::dtos::{
+    dashboard::FinancialHealth,
+    expense_breakdown::ExpenseBreakdown,
+    recent_transaction::RecentTransaction,
+};
+#[cfg(feature = "payables")]
+use shared_core::payables::dtos::top_payable::TopPayable;
 use yew_router::prelude::Navigator;
+
+use crate::{
+    api::Api,
+    contexts::auth_context::UserContextHandle,
+};
 
 pub async fn get_financial_health(
     user_ctx: UserContextHandle,
@@ -22,9 +29,15 @@ pub async fn get_financial_health(
     match response {
         Ok(response) => {
             if response.ok() {
-                response.json::<FinancialHealth>().await.map_err(|e| e.to_string())
+                response
+                    .json::<FinancialHealth>()
+                    .await
+                    .map_err(|e| e.to_string())
             } else {
-                Err(format!("Failed to fetch financial health: {}", response.status()))
+                Err(format!(
+                    "Failed to fetch financial health: {}",
+                    response.status()
+                ))
             }
         }
         Err(e) => Err(e.to_string()),
@@ -39,9 +52,15 @@ pub async fn get_recent_transactions(
     match response {
         Ok(response) => {
             if response.ok() {
-                response.json::<Vec<RecentTransaction>>().await.map_err(|e| e.to_string())
+                response
+                    .json::<Vec<RecentTransaction>>()
+                    .await
+                    .map_err(|e| e.to_string())
             } else {
-                Err(format!("Failed to fetch recent transactions: {}", response.status()))
+                Err(format!(
+                    "Failed to fetch recent transactions: {}",
+                    response.status()
+                ))
             }
         }
         Err(e) => Err(e.to_string()),
@@ -56,15 +75,22 @@ pub async fn get_expense_breakdown(
     match response {
         Ok(response) => {
             if response.ok() {
-                response.json::<Vec<ExpenseBreakdown>>().await.map_err(|e| e.to_string())
+                response
+                    .json::<Vec<ExpenseBreakdown>>()
+                    .await
+                    .map_err(|e| e.to_string())
             } else {
-                Err(format!("Failed to fetch expense breakdown: {}", response.status()))
+                Err(format!(
+                    "Failed to fetch expense breakdown: {}",
+                    response.status()
+                ))
             }
         }
         Err(e) => Err(e.to_string()),
     }
 }
 
+#[cfg(feature = "payables")]
 pub async fn get_top_payables(
     user_ctx: UserContextHandle,
     navigator: Navigator,
@@ -73,9 +99,15 @@ pub async fn get_top_payables(
     match response {
         Ok(response) => {
             if response.ok() {
-                response.json::<Vec<TopPayable>>().await.map_err(|e| e.to_string())
+                response
+                    .json::<Vec<TopPayable>>()
+                    .await
+                    .map_err(|e| e.to_string())
             } else {
-                Err(format!("Failed to fetch top payables: {}", response.status()))
+                Err(format!(
+                    "Failed to fetch top payables: {}",
+                    response.status()
+                ))
             }
         }
         Err(e) => Err(e.to_string()),

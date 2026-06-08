@@ -6,8 +6,9 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use chrono::NaiveDate;
 use std::rc::Rc;
+
+use chrono::NaiveDate;
 use uuid::Uuid;
 use yew::prelude::*;
 

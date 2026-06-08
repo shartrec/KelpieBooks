@@ -6,10 +6,13 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::contexts::locale_context::use_locale;
-use shared_core::models::auth::SystemPrivilege;
-use shared_core::requests::role::CreateRoleRequest;
+use shared_core::{
+    models::auth::SystemPrivilege,
+    requests::role::CreateRoleRequest,
+};
 use yew::prelude::*;
+
+use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
 pub struct AddRoleModalProps {

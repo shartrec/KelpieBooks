@@ -6,13 +6,21 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::contexts::auth_context::UserContextHandle;
-use crate::router::Route;
-use gloo_net::http::{Request, Response};
-use gloo_net::Error;
+use gloo_net::{
+    http::{
+        Request,
+        Response,
+    },
+    Error,
+};
 use log::info;
 use serde::Serialize;
 use yew_router::prelude::Navigator;
+
+use crate::{
+    contexts::auth_context::UserContextHandle,
+    router::Route,
+};
 
 pub struct Api;
 

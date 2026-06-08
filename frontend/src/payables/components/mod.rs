@@ -1,0 +1,47 @@
+/*
+ * Copyright (c) 2026.
+ *
+ * This file is part of KelpieBooks. For terms of use, please see the file
+ * called LICENSE at the top level of the KelpieBooks source tree
+ *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
+ */
+use shared_core::models::auth::SystemPrivilege;
+
+use crate::{
+    components::sidebar::SidebarModuleContribution,
+    router::Route,
+};
+
+pub mod aged_trial_balance_matrix;
+pub mod vendor_invoice_drawer;
+pub mod vendor_invoice_filter;
+pub mod vendor_invoice_item_row;
+pub mod vendor_invoice_table;
+
+#[cfg(feature = "payables")]
+pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
+    Some(SidebarModuleContribution {
+        label_key: "sidebar-payables".into(),
+        privilege: Some(SystemPrivilege::use_vendor_invoices),
+        target_route: None,
+        children: vec![
+            SidebarModuleContribution {
+                label_key: "payables-ledger-title",
+                privilege: Some(SystemPrivilege::use_vendor_invoices),
+                target_route: Some(Route::Payables),
+                children: vec![],
+            },
+            SidebarModuleContribution {
+                label_key: "sidebar-reports".into(),
+                privilege: Some(SystemPrivilege::use_vendor_invoices),
+                target_route: None,
+                children: vec![SidebarModuleContribution {
+                    label_key: "sidebar-aged-payables".into(),
+                    privilege: Some(SystemPrivilege::use_vendor_invoices),
+                    target_route: Some(Route::AgedPayables),
+                    children: vec![],
+                }],
+            },
+        ],
+    })
+}

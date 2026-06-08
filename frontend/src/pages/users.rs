@@ -6,22 +6,35 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::api::Api;
-use crate::components::add_user_modal::AddUserModal;
-use crate::components::edit_user_modal::EditUserModal;
-use crate::components::generic_delete_confirmation_modal::GenericDeleteConfirmationModal;
-use crate::components::layout::Layout;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::use_locale;
-use fluent::fluent_args;
-use shared_core::dtos::user_detail::UserDetail;
-use shared_core::models::role::Role;
-use shared_core::requests::user::{CreateUserRequest, UpdateUserRequest};
 use std::rc::Rc;
+
+use fluent::fluent_args;
+use shared_core::{
+    dtos::user_detail::UserDetail,
+    models::role::Role,
+    requests::user::{
+        CreateUserRequest,
+        UpdateUserRequest,
+    },
+};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::pages;
+
+use crate::{
+    api::Api,
+    components::{
+        add_user_modal::AddUserModal,
+        edit_user_modal::EditUserModal,
+        generic_delete_confirmation_modal::GenericDeleteConfirmationModal,
+        layout::Layout,
+    },
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    pages,
+};
 
 #[function_component(UsersPage)]
 pub fn users_page() -> Html {
@@ -68,10 +81,9 @@ pub fn users_page() -> Html {
                         "users-error-fetch",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(i18n.t_args(
-                        "coa-error-network",
-                        &fluent_args!["error" => e.to_string()],
-                    ))),
+                    Err(e) => error.set(Some(
+                        i18n.t_args("coa-error-network", &fluent_args!["error" => e.to_string()]),
+                    )),
                 }
             });
         })
@@ -105,10 +117,9 @@ pub fn users_page() -> Html {
                         "roles-error-fetch",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(i18n.t_args(
-                        "coa-error-network",
-                        &fluent_args!["error" => e.to_string()],
-                    ))),
+                    Err(e) => error.set(Some(
+                        i18n.t_args("coa-error-network", &fluent_args!["error" => e.to_string()]),
+                    )),
                 }
             });
         })
@@ -218,7 +229,6 @@ pub fn users_page() -> Html {
         })
     };
 
-
     let on_delete_confirm = {
         let fetch_users = fetch_users.clone();
         let error = error.clone();
@@ -226,7 +236,7 @@ pub fn users_page() -> Html {
         let i18n = i18n.clone();
         let navigator = navigator.clone();
         let user_to_delete = user_to_delete.clone();
-        Callback::from(move | user_id | {
+        Callback::from(move |user_id| {
             let fetch_users = fetch_users.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();

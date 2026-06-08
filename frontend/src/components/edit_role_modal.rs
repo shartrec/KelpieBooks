@@ -6,12 +6,17 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::contexts::locale_context::use_locale;
-use shared_core::models::auth::SystemPrivilege;
-use shared_core::models::role::Role;
-use shared_core::requests::role::UpdateRoleRequest;
+use shared_core::{
+    models::{
+        auth::SystemPrivilege,
+        role::Role,
+    },
+    requests::role::UpdateRoleRequest,
+};
 use uuid::Uuid;
 use yew::prelude::*;
+
+use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
 pub struct EditRoleModalProps {

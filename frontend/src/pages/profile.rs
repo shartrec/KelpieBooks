@@ -6,16 +6,21 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::api::Api;
-use crate::components::layout::Layout;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::use_locale;
-use crate::router::Route;
 use fluent::fluent_args;
 use serde::Serialize;
 use shared_core::dtos::user_detail::AuthUserDetail;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
+
+use crate::{
+    api::Api,
+    components::layout::Layout,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    router::Route,
+};
 
 #[derive(Clone, Serialize, Default, Debug)]
 struct UserUpdate {

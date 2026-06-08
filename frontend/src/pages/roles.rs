@@ -6,21 +6,34 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::api::Api;
-use crate::components::add_role_modal::AddRoleModal;
-use crate::components::edit_role_modal::EditRoleModal;
-use crate::components::generic_delete_confirmation_modal::GenericDeleteConfirmationModal;
-use crate::components::layout::Layout;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::use_locale;
-use fluent::fluent_args;
-use shared_core::models::role::Role;
-use shared_core::requests::role::{CreateRoleRequest, UpdateRoleRequest};
 use std::rc::Rc;
+
+use fluent::fluent_args;
+use shared_core::{
+    models::role::Role,
+    requests::role::{
+        CreateRoleRequest,
+        UpdateRoleRequest,
+    },
+};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::pages;
+
+use crate::{
+    api::Api,
+    components::{
+        add_role_modal::AddRoleModal,
+        edit_role_modal::EditRoleModal,
+        generic_delete_confirmation_modal::GenericDeleteConfirmationModal,
+        layout::Layout,
+    },
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    pages,
+};
 
 #[function_component(RolesPage)]
 pub fn roles_page() -> Html {
@@ -66,10 +79,9 @@ pub fn roles_page() -> Html {
                         "roles-error-fetch",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(i18n.t_args(
-                        "coa-error-network",
-                        &fluent_args!["error" => e.to_string()],
-                    ))),
+                    Err(e) => error.set(Some(
+                        i18n.t_args("coa-error-network", &fluent_args!["error" => e.to_string()]),
+                    )),
                 }
             });
         })
@@ -117,10 +129,9 @@ pub fn roles_page() -> Html {
                     Ok(r) => {
                         pages::set_error(error, i18n, r, "roles-error-add");
                     }
-                    Err(e) => error.set(Some(i18n.t_args(
-                        "coa-error-network",
-                        &fluent_args!["error" => e.to_string()],
-                    ))),
+                    Err(e) => error.set(Some(
+                        i18n.t_args("coa-error-network", &fluent_args!["error" => e.to_string()]),
+                    )),
                 }
             });
         })
@@ -161,10 +172,9 @@ pub fn roles_page() -> Html {
                     Ok(r) => {
                         pages::set_error(error, i18n, r, "roles-error-update");
                     }
-                    Err(e) => error.set(Some(i18n.t_args(
-                        "coa-error-network",
-                        &fluent_args!["error" => e.to_string()],
-                    ))),
+                    Err(e) => error.set(Some(
+                        i18n.t_args("coa-error-network", &fluent_args!["error" => e.to_string()]),
+                    )),
                 }
             });
         })
@@ -176,7 +186,6 @@ pub fn roles_page() -> Html {
             role_to_delete.set(Some(role));
         })
     };
-
 
     let on_delete_confirm = {
         let fetch_roles = fetch_roles.clone();
@@ -203,10 +212,9 @@ pub fn roles_page() -> Html {
                     Ok(r) => {
                         pages::set_error(error, i18n, r, "roles-error-delete");
                     }
-                    Err(e) => error.set(Some(i18n.t_args(
-                        "coa-error-network",
-                        &fluent_args!["error" => e.to_string()],
-                    ))),
+                    Err(e) => error.set(Some(
+                        i18n.t_args("coa-error-network", &fluent_args!["error" => e.to_string()]),
+                    )),
                 }
             });
         })

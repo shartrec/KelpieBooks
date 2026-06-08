@@ -6,31 +6,58 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::use_locale;
-use crate::router::Route;
 use shared_core::models::auth::SystemPrivilege;
 use yew::prelude::*;
 use yew_router::prelude::*;
+
+#[cfg(feature = "ledger")]
+use crate::ledger;
+#[cfg(feature = "partners")]
+use crate::partners;
+#[cfg(feature = "payables")]
+use crate::payables;
+use crate::{
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    router::Route,
+};
 
 #[function_component(Sidebar)]
 pub fn sidebar() -> Html {
     let user_ctx = use_user_context();
     let i18n = use_locale();
 
-    let accounts_open = use_state(|| false);
-    let accounts_reports_open = use_state(|| false);
-    let payables_open = use_state(|| false);
-    let payables_reports_open = use_state(|| false);
-    let partners_open = use_state(|| false);
-    let tasks_open = use_state(|| false);
-    let admin_open = use_state(|| false);
+    let mut registry: Vec<SidebarModuleContribution> = vec![];
 
-    let toggle_state = |state: UseStateHandle<bool>| {
-        Callback::from(move |_| {
-            state.set(!*state);
-        })
-    };
+    // Core Ledger Module
+    #[cfg(feature = "ledger")]
+    if user_ctx.has_privilege(&SystemPrivilege::use_accounts) {
+        if let Some(contrib) = ledger::components::get_sidebar_contribution() {
+            registry.push(contrib);
+        }
+    }
+
+    #[cfg(feature = "payables")]
+    if user_ctx.has_privilege(&SystemPrivilege::use_vendor_invoices) {
+        if let Some(contrib) = payables::components::get_sidebar_contribution() {
+            registry.push(contrib);
+        }
+    }
+
+    #[cfg(feature = "partners")]
+    if user_ctx.has_privilege(&SystemPrivilege::use_accounts) {
+        if let Some(contrib) = partners::components::get_sidebar_contribution() {
+            registry.push(contrib);
+        }
+    }
+
+    if user_ctx.has_privilege(&SystemPrivilege::manage_users) {
+        if let Some(contrib) = get_core_contribution() {
+            registry.push(contrib);
+        }
+    }
 
     html! {
         <aside class="sidebar">
@@ -42,156 +69,115 @@ pub fn sidebar() -> Html {
                 <ul>
                     <li><Link<Route> to={Route::Dashboard}>{ i18n.t("sidebar-dashboard") }</Link<Route>></li>
 
-                    // Accounts Group
-                    { if user_ctx.has_privilege(&SystemPrivilege::use_accounts) {
-                        html! {
-                            <li class="sidebar__group">
-                                <div class="sidebar__group-header" onclick={toggle_state(accounts_open.clone())}>
-                                    <span>{ i18n.t("sidebar-accounts") }</span>
-                                    <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *accounts_open { "is-rotated" } else { "" }} />
-                                </div>
-                                if *accounts_open {
-                                    <ul class="sidebar__sub-nav" style="--depth: 1;">
-                                        <li><Link<Route> to={Route::Ledger}>{ i18n.t("coa-title") }</Link<Route>></li>
-                                        { if user_ctx.has_privilege(&SystemPrivilege::use_transactions) {
-                                            html! {
-                                                <li class="sidebar__group">
-                                                    <div class="sidebar__group-header" onclick={toggle_state(accounts_reports_open.clone())}>
-                                                        <span>{ i18n.t("sidebar-reports") }</span>
-                                                        <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *accounts_reports_open { "is-rotated" } else { "" }} />
-                                                    </div>
-                                                    if *accounts_reports_open {
-                                                        <ul class="sidebar__sub-nav" style="--depth: 2;">
-                                                            <li><Link<Route> to={Route::TrialBalance}>{ i18n.t("sidebar-trial-balance") }</Link<Route>></li>
-                                                            <li><Link<Route> to={Route::ProfitLoss}>{ i18n.t("sidebar-profit-loss") }</Link<Route>></li>
-                                                            <li><Link<Route> to={Route::BalanceSheet}>{ i18n.t("sidebar-balance-sheet") }</Link<Route>></li>
-                                                            <li><Link<Route> to={Route::GeneralLedger}>{ i18n.t("sidebar-general-ledger") }</Link<Route>></li>
-                                                        </ul>
-                                                    }
-                                                </li>
-                                            }
-                                        } else {
-                                            html!{}
-                                        }}
-                                    </ul>
-                                }
-                            </li>
-                        }
-                    } else {
-                        html! {}
-                    }}
-
-                    // Payables Group
-                    { if user_ctx.has_privilege(&SystemPrivilege::use_vendor_invoices) {
-                        html! {
-                            <li class="sidebar__group">
-                                <div class="sidebar__group-header" onclick={toggle_state(payables_open.clone())}>
-                                    <span>{ i18n.t("sidebar-payables") }</span>
-                                    <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *payables_open { "is-rotated" } else { "" }} />
-                                </div>
-                                if *payables_open {
-                                    <ul class="sidebar__sub-nav" style="--depth: 1;">
-                                        <li><Link<Route> to={Route::Payables}>{ i18n.t("payables-ledger-title") }</Link<Route>></li>
-                                        <li class="sidebar__group">
-                                            <div class="sidebar__group-header" onclick={toggle_state(payables_reports_open.clone())}>
-                                                <span>{ i18n.t("sidebar-reports") }</span>
-                                                <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *payables_reports_open { "is-rotated" } else { "" }} />
-                                            </div>
-                                            if *payables_reports_open {
-                                                <ul class="sidebar__sub-nav" style="--depth: 2;">
-                                                    <li><Link<Route> to={Route::AgedPayables}>{ i18n.t("sidebar-aged-payables") }</Link<Route>></li>
-                                                </ul>
-                                            }
-                                        </li>
-                                    </ul>
-                                }
-                            </li>
-                        }
-                    } else {
-                        html!{}
-                    }}
-
-                    // Partners Group
-                    { if user_ctx.has_privilege(&SystemPrivilege::use_partners) {
-                        html! {
-                            <li class="sidebar__group">
-                                <div class="sidebar__group-header" onclick={toggle_state(partners_open.clone())}>
-                                    <span>{ i18n.t("sidebar-partners") }</span>
-                                    <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *partners_open { "is-rotated" } else { "" }} />
-                                </div>
-                                if *partners_open {
-                                    <ul class="sidebar__sub-nav" style="--depth: 1;">
-                                        <li><Link<Route> to={Route::PartnerList}>{ i18n.t("partner-list-title") }</Link<Route>></li>
-                                    </ul>
-                                }
-                            </li>
-                        }
-                    } else {
-                        html!{}
-                    }}
-
-                    // Tasks Group
-                    { if user_ctx.has_privilege(&SystemPrivilege::security_admin) || user_ctx.has_privilege(&SystemPrivilege::manage_organization) || user_ctx.has_privilege(&SystemPrivilege::manage_accounts) {
-                        html! {
-                            <li class="sidebar__group">
-                                <div class="sidebar__group-header" onclick={toggle_state(tasks_open.clone())}>
-                                    <span>{ i18n.t("sidebar-tasks") }</span>
-                                    <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *tasks_open { "is-rotated" } else { "" }} />
-                                </div>
-                                if *tasks_open {
-                                    <ul class="sidebar__sub-nav" style="--depth: 1;">
-                                        { if user_ctx.has_privilege(&SystemPrivilege::security_admin) {
-                                            html! { <li><Link<Route> to={Route::CloseYear}>{ i18n.t("sidebar-close-year") }</Link<Route>></li> }
-                                        } else {
-                                            html! {}
-                                        }}
-                                        { if user_ctx.has_privilege(&SystemPrivilege::manage_organization) {
-                                            html! { <li><Link<Route> to={Route::PeriodSettings}>{ i18n.t("sidebar-period-settings") }</Link<Route>></li> }
-                                        } else {
-                                            html! {}
-                                        }}
-                                        { if user_ctx.has_privilege(&SystemPrivilege::manage_accounts) {
-                                            html! { <li><Link<Route> to={Route::Configuration}>{ i18n.t("sidebar-configuration") }</Link<Route>></li> }
-                                        } else {
-                                            html! {}
-                                        }}
-                                    </ul>
-                                }
-                            </li>
-                        }
-                    } else {
-                        html!{}
-                    }}
-
-                    // Admin Group
-                    { if user_ctx.has_privilege(&SystemPrivilege::manage_users) || user_ctx.has_privilege(&SystemPrivilege::security_admin) {
-                        html! {
-                            <li class="sidebar__group">
-                                <div class="sidebar__group-header" onclick={toggle_state(admin_open.clone())}>
-                                    <span>{ i18n.t("sidebar-admin") }</span>
-                                    <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *admin_open { "is-rotated" } else { "" }} />
-                                </div>
-                                if *admin_open {
-                                    <ul class="sidebar__sub-nav" style="--depth: 1;">
-                                        { if user_ctx.has_privilege(&SystemPrivilege::manage_users) {
-                                            html! { <li><Link<Route> to={Route::Users}>{ i18n.t("sidebar-users") }</Link<Route>></li> }
-                                        } else {
-                                            html! {}
-                                        }}
-                                        { if user_ctx.has_privilege(&SystemPrivilege::security_admin) {
-                                            html! { <li><Link<Route> to={Route::Roles}>{ i18n.t("sidebar-roles") }</Link<Route>></li> }
-                                        } else {
-                                            html! {}
-                                        }}
-                                    </ul>
-                                 }
-                            </li>
-                        }
-                    } else {
-                        html!{}
-                    }}
+                    // 💡 Iterate through the discovered structural modules dynamically
+                    { for registry.into_iter().map(|item| html! {
+                        <SidebarGroupNode item={item} depth={0}/>
+                    })}
                 </ul>
             </nav>
         </aside>
     }
+}
+
+/// Represents a single link or an entire nested module block in the navigation sidebar
+#[derive(Clone, PartialEq)]
+pub struct SidebarModuleContribution {
+    pub label_key: &'static str, // The translation key for fluent i18n
+    pub privilege: Option<SystemPrivilege>, // Mandatory clearance flag if applicable
+    pub target_route: Option<Route>, // Target destination if it's a leaf node
+    pub children: Vec<SidebarModuleContribution>, // Submenu arrays (e.g., Reports)
+}
+
+#[derive(Properties, PartialEq)]
+struct GroupNodeProps {
+    item: SidebarModuleContribution,
+    pub depth: usize, // 💡 Tracks recursive rendering depth for CSS indentations
+}
+
+/// A reusable component that manages its own toggle state and nested link maps
+#[function_component(SidebarGroupNode)]
+fn sidebar_group_node(props: &GroupNodeProps) -> Html {
+    let i18n = use_locale();
+    let item = &props.item;
+    let current_depth = props.depth;
+
+    // 💡 Create a deterministic session storage identifier using the unique localization translation token
+    let storage_key = format!("kb_nav_open_{}", item.label_key);
+
+    // Initialize toggle state directly from browser session history cache if it exists
+    let is_open = use_state(|| {
+        if let Some(window) = web_sys::window() {
+            if let Ok(Some(storage)) = window.session_storage() {
+                if let Ok(Some(val)) = storage.get_item(&storage_key) {
+                    return val == "true";
+                }
+            }
+        }
+        false
+    });
+
+    let toggle = {
+        let is_open = is_open.clone();
+        let storage_key = storage_key.clone();
+        Callback::from(move |_| {
+            let next_state = !*is_open;
+
+            // Persist the UI configuration string state cleanly to disk storage context loops
+            if let Some(window) = web_sys::window() {
+                if let Ok(Some(storage)) = window.session_storage() {
+                    let _ =
+                        storage.set_item(&storage_key, if next_state { "true" } else { "false" });
+                }
+            }
+            is_open.set(next_state);
+        })
+    };
+
+    let item = &props.item;
+
+    if let Some(target_route) = &item.target_route {
+        // Simple direct leaf link node
+        html! {
+            <li><Link<Route> to={target_route.clone()}>{ i18n.t(item.label_key) }</Link<Route>></li>
+        }
+    } else {
+        // Group Dropdown Node with child nodes
+        html! {
+            <li class="sidebar__group">
+                <div class="sidebar__group-header" onclick={toggle}>
+                    <span>{ i18n.t(item.label_key) }</span>
+                    <img src="/images/chevron-right.svg" alt={i18n.t("common-toggle")} class={if *is_open { "is-rotated" } else { "" }} />
+                </div>
+                if *is_open {
+                    <ul class="sidebar__sub-nav" style={format!("--depth: {};", current_depth + 1)}>
+                        { for item.children.iter().map(|child| html! {
+                            <SidebarGroupNode item={child.clone()} depth={current_depth + 1}/>
+                        })}
+                    </ul>
+                }
+            </li>
+        }
+    }
+}
+
+pub fn get_core_contribution() -> Option<SidebarModuleContribution> {
+    Some(SidebarModuleContribution {
+        label_key: "sidebar-admin".into(),
+        privilege: Some(SystemPrivilege::manage_users),
+        target_route: None,
+        children: vec![
+            SidebarModuleContribution {
+                label_key: "sidebar-users",
+                privilege: Some(SystemPrivilege::manage_users),
+                target_route: Some(Route::Users),
+                children: vec![],
+            },
+            SidebarModuleContribution {
+                label_key: "sidebar-roles".into(),
+                privilege: Some(SystemPrivilege::manage_users),
+                target_route: Some(Route::Roles),
+                children: vec![],
+            },
+        ],
+    })
 }

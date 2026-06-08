@@ -7,16 +7,23 @@
  */
 
 /* register.rs */
-use crate::contexts::locale_context::use_locale;
-use crate::router::Route;
 use fluent::fluent_args;
 use gloo_net::http::Request;
 use shared_core::requests::onboard::OnboardingRequest;
-use yew::function_component;
-use yew::html;
-use yew::prelude::*;
-use yew_router::hooks::use_navigator;
-use yew_router::prelude::Link; // Ensure Link helper is imported
+use yew::{
+    function_component,
+    html,
+    prelude::*,
+};
+use yew_router::{
+    hooks::use_navigator,
+    prelude::Link,
+};
+
+use crate::{
+    contexts::locale_context::use_locale,
+    router::Route,
+}; // Ensure Link helper is imported
 
 #[function_component(RegisterPage)]
 pub fn register_page() -> Html {

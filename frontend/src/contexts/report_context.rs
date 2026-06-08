@@ -6,9 +6,16 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use chrono::{Datelike, NaiveDate};
-use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
+
+use chrono::{
+    Datelike,
+    NaiveDate,
+};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
 use yew::prelude::*;
 

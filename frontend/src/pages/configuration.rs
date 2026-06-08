@@ -6,21 +6,35 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::api::Api;
-use crate::components::layout::Layout;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::use_locale;
-use crate::contexts::org_context::{OrgAction, OrgContextHandle, OrgState};
-use crate::router::Route;
-use fluent::fluent_args;
-use shared_core::models::account::Account;
-use shared_core::models::organization::Organization;
-use shared_core::models::system_tag::SystemTag;
-use shared_core::requests::configuration::UpdateConfigurationRequest;
 use std::collections::HashMap;
+
+use fluent::fluent_args;
+use shared_core::{
+    ledger::models::{
+        account::Account,
+        system_tag::SystemTag,
+    },
+    models::organization::Organization,
+    requests::configuration::UpdateConfigurationRequest,
+};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
+
+use crate::{
+    api::Api,
+    components::layout::Layout,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+        org_context::{
+            OrgAction,
+            OrgContextHandle,
+            OrgState,
+        },
+    },
+    router::Route,
+};
 
 #[function_component(ConfigurationPage)]
 pub fn configuration_page() -> Html {

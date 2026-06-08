@@ -6,21 +6,35 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::components::layout::Layout;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::use_locale;
-use crate::contexts::org_context::use_org_context;
-use crate::router::Route;
-use crate::services::dashboard::{
-    get_expense_breakdown, get_financial_health, get_recent_transactions, get_top_payables,
-};
 use fluent::fluent_args;
-use shared_core::dtos::dashboard::FinancialHealth;
-use shared_core::dtos::expense_breakdown::ExpenseBreakdown;
-use shared_core::dtos::recent_transaction::RecentTransaction;
-use shared_core::dtos::top_payable::TopPayable;
+#[cfg(feature = "ledger")]
+use shared_core::ledger::dtos::{
+    dashboard::FinancialHealth,
+    expense_breakdown::ExpenseBreakdown,
+    recent_transaction::RecentTransaction,
+};
+#[cfg(feature = "payables")]
+use shared_core::payables::dtos::top_payable::TopPayable;
 use yew::prelude::*;
 use yew_router::prelude::*;
+
+#[cfg(feature = "payables")]
+use crate::services::dashboard::get_top_payables;
+#[cfg(feature = "ledger")]
+use crate::services::dashboard::{
+    get_expense_breakdown,
+    get_financial_health,
+    get_recent_transactions,
+};
+use crate::{
+    components::layout::Layout,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+        org_context::use_org_context,
+    },
+    router::Route,
+};
 
 #[function_component(DashboardPage)]
 pub fn dashboard_page() -> Html {
@@ -31,60 +45,107 @@ pub fn dashboard_page() -> Html {
     let financial_health_state = use_state(|| None::<FinancialHealth>);
     let recent_transactions_state = use_state(|| None::<Vec<RecentTransaction>>);
     let expense_breakdown_state = use_state(|| None::<Vec<ExpenseBreakdown>>);
-    let top_payables_state = use_state(|| None::<Vec<TopPayable>>);
     let error_state = use_state(|| None::<String>);
 
+    // 💡 1. FEATURE-GATE THE STATE HANDLE ENTIRELY
+    // This variable completely vanishes when "payables" is inactive, saving memory!
+    #[cfg(feature = "payables")]
+    let top_payables_state = use_state(|| None::<Vec<TopPayable>>);
+
+    // --- ASYNC DATA FETCHING LIFECYCLE EFFECTS ---
     {
         let financial_health_state = financial_health_state.clone();
         let recent_transactions_state = recent_transactions_state.clone();
         let expense_breakdown_state = expense_breakdown_state.clone();
-        let top_payables_state = top_payables_state.clone();
         let error_state = error_state.clone();
         let user_ctx = user_ctx.clone();
         let navigator = navigator.clone();
 
+        // Clone the gated state handle only if the feature is live
+        #[cfg(feature = "payables")]
+        let top_payables_state_clone = top_payables_state.clone();
+
         use_effect_with((), move |_| {
-            let error_state1 = error_state.clone();
-            let user_ctx1 = user_ctx.clone();
-            let navigator1 = navigator.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                match get_financial_health(user_ctx1, navigator1).await {
-                    Ok(data) => financial_health_state.set(Some(data)),
-                    Err(e) => error_state1.set(Some(e.clone())),
-                }
-            });
-            let error_state2 = error_state.clone();
-            let user_ctx2 = user_ctx.clone();
-            let navigator2 = navigator.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                match get_recent_transactions(user_ctx2, navigator2).await {
-                    Ok(data) => recent_transactions_state.set(Some(data)),
-                    Err(e) => error_state2.set(Some(e.clone())),
-                }
-            });
-            let error_state3 = error_state.clone();
-            let user_ctx3 = user_ctx.clone();
-            let navigator3 = navigator.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                match get_expense_breakdown(user_ctx3, navigator3).await {
-                    Ok(data) => expense_breakdown_state.set(Some(data)),
-                    Err(e) => error_state3.set(Some(e)),
-                }
-            });
-            let error_state = error_state.clone();
-            let user_ctx = user_ctx.clone();
-            let navigator = navigator.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                match get_top_payables(user_ctx.clone(), navigator.clone()).await {
-                    Ok(data) => top_payables_state.set(Some(data)),
-                    Err(e) => error_state.set(Some(e)),
-                }
-            });
-            || ()
+            #[cfg(feature = "ledger")]
+            {
+                let error_state1 = error_state.clone();
+                let user_ctx1 = user_ctx.clone();
+                let navigator1 = navigator.clone();
+                wasm_bindgen_futures::spawn_local(async move {
+                    match get_financial_health(user_ctx1, navigator1).await {
+                        Ok(data) => financial_health_state.set(Some(data)),
+                        Err(e) => error_state1.set(Some(e.clone())),
+                    }
+                });
+                let error_state2 = error_state.clone();
+                let user_ctx2 = user_ctx.clone();
+                let navigator2 = navigator.clone();
+                wasm_bindgen_futures::spawn_local(async move {
+                    match get_recent_transactions(user_ctx2, navigator2).await {
+                        Ok(data) => recent_transactions_state.set(Some(data)),
+                        Err(e) => error_state2.set(Some(e.clone())),
+                    }
+                });
+                let error_state3 = error_state.clone();
+                let user_ctx3 = user_ctx.clone();
+                let navigator3 = navigator.clone();
+                wasm_bindgen_futures::spawn_local(async move {
+                    match get_expense_breakdown(user_ctx3, navigator3).await {
+                        Ok(data) => expense_breakdown_state.set(Some(data)),
+                        Err(e) => error_state3.set(Some(e)),
+                    }
+                });
+            }
+            #[cfg(feature = "payables")]
+            {
+                let error_state = error_state.clone();
+                let user_ctx = user_ctx.clone();
+                let navigator = navigator.clone();
+                wasm_bindgen_futures::spawn_local(async move {
+                    match get_top_payables(user_ctx.clone(), navigator.clone()).await {
+                        Ok(data) => top_payables_state_clone.set(Some(data)),
+                        Err(e) => error_state.set(Some(e)),
+                    }
+                });
+                || ()
+            }
         });
     }
 
     let i18n = use_locale();
+
+    // 💡 3. METHOD B: CONSTRUCT THE COMPONENT ELEMENT CONDITIONALLY
+    // If the feature is missing, this evaluates to an empty virtual node with zero runtime cost.
+    let mut payables_table_html = html! {};
+
+    #[cfg(feature = "payables")]
+    {
+        payables_table_html = html! {
+            <section class="card shadow-sm p-4">
+                <h3>{ i18n.t("dashboard-top-5-payables") }</h3>
+                <table class="audit-table">
+                    <thead>
+                        <tr>
+                            <th>{ i18n.t("common-vendor") }</th>
+                            <th>{ i18n.t("common-due-date") }</th>
+                            <th style="text-align: right">{ i18n.t("common-amount") }</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        if let Some(payables) = &*top_payables_state {
+                            { for payables.iter().map(|p| html! {
+                                <tr>
+                                    <td>{ p.partner_name.clone() }</td>
+                                    <td>{ i18n.format_date(p.due_date) }</td>
+                                    <td class="stat-value-small">{ i18n.format_currency(p.amount) }</td>
+                                </tr>
+                            })}
+                        }
+                    </tbody>
+                </table>
+            </section>
+        };
+    }
 
     html! {
         <Layout>
@@ -140,29 +201,8 @@ pub fn dashboard_page() -> Html {
                             </tbody>
                         </table>
                     </section>
-                    <section class="card shadow-sm p-4">
-                        <h3>{ i18n.t("dashboard-top-5-payables") }</h3>
-                        <table class="audit-table">
-                            <thead>
-                                <tr>
-                                    <th>{ i18n.t("common-vendor") }</th>
-                                    <th>{ i18n.t("common-due-date") }</th>
-                                    <th style="text-align: right">{ i18n.t("common-amount") }</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                if let Some(payables) = &*top_payables_state {
-                                    { for payables.iter().map(|p| html! {
-                                        <tr>
-                                            <td>{ p.partner_name.clone() }</td>
-                                            <td>{ i18n.format_date(p.due_date) }</td>
-                                            <td class="stat-value-small">{ i18n.format_currency(p.amount) }</td>
-                                        </tr>
-                                    })}
-                                }
-                            </tbody>
-                        </table>
-                    </section>
+
+                    { payables_table_html }
                 </div>
             </div>
         </Layout>

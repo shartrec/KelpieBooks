@@ -6,36 +6,66 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use frontend::contexts::auth_context::{UserContext, UserContextHandle};
-use frontend::contexts::locale_context::LocaleProvider;
-use frontend::contexts::org_context::{OrgAction, OrgContextHandle, OrgState};
-use frontend::contexts::report_context::ReportContextProvider;
-use frontend::pages::account_ledger::AccountLedgerPage;
-use frontend::pages::aged_payables::AgedPayablesPage;
-use frontend::pages::balance_sheet::BalanceSheetPage;
-use frontend::pages::close_year::CloseYearPage;
+// Import pages conditionally based on features
+#[cfg(feature = "ledger")]
+use frontend::ledger::pages::account_ledger::AccountLedgerPage;
+#[cfg(feature = "ledger")]
+use frontend::ledger::pages::balance_sheet::BalanceSheetPage;
+#[cfg(feature = "ledger")]
+use frontend::ledger::pages::close_year::CloseYearPage;
+#[cfg(feature = "ledger")]
+use frontend::ledger::pages::general_ledger_report::GeneralLedgerReportPage;
+#[cfg(feature = "ledger")]
+use frontend::ledger::pages::ledger::LedgerPage;
+#[cfg(feature = "ledger")]
+use frontend::ledger::pages::new_transaction::NewTransactionPage;
+#[cfg(feature = "ledger")]
+use frontend::ledger::pages::period_settings::PeriodSettings;
+#[cfg(feature = "ledger")]
+use frontend::ledger::pages::profit_loss::ProfitLossPage;
+#[cfg(feature = "ledger")]
+use frontend::ledger::pages::trial_balance::TrialBalancePage;
+#[cfg(feature = "ledger")]
 use frontend::pages::configuration::ConfigurationPage;
-use frontend::pages::dashboard::DashboardPage;
-use frontend::pages::general_ledger_report::GeneralLedgerReportPage;
-use frontend::pages::ledger::LedgerPage;
-use frontend::pages::login::LoginPage;
-use frontend::pages::new_transaction::NewTransactionPage;
-use frontend::pages::new_vendor_invoice::NewVendorInvoicePage;
-use frontend::pages::partner_list_page::PartnerListPage;
-use frontend::pages::payables_ledger::PayablesLedgerPage;
-use frontend::pages::period_settings::PeriodSettings;
-use frontend::pages::profile::ProfilePage;
-use frontend::pages::profit_loss::ProfitLossPage;
-use frontend::pages::register::RegisterPage;
-use frontend::pages::roles::RolesPage;
-use frontend::pages::style_guide::StyleGuide;
-use frontend::pages::trial_balance::TrialBalancePage;
-use frontend::pages::users::UsersPage;
-use frontend::router::Route;
+#[cfg(feature = "partners")]
+use frontend::partners::pages::partner_list_page::PartnerListPage;
+#[cfg(feature = "payables")]
+use frontend::payables::pages::aged_payables::AgedPayablesPage;
+#[cfg(feature = "payables")]
+use frontend::payables::pages::new_vendor_invoice::NewVendorInvoicePage;
+#[cfg(feature = "payables")]
+use frontend::payables::pages::payables_ledger::PayablesLedgerPage;
+use frontend::{
+    contexts::{
+        auth_context::{
+            UserContext,
+            UserContextHandle,
+        },
+        locale_context::LocaleProvider,
+        org_context::{
+            OrgAction,
+            OrgContextHandle,
+            OrgState,
+        },
+        report_context::ReportContextProvider,
+    },
+    pages::{
+        dashboard::DashboardPage,
+        login::LoginPage,
+        profile::ProfilePage,
+        register::RegisterPage,
+        roles::RolesPage,
+        style_guide::StyleGuide,
+        users::UsersPage,
+    },
+    router::Route,
+};
 use gloo_net::http::Request;
 use log::info;
-use shared_core::dtos::user_detail::AuthUserDetail;
-use shared_core::models::organization::Organization;
+use shared_core::{
+    dtos::user_detail::AuthUserDetail,
+    models::organization::Organization,
+};
 use yew::prelude::*;
 use yew_router::prelude::*;
 
@@ -114,27 +144,44 @@ fn app() -> Html {
 /// The switch function to render the correct page based on the route.
 fn switch(routes: Route) -> Html {
     match routes {
+        Route::Home => html! { <DashboardPage /> },
+
         Route::Register => html! { <RegisterPage /> },
         Route::Login => html! { <LoginPage /> },
         Route::Dashboard => html! { <DashboardPage /> },
         Route::Profile => html! { <ProfilePage /> },
-        Route::Ledger => html! { <LedgerPage /> },
-        Route::PartnerList => html! { <PartnerListPage /> },
-        Route::Payables => html! { <PayablesLedgerPage /> },
-        Route::NewVendorInvoice => html! { <NewVendorInvoicePage /> },
-        Route::AgedPayables => html! { <AgedPayablesPage /> },
-        Route::TrialBalance => html! { <TrialBalancePage /> },
-        Route::ProfitLoss => html! { <ProfitLossPage /> },
-        Route::BalanceSheet => html! { <BalanceSheetPage /> },
-        Route::GeneralLedger => html! { <GeneralLedgerReportPage /> },
-        Route::AccountLedger { id } => html! { <AccountLedgerPage account_id={id} /> },
-        Route::NewTransaction => html! { <NewTransactionPage /> },
-        Route::CloseYear => html! { <CloseYearPage /> },
-        Route::PeriodSettings => html! { <PeriodSettings /> },
-        Route::Configuration => html! { <ConfigurationPage /> },
         Route::Users => html! { <UsersPage /> },
         Route::Roles => html! { <RolesPage /> },
-        Route::Home => html! { <LoginPage /> },
+
+        #[cfg(feature = "ledger")]
+        Route::Ledger => html! { <LedgerPage /> },
+        #[cfg(feature = "ledger")]
+        Route::TrialBalance => html! { <TrialBalancePage /> },
+        #[cfg(feature = "ledger")]
+        Route::ProfitLoss => html! { <ProfitLossPage /> },
+        #[cfg(feature = "ledger")]
+        Route::BalanceSheet => html! { <BalanceSheetPage /> },
+        #[cfg(feature = "ledger")]
+        Route::GeneralLedger => html! { <GeneralLedgerReportPage /> },
+        #[cfg(feature = "ledger")]
+        Route::AccountLedger { id } => html! { <AccountLedgerPage account_id={id} /> },
+        #[cfg(feature = "ledger")]
+        Route::NewTransaction => html! { <NewTransactionPage /> },
+        #[cfg(feature = "ledger")]
+        Route::CloseYear => html! { <CloseYearPage /> },
+        #[cfg(feature = "ledger")]
+        Route::PeriodSettings => html! { <PeriodSettings /> },
+        #[cfg(feature = "ledger")]
+        Route::Configuration => html! { <ConfigurationPage /> },
+        #[cfg(feature = "partners")]
+        Route::PartnerList => html! { <PartnerListPage /> },
+        #[cfg(feature = "payables")]
+        Route::Payables => html! { <PayablesLedgerPage /> },
+        #[cfg(feature = "payables")]
+        Route::NewVendorInvoice => html! { <NewVendorInvoicePage /> },
+        #[cfg(feature = "payables")]
+        Route::AgedPayables => html! { <AgedPayablesPage /> },
+
         Route::StyleGuide => html! {<StyleGuide />},
     }
 }

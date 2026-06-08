@@ -19,31 +19,44 @@ pub enum Route {
     Dashboard,
     #[at("/profile")]
     Profile,
+    #[cfg(feature = "ledger")]
     #[at("/ledger")]
     Ledger,
+    #[cfg(feature = "partners")]
     #[at("/partners")]
     PartnerList,
+    #[cfg(feature = "payables")]
     #[at("/payables")]
     Payables,
+    #[cfg(feature = "payables")]
     #[at("/payables/new")]
     NewVendorInvoice,
+    #[cfg(feature = "payables")]
     #[at("/payables/reports/aged-payables")]
     AgedPayables,
+    #[cfg(feature = "ledger")]
     #[at("/reports/trial-balance")]
     TrialBalance,
+    #[cfg(feature = "ledger")]
     #[at("/reports/profit-loss")]
     ProfitLoss,
     #[at("/reports/balance-sheet")]
+    #[cfg(feature = "ledger")]
     BalanceSheet,
     #[at("/reports/general-ledger")]
+    #[cfg(feature = "ledger")]
     GeneralLedger,
     #[at("/accounts/:id")]
+    #[cfg(feature = "ledger")]
     AccountLedger { id: Uuid },
     #[at("/transactions/new")]
+    #[cfg(feature = "ledger")]
     NewTransaction,
     #[at("/tasks/close-year")]
+    #[cfg(feature = "ledger")]
     CloseYear,
     #[at("/tasks/period-settings")]
+    #[cfg(feature = "ledger")]
     PeriodSettings,
     #[at("/tasks/configuration")]
     Configuration,

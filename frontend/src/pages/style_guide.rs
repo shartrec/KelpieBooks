@@ -5,7 +5,11 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use yew::{function_component, html, Html};
+use yew::{
+    function_component,
+    html,
+    Html,
+};
 
 #[function_component(StyleGuide)]
 pub fn dashboard_page() -> Html {

@@ -6,18 +6,28 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::api::Api;
-use crate::components::currency_input::CurrencyInput;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::use_locale;
-use crate::contexts::report_context::{ReportAction, ReportContext};
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use shared_core::models::account::Account;
-use shared_core::models::account_category::AccountCategory;
+use shared_core::ledger::models::{
+    account::Account,
+    account_category::AccountCategory,
+};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
+
+use crate::{
+    api::Api,
+    components::currency_input::CurrencyInput,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+        report_context::{
+            ReportAction,
+            ReportContext,
+        },
+    },
+};
 
 #[derive(Properties, PartialEq)]
 pub struct ReportOptionsProps {

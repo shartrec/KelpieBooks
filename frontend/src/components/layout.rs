@@ -6,9 +6,12 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::components::header::Header;
-use crate::components::sidebar::Sidebar;
 use yew::prelude::*;
+
+use crate::components::{
+    header::Header,
+    sidebar::Sidebar,
+};
 
 #[derive(Properties, PartialEq)]
 pub struct LayoutProps {

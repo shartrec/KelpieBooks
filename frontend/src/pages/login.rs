@@ -6,18 +6,27 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::contexts::auth_context::UserContextHandle;
-use crate::contexts::locale_context::use_locale;
-use crate::router::Route;
-use crate::services::web::detect_browser_locale;
 use fluent::fluent_args;
 use gloo_net::http::Request;
-use shared_core::dtos::user_detail::AuthUserDetail;
-use shared_core::requests::auth::LoginRequest;
-use yew::function_component;
-use yew::html;
-use yew::prelude::*;
+use shared_core::{
+    dtos::user_detail::AuthUserDetail,
+    requests::auth::LoginRequest,
+};
+use yew::{
+    function_component,
+    html,
+    prelude::*,
+};
 use yew_router::hooks::use_navigator;
+
+use crate::{
+    contexts::{
+        auth_context::UserContextHandle,
+        locale_context::use_locale,
+    },
+    router::Route,
+    services::web::detect_browser_locale,
+};
 
 #[function_component(LoginPage)]
 pub fn login_page() -> Html {
@@ -37,50 +46,51 @@ pub fn login_page() -> Html {
         });
     }
 
-    let on_login_submit = {
-        let error_state = error_state.clone();
-        let user_ctx = user_ctx.clone();
-        let i18n = i18n.clone();
-        let is_login_success = is_login_success.clone();
-
-        Callback::from(move |login_data: LoginRequest| {
+    let on_login_submit =
+        {
             let error_state = error_state.clone();
             let user_ctx = user_ctx.clone();
             let i18n = i18n.clone();
             let is_login_success = is_login_success.clone();
 
-            wasm_bindgen_futures::spawn_local(async move {
-                let resp = Request::post("/api/login")
-                    .json(&login_data)
-                    .unwrap()
-                    .send()
-                    .await;
+            Callback::from(move |login_data: LoginRequest| {
+                let error_state = error_state.clone();
+                let user_ctx = user_ctx.clone();
+                let i18n = i18n.clone();
+                let is_login_success = is_login_success.clone();
 
-                match resp {
-                    Ok(r) if r.ok() => {
-                        if let Ok(user) = r.json::<AuthUserDetail>().await {
-                            user_ctx.dispatch(Some(user));
-                            is_login_success.set(true);
-                        } else {
-                            error_state.set(Some(i18n.t("login-error-parse-response")));
+                wasm_bindgen_futures::spawn_local(async move {
+                    let resp = Request::post("/api/login")
+                        .json(&login_data)
+                        .unwrap()
+                        .send()
+                        .await;
+
+                    match resp {
+                        Ok(r) if r.ok() => {
+                            if let Ok(user) = r.json::<AuthUserDetail>().await {
+                                user_ctx.dispatch(Some(user));
+                                is_login_success.set(true);
+                            } else {
+                                error_state.set(Some(i18n.t("login-error-parse-response")));
+                            }
+                        }
+                        Ok(r) => {
+                            error_state.set(Some(i18n.t_args(
+                                "login-error-failed",
+                                &fluent_args!["status" => r.status()],
+                            )));
+                        }
+                        Err(e) => {
+                            error_state.set(Some(i18n.t_args(
+                                "login-error-network",
+                                &fluent_args!["error" => e.to_string()],
+                            )));
                         }
                     }
-                    Ok(r) => {
-                        error_state.set(Some(i18n.t_args(
-                            "login-error-failed",
-                            &fluent_args!["status" => r.status()],
-                        )));
-                    }
-                    Err(e) => {
-                        error_state.set(Some(i18n.t_args(
-                            "login-error-network",
-                            &fluent_args!["error" => e.to_string()],
-                        )));
-                    }
-                }
-            });
-        })
-    };
+                });
+            })
+        };
 
     html! {
         <div class="login-wrapper">

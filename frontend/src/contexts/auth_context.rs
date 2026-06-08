@@ -6,10 +6,13 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::dtos::user_detail::AuthUserDetail;
 use std::rc::Rc;
+
+use shared_core::{
+    dtos::user_detail::AuthUserDetail,
+    models::auth::SystemPrivilege,
+};
 use yew::prelude::*;
-use shared_core::models::auth::SystemPrivilege;
 
 pub type UserContextHandle = UseReducerHandle<UserContext>;
 
@@ -31,7 +34,10 @@ impl UserContext {
         let privileges = &auth_detail.privileges;
 
         // 👑 Shortcut: Organization administrators automatically bypass individual module blocks
-        if privileges.iter().any(|p| p == SystemPrivilege::security_admin.as_str()) {
+        if privileges
+            .iter()
+            .any(|p| p == SystemPrivilege::security_admin.as_str())
+        {
             return true;
         }
 
@@ -52,4 +58,3 @@ impl Reducible for UserContext {
 pub fn use_user_context() -> UserContextHandle {
     use_context::<UserContextHandle>().unwrap()
 }
-

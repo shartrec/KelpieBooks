@@ -6,10 +6,11 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::contexts::locale_context::use_locale;
 use fluent::fluent_args;
-use shared_core::dtos::account_with_balance::AccountWithBalance;
+use shared_core::ledger::dtos::account_with_balance::AccountWithBalance;
 use yew::prelude::*;
+
+use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
 pub struct DeleteConfirmationModalProps {

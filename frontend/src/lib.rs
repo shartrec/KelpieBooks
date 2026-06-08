@@ -5,6 +5,13 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+#[cfg(feature = "ledger")]
+pub mod ledger;
+#[cfg(feature = "partners")]
+pub mod partners;
+#[cfg(feature = "payables")]
+pub mod payables;
+
 pub mod api;
 pub mod components;
 pub mod contexts;

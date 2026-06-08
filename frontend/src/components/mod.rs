@@ -6,32 +6,14 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-pub mod account_row;
-pub mod add_account_modal;
-pub mod add_partner_modal;
 pub mod add_role_modal;
 pub mod add_user_modal;
-pub mod chart_of_accounts_table;
 pub mod currency_input;
 pub mod delete_confirmation_modal;
-pub mod delete_partner_confirmation_modal;
-pub mod edit_account_modal;
 pub mod edit_role_modal;
 pub mod edit_user_modal;
+pub mod generic_delete_confirmation_modal;
 pub mod header;
-pub mod je_delete_confirmation_modal;
-pub mod je_reversal_confirmation_modal;
-pub mod journal_entry_row;
 pub mod layout;
-pub mod partner_drawer;
-pub mod partner_list_table;
-pub mod partner_row;
 pub mod report_options;
 pub mod sidebar;
-pub mod transaction_row;
-pub mod vendor_invoice_item_row;
-pub mod vendor_invoice_table;
-pub mod vendor_invoice_drawer;
-pub mod generic_delete_confirmation_modal;
-pub mod vendor_invoice_filter;
-pub mod aged_trial_balance_matrix;

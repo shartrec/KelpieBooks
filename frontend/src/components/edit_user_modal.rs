@@ -6,13 +6,17 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::contexts::locale_context::use_locale;
-use shared_core::dtos::user_detail::UserDetail;
-use shared_core::models::role::Role;
-use shared_core::requests::user::UpdateUserRequest;
 use std::str::FromStr;
+
+use shared_core::{
+    dtos::user_detail::UserDetail,
+    models::role::Role,
+    requests::user::UpdateUserRequest,
+};
 use uuid::Uuid;
 use yew::prelude::*;
+
+use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
 pub struct EditUserModalProps {
@@ -66,9 +70,10 @@ pub fn edit_user_modal(props: &EditUserModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: InputEvent| {
             let mut info = (*state).clone();
-            info.display_name = Some(e
-                .target_unchecked_into::<web_sys::HtmlInputElement>()
-                .value());
+            info.display_name = Some(
+                e.target_unchecked_into::<web_sys::HtmlInputElement>()
+                    .value(),
+            );
             state.set(info);
         })
     };
