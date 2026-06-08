@@ -24,34 +24,40 @@ pub mod transaction_row;
 #[cfg(feature = "ledger")]
 pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
     Some(SidebarModuleContribution {
+        id: "sidebar-accounts",
         label_key: "sidebar-accounts",
         privilege: Some(SystemPrivilege::use_accounts),
         target_route: None,
         children: vec![
             SidebarModuleContribution {
+                id: "coa-title",
                 label_key: "coa-title",
                 privilege: Some(SystemPrivilege::use_accounts),
                 target_route: Some(Route::Ledger),
                 children: vec![],
             },
             SidebarModuleContribution {
+                id: "sidebar-tasks",
                 label_key: "sidebar-tasks",
                 privilege: Some(SystemPrivilege::manage_accounts),
                 target_route: None,
                 children: vec![
                     SidebarModuleContribution {
+                        id: "sidebar-close-year",
                         label_key: "sidebar-close-year",
                         privilege: Some(SystemPrivilege::manage_accounts),
                         target_route: Some(Route::CloseYear),
                         children: vec![],
                     },
                     SidebarModuleContribution {
+                        id: "sidebar-period-settings",
                         label_key: "sidebar-period-settings",
                         privilege: Some(SystemPrivilege::manage_accounts),
                         target_route: Some(Route::PeriodSettings),
                         children: vec![],
                     },
                     SidebarModuleContribution {
+                        id: "sidebar-configuration",
                         label_key: "sidebar-configuration",
                         privilege: Some(SystemPrivilege::manage_accounts),
                         target_route: Some(Route::Configuration),
@@ -60,29 +66,34 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 ],
             },
             SidebarModuleContribution {
+                id: "sidebar-ledger-reports",
                 label_key: "sidebar-reports",
                 privilege: Some(SystemPrivilege::use_transactions),
                 target_route: None,
                 children: vec![
                     SidebarModuleContribution {
+                        id: "sidebar-trial-balance",
                         label_key: "sidebar-trial-balance",
                         privilege: Some(SystemPrivilege::use_transactions),
                         target_route: Some(Route::TrialBalance),
                         children: vec![],
                     },
                     SidebarModuleContribution {
+                        id: "sidebar-profit-loss",
                         label_key: "sidebar-profit-loss",
                         privilege: Some(SystemPrivilege::use_transactions),
                         target_route: Some(Route::ProfitLoss),
                         children: vec![],
                     },
                     SidebarModuleContribution {
+                        id: "sidebar-balance-sheet",
                         label_key: "sidebar-balance-sheet",
                         privilege: Some(SystemPrivilege::use_transactions),
                         target_route: Some(Route::BalanceSheet),
                         children: vec![],
                     },
                     SidebarModuleContribution {
+                        id: "sidebar-general-ledger",
                         label_key: "sidebar-general-ledger",
                         privilege: Some(SystemPrivilege::use_transactions),
                         target_route: Some(Route::GeneralLedger),

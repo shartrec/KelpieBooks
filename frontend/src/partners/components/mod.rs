@@ -21,10 +21,12 @@ pub mod partner_row;
 #[cfg(feature = "payables")]
 pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
     Some(SidebarModuleContribution {
+        id: "sidebar-partners",
         label_key: "sidebar-partners",
         privilege: Some(SystemPrivilege::use_partners),
         target_route: None,
         children: vec![SidebarModuleContribution {
+            id: "payables-ledger-title",
             label_key: "payables-ledger-title",
             privilege: Some(SystemPrivilege::use_partners),
             target_route: Some(Route::PartnerList),

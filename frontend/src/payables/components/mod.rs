@@ -21,22 +21,26 @@ pub mod vendor_invoice_table;
 #[cfg(feature = "payables")]
 pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
     Some(SidebarModuleContribution {
-        label_key: "sidebar-payables".into(),
+        id: "sidebar-payables",
+        label_key: "sidebar-payables",
         privilege: Some(SystemPrivilege::use_vendor_invoices),
         target_route: None,
         children: vec![
             SidebarModuleContribution {
+                id: "payables-ledger",
                 label_key: "payables-ledger-title",
                 privilege: Some(SystemPrivilege::use_vendor_invoices),
                 target_route: Some(Route::Payables),
                 children: vec![],
             },
             SidebarModuleContribution {
-                label_key: "sidebar-reports".into(),
+                id: "sidebar-payables-reports",
+                label_key: "sidebar-reports",
                 privilege: Some(SystemPrivilege::use_vendor_invoices),
                 target_route: None,
                 children: vec![SidebarModuleContribution {
-                    label_key: "sidebar-aged-payables".into(),
+                    id: "sidebar-aged-payables",
+                    label_key: "sidebar-aged-payables",
                     privilege: Some(SystemPrivilege::use_vendor_invoices),
                     target_route: Some(Route::AgedPayables),
                     children: vec![],

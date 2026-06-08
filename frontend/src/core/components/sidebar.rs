@@ -82,6 +82,7 @@ pub fn sidebar() -> Html {
 /// Represents a single link or an entire nested module block in the navigation sidebar
 #[derive(Clone, PartialEq)]
 pub struct SidebarModuleContribution {
+    pub id: &'static str,
     pub label_key: &'static str, // The translation key for fluent i18n
     pub privilege: Option<SystemPrivilege>, // Mandatory clearance flag if applicable
     pub target_route: Option<Route>, // Target destination if it's a leaf node
@@ -102,7 +103,7 @@ fn sidebar_group_node(props: &GroupNodeProps) -> Html {
     let current_depth = props.depth;
 
     // 💡 Create a deterministic session storage identifier using the unique localization translation token
-    let storage_key = format!("kb_nav_open_{}", item.label_key);
+    let storage_key = format!("kb_nav_open_{}", item.id);
 
     // Initialize toggle state directly from browser session history cache if it exists
     let is_open = use_state(|| {
@@ -162,18 +163,21 @@ fn sidebar_group_node(props: &GroupNodeProps) -> Html {
 
 pub fn get_core_contribution() -> Option<SidebarModuleContribution> {
     Some(SidebarModuleContribution {
-        label_key: "sidebar-admin".into(),
+        id: "sidebar-admin",
+        label_key: "sidebar-admin",
         privilege: Some(SystemPrivilege::manage_users),
         target_route: None,
         children: vec![
             SidebarModuleContribution {
+                id: "sidebar-users",
                 label_key: "sidebar-users",
                 privilege: Some(SystemPrivilege::manage_users),
                 target_route: Some(Route::Users),
                 children: vec![],
             },
             SidebarModuleContribution {
-                label_key: "sidebar-roles".into(),
+                id: "sidebar-roles",
+                label_key: "sidebar-roles",
                 privilege: Some(SystemPrivilege::manage_users),
                 target_route: Some(Route::Roles),
                 children: vec![],
