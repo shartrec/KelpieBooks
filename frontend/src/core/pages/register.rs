@@ -103,6 +103,7 @@ pub fn register_form(props: &RegisterFormProps) -> Html {
     let user_email = use_state(String::new);
     let i18n = use_locale();
     let password = use_state(String::new);
+    let show_password = use_state(|| false);
     let full_name = use_state(String::new);
     let display_name = use_state(String::new);
     let organisation = use_state(String::new);
@@ -179,6 +180,15 @@ pub fn register_form(props: &RegisterFormProps) -> Html {
         })
     };
 
+    let toggle_password_visibility = {
+        let show_password = show_password.clone();
+        Callback::from(move |_| {
+            show_password.set(!*show_password);
+        })
+    };
+
+    let password_input_type = if *show_password { "text" } else { "password" };
+
     html! {
         <form onsubmit={on_submit} class="auth-form">
             <div class="input-field-group">
@@ -203,7 +213,12 @@ pub fn register_form(props: &RegisterFormProps) -> Html {
 
             <div class="input-field-group">
                 <label>{i18n.t("register-password-label")}</label>
-                <input type="password" value={(*password).clone()} oninput={on_password_input} required=true autocomplete="new-password" />
+                <div class="password-input-wrapper">
+                    <input type={password_input_type} value={(*password).clone()} oninput={on_password_input} required=true autocomplete="new-password" />
+                    <button type="button" class="icon-button" onclick={toggle_password_visibility}>
+                        { if *show_password { "⊘" } else { "👁" } }
+                    </button>
+                </div>
             </div>
 
             <div class="input-field-group">
