@@ -114,7 +114,7 @@ fn rocket() -> _ {
     // Determine the environment directory pathway
     let assets_dir = get_static_assets_dir(&rocket);
     let rocket = rocket
-        .mount("/", FileServer::from(relative!("./static")))
+        .mount("/", FileServer::from(assets_dir))
         // 3. Mount the fallback route with a lower priority (rank 2)
         .mount("/", routes![spa_index]);
 
