@@ -101,6 +101,7 @@ common-saved = Saved!
 common-items = Items
 common-payments = Payments
 common-save = Save
+common-toggle-password-visibility = Toggle password visibility
 
 # Login Page
 login-help-text = Need help? Contact your administrator.

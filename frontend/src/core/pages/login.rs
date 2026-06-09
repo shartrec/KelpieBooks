@@ -122,6 +122,7 @@ pub fn login_form(props: &LoginFormProps) -> Html {
 
     let user_email = use_state(|| "".to_string());
     let password = use_state(|| "".to_string());
+    let show_password = use_state(|| false);
     let error = props.error.clone();
 
     let on_user_email_input = {
@@ -154,6 +155,15 @@ pub fn login_form(props: &LoginFormProps) -> Html {
         })
     };
 
+    let toggle_password_visibility = {
+        let show_password = show_password.clone();
+        Callback::from(move |_| {
+            show_password.set(!*show_password);
+        })
+    };
+
+    let password_input_type = if *show_password { "text" } else { "password" };
+
     html! {
         <form onsubmit={on_submit} class="auth-form">
             <div class="input-field-group">
@@ -162,7 +172,12 @@ pub fn login_form(props: &LoginFormProps) -> Html {
             </div>
             <div class="input-field-group">
                 <label>{i18n.t("login-form-password-label")}</label>
-                <input type="password" value={(*password).clone()} oninput={on_password_input} required=true autocomplete="current-password" />
+                <div class="password-input-wrapper">
+                    <input type={password_input_type} value={(*password).clone()} oninput={on_password_input} required=true autocomplete="current-password" />
+                    <button type="button" class="icon-button" onclick={toggle_password_visibility}>
+                        { if *show_password { "⊘" } else { "👁" } }
+                    </button>
+                </div>
             </div>
             <button type="submit" class="button-primary login-btn">
                     { i18n.t("login-form-submit-button") }

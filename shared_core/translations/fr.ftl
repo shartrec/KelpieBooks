@@ -104,6 +104,7 @@ common-saved = Enregistré !
 common-items = Articles
 common-payments = Paiements
 common-save = Enregistrer
+common-toggle-password-visibility = Basculer la visibilité du mot de passe
 
 # Login Page
 login-help-text = Besoin d’aide ? Contactez votre administrateur.
