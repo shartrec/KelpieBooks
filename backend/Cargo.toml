@@ -1,5 +1,5 @@
 [package]
-name = "backend"
+name = "kelpie-books"
 version = "0.1.0"
 edition = "2021"
 

@@ -13,3 +13,4 @@
 /backend/static/
 /logs/
 /.docs/public/
+/dist/

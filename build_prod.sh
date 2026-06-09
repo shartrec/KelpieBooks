@@ -14,5 +14,5 @@ cd ..
 mkdir -p dist
 
 # Copy the binary and the generated frontend static output next to each other
-cp target/release/kelpie_backend dist/
+cp target/release/kelpie-books dist/
 cp -r backend/static dist/static

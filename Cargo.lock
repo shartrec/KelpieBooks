@@ -186,38 +186,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be5eb007b7cacc6c660343e96f650fedf4b5a77512399eb952ca6642cf8d13f7"
 
 [[package]]
-name = "backend"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "bcrypt",
- "chrono",
- "csv",
- "derive_typst_intoval",
- "fluent",
- "include_dir",
- "jsonwebtoken",
- "log",
- "once_cell",
- "rand",
- "rocket",
- "rocket_db_pools",
- "serde",
- "shared_core",
- "sqlx",
- "toml 1.1.2+spec-1.1.0",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "typst",
- "typst-as-lib",
- "typst-assets 0.11.1",
- "typst-pdf",
- "unic-langid",
- "uuid",
-]
-
-[[package]]
 name = "base64"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2554,6 +2522,38 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1130d80c7374efad55a117d715a3af9368f0fa7a2c54573afc15a188cd984837"
 dependencies = [
  "mutate_once",
+]
+
+[[package]]
+name = "kelpie-books"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "bcrypt",
+ "chrono",
+ "csv",
+ "derive_typst_intoval",
+ "fluent",
+ "include_dir",
+ "jsonwebtoken",
+ "log",
+ "once_cell",
+ "rand",
+ "rocket",
+ "rocket_db_pools",
+ "serde",
+ "shared_core",
+ "sqlx",
+ "toml 1.1.2+spec-1.1.0",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "typst",
+ "typst-as-lib",
+ "typst-assets 0.11.1",
+ "typst-pdf",
+ "unic-langid",
+ "uuid",
 ]
 
 [[package]]
