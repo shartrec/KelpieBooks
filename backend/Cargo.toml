@@ -5,14 +5,14 @@ edition = "2021"
 
 [features]
 # By default, maybe you only want the basic ledger core active
-default = ["ledger"]
+default = ["ledger", "partners", "payables", "sales", "receivables", "inventory"]
 
 # Define your optional modules here
 ledger = ["shared_core/ledger"]
 partners = ["ledger", "shared_core/partners"]
 payables = ["ledger", "partners", "shared_core/payables"]
 sales = ["ledger", "partners", "shared_core/sales"]
-accounts_receivable = ["sales", "shared_core/accounts_receivable"]
+receivables = ["sales", "shared_core/receivables"]
 inventory = ["ledger", "shared_core/inventory"]
 
 [dependencies]
@@ -25,7 +25,7 @@ fluent = {workspace = true}
 jsonwebtoken = { version = "8.3" }
 log = "0.4"
 rand = "0.8.5"
-rocket = { version = "0.5", features = ["json", "secrets"] }
+rocket = { version = "0.5.1", features = ["json", "secrets"] }
 sqlx = { workspace = true, features = ["migrate"] }
 serde = { version = "1.0", features = ["derive"] }
 toml = "1.1"

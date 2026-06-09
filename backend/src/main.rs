@@ -7,16 +7,13 @@
  */
 #![forbid(unsafe_code)]
 
-use rocket::{
-    fairing::AdHoc,
-    fs::{
-        relative,
-        FileServer,
-        NamedFile,
-    },
-    get,
-    routes,
-};
+use std::env;
+use std::path::PathBuf;
+use rocket::{fairing::AdHoc, fs::{
+    relative,
+    FileServer,
+    NamedFile,
+}, get, routes, Build, Rocket};
 use rocket_db_pools::Database;
 use core::routes::{
     configurations,
@@ -50,6 +47,25 @@ pub(crate) struct DbKelpie(sqlx::PgPool);
 async fn spa_index() -> Option<NamedFile> {
     // This tells Rocket: "If nothing else matched, just send them the index.html"
     NamedFile::open(relative!("./static/index.html")).await.ok()
+}
+
+fn get_static_assets_dir(rocket: &Rocket<Build>) -> PathBuf {
+    let profile = rocket.figment().profile().as_ref();
+
+    match profile {
+        "debug" => {
+            // Development Mode: Point directly to the source tree folder
+            // This allows local asset changes to show up immediately
+            println!("🚀 Running in DEVELOPMENT mode. Using source assets tree.");
+            rocket::fs::relative!("static").into()
+        }
+        _ => {
+            // Production / Release Mode: Look next to the running executable binary
+            println!("⚙️ Running in PRODUCTION mode. Using neighboring standalone assets folder.");
+            let current_dir = env::current_dir().expect("Failed to read runtime directory");
+            current_dir.join("static")
+        }
+    }
 }
 
 fn run_migrations() -> AdHoc {
@@ -94,6 +110,9 @@ fn rocket() -> _ {
         .mount("/", payables::routes::reports::routes())
         .mount("/", payables::routes::vendor_invoices::routes())
         .mount("/", payables::routes::vendor_payments::routes());
+
+    // Determine the environment directory pathway
+    let assets_dir = get_static_assets_dir(&rocket);
     let rocket = rocket
         .mount("/", FileServer::from(relative!("./static")))
         // 3. Mount the fallback route with a lower priority (rank 2)

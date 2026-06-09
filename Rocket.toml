@@ -8,6 +8,8 @@ log_level = "normal"
 address = "0.0.0.0"
 port = 8080
 
+secret_key = "xN/bUkQ7qIvf+LXvzn7By8BLWRagrazRJwiV9eD00cE="
+
 log_level = "normal"
 
 [default.databases.kelpie_db]

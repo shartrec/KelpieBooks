@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["ledger"]
 
 backend = ["dep:sqlx"]
 
@@ -13,7 +12,7 @@ ledger = []
 partners = ["ledger"]
 payables = ["ledger"]
 sales = ["ledger", "partners"]
-accounts_receivable = ["sales"]
+receivables = ["sales"]
 inventory = ["ledger"]
 
 [dependencies]
