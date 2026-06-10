@@ -9,12 +9,14 @@
 
 use std::env;
 use std::path::PathBuf;
+use log::error;
 use rocket::{fairing::AdHoc, fs::{
     relative,
     FileServer,
     NamedFile,
 }, get, routes, Build, Rocket};
 use rocket_db_pools::Database;
+use sqlx::migrate::MigrateError;
 use core::routes::{
     configurations,
     dashboard,
@@ -72,11 +74,16 @@ fn run_migrations() -> AdHoc {
     AdHoc::try_on_ignite("SQLx Migrations", |rocket| async {
         let db = DbKelpie::fetch(&rocket).expect("Database pool not initialized");
 
-        sqlx::migrate!("./migrations")
+        match sqlx::migrate!("./migrations")
             .run(&**db)
             .await
-            .expect("Failed to run migrations");
+        {
+            Ok(_) => {}
 
+            Err(_) => {
+                error!("Failed to run migrations")
+            }
+        }
         Ok(rocket)
     })
 }
