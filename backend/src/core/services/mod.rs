@@ -7,3 +7,4 @@
  */
 
 pub(crate) mod onboarding;
+pub(crate) mod email_service;

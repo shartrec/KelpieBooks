@@ -38,6 +38,7 @@ pub(crate) mod payables;
 pub(crate) mod security;
 mod util;
 pub mod core;
+pub mod config;
 
 #[derive(Database)]
 #[database("kelpie_db")]
@@ -84,6 +85,7 @@ fn run_migrations() -> AdHoc {
 #[rocket::launch]
 fn rocket() -> _ {
     setup_logging();
+    config::load_config();
     tracing::info!("Starting server...");
 
     let rocket = rocket::build()

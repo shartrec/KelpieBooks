@@ -96,6 +96,9 @@ The frontend assets need to be built before they can be served by the backend.
 For a smooth development workflow, you should run the backend and frontend build processes concurrently in separate terminal sessions.
 
 -   **Terminal 1: Run the Backend Server**
+    The Backend needs an environment variable set to connect to the database of the form
+    ```ROCKET_DATABASES={kelpie_db={url="postgres://user:password@127.0.0.1/kelpie_books"}}```
+
     Navigate to the `backend` directory and use `cargo-watch` to automatically rebuild and restart the server on any file changes.
     ```sh
     cd backend

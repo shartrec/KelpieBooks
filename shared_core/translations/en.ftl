@@ -131,6 +131,19 @@ reset-password-confirm-password-label = Confirm New Password:
 reset-password-submit-button = Reset Password
 reset-password-error-server = Error resetting password: { $status }
 
+# Email
+email-reset-subject = KelpieBooks - Secure Password Reset Request
+
+email-reset-body-plain = Hello,
+        A password reset request was made for your KelpieBooks account. Please visit the following link within 20 minutes to initialize a new password:
+#        { $reset_link }
+
+email-reset-body-html = <h3>KelpieBooks Security Authentication</h3>
+#        <p>A password reset request was initiated for your profile access.</p>
+#        <p><a href={ $reset_link } style=display:inline-block; padding:10px 20px; background:#2563eb; color:white; text-decoration:none; border-radius:5px;>Reset My Password</a></p>
+#        <p><small>If you did not make this request, you can safely ignore this correspondence.</small></p>
+
+
 # Sidebar
 sidebar-logo-alt = Logo
 sidebar-dashboard = Dashboard

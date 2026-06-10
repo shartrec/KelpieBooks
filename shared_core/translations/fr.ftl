@@ -134,6 +134,20 @@ reset-password-confirm-password-label = Confirmez le nouveau mot de passe:
 reset-password-submit-button = Réinitialiser le mot de passe
 reset-password-error-server = Erreur lors de la réinitialisation du mot de passe: { $status }
 
+# Email
+email-reset-subject = KelpieBooks - Demande de réinitialisation de mot de passe sécurisée
+
+email-reset-body-plain =
+    Bonjour,
+        Une demande de réinitialisation de mot de passe a été effectuée pour votre compte KelpieBooks. Veuillez visiter le lien suivant dans les 20 minutes pour initialiser un nouveau mot de passe:
+        { $reset_link }
+
+email-reset-body-html =
+    <h3>Authentification de sécurité KelpieBooks</h3>
+    <p>Une demande de réinitialisation de mot de passe a été initiée pour l'accès à votre profil.</p>
+    <p><a href='{ $reset_link }' style='display:inline-block; padding:10px 20px; background:#2563eb; color:white; text-decoration:none; border-radius:5px;'>Réinitialiser mon mot de passe</a></p>
+    <p><small>Si vous n'avez pas fait cette demande, vous pouvez ignorer cette correspondance en toute sécurité.</small></p>
+
 # Sidebar
 sidebar-logo-alt = Logo
 sidebar-dashboard = Tableau de bord

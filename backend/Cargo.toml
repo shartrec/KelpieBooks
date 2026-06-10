@@ -24,6 +24,7 @@ chrono = { version = "0.4", features = ["serde"] }
 fluent = {workspace = true}
 hex = "0.4.3"
 jsonwebtoken = { version = "8.3" }
+lettre = { version = "0.11", features = ["tokio1", "tokio1-rustls", "tokio1-native-tls", "rustls-native-certs", "ring"] }
 log = "0.4"
 rand = "0.8.5"
 rocket = { version = "0.5.1", features = ["json", "secrets"] }

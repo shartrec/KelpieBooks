@@ -23,6 +23,7 @@ use jsonwebtoken::{
     TokenData,
     Validation,
 };
+use log::{error, log};
 use rand::{
     rngs::OsRng,
     RngCore, thread_rng,
@@ -57,7 +58,9 @@ use crate::{
     util::ApiError,
     DbKelpie,
 };
+use crate::config::load_config;
 use crate::core::db::{password_reset, user};
+use crate::core::services::email_service;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![login, me, logout, forgot_password, reset_password]
@@ -164,12 +167,17 @@ async fn forgot_password(mut conn: Connection<DbKelpie>, payload: Json<ForgotPas
         let expires_at = Utc::now() + Duration::minutes(20);
 
         // 4. Save to password_reset_tokens table
-        if let Ok(token_id) = password_reset::save_reset_token(&mut conn, user.id, &token_hash, expires_at).await {
+        if let Ok(id) = password_reset::save_reset_token(&mut conn, user.id, &token_hash, expires_at).await {
 
-            // TODO 5. Send the email (ideally queued via a background worker thread)
-            // Link look format: https://kelpiebooks.com/reset-password?token=YOUR_RAW_HEX_TOKEN
-            // send_reset_email(&user.email, &raw_token).await;
-            println!("https://kelpiebooks.com/reset-password?id={}&token={}", token_id, raw_token);
+            let config = load_config();
+
+            // 5. Send the email (ideally queued via a background worker thread)
+            match email_service::send_reset_email(&user.email, id, &raw_token, &config.app.default_locale).await {
+                Ok(_) => {}
+                Err(e) => {
+                    error!("Email not sent, Error {}", e);
+                }
+            }
         }
     }
 

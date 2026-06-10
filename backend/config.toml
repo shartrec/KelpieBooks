@@ -1,0 +1,10 @@
+# Example config.toml
+
+[app]
+base_url = "http://localhost:8000"
+default_locale = "en-US"
+
+[smtp]
+server = "smtp.googlemail.com"
+port = 587
+from = "trevor@shartrec.com"
