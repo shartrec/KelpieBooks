@@ -59,7 +59,9 @@ use crate::{
     DbKelpie,
 };
 use crate::config::load_config;
-use crate::core::db::{password_reset, user};
+use crate::core::db::user;
+#[cfg(feature = "password-reset")]
+use crate::core::db::password_reset;
 #[cfg(feature = "email")]
 use crate::core::services::email_service;
 

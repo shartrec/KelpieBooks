@@ -10,7 +10,6 @@ use serde::Deserialize;
 use std::{env, fs};
 use std::path::PathBuf;
 use std::sync::OnceLock;
-use log::info;
 use rocket::fs::relative;
 
 #[derive(Deserialize, Debug, Clone)]
