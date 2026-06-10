@@ -60,10 +60,17 @@ use crate::{
 };
 use crate::config::load_config;
 use crate::core::db::{password_reset, user};
+#[cfg(feature = "email")]
 use crate::core::services::email_service;
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![login, me, logout, forgot_password, reset_password]
+    let mut routes = routes![login, me, logout];
+    #[cfg(feature = "password-reset")]
+    {
+        let mut pwd_routes = routes![forgot_password, reset_password];
+        routes.append(&mut pwd_routes);
+    }
+    routes
 }
 
 #[post("/api/login", data = "<login_request>")]
@@ -151,6 +158,7 @@ fn logout(cookies: &CookieJar<'_>) -> Status {
     Status::Ok
 }
 
+#[cfg(feature = "email")]
 #[post("/api/auth/forgot-password", data = "<payload>")]
 async fn forgot_password(mut conn: Connection<DbKelpie>, payload: Json<ForgotPasswordRequest>) -> Status {
     let email = &payload.email;
@@ -188,6 +196,7 @@ async fn forgot_password(mut conn: Connection<DbKelpie>, payload: Json<ForgotPas
     Status::Accepted
 }
 
+#[cfg(feature = "password-reset")]
 #[post("/api/auth/reset-password", data = "<payload>")]
 async fn reset_password(mut db: Connection<DbKelpie>, payload: Json<ResetPasswordSubmit>) -> Result<Status, ApiError> {
     let raw_token: String = payload.raw_token.clone().to_string();

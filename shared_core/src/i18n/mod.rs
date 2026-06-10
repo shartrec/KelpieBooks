@@ -28,7 +28,6 @@ use icu_decimal::{
     input::Decimal,
     DecimalFormatter,
 };
-use icu_provider::log::info;
 use icu_provider::prelude::icu_locale_core::{
     locale,
     Locale,

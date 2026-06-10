@@ -14,6 +14,10 @@ payables = ["ledger", "partners", "shared_core/payables"]
 sales = ["ledger", "partners", "shared_core/sales"]
 receivables = ["sales", "shared_core/receivables"]
 inventory = ["ledger", "shared_core/inventory"]
+# Email needs significant external configuration of SMPT server connection
+email = []
+password-reset = ["email"]
+
 
 [dependencies]
 shared_core = { path = "../shared_core", features = ["backend"] }
