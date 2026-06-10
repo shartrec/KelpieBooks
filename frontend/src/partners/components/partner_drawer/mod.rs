@@ -149,7 +149,7 @@ pub fn partner_drawer(props: &PartnerDrawerProps) -> Html {
                 </div>
                 <div class="drawer__content">
                     if let Some(e) = &*error {
-                        <div class="error">{e}</div>
+                        <div class="message__error">{e}</div>
                     }
                     {
                         match *active_tab {

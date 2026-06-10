@@ -101,7 +101,7 @@ pub fn add_role_modal(props: &AddRoleModalProps) -> Html {
                         <button type="submit">{ i18n.t("role-modal-add-button") }</button>
                     </div>
                     if let Some(err) = &*error {
-                        <div class="error">{ err }</div>
+                        <div class="message__error">{ err }</div>
                     }
                 </form>
             </div>

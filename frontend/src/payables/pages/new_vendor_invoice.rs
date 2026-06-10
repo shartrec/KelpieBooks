@@ -290,7 +290,7 @@ pub fn new_vendor_invoice_page() -> Html {
                 </div>
                 <div class="voucher-footer">
                     if let Some(e) = &*error {
-                        <div class="error">{e}</div>
+                        <div class="message__error">{e}</div>
                     }
                     <button type="submit" class="button-primary">{ i18n.t("new-vendor-invoice-save-button") }</button>
                 </div>

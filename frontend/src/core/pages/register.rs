@@ -216,7 +216,7 @@ pub fn register_form(props: &RegisterFormProps) -> Html {
             </button>
 
             if let Some(err) = error {
-                <div class="error">{err}</div>
+                <div class="message__error">{err}</div>
             }
         </form>
     }

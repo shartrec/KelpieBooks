@@ -152,7 +152,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                         &fluent_args!["status" => response.status()],
                     ))),
                     Err(e) => error.set(Some(
-                        i18n.t_args("coa-error-network", &fluent_args!["error" => e.to_string()]),
+                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
                     )),
                 }
             });
@@ -232,7 +232,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                                 &fluent_args!["status" => r.status()],
                             ))),
                             Err(e) => error.set(Some(i18n.t_args(
-                                "coa-error-network",
+                                "common-network-error",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
                         }
@@ -271,7 +271,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                                 &fluent_args!["status" => r.status()],
                             ))),
                             Err(e) => error.set(Some(i18n.t_args(
-                                "coa-error-network",
+                                "common-network-error",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
                         }
@@ -355,7 +355,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
             if *loading {
                 <p>{ i18n.t("common-loading") }</p>
             } else if let Some(err) = &*error {
-                <div class="error">{ err }</div>
+                <div class="message__error">{ err }</div>
             } else {
 
             if let Some(jeb) = &*transaction_to_reverse { <ReversalConfirmationModal jeb={jeb.clone()} on_close={on_reverse_modal_close.clone()} on_confirm={on_reverse_confirm.clone()} /> }

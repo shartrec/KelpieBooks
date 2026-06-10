@@ -174,7 +174,7 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
             </div>
 
             if let Some(e) = &*error {
-                <div class="error">{e}</div>
+                <div class="message__error">{e}</div>
             }
 
             { if *editing_state == EditState::Adding {

@@ -137,7 +137,7 @@ pub fn add_user_modal(props: &AddUserModalProps) -> Html {
                         <button type="submit">{ i18n.t("user-modal-add-button") }</button>
                     </div>
                     if let Some(err) = &*error {
-                        <div class="error">{ err }</div>
+                        <div class="message__error">{ err }</div>
                     }
                 </form>
             </div>

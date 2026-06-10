@@ -50,7 +50,7 @@ pub fn delete_confirmation_modal(props: &DeleteConfirmationModalProps) -> Html {
                         &fluent_args!["status" => r.status()],
                     ))),
                     Err(e) => error.set(Some(
-                        i18n.t_args("coa-error-network", &fluent_args!["error" => e.to_string()]),
+                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
                     )),
                 }
             });
@@ -107,7 +107,7 @@ pub fn delete_confirmation_modal(props: &DeleteConfirmationModalProps) -> Html {
                         </table>
                     </div>
                 } else if let Some(err) = &*error {
-                    <p class="error">{ err }</p>
+                    <p class="message__error">{ err }</p>
                 } else {
                     <p>{ i18n.t("transaction-row-loading-details") }</p>
                 }

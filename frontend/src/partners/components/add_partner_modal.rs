@@ -171,7 +171,7 @@ pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
                         <button type="submit">{ i18n.t("partner-list-add-partner-button") }</button>
                     </div>
                     if let Some(err) = &*error {
-                        <div class="error">{ err }</div>
+                        <div class="message__error">{ err }</div>
                     }
                 </form>
             </div>

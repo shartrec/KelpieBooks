@@ -93,7 +93,7 @@ pub fn chart_of_accounts_table() -> Html {
                         &fluent_args!["status" => response.status()],
                     ))),
                     Err(e) => error.set(Some(
-                        i18n.t_args("coa-error-network", &fluent_args!["error" => e.to_string()]),
+                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
                     )),
                 }
             });
@@ -136,7 +136,7 @@ pub fn chart_of_accounts_table() -> Html {
                         &fluent_args!["status" => r.status()],
                     ))),
                     Err(e) => error.set(Some(
-                        i18n.t_args("coa-error-network", &fluent_args!["error" => e.to_string()]),
+                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
                     )),
                 }
             });
@@ -172,7 +172,7 @@ pub fn chart_of_accounts_table() -> Html {
                         ))),
                         Err(e) => {
                             error.set(Some(i18n.t_args(
-                                "coa-error-network",
+                                "common-network-error",
                                 &fluent_args!["error" => e.to_string()],
                             )))
                         }
@@ -211,7 +211,7 @@ pub fn chart_of_accounts_table() -> Html {
                         ))),
                         Err(e) => {
                             error.set(Some(i18n.t_args(
-                                "coa-error-network",
+                                "common-network-error",
                                 &fluent_args!["error" => e.to_string()],
                             )))
                         }
@@ -290,7 +290,7 @@ pub fn chart_of_accounts_table() -> Html {
         return html! { <p>{ i18n.t("common-loading") }</p> };
     }
     if let Some(err) = &*error {
-        return html! { <div class="error">{ err }</div> };
+        return html! { <div class="message__error">{ err }</div> };
     }
 
     fn render_nodes(

@@ -147,7 +147,7 @@ pub fn add_account_modal(props: &AddAccountModalProps) -> Html {
                         <button type="submit">{ i18n.t("account-modal-add-button") }</button>
                     </div>
                     if let Some(err) = &*error {
-                        <div class="error">{ err }</div>
+                        <div class="message__error">{ err }</div>
                     }
                 </form>
             </div>

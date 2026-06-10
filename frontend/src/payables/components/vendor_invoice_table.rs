@@ -232,7 +232,7 @@ pub fn vendor_invoice_table() -> Html {
         return html! { <p>{ i18n.t("common-loading") }</p> };
     }
     if let Some(err) = &*error {
-        return html! { <div class="error">{ err }</div> };
+        return html! { <div class="message__error">{ err }</div> };
     }
 
     html! {

@@ -77,7 +77,7 @@ pub fn roles_page() -> Html {
                         &fluent_args!["status" => response.status()],
                     ))),
                     Err(e) => error.set(Some(
-                        i18n.t_args("coa-error-network", &fluent_args!["error" => e.to_string()]),
+                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
                     )),
                 }
             });
@@ -127,7 +127,7 @@ pub fn roles_page() -> Html {
                         pages::set_error(error, i18n, r, "roles-error-add");
                     }
                     Err(e) => error.set(Some(
-                        i18n.t_args("coa-error-network", &fluent_args!["error" => e.to_string()]),
+                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
                     )),
                 }
             });
@@ -170,7 +170,7 @@ pub fn roles_page() -> Html {
                         pages::set_error(error, i18n, r, "roles-error-update");
                     }
                     Err(e) => error.set(Some(
-                        i18n.t_args("coa-error-network", &fluent_args!["error" => e.to_string()]),
+                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
                     )),
                 }
             });
@@ -210,7 +210,7 @@ pub fn roles_page() -> Html {
                         pages::set_error(error, i18n, r, "roles-error-delete");
                     }
                     Err(e) => error.set(Some(
-                        i18n.t_args("coa-error-network", &fluent_args!["error" => e.to_string()]),
+                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
                     )),
                 }
             });

@@ -224,7 +224,7 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                                     </div>
                                 })}
                             } else {
-                                <p class="error">{ i18n.t("transaction-row-error-load-details") }</p>
+                                <p class="message__error">{ i18n.t("transaction-row-error-load-details") }</p>
                             }
                         </div>
                     </td>

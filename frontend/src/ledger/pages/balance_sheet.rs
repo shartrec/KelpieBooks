@@ -292,7 +292,7 @@ pub fn balance_sheet_page() -> Html {
                 if *loading {
                     <p>{ i18n.t("common-loading") }</p>
                 } else if let Some(err) = &*error {
-                    <div class="error">{ err }</div>
+                    <div class="message__error">{ err }</div>
                 } else {
                     <table class="report-table">
                         <thead>

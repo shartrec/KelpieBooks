@@ -280,7 +280,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                     </div>
                     <div class="voucher-footer">
                         if let Some(e) = &*error {
-                            <div class="error">{e}</div>
+                            <div class="message__error">{e}</div>
                         }
                         <button type="submit" class="button-primary">{ i18n.t("account-modal-save-button") }</button>
                     </div>

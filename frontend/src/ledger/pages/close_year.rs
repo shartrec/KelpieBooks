@@ -145,11 +145,11 @@ pub fn close_year_page() -> Html {
                 }
 
                 if let Some(err) = &*error {
-                    <div class="message message-error">{ err }</div>
+                    <div class="message message__error">{ err }</div>
                 }
 
                 if let Some(msg) = &*success {
-                    <div class="message message-success">{ msg }</div>
+                    <div class="message message__success">{ msg }</div>
                 }
 
                 if *show_confirmation {
