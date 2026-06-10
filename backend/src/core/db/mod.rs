@@ -9,3 +9,4 @@
 pub(crate) mod organization;
 pub(crate) mod roles;
 pub(crate) mod user;
+pub(crate) mod password_reset;

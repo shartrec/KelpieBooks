@@ -151,9 +151,9 @@ async fn get_account_entries(
     let user = guard.0;
 
     let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
-        .map_err(|_| ApiError::Invalid("Invalid start date".to_string()))?;
+        .map_err(|_| ApiError::BadRequest("Invalid start date".to_string()))?;
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
-        .map_err(|_| ApiError::Invalid("Invalid end date".to_string()))?;
+        .map_err(|_| ApiError::BadRequest("Invalid end date".to_string()))?;
     let entries = account_service::get_journal_entries_with_running_balance(
         &mut pool,
         *id,
@@ -246,9 +246,9 @@ async fn export_account_ledger(
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
     let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
-        .map_err(|_| ApiError::Invalid("Invalid start date".to_string()))?;
+        .map_err(|_| ApiError::BadRequest("Invalid start date".to_string()))?;
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
-        .map_err(|_| ApiError::Invalid("Invalid end date".to_string()))?;
+        .map_err(|_| ApiError::BadRequest("Invalid end date".to_string()))?;
 
     let account = account_db::get(&mut pool, *id, user.organization_id).await?;
     if let Some(account) = account {
@@ -285,7 +285,7 @@ async fn export_account_ledger(
                     Err(e) => return Err(ApiError::Internal(e)),
                 }
             }
-            _ => return Err(ApiError::Invalid("Invalid format".to_string())),
+            _ => return Err(ApiError::BadRequest("Invalid format".to_string())),
         };
 
         Ok(DownloadFile::new(content, filename, content_type))

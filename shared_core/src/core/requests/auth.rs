@@ -17,3 +17,15 @@ pub struct LoginRequest {
     pub password_raw: String,
     pub locale: Option<String>,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ForgotPasswordRequest {
+    pub email: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ResetPasswordSubmit {
+    pub id: i32,
+    pub raw_token: String,
+    pub new_password: String,
+}

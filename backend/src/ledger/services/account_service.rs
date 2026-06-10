@@ -273,7 +273,7 @@ pub(crate) async fn create_transaction(
     let total_credits: i64 = req.entries.iter().map(|e| e.credit).sum();
 
     if total_debits == 0 || total_credits == 0 || total_debits != total_credits {
-        return Err(ApiError::Invalid(
+        return Err(ApiError::BadRequest(
             "Transaction must be balanced and not zero.".to_string(),
         ));
     }

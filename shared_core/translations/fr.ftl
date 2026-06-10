@@ -112,10 +112,27 @@ login-form-email-label = E-mail utilisateur :
 login-form-password-label = Mot de passe :
 login-form-submit-button = Se connecter
 login-logo-alt-text = Logo KelpieBooks
+login-forgot-password = Mot de passe oublié?
 
 # Login Error Messages
 login-error-parse-response = Impossible d’analyser la réponse de connexion.
 login-error-failed = Échec de connexion : { $status }
+
+# Forgot Password Page
+forgot-password-subtitle = Réinitialisez votre mot de passe
+forgot-password-success-message = Si un compte avec cet e-mail existe, un lien de réinitialisation de mot de passe a été envoyé.
+forgot-password-back-to-login = Retour à la connexion
+forgot-password-email-label = E-mail:
+forgot-password-submit-button = Envoyer le lien de réinitialisation
+
+# Reset Password Page
+reset-password-subtitle = Réinitialisez votre mot de passe
+reset-password-success-message = Votre mot de passe a été réinitialisé avec succès.
+reset-password-back-to-login = Retour à la connexion
+reset-password-new-password-label = Nouveau mot de passe:
+reset-password-confirm-password-label = Confirmez le nouveau mot de passe:
+reset-password-submit-button = Réinitialiser le mot de passe
+reset-password-error-server = Erreur lors de la réinitialisation du mot de passe: { $status }
 
 # Sidebar
 sidebar-logo-alt = Logo

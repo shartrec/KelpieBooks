@@ -14,7 +14,7 @@ use yew::{
     html,
     prelude::*,
 };
-use yew_router::hooks::use_navigator;
+use yew_router::{hooks::use_navigator, prelude::Link};
 use shared_core::core::dtos::user_detail::AuthUserDetail;
 use crate::{
     contexts::{
@@ -103,6 +103,7 @@ pub fn login_page() -> Html {
                         error={(*error_state).clone()}
                     />
                 <div class="login-footer">
+                    <p><Link<Route> to={Route::ForgotPassword}>{ i18n.t("login-forgot-password") }</Link<Route>></p>
                     <p>{ i18n.t("login-help-text") }</p>
                 </div>
             </div>

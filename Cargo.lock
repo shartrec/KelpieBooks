@@ -2534,6 +2534,7 @@ dependencies = [
  "csv",
  "derive_typst_intoval",
  "fluent",
+ "hex",
  "include_dir",
  "jsonwebtoken",
  "log",

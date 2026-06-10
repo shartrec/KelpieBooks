@@ -11,11 +11,8 @@ use base64::{
     engine::general_purpose,
     Engine as _,
 };
-use bcrypt::{
-    hash,
-    BcryptError,
-    DEFAULT_COST,
-};
+use bcrypt::{hash, verify, BcryptError, DEFAULT_COST};
+use chrono::{Utc, Duration};
 use jsonwebtoken::{
     decode,
     encode,
@@ -28,7 +25,7 @@ use jsonwebtoken::{
 };
 use rand::{
     rngs::OsRng,
-    RngCore,
+    RngCore, thread_rng,
 };
 use rocket::{
     get,
@@ -52,7 +49,7 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::core::requests::auth::LoginRequest;
+use shared_core::core::requests::auth::{ForgotPasswordRequest, LoginRequest, ResetPasswordSubmit};
 use uuid::Uuid;
 use shared_core::core::dtos::user_detail::AuthUserDetail;
 use shared_core::core::models::role::Role;
@@ -60,10 +57,10 @@ use crate::{
     util::ApiError,
     DbKelpie,
 };
-use crate::core::db::user;
+use crate::core::db::{password_reset, user};
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![login, me, logout]
+    routes![login, me, logout, forgot_password, reset_password]
 }
 
 #[post("/api/login", data = "<login_request>")]
@@ -149,6 +146,67 @@ async fn me(user: AuthenticatedUser) -> Json<AuthUserDetail> {
 fn logout(cookies: &CookieJar<'_>) -> Status {
     cookies.remove(Cookie::from("session"));
     Status::Ok
+}
+
+#[post("/api/auth/forgot-password", data = "<payload>")]
+async fn forgot_password(mut conn: Connection<DbKelpie>, payload: Json<ForgotPasswordRequest>) -> Status {
+    let email = &payload.email;
+
+    // 1. Check if the user exists
+    if let Ok(Some(user)) = user::get_by_email(&mut conn, email).await {
+        // 2. Generate a secure 32-byte random token string
+        let mut token_bytes = [0u8; 32];
+        thread_rng().fill_bytes(&mut token_bytes);
+        let raw_token = hex::encode(token_bytes);
+
+        // 3. Hash the token for database storage
+        let token_hash = hash(&raw_token, 10).unwrap();
+        let expires_at = Utc::now() + Duration::minutes(20);
+
+        // 4. Save to password_reset_tokens table
+        if let Ok(token_id) = password_reset::save_reset_token(&mut conn, user.id, &token_hash, expires_at).await {
+
+            // TODO 5. Send the email (ideally queued via a background worker thread)
+            // Link look format: https://kelpiebooks.com/reset-password?token=YOUR_RAW_HEX_TOKEN
+            // send_reset_email(&user.email, &raw_token).await;
+            println!("https://kelpiebooks.com/reset-password?id={}&token={}", token_id, raw_token);
+        }
+    }
+
+    // 💡 LAZY PURGE: Clean up old garbage rows asynchronously before dealing with the new one
+    let _ = password_reset::delete_expired_reset_tokens(&mut conn).await;
+
+    // 💡 CRITICAL: Always return 200 OK / Accepted, even if the user didn't exist!
+    Status::Accepted
+}
+
+#[post("/api/auth/reset-password", data = "<payload>")]
+async fn reset_password(mut db: Connection<DbKelpie>, payload: Json<ResetPasswordSubmit>) -> Result<Status, ApiError> {
+    let raw_token: String = payload.raw_token.clone().to_string();
+
+    // 1. Locate token records that match, aren't expired, and haven't been used yet
+    let token_record = password_reset::find_active_token(&mut db, &payload.id).await?
+        .ok_or(ApiError::NotFound("Invalid or expired token".to_string()))?;
+
+    if token_record.expires_at < Utc::now() {
+        return Err(ApiError::BadRequest("Token has expired".to_string()));
+    }
+    if let Ok(b) = verify(raw_token, token_record.token_hash.as_str()) {
+        if b {
+            let hashed_password = hash_pwd(&payload.new_password)?;
+
+            // 3. Update the user record and atomically flag the token as used
+            user::update_password(&mut db, token_record.user_id, &hashed_password).await?;
+            password_reset::mark_token_as_used(&mut db, payload.id).await?;
+
+            Ok(Status::Ok)
+        } else {
+            Err(ApiError::BadRequest("Invalid token".to_string()))
+        }
+    } else {
+        return Err(ApiError::BadRequest("Invalid token".to_string()));
+    }
+
 }
 
 pub(crate) struct AuthenticatedUser {

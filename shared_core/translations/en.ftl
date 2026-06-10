@@ -109,10 +109,27 @@ login-form-email-label = User Email:
 login-form-password-label = Password:
 login-form-submit-button = Sign In
 login-logo-alt-text = KelpieBooks Logo
+login-forgot-password = Forgot Password?
 
 # Login Error Messages
 login-error-parse-response = Failed to parse login response.
 login-error-failed = Login failed: { $status }
+
+# Forgot Password Page
+forgot-password-subtitle = Reset your password
+forgot-password-success-message = If an account with that email exists, a password reset link has been sent.
+forgot-password-back-to-login = Back to Login
+forgot-password-email-label = Email:
+forgot-password-submit-button = Send Reset Link
+
+# Reset Password Page
+reset-password-subtitle = Reset Your Password
+reset-password-success-message = Your password has been reset successfully.
+reset-password-back-to-login = Back to Login
+reset-password-new-password-label = New Password:
+reset-password-confirm-password-label = Confirm New Password:
+reset-password-submit-button = Reset Password
+reset-password-error-server = Error resetting password: { $status }
 
 # Sidebar
 sidebar-logo-alt = Logo

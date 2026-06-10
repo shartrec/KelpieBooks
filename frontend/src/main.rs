@@ -52,6 +52,8 @@ use frontend::{
     core::pages::{
         dashboard::DashboardPage,
         login::LoginPage,
+        forgot_password::ForgotPasswordPage,
+        reset_password::ResetPasswordPage,
         profile::ProfilePage,
         register::RegisterPage,
         roles::RolesPage,
@@ -146,6 +148,8 @@ fn switch(routes: Route) -> Html {
 
         Route::Register => html! { <RegisterPage /> },
         Route::Login => html! { <LoginPage /> },
+        Route::ForgotPassword => html! { <ForgotPasswordPage /> },
+        Route::ResetPassword => html! { <ResetPasswordPage /> },
         Route::Dashboard => html! { <DashboardPage /> },
         Route::Profile => html! { <ProfilePage /> },
         Route::Users => html! { <UsersPage /> },
