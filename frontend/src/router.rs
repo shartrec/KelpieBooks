@@ -15,6 +15,10 @@ pub enum Route {
     Register,
     #[at("/login")]
     Login,
+    #[at("/forgot-password")]
+    ForgotPassword,
+    #[at("/reset-password")]
+    ResetPassword,
     #[at("/dashboard")]
     Dashboard,
     #[at("/profile")]

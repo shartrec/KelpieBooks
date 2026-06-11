@@ -36,7 +36,7 @@ async fn close_financial_year(
 ) -> Result<&'static str, ApiError> {
     let user = guard.0;
     let year_end_date = NaiveDate::parse_from_str(&year_end, "%Y-%m-%d")
-        .map_err(|_| ApiError::Invalid("Invalid year end date".to_string()))?;
+        .map_err(|_| ApiError::BadRequest("Invalid year end date".to_string()))?;
 
     period_end_service::close_financial_year(&mut pool, user.organization_id, year_end_date)
         .await?;

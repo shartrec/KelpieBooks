@@ -204,7 +204,7 @@ pub(crate) async fn update_password(
 
     let valid = bcrypt::verify(&password_data.old_password, &original_user.password_hash)?;
     if !valid {
-        return Err(ApiError::Invalid("Incorrect old password".to_string()));
+        return Err(ApiError::BadRequest("Incorrect old password".to_string()));
     }
 
     let new_password_hash = hash_pwd(&password_data.new_password)?;

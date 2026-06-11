@@ -7,3 +7,5 @@
  */
 
 pub(crate) mod onboarding;
+#[cfg(feature = "email")]
+pub(crate) mod email_service;

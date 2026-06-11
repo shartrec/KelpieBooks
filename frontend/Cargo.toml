@@ -13,6 +13,9 @@ payables = ["ledger", "partners", "shared_core/payables"]
 sales = ["ledger", "partners", "shared_core/sales"]
 receivables = ["sales", "shared_core/receivables"]
 inventory = ["ledger", "shared_core/inventory"]
+# Should be configured in line with backend feature.
+password-reset = []
+
 
 [dependencies]
 shared_core = { path = "../shared_core" }
