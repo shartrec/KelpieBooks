@@ -38,6 +38,8 @@ pub enum SystemPrivilege {
     manage_transactions,
     manage_users,
     manage_organization,
+    use_sales,
+    manage_sales,
 }
 
 impl SystemPrivilege {

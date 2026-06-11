@@ -6,5 +6,4 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-pub(crate) mod vendor_invoices;
-pub(crate) mod vendor_payments;
+pub(crate) mod items;

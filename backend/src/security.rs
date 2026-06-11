@@ -67,6 +67,20 @@ impl GuardPrivilege for ManageVendorInvoices {
     const VALUE: SystemPrivilege = SystemPrivilege::manage_vendor_invoices;
 }
 
+#[cfg(feature = "sales")]
+pub(crate) struct UseSales;
+#[cfg(feature = "sales")]
+impl GuardPrivilege for UseSales {
+    const VALUE: SystemPrivilege = SystemPrivilege::use_sales;
+}
+
+#[cfg(feature = "sales")]
+pub(crate) struct ManageSales;
+#[cfg(feature = "sales")]
+impl GuardPrivilege for ManageSales {
+    const VALUE: SystemPrivilege = SystemPrivilege::manage_sales;
+}
+
 pub(crate) struct UseTransactions;
 impl GuardPrivilege for UseTransactions {
     const VALUE: SystemPrivilege = SystemPrivilege::use_transactions;

@@ -30,6 +30,13 @@ sys-privilege-use_vendor_invoices-description = Permet de consulter les factures
 sys-privilege-manage_vendor_invoices-name = Gérer les factures fournisseurs
 sys-privilege-manage_vendor_invoices-description = Permet de saisir, de mettre à jour et de payer les factures fournisseurs.
 
+# Sales Module
+sys-privilege-use_sales-name = Consulter les articles et les factures de vente
+sys-privilege-use_sales-description = Permet de consulter les factures de vente et les détails des articles.
+
+sys-privilege-manage_sales-name = Gérer les articles et les factures de vente
+sys-privilege-manage_sales-description = Permet la maintenance des articles ainsi que la saisie et la mise à jour des factures de vente.
+
 # Module Transactions
 sys-privilege-use_transactions-name = Saisir les écritures
 sys-privilege-use_transactions-description = Permet de saisir les écritures de journal général, de préparer des brouillons de transaction et de structurer les données avant validation.
@@ -37,7 +44,7 @@ sys-privilege-use_transactions-description = Permet de saisir les écritures de 
 sys-privilege-manage_transactions-name = Valider et modifier les écritures
 sys-privilege-manage_transactions-description = Permet de finaliser les écritures de journal, de les valider dans le grand livre et de générer des extournes structurelles (sous réserve du mode d'audit strict).
 
-# Outils Administratifs
+# Administrative Tools
 sys-privilege-manage_users-name = Gérer les utilisateurs et rôles
 sys-privilege-manage_users-description = Permet d'inviter des collaborateurs, d'ajuster les niveaux d'accès individuels, de configurer des rôles dynamiques ou de désactiver des comptes.
 

@@ -34,6 +34,8 @@ pub(crate) mod ledger;
 pub(crate) mod partners;
 #[cfg(feature = "payables")]
 pub(crate) mod payables;
+#[cfg(feature = "sales")]
+pub mod sales;
 
 pub(crate) mod security;
 mod util;
@@ -112,6 +114,9 @@ fn rocket() -> _ {
         .mount("/", payables::routes::reports::routes())
         .mount("/", payables::routes::vendor_invoices::routes())
         .mount("/", payables::routes::vendor_payments::routes());
+    #[cfg(feature = "sales")]
+    let rocket = rocket
+        .mount("/", sales::routes::items::routes());
 
     // Determine the environment directory pathway
     let assets_dir = get_static_assets_dir(&rocket);

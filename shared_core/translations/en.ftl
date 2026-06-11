@@ -28,6 +28,13 @@ sys-privilege-use_vendor_invoices-description = Permits viewing vendor invoices.
 sys-privilege-manage_vendor_invoices-name = Manage Vendor Invoices
 sys-privilege-manage_vendor_invoices-description = Permits entering, updating and paying of vendor invoices.
 
+# Sales Module
+sys-privilege-use_sales-name = View item and sales invoices
+sys-privilege-use_sales-description = Permites view sales invoices and item details.
+
+sys-privilege-manage_sales-name = Mangage items and sales invoices
+sys-privilege-manage_sales-description = Permits maintenance of items and entering, updating sales invoices.
+
 # Transactions Module
 sys-privilege-use_transactions-name = Record Transactions
 sys-privilege-use_transactions-description = Permits inputting general journal entries, staging transaction drafts, and preparing data for verification.
