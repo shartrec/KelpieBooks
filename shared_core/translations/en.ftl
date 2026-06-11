@@ -109,10 +109,40 @@ login-form-email-label = User Email:
 login-form-password-label = Password:
 login-form-submit-button = Sign In
 login-logo-alt-text = KelpieBooks Logo
+login-forgot-password = Forgot Password?
 
 # Login Error Messages
 login-error-parse-response = Failed to parse login response.
 login-error-failed = Login failed: { $status }
+
+# Forgot Password Page
+forgot-password-subtitle = Reset your password
+forgot-password-success-message = If an account with that email exists, a password reset link has been sent.
+forgot-password-back-to-login = Back to Login
+forgot-password-email-label = Email:
+forgot-password-submit-button = Send Reset Link
+
+# Reset Password Page
+reset-password-subtitle = Reset Your Password
+reset-password-success-message = Your password has been reset successfully.
+reset-password-back-to-login = Back to Login
+reset-password-new-password-label = New Password:
+reset-password-confirm-password-label = Confirm New Password:
+reset-password-submit-button = Reset Password
+reset-password-error-server = Error resetting password: { $status }
+
+# Email
+email-reset-subject = KelpieBooks - Secure Password Reset Request
+
+email-reset-body-plain = Hello,
+        A password reset request was made for your KelpieBooks account. Please visit the following link within 20 minutes to initialize a new password:
+#        { $reset_link }
+
+email-reset-body-html = <h3>KelpieBooks Security Authentication</h3>
+#        <p>A password reset request was initiated for your profile access.</p>
+#        <p><a href={ $reset_link } style=display:inline-block; padding:10px 20px; background:#2563eb; color:white; text-decoration:none; border-radius:5px;>Reset My Password</a></p>
+#        <p><small>If you did not make this request, you can safely ignore this correspondence.</small></p>
+
 
 # Sidebar
 sidebar-logo-alt = Logo

@@ -72,6 +72,7 @@ impl I18nManager {
         // and initialize their concurrent bundles
         for file in TRANSLATIONS_DIR.files() {
             let path = file.path();
+            let err_msg = format!("Translation dir {:?}",path);
             if let Some(lang_str) = path.file_stem().and_then(|s| s.to_str()) {
                 if let Ok(lang_id) = lang_str.parse::<LanguageIdentifier>() {
                     // Only process base languages without regions in the first pass (e.g., length == 1 or region is None)
@@ -83,7 +84,7 @@ impl I18nManager {
                         let mut bundle = FluentBundle::new_concurrent(vec![lang_id.clone()]);
                         bundle
                             .add_resource(resource)
-                            .expect("Failed to add base resource.");
+                            .expect(&err_msg);
 
                         // Disable isolation markers if desired, or keep default
                         bundles.insert(lang_id, bundle);

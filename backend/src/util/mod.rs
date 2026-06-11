@@ -28,7 +28,7 @@ pub(crate) enum ApiError {
     Db(sqlx::Error),
     Conflict(String),
     Hashing(bcrypt::BcryptError),
-    Invalid(String),
+    BadRequest(String),
     NotFound(String),
     Internal(String),
     Forbidden(String),
@@ -55,7 +55,7 @@ impl<'r> Responder<'r, 'static> for ApiError {
         let (status, msg) = match self {
             ApiError::NotFound(msg) => (Status::NotFound, msg),
             ApiError::Forbidden(msg) => (Status::Forbidden, msg),
-            ApiError::Invalid(msg) => (Status::BadRequest, msg),
+            ApiError::BadRequest(msg) => (Status::BadRequest, msg),
             ApiError::Internal(msg) => (Status::InternalServerError, msg),
             ApiError::Conflict(e) => (Status::Conflict, e.to_string()),
             ApiError::Db(e) => (Status::InternalServerError, e.to_string()),
