@@ -42,13 +42,13 @@ impl<'a> LocaleContext<'a> {
     }
 
     /// Standard currency formatting ("1,234.56")
-    pub(crate) fn format_money(&self, amount_cents: Decimal) -> String {
-        shared_core::i18n::format_currency_icu(amount_cents, Some(self.locale)) //
+    pub(crate) fn format_money(&self, amount: Decimal) -> String {
+        shared_core::i18n::format_currency_icu(amount, Some(self.locale)) //
     }
 
     /// Typst-safe currency formatting ("−1,234.56")
-    pub(crate) fn format_money_typ(&self, amount_cents: Decimal) -> String {
-        shared_core::i18n::format_currency_icu_typ(amount_cents, Some(self.locale))
+    pub(crate) fn format_money_typ(&self, amount: Decimal) -> String {
+        shared_core::i18n::format_currency_icu_typ(amount, Some(self.locale))
         //
     }
 

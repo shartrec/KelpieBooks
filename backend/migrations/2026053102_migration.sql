@@ -300,9 +300,9 @@ CREATE TABLE vendor_payments
     -- The transaction clearing the liability (Credit Bank, Debit AP)
     transaction_id  UUID                     REFERENCES transactions (id) ON DELETE SET NULL,
 
-    payment_date       DATE         NOT NULL,
-    paid_from_account  UUID         NOT NULL, -- Ledger Account paid from
-    amount             NUMERIC(15,4)       NOT NULL, -- Total payment size in cents
+    payment_date       DATE             NOT NULL,
+    paid_from_account  UUID             NOT NULL, -- Ledger Account paid from
+    amount             NUMERIC(15,4)    NOT NULL, -- Total payment
     reference          TEXT,                     -- Check number or bank trace number
 
     created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW()

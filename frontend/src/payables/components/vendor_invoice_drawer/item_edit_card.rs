@@ -18,7 +18,7 @@ use web_sys::{
 use yew::prelude::*;
 
 use crate::{
-    core::components::currency_input::CurrencyInput,
+    core::components::currency_input::DecimalInput,
     contexts::locale_context::use_locale,
 };
 
@@ -114,10 +114,10 @@ pub fn item_edit_card(props: &ItemEditCardProps) -> Html {
                     </select>
 
                     <label>{i18n.t("item-edit-card-net-amount-label")}</label>
-                    <CurrencyInput value={item.net_amount} on_change={on_net_amount_change} />
+                    <DecimalInput value={item.net_amount} on_change={on_net_amount_change} />
 
                     <label>{i18n.t("item-edit-card-tax-amount-label")}</label>
-                    <CurrencyInput value={item.tax_amount} on_change={on_tax_amount_change} />
+                    <DecimalInput value={item.tax_amount} on_change={on_tax_amount_change} />
 
                     <label>{i18n.t("common-total")}</label>
                     <div class="total-amount">

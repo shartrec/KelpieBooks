@@ -16,7 +16,7 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    core::components::currency_input::CurrencyInput,
+    core::components::currency_input::DecimalInput,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
@@ -91,11 +91,11 @@ pub fn vendor_invoice_filter() -> Html {
 
     let on_min_amount_change = {
         let filter_ctx = filter_ctx.clone();
-        Callback::from(move |cents: Decimal| {
-            if cents == dec!(0.00) {
+        Callback::from(move |amount: Decimal| {
+            if amount == dec!(0.00) {
                 filter_ctx.dispatch(VendorInvoiceFilterAction::SetMinAmount(None));
             } else {
-                filter_ctx.dispatch(VendorInvoiceFilterAction::SetMinAmount(Some(cents)));
+                filter_ctx.dispatch(VendorInvoiceFilterAction::SetMinAmount(Some(amount)));
             }
         })
     };
@@ -154,7 +154,7 @@ pub fn vendor_invoice_filter() -> Html {
                 </div>
                 <div class="report__filter-group">
                     <label>{ i18n.t("vendor-invoice-filter-min-amount-label") }</label>
-                    <CurrencyInput
+                    <DecimalInput
                         value={filter_ctx.min_amount.unwrap_or(dec!(0.00))}
                         on_change={on_min_amount_change}
                         placeholder={i18n.t("journal-entry-currency-placeholder")}

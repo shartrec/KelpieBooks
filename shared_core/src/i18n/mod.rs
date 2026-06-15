@@ -269,9 +269,9 @@ impl I18n for I18nManager {
     }
 }
 
-/// Formats standard cents integers (i64) into localized decimals.
+/// Formats standard decimal into localized decimal strings.
 /// e.g., 123456 -> "1,234.56" (en-AU) or "1 234,56" (fr-FR)
-pub fn format_currency_icu(amount_cents: Decimal, target_locale: Option<&str>) -> String {
+pub fn format_currency_icu(amount: Decimal, target_locale: Option<&str>) -> String {
     let locale: Locale = target_locale
         .and_then(|l| l.parse().ok())
         .unwrap_or_else(|| I18N.default_locale.clone());
@@ -289,8 +289,8 @@ pub fn format_currency_icu(amount_cents: Decimal, target_locale: Option<&str>) -
                 .expect("Failed to initialize ICU4X Decimal Formatter")
         });
 
-        let mut icu_decimal = icu_decimal::input::Decimal::from(amount_cents.mantissa() as i64);
-        icu_decimal.multiply_pow10(-(amount_cents.scale() as i16));
+        let mut icu_decimal = icu_decimal::input::Decimal::from(amount.mantissa() as i64);
+        icu_decimal.multiply_pow10(-(amount.scale() as i16));
         icu_decimal.pad_end(-2);
 
         formatter.format_to_string(&icu_decimal)
@@ -298,8 +298,8 @@ pub fn format_currency_icu(amount_cents: Decimal, target_locale: Option<&str>) -
 }
 
 /// Specialized wrapper for Typst reporting layouts
-pub fn format_currency_icu_typ(amount_cents: Decimal, target_locale: Option<&str>) -> String {
-    let formatted = format_currency_icu(amount_cents, target_locale);
+pub fn format_currency_icu_typ(amount: Decimal, target_locale: Option<&str>) -> String {
+    let formatted = format_currency_icu(amount, target_locale);
 
     // Safety check: In Typst, a leading standard hyphen can interpret as an unintended
     // structural markdown list element. Map seamlessly to the clean minus sign (U+2212).

@@ -34,7 +34,7 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    core::components::currency_input::CurrencyInput,
+    core::components::currency_input::DecimalInput,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
@@ -257,7 +257,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
                     </select>
 
                     <label>{i18n.t("common-amount")}</label>
-                    <CurrencyInput value={request.amount} on_change={on_amount_change} />
+                    <DecimalInput value={request.amount} on_change={on_amount_change} />
 
                     <label>{i18n.t("payments-view-reference-label")}</label>
                     <input type="text" value={request.reference.as_deref().unwrap_or("").to_string()} oninput={on_input(|r, v| r.reference = Some(v))} />

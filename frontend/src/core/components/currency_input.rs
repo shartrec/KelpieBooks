@@ -10,17 +10,19 @@ use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
-pub struct CurrencyProps {
-    pub value: Decimal, // Cents
+pub struct DecimalInputProps {
+    pub value: Decimal, // amount
     pub on_change: Callback<Decimal>,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
     pub placeholder: String,
+    #[prop_or_else(|| 2)]
+    pub decimal_places: u32,
 }
 
-#[function_component(CurrencyInput)]
-pub fn currency_input(props: &CurrencyProps) -> Html {
+#[function_component(DecimalInput)]
+pub fn decimal_input(props: &DecimalInputProps) -> Html {
     // Local string buffer to handle mid-typing states (like "22.")
     // that don't parse cleanly to Decimal yet.
     let display_value = use_state(|| format_value(props.value));
@@ -29,10 +31,11 @@ pub fn currency_input(props: &CurrencyProps) -> Html {
     {
         let display_value = display_value.clone();
         let props_value = props.value;
+        let props_decimal_places = props.decimal_places;
         use_effect_with(props_value, move |&val| {
             // Only update if the parsed version of current display differs
             // from the new prop value to avoid overwriting the user's cursor.
-            if parse_to_cents(&display_value) != Some(val) {
+            if parse_to_amount(&display_value, props_decimal_places) != Some(val) {
                 display_value.set(format_value(val));
             }
             || ()
@@ -42,6 +45,7 @@ pub fn currency_input(props: &CurrencyProps) -> Html {
     let oninput = {
         let display_value = display_value.clone();
         let on_change = props.on_change.clone();
+        let props_decimal_places = props.decimal_places;
         Callback::from(move |e: InputEvent| {
             let input: HtmlInputElement = e.target_unchecked_into();
             let val = input.value();
@@ -54,8 +58,8 @@ pub fn currency_input(props: &CurrencyProps) -> Html {
 
             display_value.set(filtered.clone());
 
-            if let Some(cents) = parse_to_cents(&filtered) {
-                on_change.emit(cents);
+            if let Some(amount) = parse_to_amount(&filtered, props_decimal_places) {
+                on_change.emit(amount);
             }
         })
     };
@@ -76,9 +80,9 @@ fn format_value(amount: Decimal) -> String {
     amount.to_string()
 }
 
-fn parse_to_cents(s: &str) -> Option<Decimal> {
+fn parse_to_amount(s: &str, dp: u32) -> Option<Decimal> {
     match Decimal::from_str_exact(s) {
-        Ok(dec) => Some(dec),
+        Ok(dec) => Some(dec.round_dp(dp)),
         Err(_) => Some(dec!(0.00)),
     }
 }

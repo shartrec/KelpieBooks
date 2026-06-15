@@ -19,7 +19,7 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    core::components::currency_input::CurrencyInput,
+    core::components::currency_input::DecimalInput,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
@@ -172,7 +172,7 @@ pub fn report_options(props: &ReportOptionsProps) -> Html {
                         </div>
                         <div class="report__filter-group">
                             <label>{ i18n.t("report-options-min-amount-label") }</label>
-                            <CurrencyInput
+                            <DecimalInput
                                 value={ctx.min_amount.unwrap_or(dec!(0.00))}
                                 on_change={on_min_amount_change}
                                 placeholder={i18n.t("journal-entry-currency-placeholder")}

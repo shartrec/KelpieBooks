@@ -14,7 +14,7 @@ use uuid::Uuid;
 use yew::prelude::*;
 
 use crate::{
-    core::components::currency_input::CurrencyInput,
+    core::components::currency_input::DecimalInput,
     contexts::locale_context::use_locale,
 };
 
@@ -94,9 +94,9 @@ pub fn vendor_invoice_item_row(props: &VendorInvoiceItemRowProps) -> Html {
                     <option value={acc.id.to_string()} selected={props.item.account_id == acc.id}>{&acc.name}</option>
                 })}
             </select>
-            <CurrencyInput value={props.item.net_amount} on_change={on_net_amount_change} />
-            <CurrencyInput value={props.item.tax_amount} on_change={on_tax_amount_change} />
-            <CurrencyInput value={props.item.total_amount} on_change={Callback::noop()} />
+            <DecimalInput value={props.item.net_amount} on_change={on_net_amount_change} />
+            <DecimalInput value={props.item.tax_amount} on_change={on_tax_amount_change} />
+            <DecimalInput value={props.item.total_amount} on_change={Callback::noop()} />
             <button class="icon-button btn-action" onclick={on_delete_click}>
                 <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
             </button>

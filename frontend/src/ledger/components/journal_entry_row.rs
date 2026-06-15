@@ -12,7 +12,7 @@ use web_sys::HtmlSelectElement;
 use yew::prelude::*;
 
 use crate::{
-    core::components::currency_input::CurrencyInput,
+    core::components::currency_input::DecimalInput,
     contexts::locale_context::use_locale,
 };
 
@@ -75,9 +75,9 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
     let on_debit_change = {
         let on_change = props.on_change.clone();
         let entry = props.entry.clone();
-        Callback::from(move |cents: Decimal| {
+        Callback::from(move |amount: Decimal| {
             let mut updated_entry = entry.clone();
-            updated_entry.debit = cents;
+            updated_entry.debit = amount;
             updated_entry.credit = dec!(0.00); // Maintain mutual exclusivity
             on_change.emit(updated_entry);
         })
@@ -86,9 +86,9 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
     let on_credit_change = {
         let on_change = props.on_change.clone();
         let entry = props.entry.clone();
-        Callback::from(move |cents: Decimal| {
+        Callback::from(move |amount: Decimal| {
             let mut updated_entry = entry.clone();
-            updated_entry.credit = cents;
+            updated_entry.credit = amount;
             updated_entry.debit = dec!(0.00); // Maintain mutual exclusivity
             on_change.emit(updated_entry);
         })
@@ -114,12 +114,12 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
                    oninput={on_description_change} />
 
             // USE THE SPECIALIZED COMPONENT HERE
-            <CurrencyInput
+            <DecimalInput
                 value={props.entry.debit}
                 on_change={on_debit_change}
                 placeholder={i18n.t("journal-entry-currency-placeholder")}
             />
-            <CurrencyInput
+            <DecimalInput
                 value={props.entry.credit}
                 on_change={on_credit_change}
                 placeholder={i18n.t("journal-entry-currency-placeholder")}

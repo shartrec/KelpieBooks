@@ -44,8 +44,8 @@ impl LocaleContext {
     }
 
     // Pass-through wrapper for currency
-    pub fn format_currency(&self, amount_cents: Decimal) -> String {
-        format_currency_icu(amount_cents, Some(self.as_str()))
+    pub fn format_currency(&self, amount: Decimal) -> String {
+        format_currency_icu(amount, Some(self.as_str()))
     }
 
     // Pass-through wrapper for dates
