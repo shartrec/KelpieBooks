@@ -666,6 +666,7 @@ item-tax-category-label = Catégorie fiscale :
 item-select-tax-category = Sélectionner un catégorie fiscale
 item-income-account-label = Compte de revenus :
 item-select-income-account = Sélectionner un compte de revenus
+item-is-active-label = Est actif:
 
 # Security
 security-error-no-admin = Vous ne pouvez pas effectuer cette action. Au moins un administrateur de la sécurité doit rester.

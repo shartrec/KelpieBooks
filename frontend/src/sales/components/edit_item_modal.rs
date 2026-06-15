@@ -108,6 +108,15 @@ pub fn edit_item_modal(props: &EditItemModalProps) -> Html {
         })
     };
 
+    let on_is_active_change = {
+        let state = request.clone();
+        Callback::from(move |e: Event| {
+            let mut info = (*state).clone();
+            info.is_active = e.target_unchecked_into::<web_sys::HtmlInputElement>().checked();
+            state.set(info);
+        })
+    };
+
     let on_form_submit = {
         let on_submit = props.on_submit.clone();
         let request = request.clone();
@@ -185,6 +194,9 @@ pub fn edit_item_modal(props: &EditItemModalProps) -> Html {
                             <option value={acc.id.to_string()} selected={request.income_account_id == acc.id}>{&acc.name}</option>
                         })}
                     </select>
+
+                    <label>{i18n.t("item-is-active-label")}</label>
+                    <input type="checkbox" checked={request.is_active} onchange={on_is_active_change} />
 
                     <div class="modal__form__actions">
                         <button type="button" onclick={on_cancel} class="button-secondary">{ i18n.t("common-cancel") }</button>

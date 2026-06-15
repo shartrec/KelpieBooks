@@ -664,6 +664,7 @@ item-tax-category-label = Tax category:
 item-select-tax-category = Select a tax category
 item-income-account-label = Income Account:
 item-select-income-account = Select an income account
+item-is-active-label = Is Active:
 
 # Security
 security-error-no-admin = You cannot perform this action. At least one Security Administrator must remain.
