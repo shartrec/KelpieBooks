@@ -5,10 +5,11 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use rust_decimal::dec;
+use rust_decimal::{dec, Decimal};
 use yew::prelude::*;
 use shared_core::sales::models::item::{UnitOfMeasure, ItemType};
 use uuid::Uuid;
+use web_sys::console::info;
 use crate::api::Api;
 use crate::contexts::auth_context::use_user_context;
 use crate::contexts::locale_context::use_locale;
@@ -17,6 +18,7 @@ use shared_core::ledger::models::account::Account;
 use shared_core::ledger::models::account_category::AccountCategory;
 use shared_core::sales::models::tax::TaxCategory;
 use shared_core::sales::requests::item::CreateItemRequest;
+use crate::core::components::currency_input::DecimalInput;
 
 #[derive(Properties, PartialEq)]
 pub struct AddItemModalProps {
@@ -68,6 +70,15 @@ pub fn add_item_modal(props: &AddItemModalProps) -> Html {
             || ()
         });
     }
+
+    let on_price_change = {
+        let state = request.clone();
+        Callback::from(move |value: Decimal| {
+            let mut info = (*state).clone();
+            info.unit_price = value;
+            state.set(info);
+        })
+    };
 
     let on_input = |field_updater: fn(&mut CreateItemRequest, String)| {
         let state = request.clone();
@@ -163,9 +174,11 @@ pub fn add_item_modal(props: &AddItemModalProps) -> Html {
                     </select>
 
                     <label>{i18n.t("item-price-label")}</label>
-                    <input type="number"
-                        value={request.unit_price.to_string()}
-                        oninput={on_input(|r, v| r.unit_price = v.parse().unwrap_or(dec!(0.00)))} />
+                    <DecimalInput
+                        value={request.unit_price}
+                        decimal_places = 4
+                        on_change={on_price_change}
+                    />
 
                     <label>{i18n.t("item-income-account-label")}</label>
                     <select onchange={on_select(|r, v| r.income_account_id = v)}>

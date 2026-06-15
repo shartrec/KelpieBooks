@@ -135,11 +135,11 @@ pub fn item_list_table() -> Html {
             <table class="table">
                 <thead>
                     <tr>
-                        <th>{ i18n.t("item-list-code") }</th>
-                        <th>{ i18n.t("item-list-name") }</th>
-                        <th>{ i18n.t("item-list-type") }</th>
-                        <th>{ i18n.t("item-list-price") }</th>
-                        <th>{ i18n.t("common-actions") }</th>
+                        <th class="table__text-col">{ i18n.t("item-list-code") }</th>
+                        <th class="table__text-col">{ i18n.t("item-list-name") }</th>
+                        <th class="table__text-col">{ i18n.t("item-list-type") }</th>
+                        <th class="table__value-col">{ i18n.t("item-list-price") }</th>
+                        <th class="table__col-actions">{ i18n.t("common-actions") }</th>
                     </tr>
                 </thead>
                 <tbody>

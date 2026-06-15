@@ -660,6 +660,8 @@ item-type-label = Type:
 item-uom-label = Unit of Measure:
 item-select-uom = Select a UOM
 item-price-label = Price:
+item-tax-category-label = Tax category:
+item-select-tax-category = Select a tax category
 item-income-account-label = Income Account:
 item-select-income-account = Select an income account
 

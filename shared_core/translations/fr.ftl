@@ -662,6 +662,8 @@ item-type-label = Type :
 item-uom-label = Unité de mesure :
 item-select-uom = Sélectionner une unité de mesure
 item-price-label = Prix :
+item-tax-category-label = Catégorie fiscale :
+item-select-tax-category = Sélectionner un catégorie fiscale
 item-income-account-label = Compte de revenus :
 item-select-income-account = Sélectionner un compte de revenus
 

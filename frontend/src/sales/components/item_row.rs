@@ -33,10 +33,10 @@ pub fn item_row(props: &ItemRowProps) -> Html {
 
     html! {
         <tr>
-            <td>{ &props.item.code }</td>
-            <td>{ &props.item.name }</td>
-            <td>{ format!("{:?}", props.item.item_type) }</td>
-            <td>{ i18n.format_currency(props.item.unit_price) }</td>
+            <td class="table__text-col">{ &props.item.code }</td>
+            <td class="table__text-col">{ &props.item.name }</td>
+            <td class="table__text-col">{ format!("{:?}", props.item.item_type) }</td>
+            <td class="table__value-col">{ i18n.format_currency(props.item.unit_price) }</td>
             <td class="table__col-actions">
                 <div class="actions-wrapper">
                     { if user_ctx.has_privilege(&SystemPrivilege::ManageSales) {
