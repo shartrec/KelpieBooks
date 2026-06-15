@@ -140,16 +140,15 @@ reset-password-error-server = Error resetting password: { $status }
 
 # Email
 email-reset-subject = KelpieBooks - Secure Password Reset Request
-
-email-reset-body-plain = Hello,
+email-reset-body-plain =
+    Hello,
         A password reset request was made for your KelpieBooks account. Please visit the following link within 20 minutes to initialize a new password:
-#        { $reset_link }
-
-email-reset-body-html = <h3>KelpieBooks Security Authentication</h3>
-#        <p>A password reset request was initiated for your profile access.</p>
-#        <p><a href={ $reset_link } style=display:inline-block; padding:10px 20px; background:#2563eb; color:white; text-decoration:none; border-radius:5px;>Reset My Password</a></p>
-#        <p><small>If you did not make this request, you can safely ignore this correspondence.</small></p>
-
+        { $reset_link }
+email-reset-body-html =
+    <h3>KelpieBooks Security Authentication</h3>
+    <p>A password reset request was initiated for your profile access.</p>
+    <p><a href="{ $reset_link }" style="display:inline-block; padding:10px 20px; background:#2563eb; color:white; text-decoration:none; border-radius:5px;">Reset My Password</a></p>
+    <p><small>If you did not make this request, you can safely ignore this correspondence.</small></p>
 
 # Sidebar
 sidebar-logo-alt = Logo
@@ -170,6 +169,7 @@ sidebar-configuration = Configuration
 sidebar-admin = Admin
 sidebar-users = Users
 sidebar-roles = Roles
+sidebar-sales = Sales
 
 # Header
 header-toggle-menu-alt = Toggle menu
@@ -490,6 +490,7 @@ address-edit-card-edit-title = Edit Address
 address-edit-card-add-title = Add Address
 address-edit-card-line1-label = Addr line 1:
 address-edit-card-line1-placeholder = Address Line 1
+address-edit-card-line2-label = Addr line 2:
 address-edit-card-line2-placeholder = Address Line 2 (Optional)
 address-edit-card-city-label = City:
 address-edit-card-city-placeholder = City
@@ -499,6 +500,7 @@ address-edit-card-post-code-label = Post Code:
 address-edit-card-post-code-placeholder = Postcode
 address-edit-card-country-label = Country:
 address-edit-card-country-placeholder = Country
+address-edit-card-address-type-label = Address Type:
 address-edit-card-save-button = Save Address
 
 # Addresses View
@@ -638,6 +640,28 @@ role-modal-add-button = Add Role
 role-modal-save-button = Save Changes
 delete-role-confirm-title = Delete Role
 delete-role-confirm-message = Are you sure you want to delete the role: { $role }?
+
+# Sales items
+item-list-title = Items
+item-list-description = This is a list of all the items in your organization.
+item-list-code = Code
+item-list-name = Name
+item-list-type = Type
+item-list-price = Price
+item-list-add-item-button = Add Item
+item-list-error-parse-items = Failed to parse items: { $error }
+item-list-error-fetch-items = Failed to fetch items: { $status }
+item-edit-title = Edit Item
+item-add-title = Add Item
+item-code-label = Code:
+item-name-label = Name:
+item-description-label = Description:
+item-type-label = Type:
+item-uom-label = Unit of Measure:
+item-select-uom = Select a UOM
+item-price-label = Price:
+item-income-account-label = Income Account:
+item-select-income-account = Select an income account
 
 # Security
 security-error-no-admin = You cannot perform this action. At least one Security Administrator must remain.

@@ -7,6 +7,7 @@
  */
 
 use fluent::fluent_args;
+use rust_decimal::dec;
 use shared_core::{
     partners::models::partner::Partner,
     payables::{
@@ -85,12 +86,12 @@ pub fn vendor_invoice_table() -> Html {
                     PaymentStatusFilter::Outstanding => {
                         url.push_str(&format!(
                             "&status={},{}",
-                            InvoiceStatus::Open.as_str(),
-                            InvoiceStatus::PartiallyPaid.as_str()
+                            InvoiceStatus::Open,
+                            InvoiceStatus::PartiallyPaid
                         ));
                     }
                     PaymentStatusFilter::Paid => {
-                        url.push_str(&format!("&status={}", InvoiceStatus::Paid.as_str()));
+                        url.push_str(&format!("&status={}", InvoiceStatus::Paid));
                     }
                     PaymentStatusFilter::All => {}
                 }
@@ -298,7 +299,7 @@ pub fn vendor_invoice_table() -> Html {
                                 <td class="table__value-col">{ i18n.format_currency(invoice.gross_amount) }</td>
                                 <td class="table__value-col">{ i18n.format_currency(invoice.amount_remaining) }</td>
                                 <td class="table__col-actions">
-                                    <button class="btn-pay-action" disabled={invoice.amount_remaining == 0} onclick={on_pay}>
+                                    <button class="btn-pay-action" disabled={invoice.amount_remaining == dec!(0.00)} onclick={on_pay}>
                                         <span class="btn-pay-icon">
                                             <img src="/images/credit-card.svg" alt="" style="width:100%; height:100%;" />
                                         </span>

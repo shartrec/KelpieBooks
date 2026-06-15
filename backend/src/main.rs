@@ -9,6 +9,7 @@
 
 use std::env;
 use std::path::PathBuf;
+use log::error;
 use rocket::{fairing::AdHoc, fs::{
     relative,
     FileServer,
@@ -78,7 +79,9 @@ fn run_migrations() -> AdHoc {
         sqlx::migrate!("./migrations")
             .run(&**db)
             .await
-            .expect("Failed to run migrations");
+            .unwrap_or_else(|e| {
+                error!("Failed to run migrations. err: {}", e);
+            });
 
         Ok(rocket)
     })
@@ -116,7 +119,9 @@ fn rocket() -> _ {
         .mount("/", payables::routes::vendor_payments::routes());
     #[cfg(feature = "sales")]
     let rocket = rocket
-        .mount("/", sales::routes::items::routes());
+        .mount("/", sales::routes::items::routes())
+        .mount("/", sales::routes::uoms::routes())
+        .mount("/", sales::routes::tax_categories::routes());
 
     // Determine the environment directory pathway
     let assets_dir = get_static_assets_dir(&rocket);

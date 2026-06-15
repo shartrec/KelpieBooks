@@ -5,7 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
+use rust_decimal::{dec, Decimal};
 use serde::{
     Deserialize,
     Serialize,
@@ -31,19 +31,19 @@ pub struct AccountWithBalance {
     pub is_bank_account: bool,
     pub system_tag: Option<SystemTag>,
     pub created_at: chrono::DateTime<chrono::Utc>,
-    pub balance: i64,
+    pub balance: Decimal,
 }
 
 impl AccountWithBalance {
-    pub fn calculate_totals(accounts: &[Self]) -> (i64, i64) {
-        let mut debit_sum = 0;
-        let mut credit_sum = 0;
+    pub fn calculate_totals(accounts: &[Self]) -> (Decimal, Decimal) {
+        let mut debit_sum = dec!(0.00);
+        let mut credit_sum = dec!(0.00);
 
         for acc in accounts.iter() {
             if !acc.is_group {
                 match acc.category {
                     AccountCategory::Asset | AccountCategory::Expense => {
-                        if acc.balance >= 0 {
+                        if acc.balance >= dec!(0.00) {
                             debit_sum += acc.balance;
                         } else {
                             credit_sum += acc.balance.abs();
@@ -52,7 +52,7 @@ impl AccountWithBalance {
                     AccountCategory::Liability
                     | AccountCategory::Equity
                     | AccountCategory::Revenue => {
-                        if acc.balance <= 0 {
+                        if acc.balance <= dec!(0.00) {
                             credit_sum += acc.balance.abs();
                         } else {
                             debit_sum += acc.balance;

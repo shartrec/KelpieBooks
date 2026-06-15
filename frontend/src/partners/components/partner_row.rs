@@ -59,7 +59,7 @@ pub fn partner_row(props: &PartnerRowProps) -> Html {
             <td>{ partner_type }</td>
             <td class="table__col-actions">
                 <div class="actions-wrapper">
-                    { if user_ctx.has_privilege(&SystemPrivilege::manage_partners) {
+                    { if user_ctx.has_privilege(&SystemPrivilege::ManagePartners) {
                         html! {
                             <>
                                 <button class="icon-button btn-action" onclick={on_edit}>

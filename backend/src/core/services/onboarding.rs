@@ -24,11 +24,13 @@ use crate::core::db::{
     roles as db_role,
     user as db_user,
 };
+use crate::core::routes::security::hash_pwd;
+use crate::util::ApiError;
 
 pub(crate) async fn bootstrap_tenant_organization(
     pool: &mut PgConnection,
     req: &OnboardingRequest,
-) -> Result<User, sqlx::Error> {
+) -> Result<User, ApiError> {
     // 1. Begin the atomic transaction isolation guard
     let mut tx: Transaction<'_, Postgres> = pool.begin().await?;
 
@@ -44,11 +46,12 @@ pub(crate) async fn bootstrap_tenant_organization(
     db_role::add_privileges(&mut tx, role_id, master_privileges).await?;
 
     // 6. Build the initial profile entity record and anchor it to the org_admin role
+    let password_hash = hash_pwd(&req.user_password)?;
     let user = db_user::insert(
         &mut tx,
         org.id,
         &req.user_email,
-        &req.user_password,
+        &password_hash,
         &req.user_full_name,
         req.user_display_name.as_deref(),
         Some(role_id),

@@ -2,3 +2,4 @@
 
 pub mod vendor_invoice;
 pub mod vendor_payment;
+pub mod vendor_invoice_payment;

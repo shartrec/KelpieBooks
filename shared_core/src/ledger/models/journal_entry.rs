@@ -10,6 +10,7 @@ use chrono::{
     DateTime,
     Utc,
 };
+use rust_decimal::Decimal;
 use serde::{
     Deserialize,
     Serialize,
@@ -21,8 +22,8 @@ pub struct JournalEntry {
     pub id: Uuid,
     pub transaction_id: Uuid,
     pub account_id: Uuid,
-    pub debit: i64,
-    pub credit: i64,
+    pub debit: Decimal,
+    pub credit: Decimal,
     pub description: Option<String>,
     pub created_at: DateTime<Utc>,
 }

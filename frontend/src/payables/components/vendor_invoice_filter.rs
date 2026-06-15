@@ -8,6 +8,7 @@
 
 use chrono::NaiveDate;
 use gloo_console::info;
+use rust_decimal::{dec, Decimal};
 use shared_core::partners::dtos::partner_list_item::PartnerListItem;
 use uuid::Uuid;
 use yew::prelude::*;
@@ -90,8 +91,8 @@ pub fn vendor_invoice_filter() -> Html {
 
     let on_min_amount_change = {
         let filter_ctx = filter_ctx.clone();
-        Callback::from(move |cents: i64| {
-            if cents == 0 {
+        Callback::from(move |cents: Decimal| {
+            if cents == dec!(0.00) {
                 filter_ctx.dispatch(VendorInvoiceFilterAction::SetMinAmount(None));
             } else {
                 filter_ctx.dispatch(VendorInvoiceFilterAction::SetMinAmount(Some(cents)));
@@ -154,7 +155,7 @@ pub fn vendor_invoice_filter() -> Html {
                 <div class="report__filter-group">
                     <label>{ i18n.t("vendor-invoice-filter-min-amount-label") }</label>
                     <CurrencyInput
-                        value={filter_ctx.min_amount.unwrap_or(0)}
+                        value={filter_ctx.min_amount.unwrap_or(dec!(0.00))}
                         on_change={on_min_amount_change}
                         placeholder={i18n.t("journal-entry-currency-placeholder")}
                     />

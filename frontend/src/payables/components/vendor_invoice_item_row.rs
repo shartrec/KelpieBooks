@@ -5,7 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
+use rust_decimal::Decimal;
 use shared_core::{
     ledger::models::account::Account,
     payables::models::vendor_invoice_item::VendorInvoiceItem,
@@ -58,7 +58,7 @@ pub fn vendor_invoice_item_row(props: &VendorInvoiceItemRowProps) -> Html {
     let on_net_amount_change = {
         let on_change = props.on_change.clone();
         let item = props.item.clone();
-        Callback::from(move |value: i64| {
+        Callback::from(move |value: Decimal| {
             let mut new_item = item.clone();
             new_item.net_amount = value;
             new_item.total_amount = new_item.net_amount + new_item.tax_amount;
@@ -69,7 +69,7 @@ pub fn vendor_invoice_item_row(props: &VendorInvoiceItemRowProps) -> Html {
     let on_tax_amount_change = {
         let on_change = props.on_change.clone();
         let item = props.item.clone();
-        Callback::from(move |value: i64| {
+        Callback::from(move |value: Decimal| {
             let mut new_item = item.clone();
             new_item.tax_amount = value;
             new_item.total_amount = new_item.net_amount + new_item.tax_amount;

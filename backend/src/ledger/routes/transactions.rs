@@ -16,6 +16,7 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
+use rust_decimal::{dec, Decimal};
 use shared_core::ledger::{
     dtos::transaction_detail::TransactionDetail,
     requests::transaction::{
@@ -120,10 +121,10 @@ async fn update_transaction(
 ) -> Result<&'static str, ApiError> {
     let user = guard.0;
 
-    let total_debits: i64 = req.entries.iter().map(|e| e.debit).sum();
-    let total_credits: i64 = req.entries.iter().map(|e| e.credit).sum();
+    let total_debits: Decimal = req.entries.iter().map(|e| e.debit).sum();
+    let total_credits: Decimal = req.entries.iter().map(|e| e.credit).sum();
 
-    if total_debits == 0 || total_credits == 0 || total_debits != total_credits {
+    if total_debits == dec!(0.00) || total_credits == dec!(0.00) || total_debits != total_credits {
         return Err(ApiError::BadRequest(
             "Transaction must be balanced and not zero.".to_string(),
         ));

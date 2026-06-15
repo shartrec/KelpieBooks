@@ -7,6 +7,7 @@
  */
 
 use chrono::NaiveDate;
+use rust_decimal::Decimal;
 use serde::{
     Deserialize,
     Serialize,
@@ -16,5 +17,5 @@ use serde::{
 pub struct TopPayable {
     pub partner_name: String,
     pub due_date: NaiveDate,
-    pub amount: i64,
+    pub amount: Decimal,
 }

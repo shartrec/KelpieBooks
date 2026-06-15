@@ -9,18 +9,18 @@
 use rocket::{delete, get, post, put, routes, Route};
 use rocket::serde::json::Json;
 use rocket_db_pools::Connection;
-use shared_core::sales::models::item::{Item, UnitOfMeasure};
+use shared_core::sales::models::item::Item;
 use uuid::Uuid;
+use crate::core::routes::security::AuthenticatedUser;
 use crate::DbKelpie;
 use crate::sales::services::item_service;
 use crate::security::{ManageSales, RequirePrivilege, UseSales};
-use crate::sales::db::item::get_active_uoms;
 use crate::util::ApiError;
 use crate::util::types::PathUuid;
+use shared_core::sales::requests::item::CreateItemRequest;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
-        list_active_uoms,
         get_items,
         get_item,
         create_item,
@@ -29,20 +29,13 @@ pub(crate) fn routes() -> Vec<Route> {
     ]
 }
 
-#[get("/units-of-measure")]
-pub async fn list_active_uoms(
-    mut pool: Connection<DbKelpie>,
-    guard: RequirePrivilege<UseSales>,
-) -> Result<Json<Vec<UnitOfMeasure>>, ApiError> {
-    let uoms =  get_active_uoms(&mut pool).await?;
-    Ok(Json(uoms))
-}
 #[get("/api/sales/items")]
 async fn get_items(
     mut pool: Connection<DbKelpie>,
+    user: AuthenticatedUser,
     _guard: RequirePrivilege<UseSales>,
 ) -> Result<Json<Vec<Item>>, ApiError> {
-    let items = item_service::get_items(&mut pool).await?;
+    let items = item_service::get_items(&mut pool, user.organization_id).await?;
     Ok(Json(items))
 }
 
@@ -50,19 +43,21 @@ async fn get_items(
 async fn get_item(
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
+    user: AuthenticatedUser,
     _guard: RequirePrivilege<UseSales>,
 ) -> Result<Json<Option<Item>>, ApiError> {
-    let item = item_service::get_item(&mut pool, *id).await?;
+    let item = item_service::get_item(&mut pool, *id, user.organization_id).await?;
     Ok(Json(item))
 }
 
 #[post("/api/sales/items", data = "<item>")]
 async fn create_item(
     mut pool: Connection<DbKelpie>,
-    item: Json<Item>,
+    item: Json<CreateItemRequest>,
+    user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<Json<Item>, ApiError> {
-    let new_item = item_service::create_item(&mut pool, &item).await?;
+    let new_item = item_service::create_item(&mut pool, user.organization_id, &item).await?;
     Ok(Json(new_item))
 }
 
@@ -71,9 +66,10 @@ async fn update_item(
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
     item: Json<Item>,
+    user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<Json<Item>, ApiError> {
-    let updated_item = item_service::update_item(&mut pool, *id, &item).await?;
+    let updated_item = item_service::update_item(&mut pool, *id, user.organization_id, &item).await?;
     Ok(Json(updated_item))
 }
 
@@ -81,8 +77,9 @@ async fn update_item(
 async fn delete_item(
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
+    user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<Json<u64>, ApiError> {
-    let rows_affected = item_service::delete_item(&mut pool, *id).await?;
+    let rows_affected = item_service::delete_item(&mut pool, *id, user.organization_id).await?;
     Ok(Json(rows_affected))
 }

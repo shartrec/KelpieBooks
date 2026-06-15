@@ -8,6 +8,7 @@
 
 use chrono::NaiveDate;
 use fluent::fluent_args;
+use rust_decimal::{dec, Decimal};
 use shared_core::ledger::models::{
     account::Account,
     account_category::AccountCategory,
@@ -106,9 +107,9 @@ pub fn report_options(props: &ReportOptionsProps) -> Html {
 
     let on_min_amount_change = {
         let report_ctx = report_ctx.clone();
-        Callback::from(move |cents: i64| {
+        Callback::from(move |amount: Decimal| {
             if let Some(ctx) = &report_ctx {
-                ctx.dispatch(ReportAction::SetMinAmount(Some(cents)));
+                ctx.dispatch(ReportAction::SetMinAmount(Some(amount)));
             }
         })
     };
@@ -172,7 +173,7 @@ pub fn report_options(props: &ReportOptionsProps) -> Html {
                         <div class="report__filter-group">
                             <label>{ i18n.t("report-options-min-amount-label") }</label>
                             <CurrencyInput
-                                value={ctx.min_amount.unwrap_or(0)}
+                                value={ctx.min_amount.unwrap_or(dec!(0.00))}
                                 on_change={on_min_amount_change}
                                 placeholder={i18n.t("journal-entry-currency-placeholder")}
                             />

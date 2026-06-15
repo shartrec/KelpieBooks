@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026.
+ * Copyright (c) 2024.
  *
  * This file is part of KelpieBooks. For terms of use, please see the file
  * called LICENSE at the top level of the KelpieBooks source tree
@@ -14,31 +14,22 @@ use strum::{
     Display,
     EnumIter,
     EnumString,
-    IntoEnumIterator,
 };
 
 #[derive(
     Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy,
 )]
-#[strum(serialize_all = "PascalCase")]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(
+    feature = "backend",
+    sqlx(type_name = "address_type", rename_all = "snake_case")
+)]
 pub enum AddressType {
     Billing,
     Shipping,
     General,
 }
 
-impl AddressType {
-    pub fn iterator() -> impl Iterator<Item = Self> {
-        Self::iter()
-    }
-    pub fn display_name(&self) -> String {
-        match self {
-            AddressType::Billing => "Billing".to_string(),
-            AddressType::Shipping => "Shipping".to_string(),
-            AddressType::General => "General".to_string(),
-        }
-    }
-}
 impl Default for AddressType {
     fn default() -> Self {
         Self::General

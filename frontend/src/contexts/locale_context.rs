@@ -10,6 +10,7 @@ use chrono::{
     NaiveDate,
 };
 use fluent::FluentArgs;
+use rust_decimal::Decimal;
 use shared_core::i18n::{
     format_currency_icu,
     format_date_icu,
@@ -43,7 +44,7 @@ impl LocaleContext {
     }
 
     // Pass-through wrapper for currency
-    pub fn format_currency(&self, amount_cents: i64) -> String {
+    pub fn format_currency(&self, amount_cents: Decimal) -> String {
         format_currency_icu(amount_cents, Some(self.as_str()))
     }
 

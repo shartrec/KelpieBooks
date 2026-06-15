@@ -5,7 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
+use rust_decimal::Decimal;
 use serde::{
     Deserialize,
     Serialize,
@@ -18,11 +18,11 @@ use crate::payables::dtos::vendor_invoice_list_item::VendorInvoiceListItem;
 pub struct AgedPayableSummary {
     pub partner_id: Uuid,
     pub partner_name: String,
-    pub current: i64,
-    pub days_30: i64,
-    pub days_60: i64,
-    pub days_90: i64,
-    pub days_90_plus: i64,
-    pub total: i64,
+    pub current: Decimal,
+    pub days_30: Decimal,
+    pub days_60: Decimal,
+    pub days_90: Decimal,
+    pub days_90_plus: Decimal,
+    pub total: Decimal,
     pub invoices: Vec<VendorInvoiceListItem>,
 }

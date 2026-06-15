@@ -17,7 +17,7 @@ use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 use shared_core::core::models::organization::Organization;
-use shared_core::core::requests::configuration::UpdateConfigurationRequest;
+use shared_core::ledger::requests::configuration::UpdateConfigurationRequest;
 use crate::{
     api::Api,
     contexts::{

@@ -7,6 +7,7 @@
  */
 
 use chrono::NaiveDate;
+use rust_decimal::Decimal;
 use serde::{
     Deserialize,
     Serialize,
@@ -23,9 +24,9 @@ pub struct VendorInvoiceListItem {
     pub invoice_number: String,
     pub issue_date: NaiveDate,
     pub due_date: NaiveDate,
-    pub net_amount: i64,
-    pub tax_amount: i64,
-    pub gross_amount: i64,
-    pub amount_remaining: i64,
+    pub net_amount: Decimal,
+    pub tax_amount: Decimal,
+    pub gross_amount: Decimal,
+    pub amount_remaining: Decimal,
     pub status: InvoiceStatus,
 }

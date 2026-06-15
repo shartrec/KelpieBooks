@@ -12,6 +12,7 @@ use chrono::{
     Utc,
 };
 use fluent::fluent_args;
+use rust_decimal::Decimal;
 use shared_core::{
     ledger::models::account::Account,
     payables::{
@@ -193,7 +194,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
 
     let on_amount_change = {
         let request = request.clone();
-        Callback::from(move |value: i64| {
+        Callback::from(move |value: Decimal| {
             let mut new_request = (*request).clone();
             new_request.amount = value;
             new_request.allocations[0].allocated_amount = value;

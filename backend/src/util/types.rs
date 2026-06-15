@@ -7,6 +7,7 @@
  */
 
 use std::ops::Deref;
+use std::str::FromStr;
 
 use chrono::NaiveDate;
 use rocket::{
@@ -17,6 +18,7 @@ use rocket::{
     },
     request::FromParam,
 };
+use shared_core::payables::models::invoice_status::InvoiceStatus;
 use uuid::Uuid;
 
 /// A newtype wrapper for `Uuid` to implement `FromParam` and satisfy the orphan rule.
@@ -47,6 +49,29 @@ impl<'r> FromFormField<'r> for PathUuid {
         match Uuid::parse_str(field.value) {
             Ok(uuid) => Ok(PathUuid(uuid)),
             Err(e) => Err(form::Error::validation(format!("{}", e)).into()),
+        }
+    }
+}
+
+/// A newtype wrapper for `InvoiceStatus` to implement `FromFormField` and satisfy the orphan rule.
+#[derive(Clone, Copy)]
+pub(crate) struct FormInvoiceStatus(pub(crate) InvoiceStatus);
+
+/// Allows `FormInvoiceStatus` to be used as a `InvoiceStatus` via dereferencing.
+impl Deref for FormInvoiceStatus {
+    type Target = InvoiceStatus;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromFormField<'r> for FormInvoiceStatus {
+    fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
+        // The `from_str` comes from `strum::EnumString` on the InvoiceStatus enum
+        match InvoiceStatus::from_str(field.value) {
+            Ok(status) => Ok(FormInvoiceStatus(status)),
+            Err(_) => Err(form::Error::validation("Invalid invoice status.").into()),
         }
     }
 }

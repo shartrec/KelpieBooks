@@ -19,23 +19,16 @@ use strum::{
 #[derive(
     Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy,
 )]
-#[strum(serialize_all = "PascalCase")]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(
+    feature = "backend",
+    sqlx(type_name = "invoice_status", rename_all = "snake_case")
+)]
 pub enum InvoiceStatus {
     Open,
     Paid,
     PartiallyPaid,
     Void,
-}
-
-impl InvoiceStatus {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::Open => "Open",
-            Self::Paid => "Paid",
-            Self::PartiallyPaid => "PartiallyPaid",
-            Self::Void => "Void",
-        }
-    }
 }
 
 impl Default for InvoiceStatus {

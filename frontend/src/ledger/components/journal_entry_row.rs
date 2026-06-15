@@ -5,6 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use rust_decimal::{dec, Decimal};
 use shared_core::ledger::requests::transaction::JournalEntryLine;
 use uuid::Uuid;
 use web_sys::HtmlSelectElement;
@@ -70,14 +71,14 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
         })
     };
 
-    // Updated: Accept i64 directly, no more f64 parsing here!
+    // Updated: Accept Decimal directly, no more f64 parsing here!
     let on_debit_change = {
         let on_change = props.on_change.clone();
         let entry = props.entry.clone();
-        Callback::from(move |cents: i64| {
+        Callback::from(move |cents: Decimal| {
             let mut updated_entry = entry.clone();
             updated_entry.debit = cents;
-            updated_entry.credit = 0; // Maintain mutual exclusivity
+            updated_entry.credit = dec!(0.00); // Maintain mutual exclusivity
             on_change.emit(updated_entry);
         })
     };
@@ -85,10 +86,10 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
     let on_credit_change = {
         let on_change = props.on_change.clone();
         let entry = props.entry.clone();
-        Callback::from(move |cents: i64| {
+        Callback::from(move |cents: Decimal| {
             let mut updated_entry = entry.clone();
             updated_entry.credit = cents;
-            updated_entry.debit = 0; // Maintain mutual exclusivity
+            updated_entry.debit = dec!(0.00); // Maintain mutual exclusivity
             on_change.emit(updated_entry);
         })
     };

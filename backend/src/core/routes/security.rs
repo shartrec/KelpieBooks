@@ -86,7 +86,7 @@ async fn login(
     match db_user {
         Ok(Some(user)) => {
             let valid =
-                bcrypt::verify(&login_request.password_raw, &user.password_hash).unwrap_or(false);
+                verify(&login_request.password_raw, &user.password_hash).unwrap_or(false);
             if !valid {
                 return Err(Status::Unauthorized);
             }
@@ -289,8 +289,8 @@ fn get_secret_key() -> &'static str {
 }
 
 fn generate_session_token(user: &AuthenticatedUser) -> String {
-    let expiration = chrono::Utc::now()
-        .checked_add_signed(chrono::Duration::hours(24))
+    let expiration = Utc::now()
+        .checked_add_signed(Duration::hours(24))
         .expect("Failed to calculate expiration")
         .timestamp() as usize;
 
@@ -338,7 +338,7 @@ pub(crate) async fn validate_session_token(token: &str) -> Option<AuthenticatedU
     );
 
     if let Ok(data) = token_data {
-        if data.claims.exp > chrono::Utc::now().timestamp() as usize {
+        if data.claims.exp > Utc::now().timestamp() as usize {
             let org_id = Uuid::parse_str(&data.claims.organization_id).unwrap();
             let role_id = Uuid::parse_str(&data.claims.role_id).unwrap_or_default();
 

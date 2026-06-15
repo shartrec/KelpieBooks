@@ -6,13 +6,14 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-ALTER TYPE system_privilege ADD VALUE 'use_sales';
+ALTER TYPE system_privilege ADD VALUE 'use_sales' ;
 ALTER TYPE system_privilege ADD VALUE 'manage_sales';
 
 CREATE TYPE item_type AS ENUM ('stocked', 'non_stocked', 'service');
 
 CREATE TABLE tax_categories (
                                 id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                                organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
                                 name VARCHAR(50) NOT NULL UNIQUE,       -- e.g., "Standard Rate", "Zero Rated", "Exempt"
                                 description VARCHAR(255),
                                 is_active BOOLEAN NOT NULL DEFAULT TRUE
@@ -20,6 +21,7 @@ CREATE TABLE tax_categories (
 
 CREATE TABLE tax_rates (
                            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                           organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
                            tax_category_id UUID NOT NULL REFERENCES tax_categories(id) ON DELETE CASCADE,
                            name VARCHAR(50) NOT NULL,              -- e.g., "VAT 20%", "State Tax 6%"
                            rate NUMERIC(6, 4) NOT NULL,            -- e.g., 0.2000 for 20%, 0.0625 for 6.25%
@@ -36,23 +38,18 @@ CREATE TABLE tax_rates (
 
 CREATE TABLE units_of_measure (
                                   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                                  organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
                                   code VARCHAR(10) NOT NULL UNIQUE,       -- e.g., "EA", "HR", "M", "KG"
                                   name VARCHAR(50) NOT NULL,              -- e.g., "Each", "Hour", "Meter", "Kilogram"
                                   is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
-
--- Seed some standard universal defaults
-INSERT INTO units_of_measure (code, name) VALUES
-                                              ('EA', 'Each'),
-                                              ('HR', 'Hour'),
-                                              ('M', 'Metre'),
-                                              ('Kg', 'Kilogram');
 
 -- Indexing for fast historical date lookups
 CREATE INDEX idx_tax_rates_lookup ON tax_rates(tax_category_id, valid_from, valid_to);
 
 CREATE TABLE items (
                        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                       organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
                        code VARCHAR(50) NOT NULL UNIQUE,       -- SKU or Item ID (e.g., "CONS-01", "WIDGET-X")
                        name VARCHAR(150) NOT NULL,
                        description TEXT,
@@ -60,7 +57,7 @@ CREATE TABLE items (
                        uom_id UUID NOT NULL REFERENCES units_of_measure(id),
                        tax_category_id UUID REFERENCES tax_categories(id) ON DELETE SET NULL,
     -- Financial Mapping
-                       unit_price BIGINT NOT NULL DEFAULT 0, -- Base sales price
+                       unit_price NUMERIC(15,4) NOT NULL DEFAULT 0, -- Base sales price
                        income_account_id UUID NOT NULL,         -- Links to Chart of Accounts (e.g., "Revenue")
 
                        is_active BOOLEAN NOT NULL DEFAULT TRUE,
@@ -69,19 +66,20 @@ CREATE TABLE items (
 
 CREATE TABLE sales_invoices (
                                 id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                                organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
                                 invoice_number VARCHAR(50) NOT NULL UNIQUE, -- User-facing sequence ID (e.g., "INV-2026-001")
                                 customer_id UUID NOT NULL,                  -- Links to your Customers/Contacts table
-                                status invoice_status NOT NULL DEFAULT 'Draft',
+                                status invoice_status NOT NULL DEFAULT 'open',
 
     -- Key Accounting Dates
                                 issue_date DATE NOT NULL DEFAULT CURRENT_DATE,
                                 due_date DATE NOT NULL,
 
     -- Financial Summary Fields (Denormalized slightly for fast reading)
-                                subtotal BIGINT NOT NULL DEFAULT 0,
-                                tax_total BIGINT NOT NULL DEFAULT 0,
-                                total_amount BIGINT NOT NULL DEFAULT 0,
-                                amount_due BIGINT NOT NULL DEFAULT 0, -- Track remaining A/R balance
+                                subtotal NUMERIC(15,4) NOT NULL DEFAULT 0,
+                                tax_total NUMERIC(15,4) NOT NULL DEFAULT 0,
+                                total_amount NUMERIC(15,4) NOT NULL DEFAULT 0,
+                                amount_due NUMERIC(15,4) NOT NULL DEFAULT 0, -- Track remaining A/R balance
 
                                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -92,16 +90,17 @@ CREATE INDEX idx_invoices_customer ON sales_invoices(customer_id);
 
 CREATE TABLE sales_invoice_lines (
                                      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                                     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
                                      invoice_id UUID NOT NULL REFERENCES sales_invoices(id) ON DELETE CASCADE,
                                      item_id UUID REFERENCES items(id) ON DELETE SET NULL, -- Nullable if allowing free-text custom lines
 
                                      description TEXT NOT NULL,         -- Copy from item, but editable by user per invoice
                                      quantity BIGINT NOT NULL DEFAULT 1.0000,
-                                     unit_price BIGINT NOT NULL DEFAULT 0,
+                                     unit_price NUMERIC(15,4) NOT NULL DEFAULT 0,
                                      tax_rate_id UUID REFERENCES tax_rates(id) ON DELETE SET NULL,
-                                     tax_amount BIGINT NOT NULL DEFAULT 0,
+                                     tax_amount NUMERIC(15,4) NOT NULL DEFAULT 0,
     -- Subtotals calculated automatically per line
-                                     line_total BIGINT NOT NULL DEFAULT 0,
+                                     line_total NUMERIC(15,4) NOT NULL DEFAULT 0,
 
     -- Track sorting sequence for rendering PDFs correctly
                                      sort_order INT NOT NULL DEFAULT 0
@@ -111,6 +110,7 @@ CREATE TYPE ar_transaction_type AS ENUM ('invoice_charge', 'payment_received', '
 
 CREATE TABLE accounts_receivable_ledger (
                                             id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                                            organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
                                             customer_id UUID NOT NULL,
                                             invoice_id UUID NOT NULL REFERENCES sales_invoices(id) ON DELETE CASCADE,
                                             transaction_type ar_transaction_type NOT NULL,
@@ -118,7 +118,7 @@ CREATE TABLE accounts_receivable_ledger (
     -- Accounts Receivable is an Asset, so:
     -- Invoices INCREASE the balance (Debit)
     -- Payments DECREASE the balance (Credit)
-                                            amount BIGINT NOT NULL,
+                                            amount NUMERIC(15,4) NOT NULL,
 
                                             entry_date DATE NOT NULL DEFAULT CURRENT_DATE,
                                             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

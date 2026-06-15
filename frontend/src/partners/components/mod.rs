@@ -23,12 +23,12 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
     Some(SidebarModuleContribution {
         id: "sidebar-partners",
         label_key: "sidebar-partners",
-        privilege: Some(SystemPrivilege::use_partners),
+        privilege: Some(SystemPrivilege::UsePartners),
         target_route: None,
         children: vec![SidebarModuleContribution {
-            id: "payables-ledger-title",
-            label_key: "payables-ledger-title",
-            privilege: Some(SystemPrivilege::use_partners),
+            id: "partner-list",
+            label_key: "partner-list-title",
+            privilege: Some(SystemPrivilege::UsePartners),
             target_route: Some(Route::PartnerList),
             children: vec![],
         }],

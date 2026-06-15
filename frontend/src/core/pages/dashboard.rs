@@ -7,6 +7,7 @@
  */
 
 use fluent::fluent_args;
+use rust_decimal::Decimal;
 #[cfg(feature = "ledger")]
 use shared_core::ledger::dtos::{
     dashboard::FinancialHealth,
@@ -212,7 +213,7 @@ pub fn dashboard_page() -> Html {
 #[derive(Properties, PartialEq)]
 struct FinancialCardProps {
     title: AttrValue,
-    value: i64,
+    value: Decimal,
 }
 
 #[function_component(FinancialCard)]

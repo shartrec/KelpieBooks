@@ -5,7 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
+use rust_decimal::Decimal;
 use serde::{
     Deserialize,
     Serialize,
@@ -13,8 +13,8 @@ use serde::{
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct FinancialHealth {
-    pub net_profit_ytd: i64,
-    pub bank_balance: i64,
-    pub accounts_receivable: i64,
-    pub accounts_payable: i64,
+    pub net_profit_ytd: Decimal,
+    pub bank_balance: Decimal,
+    pub accounts_receivable: Decimal,
+    pub accounts_payable: Decimal,
 }

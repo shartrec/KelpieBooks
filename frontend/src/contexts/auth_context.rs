@@ -34,7 +34,7 @@ impl UserContext {
         // 👑 Shortcut: Organization administrators automatically bypass individual module blocks
         if privileges
             .iter()
-            .any(|p| p == SystemPrivilege::security_admin.as_str())
+            .any(|p| p == SystemPrivilege::SecurityAdmin.as_str())
         {
             return true;
         }

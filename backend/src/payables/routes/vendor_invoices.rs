@@ -15,6 +15,7 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
+use rust_decimal::Decimal;
 use shared_core::payables::{
     dtos::vendor_invoice_list_item::VendorInvoiceListItem,
     models::{
@@ -27,7 +28,7 @@ use shared_core::payables::{
         UpdateVendorInvoiceRequest,
     },
 };
-
+use shared_core::payables::models::invoice_status::InvoiceStatus;
 use crate::{
     payables::services::{
         vendor_invoice_service,
@@ -47,6 +48,7 @@ use crate::{
     },
     DbKelpie,
 };
+use crate::util::types::FormInvoiceStatus;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -66,8 +68,8 @@ async fn get_vendor_invoices(
     start_date: Option<PathDate>,
     end_date: Option<PathDate>,
     partner_id: Option<PathUuid>,
-    min_amount: Option<i64>,
-    status: Option<String>,
+    min_amount: Option<Decimal>,
+    status: Option<FormInvoiceStatus>,
 ) -> Result<Json<Vec<VendorInvoiceListItem>>, ApiError> {
     let user = guard.0;
     let invoices = vendor_invoice_service::get_vendor_invoices(
@@ -77,7 +79,7 @@ async fn get_vendor_invoices(
         end_date.map(|d| *d),
         partner_id.map(|u| *u),
         min_amount,
-        status,
+        status.map(|s| *s),
     )
     .await?;
     Ok(Json(invoices))

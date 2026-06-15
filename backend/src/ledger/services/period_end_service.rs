@@ -8,9 +8,10 @@
 
 use chrono::NaiveDate;
 use rocket_db_pools::sqlx::PgConnection;
+use rust_decimal::dec;
 use shared_core::ledger::models::account_category::AccountCategory;
 use uuid::Uuid;
-
+use shared_core::ledger::models::system_tag::SystemTag;
 use crate::{
     ledger::db::{
         account,
@@ -27,8 +28,8 @@ pub(crate) async fn close_financial_year(
     organization_id: Uuid,
     year_end: NaiveDate,
 ) -> Result<(), ApiError> {
-    let mut total_credits = 0i64;
-    let mut total_debits = 0i64;
+    let mut total_credits = dec!(0.00);
+    let mut total_debits = dec!(0.00);
 
     // 1. Create the Closing Journal Transaction
     let closing_tx = transaction::insert(
@@ -51,11 +52,11 @@ pub(crate) async fn close_financial_year(
         let balance =
             journal_entry::get_balance_up_to_date(pool, account.id, organization_id, year_end)
                 .await?;
-        if balance != 0 {
-            let (debit, credit) = if balance > 0 {
-                (0, balance)
+        if balance != dec!(0.00) {
+            let (debit, credit) = if balance > dec!(0.00) {
+                (dec!(0.00), balance)
             } else {
-                (-balance, 0)
+                (-balance, dec!(0.00))
             };
             // Accumulate total debits and credits for the closing transaction
             total_credits += credit;
@@ -74,15 +75,15 @@ pub(crate) async fn close_financial_year(
 
     // 3. Post the Net Income to Retained Earnings
     let retained_earnings_account =
-        account::get_by_system_tag(pool, organization_id, "RetainedEarnings")
+        account::get_by_system_tag(pool, organization_id, &SystemTag::RetainedEarnings)
             .await?
             .ok_or_else(|| ApiError::NotFound("Retained Earnings account not found".to_string()))?;
 
     // calculate reversing entry for the closing transaction
     let (debit, credit) = if total_credits > total_debits {
-        (total_credits - total_debits, 0)
+        (total_credits - total_debits, dec!(0.00))
     } else {
-        (0, total_debits - total_credits)
+        (dec!(0.00), total_debits - total_credits)
     };
     journal_entry::insert(
         pool,

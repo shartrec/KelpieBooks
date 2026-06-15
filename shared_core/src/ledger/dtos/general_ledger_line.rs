@@ -7,6 +7,7 @@
  */
 
 use chrono::NaiveDate;
+use rust_decimal::Decimal;
 use serde::{
     Deserialize,
     Serialize,
@@ -20,8 +21,9 @@ pub struct GeneralLedgerLine {
     pub date: NaiveDate,
     pub account_id: Uuid,
     pub account_name: String,
+    pub code: String,
     pub description: Option<String>,
-    pub debit: i64,
-    pub credit: i64,
-    pub balance: i64,
+    pub debit: Decimal,
+    pub credit: Decimal,
+    pub balance: Decimal,
 }

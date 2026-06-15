@@ -7,6 +7,7 @@
  */
 
 use fluent::fluent_args;
+use rust_decimal::dec;
 use shared_core::{
     ledger::models::{
         account::Account,
@@ -157,9 +158,9 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                 vendor_invoice_id: invoice_id,
                 account_id: Uuid::nil(),
                 description: String::new(),
-                net_amount: 0,
-                tax_amount: 0,
-                total_amount: 0,
+                net_amount: dec!(0.00),
+                tax_amount: dec!(0.00),
+                total_amount: dec!(0.00),
             }));
         })
     };

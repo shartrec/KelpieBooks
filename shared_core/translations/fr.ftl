@@ -143,12 +143,10 @@ reset-password-error-server = Erreur lors de la réinitialisation du mot de pass
 
 # Email
 email-reset-subject = KelpieBooks - Demande de réinitialisation de mot de passe sécurisée
-
 email-reset-body-plain =
     Bonjour,
         Une demande de réinitialisation de mot de passe a été effectuée pour votre compte KelpieBooks. Veuillez visiter le lien suivant dans les 20 minutes pour initialiser un nouveau mot de passe:
         { $reset_link }
-
 email-reset-body-html =
     <h3>Authentification de sécurité KelpieBooks</h3>
     <p>Une demande de réinitialisation de mot de passe a été initiée pour l'accès à votre profil.</p>
@@ -174,6 +172,7 @@ sidebar-configuration = Configuration
 sidebar-admin = Administration
 sidebar-users = Utilisateurs
 sidebar-roles = Rôles
+sidebar-sales = Ventes
 
 # Header
 header-toggle-menu-alt = Basculer le menu
@@ -493,6 +492,7 @@ address-edit-card-edit-title = Modifier l’adresse
 address-edit-card-add-title = Ajouter une adresse
 address-edit-card-line1-label = Ligne d’adresse 1 :
 address-edit-card-line1-placeholder = Ligne d’adresse 1
+address-edit-card-line2-label = Ligne d’adresse 2 :
 address-edit-card-line2-placeholder = Ligne d’adresse 2 (optionnel)
 address-edit-card-city-label = Ville :
 address-edit-card-city-placeholder = Ville
@@ -502,6 +502,7 @@ address-edit-card-post-code-label = Code postal :
 address-edit-card-post-code-placeholder = Code postal
 address-edit-card-country-label = Pays :
 address-edit-card-country-placeholder = Pays
+address-edit-card-address-type-label = Type d’adresse:
 address-edit-card-save-button = Enregistrer l’adresse
 
 # Addresses View
@@ -641,6 +642,28 @@ role-modal-add-button = Ajouter un rôle
 role-modal-save-button = Enregistrer les modifications
 delete-role-confirm-title = Supprimer le rôle
 delete-role-confirm-message = Êtes-vous sûr de vouloir supprimer le rôle : { $role } ?
+
+# Sales items
+item-list-title = Articles
+item-list-description = Ceci est une liste de tous les articles de votre organisation.
+item-list-code = Code
+item-list-name = Nom
+item-list-type = Type
+item-list-price = Prix
+item-list-add-item-button = Ajouter un article
+item-list-error-parse-items = Impossible d'analyser les articles : { $error }
+item-list-error-fetch-items = Impossible de récupérer les articles : { $status }
+item-edit-title = Modifier l'article
+item-add-title = Ajouter un article
+item-code-label = Code :
+item-name-label = Nom :
+item-description-label = Description :
+item-type-label = Type :
+item-uom-label = Unité de mesure :
+item-select-uom = Sélectionner une unité de mesure
+item-price-label = Prix :
+item-income-account-label = Compte de revenus :
+item-select-income-account = Sélectionner un compte de revenus
 
 # Security
 security-error-no-admin = Vous ne pouvez pas effectuer cette action. Au moins un administrateur de la sécurité doit rester.

@@ -8,6 +8,7 @@
 
 use chrono::NaiveDate;
 use fluent::fluent_args;
+use rust_decimal::dec;
 use shared_core::{
     i18n::format_currency_icu_typ,
     ledger::dtos::general_ledger_line::GeneralLedgerLine,
@@ -76,25 +77,27 @@ pub(crate) fn generate_general_ledger_typst(
     let mut grouped = std::collections::BTreeMap::new();
     for line in lines {
         grouped
-            .entry(line.account_name.clone())
+            .entry(line.code.clone())
             .or_insert_with(Vec::new)
             .push(line.clone());
     }
 
-    for (account_name, account_lines) in grouped {
-        typst_content.push_str(&format!(
-            "text(weight: \"bold\", size: 1.2em)[{}], [], [], [],\n",
-            account_name
-        ));
-        typst_content.push_str(" [],  [], [], [],\n");
+    for (_account_name, account_lines) in grouped {
 
-        for entry in account_lines {
-            let debit = if entry.debit > 0 {
+        account_lines.iter().enumerate().for_each(|(index, entry)|  {
+            if index == 0 {
+                typst_content.push_str(&format!(
+                    "text(weight: \"bold\", size: 1.2em)[{}], [], [], [],\n",
+                    entry.account_name
+                ));
+                typst_content.push_str(" [],  [], [], [],\n");
+            }
+            let debit = if entry.debit > dec!(0.00) {
                 format_currency_icu_typ(entry.debit, Some(&user.locale))
             } else {
                 "".to_string()
             };
-            let credit = if entry.credit > 0 {
+            let credit = if entry.credit > dec!(0.00) {
                 format_currency_icu_typ(entry.credit, Some(&user.locale))
             } else {
                 "".to_string()
@@ -106,7 +109,7 @@ pub(crate) fn generate_general_ledger_typst(
                 debit,
                 credit
             ));
-        }
+        });
         typst_content.push_str(" [],  [], [], [],\n");
     }
 

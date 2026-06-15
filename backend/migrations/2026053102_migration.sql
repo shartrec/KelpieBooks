@@ -66,18 +66,18 @@ CREATE TABLE users
 -- Chart of Accounts
 -- =============================================================================
 
-CREATE TYPE account_category AS ENUM ('Asset', 'Liability', 'Equity', 'Revenue', 'Expense');
+CREATE TYPE account_category AS ENUM ('asset', 'liability', 'equity', 'revenue', 'expense');
 
 CREATE TYPE system_tag AS ENUM (
-    'CashAtBank',
-    'AccountsReceivable',
-    'AccountsPayable',
-    'RetainedEarnings',
-    'SalesTaxPayable',
-    'SalesTaxClearing',
-    'Revenue',
-    'Expense',
-    'CostOfGoodsSold'
+    'cash_at_bank',
+    'accounts_receivable',
+    'accounts_payable',
+    'retained_earnings',
+    'sales_tax_payable',
+    'sales_tax_clearing',
+    'revenue',
+    'expense',
+    'cost_of_goods_sold'
     );
 
 CREATE TABLE accounts
@@ -131,9 +131,8 @@ CREATE TABLE journal_entries
     transaction_id UUID   NOT NULL REFERENCES transactions (id) ON DELETE CASCADE,
     account_id     UUID   NOT NULL REFERENCES accounts (id),
 
-    -- Amount in cents.
-    debit          BIGINT NOT NULL  DEFAULT 0,
-    credit         BIGINT NOT NULL  DEFAULT 0,
+    debit          NUMERIC(15,4) NOT NULL  DEFAULT 0,
+    credit         NUMERIC(15,4) NOT NULL  DEFAULT 0,
 
     description    TEXT, -- Line-specific memo
     created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -151,7 +150,7 @@ CREATE INDEX idx_je_account ON journal_entries (account_id);
 -- =============================================================================
 -- 1. Partner Addresses Table (Supporting Multiple Locations)
 -- =============================================================================
-CREATE TYPE address_type AS ENUM ('Billing', 'Shipping', 'General');
+CREATE TYPE address_type AS ENUM ('billing', 'shipping', 'general');
 
 CREATE TABLE partners
 (
@@ -183,7 +182,7 @@ CREATE TABLE partner_addresses
     organization_id UUID            NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
     partner_id      UUID            NOT NULL REFERENCES partners (id) ON DELETE CASCADE,
 
-    address_type    address_type    NOT NULL DEFAULT 'General',
+    address_type    address_type    NOT NULL DEFAULT 'general',
     is_primary      BOOLEAN         NOT NULL DEFAULT FALSE,
 
     address_line1   TEXT            NOT NULL,
@@ -235,7 +234,7 @@ CREATE UNIQUE INDEX idx_partner_single_primary_contact
 -- =============================================================================
 -- 3. Accounts Payable: Vendor Invoices (Bills)
 -- =============================================================================
-CREATE TYPE invoice_status AS ENUM ('Open', 'Paid', 'PartiallyPaid', 'Void');
+CREATE TYPE invoice_status AS ENUM ('open', 'paid', 'partially_paid', 'void');
 
 CREATE TABLE vendor_invoices
 (
@@ -247,16 +246,15 @@ CREATE TABLE vendor_invoices
     transaction_id  UUID                     REFERENCES transactions (id) ON DELETE SET NULL,
 
     invoice_number  TEXT            NOT NULL, -- The vendor's invoice number
-    status          invoice_status  NOT NULL DEFAULT 'Open',
+    status          invoice_status  NOT NULL DEFAULT 'open',
 
     issue_date      DATE            NOT NULL,
     due_date        DATE            NOT NULL,
 
-    -- Tracking monetary sums in cents (BIGINT to avoid float truncation bugs)
-    net_amount       BIGINT         NOT NULL, -- Net amount of the invoice
-    tax_amount       BIGINT         NOT NULL, -- Tax amount of the invoice
-    gross_amount     BIGINT         NOT NULL, -- Gross amount of the invoice
-    amount_remaining BIGINT         NOT NULL, -- Amount left to pay (for partial tracking)
+    net_amount       NUMERIC(15,4)         NOT NULL, -- Net amount of the invoice
+    tax_amount       NUMERIC(15,4)         NOT NULL, -- Tax amount of the invoice
+    gross_amount     NUMERIC(15,4)         NOT NULL, -- Gross amount of the invoice
+    amount_remaining NUMERIC(15,4)         NOT NULL, -- Amount left to pay (for partial tracking)
 
     notes           TEXT,
     created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
@@ -281,9 +279,9 @@ CREATE TABLE vendor_invoice_items
     account_id        UUID        NOT NULL REFERENCES accounts (id) ON DELETE RESTRICT,
 
     description       TEXT                 DEFAULT '',
-    net_amount        BIGINT      NOT NULL DEFAULT 0, -- Line amount before tax
-    tax_amount        BIGINT      NOT NULL DEFAULT 0, -- Tax applied to this specific line
-    total_amount      BIGINT      NOT NULL DEFAULT 0, -- Net + Tax
+    net_amount        NUMERIC(15,4)      NOT NULL DEFAULT 0, -- Line amount before tax
+    tax_amount        NUMERIC(15,4)      NOT NULL DEFAULT 0, -- Tax applied to this specific line
+    total_amount      NUMERIC(15,4)      NOT NULL DEFAULT 0, -- Net + Tax
 
     created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -304,7 +302,7 @@ CREATE TABLE vendor_payments
 
     payment_date       DATE         NOT NULL,
     paid_from_account  UUID         NOT NULL, -- Ledger Account paid from
-    amount             BIGINT       NOT NULL, -- Total payment size in cents
+    amount             NUMERIC(15,4)       NOT NULL, -- Total payment size in cents
     reference          TEXT,                     -- Check number or bank trace number
 
     created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW()
@@ -325,7 +323,7 @@ CREATE TABLE vendor_payment_allocations
     vendor_invoice_id UUID            NOT NULL REFERENCES vendor_invoices (id) ON DELETE CASCADE,
     vendor_payment_id UUID            NOT NULL REFERENCES vendor_payments (id) ON DELETE CASCADE,
 
-    allocated_amount  BIGINT          NOT NULL, -- How much of this payment went to this invoice
+    allocated_amount  NUMERIC(15,4)          NOT NULL, -- How much of this payment went to this invoice
     created_at        TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
 
     CONSTRAINT check_positive_allocation CHECK (allocated_amount > 0)
@@ -333,5 +331,3 @@ CREATE TABLE vendor_payment_allocations
 
 CREATE INDEX idx_allocations_invoice ON vendor_payment_allocations (vendor_invoice_id);
 CREATE INDEX idx_allocations_payment ON vendor_payment_allocations (vendor_payment_id);
-
-

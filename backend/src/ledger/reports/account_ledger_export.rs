@@ -7,6 +7,7 @@
  */
 use chrono::NaiveDate;
 use fluent::fluent_args;
+use rust_decimal::dec;
 use shared_core::ledger::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 use shared_core::core::models::organization::Organization;
 use crate::util::{
@@ -35,12 +36,12 @@ pub(crate) fn generate_ledger_csv(
     ));
 
     for entry in entries.iter() {
-        let debit = if entry.debit > 0 {
+        let debit = if entry.debit > dec!(0.00) {
             i18n.format_money(entry.debit)
         } else {
             "".to_string()
         };
-        let credit = if entry.credit > 0 {
+        let credit = if entry.credit > dec!(0.00) {
             i18n.format_money(entry.credit)
         } else {
             "".to_string()
@@ -82,12 +83,12 @@ pub(crate) fn generate_ledger_typst(
     ));
 
     for entry in entries.iter() {
-        let debit = if entry.debit > 0 {
+        let debit = if entry.debit > dec!(0.00) {
             i18n.format_money_typ(entry.debit)
         } else {
             "".to_string()
         };
-        let credit = if entry.credit > 0 {
+        let credit = if entry.credit > dec!(0.00) {
             i18n.format_money_typ(entry.credit)
         } else {
             "".to_string()

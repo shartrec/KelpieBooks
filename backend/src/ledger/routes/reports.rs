@@ -15,6 +15,7 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
+use rust_decimal::Decimal;
 use shared_core::ledger::dtos::{
     account_with_balance::AccountWithBalance,
     balance_sheet::BalanceSheet,
@@ -77,8 +78,8 @@ pub(crate) fn routes() -> Vec<Route> {
 async fn get_profit_loss(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseTransactions>,
-    start: String,
-    end: String,
+    start: &str,
+    end: &str,
 ) -> Result<Json<Vec<AccountWithBalance>>, ApiError> {
     let user = guard.0;
     let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
@@ -96,7 +97,7 @@ async fn get_profit_loss(
 async fn get_balance_sheet(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseTransactions>,
-    date: String,
+    date: &str,
 ) -> Result<Json<BalanceSheet>, ApiError> {
     let user = guard.0;
     let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
@@ -111,7 +112,7 @@ async fn get_balance_sheet(
 async fn get_trial_balance(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseTransactions>,
-    date: String,
+    date: &str,
 ) -> Result<Json<Vec<AccountWithBalance>>, ApiError> {
     let user = guard.0;
     let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
@@ -126,10 +127,10 @@ async fn get_trial_balance(
 async fn get_general_ledger(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseTransactions>,
-    start: String,
-    end: String,
-    accounts: Option<String>,
-    min_amount: Option<i64>,
+    start: &str,
+    end: &str,
+    accounts: Option<&str>,
+    min_amount: Option<Decimal>,
 ) -> Result<Json<Vec<GeneralLedgerLine>>, ApiError> {
     let user = guard.0;
     let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
@@ -159,8 +160,8 @@ async fn get_general_ledger(
 async fn export_trial_balance(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseTransactions>,
-    format: String,
-    date: String,
+    format: &str,
+    date: &str,
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
     let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
@@ -170,7 +171,7 @@ async fn export_trial_balance(
         report_service::get_trial_balance(&mut pool, user.organization_id, report_date).await?;
     let org = crate::core::db::organization::get(&mut pool, user.organization_id).await?;
 
-    let (content, content_type, filename) = match format.as_str() {
+    let (content, content_type, filename) = match format {
         "csv" => {
             let csv_data = generate_trial_balance_csv(&user, &accounts);
             (
@@ -197,9 +198,9 @@ async fn export_trial_balance(
 async fn export_profit_loss(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseTransactions>,
-    format: String,
-    start: String,
-    end: String,
+    format: &str,
+    start: &str,
+    end: &str,
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
     let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
@@ -212,7 +213,7 @@ async fn export_profit_loss(
             .await?;
     let org = crate::core::db::organization::get(&mut pool, user.organization_id).await?;
 
-    let (content, content_type, filename) = match format.as_str() {
+    let (content, content_type, filename) = match format {
         "csv" => {
             let csv_data = generate_profit_loss_csv(&user, &accounts);
             (
@@ -239,8 +240,8 @@ async fn export_profit_loss(
 async fn export_balance_sheet(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseTransactions>,
-    format: String,
-    date: String,
+    format: &str,
+    date: &str,
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
     let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
@@ -250,7 +251,7 @@ async fn export_balance_sheet(
         report_service::get_balance_sheet(&mut pool, user.organization_id, report_date).await?;
     let org = crate::core::db::organization::get(&mut pool, user.organization_id).await?;
 
-    let (content, content_type, filename) = match format.as_str() {
+    let (content, content_type, filename) = match format {
         "csv" => {
             let csv_data = generate_balance_sheet_csv(&user, &balance_sheet);
             (
@@ -277,11 +278,11 @@ async fn export_balance_sheet(
 async fn export_general_ledger(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseTransactions>,
-    format: String,
-    start: String,
-    end: String,
-    accounts: Option<String>,
-    min_amount: Option<i64>,
+    format: &str,
+    start: &str,
+    end: &str,
+    accounts: Option<&str>,
+    min_amount: Option<Decimal>,
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
     let i18n = LocaleContext::new(&user.locale);
@@ -320,7 +321,7 @@ async fn export_general_ledger(
     .await?;
     let org = crate::core::db::organization::get(&mut pool, user.organization_id).await?;
 
-    let (content, content_type, filename) = match format.as_str() {
+    let (content, content_type, filename) = match format {
         "csv" => {
             let csv_data = generate_general_ledger_csv(&user, &lines);
             (

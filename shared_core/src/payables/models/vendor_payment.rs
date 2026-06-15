@@ -11,6 +11,7 @@ use chrono::{
     NaiveDate,
     Utc,
 };
+use rust_decimal::Decimal;
 use serde::{
     Deserialize,
     Serialize,
@@ -28,7 +29,7 @@ pub struct VendorPayment {
 
     pub payment_date: NaiveDate,
     pub paid_from_account: Uuid, // e.g., "EFT", "Check", "Card"
-    pub amount: i64,             // Total paid value in cents
+    pub amount: Decimal,             // Total paid value in cents
     pub reference: Option<String>,
 
     pub created_at: DateTime<Utc>,

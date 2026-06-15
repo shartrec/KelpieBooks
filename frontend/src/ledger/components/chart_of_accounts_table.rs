@@ -319,7 +319,7 @@ pub fn chart_of_accounts_table() -> Html {
     html! {
         <>
             <div class="table-actions">
-                { if user_ctx.has_privilege(&SystemPrivilege::manage_accounts) {
+                { if user_ctx.has_privilege(&SystemPrivilege::ManageAccounts) {
                     html! {
                         <button onclick={on_add_click}>{ i18n.t("coa-add-account-button") }</button>
                     }

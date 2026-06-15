@@ -10,6 +10,7 @@ use std::collections::HashMap;
 
 use chrono::NaiveDate;
 use fluent::fluent_args;
+use rust_decimal::{dec, Decimal};
 use shared_core::ledger::{
     dtos::account_with_balance::AccountWithBalance,
     models::account_category::AccountCategory,
@@ -33,9 +34,9 @@ pub(crate) struct AccountNode {
 
 fn build_account_nodes(
     accounts: &[AccountWithBalance],
-) -> (Vec<AccountNode>, Vec<AccountNode>, i64) {
-    let mut revenue_total = 0;
-    let mut expense_total = 0;
+) -> (Vec<AccountNode>, Vec<AccountNode>, Decimal) {
+    let mut revenue_total = dec!(0.00);
+    let mut expense_total = dec!(0.00);
 
     let mut acc_map: HashMap<Uuid, AccountWithBalance> = HashMap::new();
     let mut pc_map: HashMap<Uuid, Vec<Uuid>> = HashMap::new();

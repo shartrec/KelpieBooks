@@ -344,7 +344,7 @@ pub fn partner_list_table() -> Html {
     html! {
         <>
             <div class="table-actions">
-                { if user_ctx.has_privilege(&SystemPrivilege::manage_partners) {
+                { if user_ctx.has_privilege(&SystemPrivilege::ManagePartners) {
                     html! {
                         <button onclick={on_add_click}>{ i18n.t("partner-list-add-partner-button") }</button>
                     }

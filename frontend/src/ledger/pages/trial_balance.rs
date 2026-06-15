@@ -15,6 +15,7 @@ use std::{
 };
 
 use fluent::fluent_args;
+use rust_decimal::dec;
 use shared_core::ledger::{
     dtos::account_with_balance::AccountWithBalance,
     models::account_category::AccountCategory,
@@ -235,7 +236,7 @@ pub fn trial_balance_page() -> Html {
 
         let (debit_display, credit_display) = match node.account.category {
             AccountCategory::Asset | AccountCategory::Expense => {
-                if node.account.balance >= 0 {
+                if node.account.balance >= dec!(0.00) {
                     (i18n.format_currency(node.account.balance), "".to_string())
                 } else {
                     (
@@ -245,7 +246,7 @@ pub fn trial_balance_page() -> Html {
                 }
             }
             AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
-                if node.account.balance <= 0 {
+                if node.account.balance <= dec!(0.00) {
                     (
                         "".to_string(),
                         i18n.format_currency(node.account.balance.abs()),

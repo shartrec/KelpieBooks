@@ -150,7 +150,7 @@ pub(crate) async fn check_security_admin_remains(
             AND u.organization_id = $2
         "#,
     )
-    .bind(SystemPrivilege::security_admin)
+    .bind(SystemPrivilege::SecurityAdmin)
     .bind(org_id)
     .fetch_one(pool)
     .await

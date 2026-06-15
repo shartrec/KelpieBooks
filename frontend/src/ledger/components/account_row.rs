@@ -7,7 +7,7 @@
  */
 
 use std::collections::HashSet;
-
+use rust_decimal::dec;
 use shared_core::ledger::dtos::account_with_balance::AccountWithBalance;
 use uuid::Uuid;
 use yew::prelude::*;
@@ -77,7 +77,7 @@ pub fn account_row(props: &AccountRowProps) -> Html {
 
     let account_name_display = if props.node.account.is_group {
         html! { { &props.node.account.name } }
-    } else if user_ctx.has_privilege(&SystemPrivilege::use_transactions) {
+    } else if user_ctx.has_privilege(&SystemPrivilege::UseTransactions) {
         html! {
             <Link<Route> to={Route::AccountLedger { id: props.node.account.id }}>
                 { &props.node.account.name }
@@ -107,13 +107,13 @@ pub fn account_row(props: &AccountRowProps) -> Html {
                 <td style="text-align: right;">{ i18n.format_currency(props.node.account.balance) }</td>
                 <td class="table__col-actions">
                     <div class="actions-wrapper">
-                        { if user_ctx.has_privilege(&SystemPrivilege::manage_accounts) {
+                        { if user_ctx.has_privilege(&SystemPrivilege::ManageAccounts) {
                             html! {
                                 <>
                                     <button class="icon-button btn-action" onclick={on_edit_click}>
                                         <img src="/images/edit.svg" alt={i18n.t("common-edit")} />
                                     </button>
-                                    if !is_parent && props.node.account.balance == 0 {
+                                    if !is_parent && props.node.account.balance == dec!(0.00) {
                                         <button class="icon-button btn-action" onclick={on_delete_click}>
                                             <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
                                         </button>
