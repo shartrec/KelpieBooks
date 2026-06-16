@@ -10,6 +10,8 @@ use yew::prelude::*;
 use crate::core::components::layout::Layout;
 use crate::sales::components::item_list_table::ItemListTable;
 use crate::contexts::locale_context::use_locale;
+use crate::sales::contexts::item_filter_context::ItemFilterProvider;
+use crate::sales::components::item_filter::ItemFilter;
 
 #[function_component(ItemListPage)]
 pub fn item_list_page() -> Html {
@@ -17,13 +19,16 @@ pub fn item_list_page() -> Html {
 
     html! {
         <Layout>
-            <div class="item-list-container">
-                <header class="item-list-header-flex">
-                    <h1>{ i18n.t("item-list-title") }</h1>
-                </header>
-                <p>{ i18n.t("item-list-description") }</p>
+            <ItemFilterProvider>
+                <div class="report-header">
+                    <div>
+                    <h3>{ i18n.t("item-list-title") }</h3>
+                    { i18n.t("item-list-description") }
+                    </div>
+                    <ItemFilter />
+                </div>
                 <ItemListTable />
-            </div>
+            </ItemFilterProvider>
         </Layout>
     }
 }

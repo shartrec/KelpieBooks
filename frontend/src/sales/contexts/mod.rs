@@ -6,6 +6,4 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-pub mod components;
-pub mod contexts;
-pub mod pages;
+pub mod item_filter_context;

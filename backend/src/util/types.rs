@@ -20,6 +20,7 @@ use rocket::{
 };
 use shared_core::payables::models::invoice_status::InvoiceStatus;
 use uuid::Uuid;
+use shared_core::sales::models::item::ItemType;
 
 /// A newtype wrapper for `Uuid` to implement `FromParam` and satisfy the orphan rule.
 /// This allows Rocket to parse `Uuid` values from URL path segments.
@@ -71,6 +72,27 @@ impl<'r> FromFormField<'r> for FormInvoiceStatus {
         // The `from_str` comes from `strum::EnumString` on the InvoiceStatus enum
         match InvoiceStatus::from_str(field.value) {
             Ok(status) => Ok(FormInvoiceStatus(status)),
+            Err(_) => Err(form::Error::validation("Invalid invoice status.").into()),
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub(crate) struct FormItemType(pub(crate) ItemType);
+/// Allows `FormItemType` to be used as a `ItemType` via dereferencing.
+impl Deref for FormItemType {
+    type Target = ItemType;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromFormField<'r> for FormItemType {
+    fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
+        // The `from_str` comes from `strum::EnumString` on the ItemType enum
+        match ItemType::from_str(field.value) {
+            Ok(status) => Ok(FormItemType(status)),
             Err(_) => Err(form::Error::validation("Invalid invoice status.").into()),
         }
     }

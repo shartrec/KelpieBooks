@@ -6,6 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 pub mod edit_item_modal;
+pub mod item_filter;
 pub mod item_list_table;
 pub mod item_row;
 pub mod add_item_modal;

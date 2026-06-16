@@ -17,12 +17,14 @@ use crate::sales::components::item_row::ItemRow;
 use crate::sales::components::edit_item_modal::EditItemModal;
 use crate::sales::components::add_item_modal::AddItemModal;
 use shared_core::core::models::auth::SystemPrivilege;
+use crate::sales::contexts::item_filter_context::use_item_filter;
 
 #[function_component(ItemListTable)]
 pub fn item_list_table() -> Html {
     let user_ctx = use_user_context();
     let i18n = use_locale();
     let navigator = use_navigator().unwrap();
+    let filter_ctx = use_item_filter();
     let items = use_state(Vec::new);
     let error = use_state(|| None::<String>);
     let loading = use_state(|| true);
@@ -36,6 +38,7 @@ pub fn item_list_table() -> Html {
         let user_ctx = user_ctx.clone();
         let i18n = i18n.clone();
         let navigator = navigator.clone();
+        let filter_ctx = filter_ctx.clone();
         Callback::from(move |_: ()| {
             let items = items.clone();
             let error = error.clone();
@@ -43,9 +46,21 @@ pub fn item_list_table() -> Html {
             let user_ctx = user_ctx.clone();
             let i18n = i18n.clone();
             let navigator = navigator.clone();
+            let filter_ctx = filter_ctx.clone();
             loading.set(true);
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_items = Api::get("/api/sales/items", user_ctx, navigator).await;
+                let mut url = format!("/api/sales/items?limit={}", filter_ctx.limit);
+                if !filter_ctx.search_term.is_empty() {
+                    url.push_str(&format!("&search_term={}", filter_ctx.search_term));
+                }
+                if let Some(item_type) = &filter_ctx.item_type {
+                    url.push_str(&format!("&item_type={}", item_type));
+                }
+                if filter_ctx.include_inactive {
+                    url.push_str("&include_inactive=true");
+                }
+
+                let fetched_items = Api::get(&url, user_ctx, navigator).await;
                 loading.set(false);
                 match fetched_items {
                     Ok(response) if response.ok() => {
@@ -71,10 +86,18 @@ pub fn item_list_table() -> Html {
     };
 
     let fetch_items_clone = fetch_items.clone();
-    use_effect_with((), move |()| {
-        fetch_items_clone.emit(());
-        || ()
-    });
+    use_effect_with(
+        (
+            filter_ctx.search_term.clone(),
+            filter_ctx.item_type.clone(),
+            filter_ctx.include_inactive,
+            filter_ctx.limit,
+        ),
+        move |_| {
+            fetch_items_clone.emit(());
+            || ()
+        },
+    );
 
     let on_add_click = {
         let show_add_modal = show_add_modal.clone();

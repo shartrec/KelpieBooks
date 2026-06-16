@@ -5,7 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use rust_decimal::{dec, Decimal};
+use rust_decimal::Decimal;
 use yew::prelude::*;
 use shared_core::sales::models::item::{Item, UnitOfMeasure, ItemType};
 use uuid::Uuid;

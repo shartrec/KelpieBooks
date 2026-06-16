@@ -7,7 +7,7 @@
  */
 
 use rocket_db_pools::sqlx::{self, PgConnection};
-use shared_core::sales::models::item::{Item, UnitOfMeasure};
+use shared_core::sales::models::item::{Item, UnitOfMeasure, ItemType};
 use uuid::Uuid;
 use shared_core::sales::requests::item::CreateItemRequest;
 
@@ -21,11 +21,46 @@ pub(crate) async fn get_active_uoms(conn: &mut PgConnection, org_id: Uuid) -> Re
         .await
 }
 
-pub async fn all(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<Item>, sqlx::Error> {
-    sqlx::query_as::<_, Item>("SELECT * FROM items WHERE organization_id = $1")
-        .bind(org_id)
-        .fetch_all(conn)
-        .await
+pub async fn all(
+    conn: &mut PgConnection,
+    org_id: Uuid,
+    search_term: Option<String>,
+    item_type: Option<ItemType>,
+    include_inactive: bool,
+    limit: u32,
+) -> Result<Vec<Item>, sqlx::Error> {
+    let mut query = "SELECT * FROM items WHERE organization_id = $1".to_string();
+    let mut i = 2;
+
+    if search_term.is_some() {
+        query.push_str(&format!(" AND (code ILIKE ${} OR name ILIKE ${})", i, i));
+        i += 1;
+    }
+
+    if item_type.is_some() {
+        query.push_str(&format!(" AND item_type = ${}", i));
+        i += 1;
+    }
+
+    if !include_inactive {
+        query.push_str(" AND is_active = true");
+    }
+
+    query.push_str(&format!(" LIMIT ${}", i));
+
+    let mut query_builder = sqlx::query_as::<_, Item>(&query).bind(org_id);
+
+    if let Some(term) = search_term {
+        query_builder = query_builder.bind(format!("%{}%", term));
+    }
+
+    if let Some(item_type) = item_type {
+        query_builder = query_builder.bind(item_type);
+    }
+
+    query_builder = query_builder.bind(limit as i32);
+
+    query_builder.fetch_all(conn).await
 }
 
 pub async fn get(conn: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<Option<Item>, sqlx::Error> {

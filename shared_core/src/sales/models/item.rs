@@ -8,9 +8,10 @@
 use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
+use strum::{Display, EnumString};
 use uuid::Uuid;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, EnumString, Display, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(
     feature = "backend",

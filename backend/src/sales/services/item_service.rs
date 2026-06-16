@@ -7,15 +7,22 @@
  */
 
 use rocket_db_pools::Connection;
-use shared_core::sales::models::item::Item;
+use shared_core::sales::models::item::{Item, ItemType};
 use uuid::Uuid;
 use crate::DbKelpie;
 use crate::sales::db::item as item_db;
 use crate::util::ApiError;
 use shared_core::sales::requests::item::CreateItemRequest;
 
-pub async fn get_items(pool: &mut Connection<DbKelpie>, org_id: Uuid) -> Result<Vec<Item>, sqlx::Error> {
-    item_db::all(pool, org_id).await
+pub async fn get_items(
+    pool: &mut Connection<DbKelpie>,
+    org_id: Uuid,
+    search_term: Option<String>,
+    item_type: Option<ItemType>,
+    include_inactive: bool,
+    limit: u32,
+) -> Result<Vec<Item>, sqlx::Error> {
+    item_db::all(pool, org_id, search_term, item_type, include_inactive, limit).await
 }
 
 pub async fn get_item(pool: &mut Connection<DbKelpie>, id: Uuid, org_id: Uuid) -> Result<Option<Item>, sqlx::Error> {

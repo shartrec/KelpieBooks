@@ -5,11 +5,10 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use rust_decimal::{dec, Decimal};
+use rust_decimal::Decimal;
 use yew::prelude::*;
 use shared_core::sales::models::item::{UnitOfMeasure, ItemType};
 use uuid::Uuid;
-use web_sys::console::info;
 use crate::api::Api;
 use crate::contexts::auth_context::use_user_context;
 use crate::contexts::locale_context::use_locale;

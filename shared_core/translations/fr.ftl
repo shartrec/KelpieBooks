@@ -112,6 +112,7 @@ common-items = Articles
 common-payments = Paiements
 common-save = Enregistrer
 common-toggle-password-visibility = Basculer la visibilité du mot de passe
+common-more = Plus+
 
 # Login Page
 login-help-text = Besoin d’aide ? Contactez votre administrateur.
@@ -667,6 +668,12 @@ item-select-tax-category = Sélectionner un catégorie fiscale
 item-income-account-label = Compte de revenus :
 item-select-income-account = Sélectionner un compte de revenus
 item-is-active-label = Est actif:
+item-filter-search-placeholder = Rechercher par code ou nom
+item-filter-all-types = Tous les types
+item-type-service = Service
+item-type-stocked = Stocké
+item-type-non-stocked = Non stocké
+item-filter-include-inactive = Inclure les inactifs
 
 # Security
 security-error-no-admin = Vous ne pouvez pas effectuer cette action. Au moins un administrateur de la sécurité doit rester.

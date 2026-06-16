@@ -109,6 +109,7 @@ common-items = Items
 common-payments = Payments
 common-save = Save
 common-toggle-password-visibility = Toggle password visibility
+common-more = More+
 
 # Login Page
 login-help-text = Need help? Contact your administrator.
@@ -665,6 +666,12 @@ item-select-tax-category = Select a tax category
 item-income-account-label = Income Account:
 item-select-income-account = Select an income account
 item-is-active-label = Is Active:
+item-filter-search-placeholder = Search by code or name
+item-filter-all-types = All types
+item-type-service = Service
+item-type-stocked = Stocked
+item-type-non-stocked = Non stocked
+item-filter-include-inactive = Include inactive
 
 # Security
 security-error-no-admin = You cannot perform this action. At least one Security Administrator must remain.

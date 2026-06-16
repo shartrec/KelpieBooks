@@ -9,14 +9,14 @@
 use rocket::{delete, get, post, put, routes, Route};
 use rocket::serde::json::Json;
 use rocket_db_pools::Connection;
-use shared_core::sales::models::item::Item;
+use shared_core::sales::models::item::{Item, ItemType};
 use uuid::Uuid;
 use crate::core::routes::security::AuthenticatedUser;
 use crate::DbKelpie;
 use crate::sales::services::item_service;
 use crate::security::{ManageSales, RequirePrivilege, UseSales};
 use crate::util::ApiError;
-use crate::util::types::PathUuid;
+use crate::util::types::{FormItemType, PathUuid};
 use shared_core::sales::requests::item::CreateItemRequest;
 
 pub(crate) fn routes() -> Vec<Route> {
@@ -29,13 +29,24 @@ pub(crate) fn routes() -> Vec<Route> {
     ]
 }
 
-#[get("/api/sales/items")]
+#[get("/api/sales/items?<search_term>&<item_type>&<include_inactive>&<limit>")]
 async fn get_items(
     mut pool: Connection<DbKelpie>,
     user: AuthenticatedUser,
+    search_term: Option<String>,
+    item_type: Option<FormItemType>,
+    include_inactive: Option<bool>,
+    limit: Option<u32>,
     _guard: RequirePrivilege<UseSales>,
 ) -> Result<Json<Vec<Item>>, ApiError> {
-    let items = item_service::get_items(&mut pool, user.organization_id).await?;
+    let items = item_service::get_items(
+        &mut pool,
+        user.organization_id,
+        search_term,
+        item_type.map(|it| *it),
+        include_inactive.unwrap_or(false),
+        limit.unwrap_or(20),
+    ).await?;
     Ok(Json(items))
 }
 
