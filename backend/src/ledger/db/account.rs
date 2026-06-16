@@ -8,7 +8,6 @@
 
 use std::{
     collections::HashMap,
-    str::FromStr,
 };
 
 use rocket_db_pools::sqlx::{

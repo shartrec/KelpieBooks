@@ -394,7 +394,7 @@ pub(crate) async fn get_general_ledger(
         WHERE t.organization_id = $1
           AND t.date >= $2
           AND t.date <= $3
-          AND a.category IN ('Revenue', 'Expense')
+          AND (a.category = $6 OR a.category = $7)
           AND (CARDINALITY($4::uuid[]) = 0 OR a.id = ANY($4))
           AND (je.debit >= $5 OR je.credit >= $5)
         ORDER BY a.code ASC, t.date ASC
@@ -405,6 +405,8 @@ pub(crate) async fn get_general_ledger(
     .bind(end_date)
     .bind(&account_ids)
     .bind(min_amount)
+    .bind(AccountCategory::Revenue)
+    .bind(AccountCategory::Expense)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
