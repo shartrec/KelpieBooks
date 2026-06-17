@@ -68,6 +68,7 @@ use shared_core::core::models::organization::Organization;
 use yew::prelude::*;
 use yew_router::prelude::*;
 use frontend::sales::pages::item_list::ItemListPage;
+use frontend::sales::pages::new_sales_invoice::NewSalesInvoicePage;
 use frontend::sales::pages::uom_list::UomListPage;
 use frontend::sales::pages::tax_category_list::TaxCategoryListPage;
 use shared_core::core::dtos::user_detail::AuthUserDetail;
@@ -190,6 +191,8 @@ fn switch(routes: Route) -> Html {
         Route::ItemList => html! { <ItemListPage /> },
         #[cfg(feature = "sales")]
         Route::UomList => html! { <UomListPage /> },
+        #[cfg(feature = "sales")]
+        Route::NewSalesInvoice => html! { <NewSalesInvoicePage /> },
         #[cfg(feature = "sales")]
         Route::TaxCategoryList => html! { <TaxCategoryListPage /> },
 

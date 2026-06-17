@@ -44,7 +44,7 @@ fn from_row_to_sales_invoice_line(row: &sqlx::postgres::PgRow) -> SalesInvoiceLi
         description: row.get("description"),
         quantity: row.get("quantity"),
         unit_price: row.get("unit_price"),
-        tax_rate_id: row.get("tax_rate_id"),
+        tax_category_id: row.get("tax_rate_id"),
         tax_amount: row.get("tax_amount"),
         line_total: row.get("line_total"),
         sort_order: row.get("sort_order"),
@@ -89,7 +89,7 @@ pub(crate) async fn insert_sales_invoice_line(
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         r#"
-        INSERT INTO sales_invoice_lines (organization_id, invoice_id, item_id, description, quantity, unit_price, tax_rate_id, tax_amount, line_total, sort_order)
+        INSERT INTO sales_invoice_lines (organization_id, invoice_id, item_id, description, quantity, unit_price, tax_category_id, tax_amount, line_total, sort_order)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         "#,
     )
@@ -99,7 +99,7 @@ pub(crate) async fn insert_sales_invoice_line(
     .bind(&line.description)
     .bind(line.quantity)
     .bind(line.unit_price)
-    .bind(line.tax_rate_id)
+    .bind(line.tax_category_id)
     .bind(line.tax_amount)
     .bind(line.line_total)
     .bind(line.sort_order)
@@ -146,7 +146,7 @@ pub(crate) async fn get_sales_invoice_with_lines(
 
         let line_rows = sqlx::query(
             r#"
-            SELECT id, invoice_id, item_id, description, quantity, unit_price, tax_rate_id, tax_amount, line_total, sort_order
+            SELECT id, invoice_id, item_id, description, quantity, unit_price, tax_category_id, tax_amount, line_total, sort_order
             FROM sales_invoice_lines
             WHERE invoice_id = $1
             "#,

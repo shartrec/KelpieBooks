@@ -8,3 +8,4 @@
 pub mod item_list;
 pub mod uom_list;
 pub mod tax_category_list;
+pub mod new_sales_invoice;

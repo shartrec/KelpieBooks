@@ -20,8 +20,8 @@ pub struct SalesInvoiceLine {
     pub description: String,
     pub quantity: Decimal,
     pub unit_price: Decimal,
-    pub tax_rate_id: Decimal,
+    pub tax_category_id: Option<Uuid>,
     pub tax_amount: Decimal,
     pub line_total: Decimal,
-    pub sort_order: Decimal,
+    pub sort_order: i32,
 }

@@ -86,6 +86,9 @@ pub enum Route {
     #[cfg(feature = "sales")]
     #[at("/tax-categories")]
     TaxCategoryList,
+    #[cfg(feature = "sales")]
+    #[at("/sales/new")]
+    NewSalesInvoice,
 
     // Not really a page, but it's a good example of a page that doesn't have a route
     #[at("/style-guide")]

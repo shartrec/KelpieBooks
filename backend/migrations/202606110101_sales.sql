@@ -97,7 +97,7 @@ CREATE TABLE sales_invoice_lines (
                                      description TEXT NOT NULL,         -- Copy from item, but editable by user per invoice
                                      quantity BIGINT NOT NULL DEFAULT 1.0000,
                                      unit_price NUMERIC(15,4) NOT NULL DEFAULT 0,
-                                     tax_rate_id UUID REFERENCES tax_rates(id) ON DELETE SET NULL,
+                                     tax_category_id UUID REFERENCES tax_categories(id) ON DELETE SET NULL,
                                      tax_amount NUMERIC(15,4) NOT NULL DEFAULT 0,
     -- Subtotals calculated automatically per line
                                      line_total NUMERIC(15,4) NOT NULL DEFAULT 0,

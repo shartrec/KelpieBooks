@@ -106,11 +106,14 @@ common-contacts = Contacts
 common-primary = Primary
 common-saved = Saved!
 common-items = Items
+common-item = Item
 common-payments = Payments
 common-save = Save
 common-toggle-password-visibility = Toggle password visibility
 common-more = More+
 common-present = Present
+common-quantity = Quantity
+common-price = Price
 
 # Login Page
 login-help-text = Need help? Contact your administrator.
@@ -642,6 +645,9 @@ role-modal-add-button = Add Role
 role-modal-save-button = Save Changes
 delete-role-confirm-title = Delete Role
 delete-role-confirm-message = Are you sure you want to delete the role: { $role }?
+
+#Sales
+sales-new-invoice = New Sales Invoice
 
 # Sales items
 item-list-title = Items

@@ -20,6 +20,7 @@ pub mod tax_category_row;
 pub mod add_tax_category_modal;
 pub mod edit_tax_category_modal;
 pub mod tax_category_drawer;
+pub mod sales_invoice_item_row;
 
 use shared_core::core::models::auth::SystemPrivilege;
 use crate::core::components::sidebar::SidebarModuleContribution;
@@ -33,6 +34,13 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
         privilege: Some(SystemPrivilege::UseSales),
         target_route: None,
         children: vec![
+            SidebarModuleContribution {
+                id: "sales-new-invoice",
+                label_key: "sales-new-invoice",
+                privilege: Some(SystemPrivilege::ManageSales),
+                target_route: Some(Route::NewSalesInvoice),
+                children: vec![],
+            },
             SidebarModuleContribution {
                 id: "sales-item-list",
                 label_key: "item-list-title",
