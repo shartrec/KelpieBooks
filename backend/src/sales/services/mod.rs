@@ -5,5 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
-pub(crate) mod item_service;
+pub mod item_service;
+pub mod tax_category_service;
+pub mod tax_rate_service;
+pub mod uom_service;

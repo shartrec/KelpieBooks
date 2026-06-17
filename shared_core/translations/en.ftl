@@ -110,6 +110,7 @@ common-payments = Payments
 common-save = Save
 common-toggle-password-visibility = Toggle password visibility
 common-more = More+
+common-present = Present
 
 # Login Page
 login-help-text = Need help? Contact your administrator.
@@ -622,8 +623,8 @@ delete-user-confirm-title = Delete User
 delete-user-confirm-message = Are you sure you want to delete the user: { $user }?
 
 # Roles Page
-roles-title = User Roles
-roles-list-description = This is a list of all the user roles in your organization.
+roles-title = Roles
+roles-list-description = This is a list of all the roles in your organization.
 roles-add-button = Add Role
 roles-header-name = Name
 roles-error-parse = Failed to parse roles: { $error }
@@ -659,22 +660,70 @@ item-name-label = Name:
 item-description-label = Description:
 item-type-label = Type:
 item-uom-label = Unit of Measure:
-item-select-uom = Select a UOM
+item-select-uom = Select a unit of measure
 item-price-label = Price:
-item-tax-category-label = Tax category:
+item-tax-category-label = Tax Category:
 item-select-tax-category = Select a tax category
 item-income-account-label = Income Account:
 item-select-income-account = Select an income account
 item-is-active-label = Is Active:
 item-filter-search-placeholder = Search by code or name
-item-filter-all-types = All types
+item-filter-all-types = All Types
 item-type-service = Service
 item-type-stocked = Stocked
-item-type-non-stocked = Non stocked
-item-filter-include-inactive = Include inactive
+item-type-non-stocked = Non-Stocked
+item-filter-include-inactive = Include Inactive
+uom-list-title = Units of Measure
+uom-list-description = This is a list of all the units of measure in your organization.
+uom-list-add-uom-button = Add Unit of Measure
+uom-list-code = Code
+uom-list-name = Name
+uom-list-is-active = Is Active
+uom-list-error-parse-uoms = Failed to parse units of measure: { $error }
+uom-list-error-fetch-uoms = Failed to fetch units of measure: { $status }
+uom-add-title = Add Unit of Measure
+uom-edit-title = Edit Unit of Measure
+uom-code-label = Code:
+uom-name-label = Name:
+uom-is-active-label = Is Active:
+uom-delete-title = Delete Unit of Measure
+uom-delete-confirm-message = Are you sure you want to delete the unit of measure: { $name }?
+uom-delete-error = Failed to delete unit of measure. It may be in use.
+tax-category-list-title = Tax Categories
+tax-category-list-description = This is a list of all the tax categories in your organization.
+tax-category-list-add-tax-category-button = Add Tax Category
+tax-category-list-name = Name
+tax-category-list-is-active = Is Active
+tax-category-list-error-parse-tax-categories = Failed to parse tax categories: { $error }
+tax-category-list-error-fetch-tax-categories = Failed to fetch tax categories: { $status }
+tax-category-add-title = Add Tax Category
+tax-category-edit-title = Edit Tax Category
+tax-category-name-label = Name:
+tax-category-description-label = Description:
+tax-category-is-active-label = Is Active:
+tax-category-delete-title = Delete Tax Category
+tax-category-delete-confirm-message = Are you sure you want to delete the tax category: { $name }?
+tax-category-delete-error = Failed to delete tax category. It may be in use.
+tax-category-row-manage-rates = Manage Rates
+
+# Tax Rate Drawer
+tax-rate-drawer-error-parse-rates = Failed to parse tax rates: { $error }
+tax-rate-drawer-error-fetch-rates = Failed to fetch tax rates: { $status }
+tax-rate-drawer-error-update-rates = Failed to update tax rates: { $status }
+tax-rate-drawer-add-rate-button = + Add Rate
+tax-rate-drawer-validity = Valid from { $from } to { $to }
+tax-rate-drawer-delete-rate-title = Delete Rate
+tax-rate-drawer-delete-rate-message = Are you sure you want to delete the rate: { $name }?
+
+# Tax Rate Edit Card
+tax-rate-edit-card-add-title = Add Rate
+tax-rate-edit-card-edit-title = Edit Rate
+tax-rate-edit-card-rate-label = Rate:
+tax-rate-edit-card-valid-from-label = Valid From:
+tax-rate-edit-card-valid-to-label = Valid To:
 
 # Security
-security-error-no-admin = You cannot perform this action. At least one Security Administrator must remain.
+security-error-no-admin = You cannot perform this action. At least one security administrator must remain.
 
 # Test keys
 test-key = Test Value

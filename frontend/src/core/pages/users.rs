@@ -164,7 +164,7 @@ pub fn users_page() -> Html {
                         fetch_users.emit(());
                     }
                     Ok(r) => {
-                        pages::set_error(error, i18n, r, "users-error-delete");
+                        pages::set_error(error, i18n, r, "users-error-add");
                     }
                     Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
@@ -208,7 +208,7 @@ pub fn users_page() -> Html {
                         fetch_users.emit(());
                     }
                     Ok(r) => {
-                        pages::set_error(error, i18n, r, "users-error-delete");
+                        pages::set_error(error, i18n, r, "users-error-update");
                     }
                     Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",

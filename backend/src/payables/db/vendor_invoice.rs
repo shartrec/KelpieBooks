@@ -6,8 +6,6 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use std::str::FromStr;
-
 use chrono::NaiveDate;
 use rocket_db_pools::sqlx::{
     self,

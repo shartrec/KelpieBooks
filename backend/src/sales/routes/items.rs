@@ -9,8 +9,7 @@
 use rocket::{delete, get, post, put, routes, Route};
 use rocket::serde::json::Json;
 use rocket_db_pools::Connection;
-use shared_core::sales::models::item::{Item, ItemType};
-use uuid::Uuid;
+use shared_core::sales::models::item::Item;
 use crate::core::routes::security::AuthenticatedUser;
 use crate::DbKelpie;
 use crate::sales::services::item_service;

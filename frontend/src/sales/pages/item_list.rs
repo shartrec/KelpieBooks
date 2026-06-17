@@ -22,7 +22,7 @@ pub fn item_list_page() -> Html {
             <ItemFilterProvider>
                 <div class="report-header">
                     <div>
-                    <h3>{ i18n.t("item-list-title") }</h3>
+                    <h1>{ i18n.t("item-list-title") }</h1>
                     { i18n.t("item-list-description") }
                     </div>
                     <ItemFilter />

@@ -45,6 +45,8 @@ static TRANSLATIONS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/translations");
 thread_local! {
     static DECIMAL_FORMATTER_CACHE: RefCell<HashMap<Locale, DecimalFormatter>> =
         RefCell::new(HashMap::new());
+    static PERCENT_FORMATTER_CACHE: RefCell<HashMap<Locale, DecimalFormatter>> =
+        RefCell::new(HashMap::new());
     static DATE_FORMATTER_CACHE: RefCell<HashMap<Locale, DateTimeFormatter<YMD>>> =
         RefCell::new(HashMap::new());
 }
@@ -272,6 +274,12 @@ impl I18n for I18nManager {
 /// Formats standard decimal into localized decimal strings.
 /// e.g., 123456 -> "1,234.56" (en-AU) or "1 234,56" (fr-FR)
 pub fn format_currency_icu(amount: Decimal, target_locale: Option<&str>) -> String {
+    format_decimal_icu(amount, target_locale)
+}
+
+/// Formats standard decimal into localized decimal strings.
+/// e.g., 123456 -> "1,234.56" (en-AU) or "1 234,56" (fr-FR)
+pub fn format_decimal_icu(amount: Decimal, target_locale: Option<&str>) -> String {
     let locale: Locale = target_locale
         .and_then(|l| l.parse().ok())
         .unwrap_or_else(|| I18N.default_locale.clone());
@@ -295,6 +303,14 @@ pub fn format_currency_icu(amount: Decimal, target_locale: Option<&str>) -> Stri
 
         formatter.format_to_string(&icu_decimal)
     })
+}
+
+pub fn format_percentage_icu(amount: Decimal, target_locale: Option<&str>) -> String {
+
+    // Todo Use ICU formatting when Notation formatting is no longer experimental
+    let s = format_decimal_icu(amount, target_locale);
+    format!("{}%", s)
+
 }
 
 /// Specialized wrapper for Typst reporting layouts

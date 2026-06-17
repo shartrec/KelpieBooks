@@ -29,7 +29,7 @@ impl Default for ItemType {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct UnitOfMeasure {
     pub id: Uuid,

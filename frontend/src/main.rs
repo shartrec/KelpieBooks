@@ -68,6 +68,8 @@ use shared_core::core::models::organization::Organization;
 use yew::prelude::*;
 use yew_router::prelude::*;
 use frontend::sales::pages::item_list::ItemListPage;
+use frontend::sales::pages::uom_list::UomListPage;
+use frontend::sales::pages::tax_category_list::TaxCategoryListPage;
 use shared_core::core::dtos::user_detail::AuthUserDetail;
 
 /// The component that contains the router and switches between pages.
@@ -186,6 +188,10 @@ fn switch(routes: Route) -> Html {
         Route::AgedPayables => html! { <AgedPayablesPage /> },
         #[cfg(feature = "sales")]
         Route::ItemList => html! { <ItemListPage /> },
+        #[cfg(feature = "sales")]
+        Route::UomList => html! { <UomListPage /> },
+        #[cfg(feature = "sales")]
+        Route::TaxCategoryList => html! { <TaxCategoryListPage /> },
 
         Route::StyleGuide => html! {<StyleGuide />},
     }

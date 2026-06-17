@@ -128,3 +128,11 @@ pub async fn delete(conn: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<u
         .await?;
     Ok(result.rows_affected())
 }
+
+pub async fn is_uom_in_use(conn: &mut PgConnection, uom_id: Uuid) -> Result<bool, sqlx::Error> {
+    let exists: bool = sqlx::query_scalar("SELECT EXISTS (SELECT 1 FROM items WHERE uom_id = $1)")
+        .bind(uom_id)
+        .fetch_one(conn)
+        .await?;
+    Ok(exists)
+}

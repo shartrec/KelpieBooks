@@ -6,7 +6,6 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use std::str::FromStr;
 
 use rocket_db_pools::sqlx::{
     self,
@@ -16,7 +15,6 @@ use rocket_db_pools::sqlx::{
 use shared_core::partners::{
     dtos::partner_list_item::PartnerListItem,
     models::{
-        address_type::AddressType,
         partner::Partner,
         partner_address::PartnerAddress,
         partner_contact::PartnerContact,

@@ -37,7 +37,7 @@ pub fn payables_ledger_page() -> Html {
         <Layout>
             <VendorInvoiceFilterProvider>
                 <div class="report-header">
-                    <h3>{ i18n.t("payables-ledger-title") }</h3>
+                    <h1>{ i18n.t("payables-ledger-title") }</h1>
                     <VendorInvoiceFilter />
                 </div>
                 <div class="table-actions">
