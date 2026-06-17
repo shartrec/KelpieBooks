@@ -5,8 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use crate::DbKelpie;
-use rocket_db_pools::{sqlx, Connection};
+use rocket_db_pools::sqlx;
 use shared_core::sales::models::tax::TaxRate;
 use sqlx::{Acquire, PgConnection};
 use uuid::Uuid;

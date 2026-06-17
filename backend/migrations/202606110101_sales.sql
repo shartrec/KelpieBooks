@@ -68,7 +68,7 @@ CREATE TABLE sales_invoices (
                                 id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
                                 organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
                                 invoice_number VARCHAR(50) NOT NULL UNIQUE, -- User-facing sequence ID (e.g., "INV-2026-001")
-                                customer_id UUID NOT NULL,                  -- Links to your Customers/Contacts table
+                                partner_id UUID NOT NULL REFERENCES partners(id),                  -- Links to your Customers/Contacts table
                                 status invoice_status NOT NULL DEFAULT 'open',
 
     -- Key Accounting Dates
@@ -86,7 +86,7 @@ CREATE TABLE sales_invoices (
 
 -- Indexing for standard A/R Aging reports ("Show me who is past due")
 CREATE INDEX idx_invoices_due_date_status ON sales_invoices(due_date, status);
-CREATE INDEX idx_invoices_customer ON sales_invoices(customer_id);
+CREATE INDEX idx_invoices_partner ON sales_invoices(partner_id);
 
 CREATE TABLE sales_invoice_lines (
                                      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

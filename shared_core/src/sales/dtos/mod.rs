@@ -5,4 +5,6 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+
+pub mod sales_invoice_list_item;
 pub mod item_payload;
