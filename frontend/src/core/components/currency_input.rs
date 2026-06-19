@@ -8,10 +8,10 @@
 use rust_decimal::{dec, Decimal};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
+use crate::contexts::locale_context::{use_locale, LocaleContext};
 
 #[derive(Properties, PartialEq)]
 pub struct DecimalInputProps {
-    pub value: Decimal, // amount
     pub on_change: Callback<Decimal>,
     #[prop_or_default]
     pub class: Classes,
@@ -19,13 +19,18 @@ pub struct DecimalInputProps {
     pub placeholder: String,
     #[prop_or_else(|| 2)]
     pub decimal_places: u32,
+    pub value: Decimal, // amount
+    #[prop_or_else(|| false)]
+    pub readonly: bool,
 }
 
 #[function_component(DecimalInput)]
 pub fn decimal_input(props: &DecimalInputProps) -> Html {
+    let i18n = use_locale();
+
     // Local string buffer to handle mid-typing states (like "22.")
     // that don't parse cleanly to Decimal yet.
-    let display_value = use_state(|| format_value(props.value));
+    let display_value = use_state(|| format_value(&i18n, props.value, props.decimal_places));
 
     // Sync local state if parent value changes externally (e.g. form reset)
     {
@@ -36,7 +41,7 @@ pub fn decimal_input(props: &DecimalInputProps) -> Html {
             // Only update if the parsed version of current display differs
             // from the new prop value to avoid overwriting the user's cursor.
             if parse_to_amount(&display_value, props_decimal_places) != Some(val) {
-                display_value.set(format_value(val));
+                display_value.set(format_value(&i18n, val, props_decimal_places));
             }
             || ()
         });
@@ -70,14 +75,15 @@ pub fn decimal_input(props: &DecimalInputProps) -> Html {
             class={classes!(props.class.clone(), "currency-input")}
             placeholder={props.placeholder.clone()}
             value={(*display_value).clone()}
+            readonly={props.readonly}
             {oninput}
         />
     }
 }
 
 // Logic helpers
-fn format_value(amount: Decimal) -> String {
-    amount.to_string()
+fn format_value(i18n: &LocaleContext, amount: Decimal, dp: u32) -> String {
+    i18n.format_decimal(amount.round_dp(dp))
 }
 
 fn parse_to_amount(s: &str, dp: u32) -> Option<Decimal> {

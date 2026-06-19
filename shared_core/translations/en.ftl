@@ -94,6 +94,7 @@ common-list = List
 common-aged = Aged
 common-net = Net
 common-tax = Tax
+common-tax-rate = Tax rate
 common-gross = Gross
 common-pay = Pay
 common-view = View
@@ -647,7 +648,20 @@ delete-role-confirm-title = Delete Role
 delete-role-confirm-message = Are you sure you want to delete the role: { $role }?
 
 #Sales
-sales-new-invoice = New Sales Invoice
+new-sales-invoice-title = New Sales Invoice
+new-sales-invoice-number-label = Invoice number
+new-sales-invoice-date-label = Date
+new-sales-invoice-due-date-label = Due Date
+new-sales-invoice-select-customer = Select Item
+new-sales-invoice-select-item = Select Item
+new-sales-invoice-add-line-button = + Add line
+new-sales-invoice-error-parse-items = Error parsing items
+new-sales-invoice-save-button = Save
+new-sales-invoice-success = Sales invoice { $number } was created successfully.
+new-sales-invoice-error-parse-response = Failed to parse created invoice: { $error }
+
+
+
 
 # Sales items
 item-list-title = Items

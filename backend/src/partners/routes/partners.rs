@@ -46,6 +46,7 @@ use crate::{
 pub(crate) fn routes() -> Vec<Route> {
     routes![
         get_partners,
+        search_partners,
         get_partner,
         get_partner_addresses,
         get_partner_contacts,
@@ -68,6 +69,17 @@ async fn get_partners(
 ) -> Result<Json<Vec<PartnerListItem>>, ApiError> {
     let user = guard.0;
     let partners = partner_service::get_partners(&mut pool, user.organization_id).await?;
+    Ok(Json(partners))
+}
+
+#[get("/api/partners/search?<term>")]
+async fn search_partners(
+    mut pool: Connection<DbKelpie>,
+    guard: RequirePrivilege<UsePartners>,
+    term: &str,
+) -> Result<Json<Vec<PartnerListItem>>, ApiError> {
+    let user = guard.0;
+    let partners = partner_service::search_partners(&mut pool, user.organization_id, term).await?;
     Ok(Json(partners))
 }
 

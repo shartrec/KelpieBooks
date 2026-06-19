@@ -6,6 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+use chrono::NaiveDate;
 use rocket::{delete, get, post, put, routes, Route};
 use rocket::serde::json::Json;
 use rocket_db_pools::Connection;
@@ -15,7 +16,7 @@ use crate::DbKelpie;
 use crate::sales::services::{tax_category_service, tax_rate_service};
 use crate::security::{ManageSales, RequirePrivilege, UseSales};
 use crate::util::ApiError;
-use crate::util::types::PathUuid;
+use crate::util::types::{PathDate, PathUuid};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -25,6 +26,7 @@ pub(crate) fn routes() -> Vec<Route> {
         update_tax_category,
         delete_tax_category,
         get_tax_rates_for_category,
+        get_current_tax_rate_for_category_route,
         update_tax_rates_for_category,
     ]
 }
@@ -89,7 +91,7 @@ async fn delete_tax_category(
     Ok("Tax Category deleted successfully.")
 }
 
-#[get("/api/tax-categories/<id>/rates")]
+#[get("/api/sales/tax-categories/<id>/rates")]
 async fn get_tax_rates_for_category(
     mut pool: Connection<DbKelpie>,
     id: PathUuid,
@@ -100,7 +102,20 @@ async fn get_tax_rates_for_category(
     Ok(Json(rates))
 }
 
-#[put("/api/tax-categories/<id>/rates", data = "<rates>")]
+#[get("/api/sales/tax-categories/<id>/current-rate?<effective_date>")]
+async fn get_current_tax_rate_for_category_route(
+    mut pool: Connection<DbKelpie>,
+    id: PathUuid,
+    user: AuthenticatedUser,
+    _guard: RequirePrivilege<UseSales>,
+    effective_date: Option<PathDate>,
+) -> Result<Json<Option<TaxRate>>, ApiError> {
+    let date = effective_date.map(|d| *d).unwrap_or_else(|| chrono::Local::now().naive_local().date());
+    let rate = tax_rate_service::get_current_tax_rate_for_category(&mut pool, *id, user.organization_id, date).await?;
+    Ok(Json(rate))
+}
+
+#[put("/api/sales/tax-categories/<id>/rates", data = "<rates>")]
 async fn update_tax_rates_for_category(
     mut pool: Connection<DbKelpie>,
     id: PathUuid,

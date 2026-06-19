@@ -36,7 +36,7 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
         children: vec![
             SidebarModuleContribution {
                 id: "sales-new-invoice",
-                label_key: "sales-new-invoice",
+                label_key: "new-sales-invoice-title",
                 privilege: Some(SystemPrivilege::ManageSales),
                 target_route: Some(Route::NewSalesInvoice),
                 children: vec![],

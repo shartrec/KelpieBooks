@@ -5,6 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use chrono::NaiveDate;
 use rocket_db_pools::sqlx;
 use shared_core::sales::models::tax::TaxRate;
 use sqlx::{Acquire, PgConnection};
@@ -20,12 +21,38 @@ pub async fn get_tax_rates_for_category(
         SELECT id, organization_id, tax_category_id, name, rate, liability_account_id, valid_from, valid_to
         FROM tax_rates
         WHERE tax_category_id = $1 AND organization_id = $2
+        ORDER BY valid_from DESC
         "#)
         .bind(category_id)
         .bind(organization_id)
         .fetch_all(conn)
         .await;
     rows
+}
+
+pub async fn get_current_tax_rate_for_category(
+    conn: &mut PgConnection,
+    category_id: Uuid,
+    organization_id: Uuid,
+    effective_date: NaiveDate,
+) -> Result<Option<TaxRate>, sqlx::Error> {
+    let row = sqlx::query_as(
+        r#"
+        SELECT id, organization_id, tax_category_id, name, rate, liability_account_id, valid_from, valid_to
+        FROM tax_rates
+        WHERE tax_category_id = $1
+          AND organization_id = $2
+          AND valid_from <= $3
+          AND (valid_to IS NULL OR valid_to >= $3)
+        ORDER BY valid_from DESC
+        LIMIT 1
+        "#)
+        .bind(category_id)
+        .bind(organization_id)
+        .bind(effective_date)
+        .fetch_optional(conn)
+        .await;
+    row
 }
 
 pub async fn update_tax_rates_for_category(

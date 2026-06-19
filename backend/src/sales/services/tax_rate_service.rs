@@ -5,6 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use chrono::NaiveDate;
 use rocket_db_pools::Connection;
 use shared_core::sales::models::tax::TaxRate;
 use uuid::Uuid;
@@ -19,6 +20,16 @@ pub async fn get_tax_rates_for_category(
 ) -> Result<Vec<TaxRate>, ApiError> {
     let rates = tax_rate::get_tax_rates_for_category(pool, category_id, organization_id).await?;
     Ok(rates)
+}
+
+pub async fn get_current_tax_rate_for_category(
+    pool: &mut Connection<DbKelpie>,
+    category_id: Uuid,
+    organization_id: Uuid,
+    effective_date: NaiveDate,
+) -> Result<Option<TaxRate>, ApiError> {
+    let rate = tax_rate::get_current_tax_rate_for_category(pool, category_id, organization_id, effective_date).await?;
+    Ok(rate)
 }
 
 pub async fn update_tax_rates_for_category(

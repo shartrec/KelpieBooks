@@ -23,7 +23,7 @@ use uuid::Uuid;
 fn from_row_to_sales_invoice(row: &sqlx::postgres::PgRow) -> SalesInvoice {
     SalesInvoice {
         id: row.get("id"),
-        org_id: row.get("org_id"),
+        org_id: row.get("organization_id"),
         partner_id: row.get("partner_id"),
         invoice_number: row.get("invoice_number"),
         issue_date: row.get("issue_date"),
@@ -41,11 +41,13 @@ fn from_row_to_sales_invoice_line(row: &sqlx::postgres::PgRow) -> SalesInvoiceLi
         id: row.get("id"),
         invoice_id: row.get("invoice_id"),
         item_id: row.get("item_id"),
+        name: row.get("name"),
         description: row.get("description"),
         quantity: row.get("quantity"),
         unit_price: row.get("unit_price"),
-        tax_category_id: row.get("tax_rate_id"),
+        tax_category_id: row.get("tax_category_id"),
         tax_amount: row.get("tax_amount"),
+        tax_rate: Decimal::ZERO,
         line_total: row.get("line_total"),
         sort_order: row.get("sort_order"),
     }
@@ -63,7 +65,7 @@ pub(crate) async fn create_draft_invoice(
         r#"
         INSERT INTO sales_invoices (organization_id, partner_id, invoice_number, issue_date, due_date, status, subtotal, tax_total, total_amount, amount_due)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-        RETURNING id, organization_id, partner_id, invoice_number, issue_date, due_date, status, subtotal, total_amount, amount_due
+        RETURNING id, organization_id, partner_id, invoice_number, issue_date, due_date, status, subtotal, tax_total, total_amount, amount_due
         "#,
     )
     .bind(org_id)
@@ -84,6 +86,7 @@ pub(crate) async fn create_draft_invoice(
 
 pub(crate) async fn insert_sales_invoice_line(
     pool: &mut PgConnection,
+    inv_id: Uuid,
     org_id: Uuid,
     line: &SalesInvoiceLine,
 ) -> Result<(), sqlx::Error> {
@@ -94,7 +97,7 @@ pub(crate) async fn insert_sales_invoice_line(
         "#,
     )
     .bind(org_id)
-    .bind(line.invoice_id)
+    .bind(inv_id)
     .bind(line.item_id)
     .bind(&line.description)
     .bind(line.quantity)
@@ -146,9 +149,10 @@ pub(crate) async fn get_sales_invoice_with_lines(
 
         let line_rows = sqlx::query(
             r#"
-            SELECT id, invoice_id, item_id, description, quantity, unit_price, tax_category_id, tax_amount, line_total, sort_order
-            FROM sales_invoice_lines
-            WHERE invoice_id = $1
+            SELECT sil.id, invoice_id, item_id, sil.description, quantity, sil.unit_price, sil.tax_category_id, tax_amount, line_total, sort_order
+            FROM sales_invoice_lines sil, items it
+            WHERE sil.item_id = it.id
+                AND invoice_id = $1
             "#,
         )
         .bind(id)

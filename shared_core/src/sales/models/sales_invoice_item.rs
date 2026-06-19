@@ -17,10 +17,12 @@ pub struct SalesInvoiceLine {
     pub id: Uuid,
     pub invoice_id: Uuid,
     pub item_id: Uuid,
+    pub name: String,
     pub description: String,
     pub quantity: Decimal,
     pub unit_price: Decimal,
     pub tax_category_id: Option<Uuid>,
+    pub tax_rate: Decimal, // Added tax_rate field
     pub tax_amount: Decimal,
     pub line_total: Decimal,
     pub sort_order: i32,

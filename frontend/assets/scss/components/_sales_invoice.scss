@@ -1,0 +1,254 @@
+/*!
+ * Copyright (c) 2026.
+ *
+ * This file is part of KelpieBooks. For terms of use, please see the file
+ * called LICENSE at the top level of the KelpieBooks source tree
+ *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
+ */
+
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.sale {
+  &__form {
+    width: 100%;
+    max-width: 1250px;
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    &__header {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    &__invoice {
+      width: 12rem;
+    }
+    &__totals {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1.5rem;
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f9fafb;
+      border-top: 1px solid #e5e7eb;
+      font-weight: bold;
+    }
+    &__balanced {
+      color: $color-success;
+      padding: 0 1rem;
+      border-radius: 4px;
+      background-color: #eafaf1;
+    }
+
+  }
+
+  &__entries {
+    display: grid;
+    gap: 5px;
+  }
+
+  &__entry-header {
+    display: grid;
+    grid-template-columns: 2fr 3fr 5rem 6rem 6rem 6rem 7rem 30px;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+    font-size: 0.9rem;
+    color: #576574;
+  }
+
+  &__entry-row {
+    display: grid;
+    grid-template-columns: 2fr 3fr 5rem 6rem 6rem 6rem 7rem 30px;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    input, select {
+      margin-bottom: 0;
+      padding: 6px 8px; /* More compact inputs */
+      width: 100%;
+    }
+  }
+}
+
+// Button configuration for primary transaction executions
+.btn-pay-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px; // Breathing room between the credit card icon and text label
+  background-color: #28a745; // Emerald Accounting Success green
+  color: #ffffff;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius, 4px);
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  &:hover:not(:disabled) {
+    background-color: #218838; // Rich dark emerald on cursor focus
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.97); // Tight physical press response
+  }
+
+  &:disabled {
+    background-color: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+
+    .btn-pay-icon {
+      filter: grayscale(100%);
+      opacity: 0.4;
+    }
+  }
+
+  // Micro SVG icon positioning inside button
+  .btn-pay-icon {
+    width: 13px;
+    height: 13px;
+    display: inline-flex;
+    align-items: center;
+    color: currentColor; // Automatically inherits text color transitions
+  }
+}
+
+.card-item-compact {
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--border-radius, 4px);
+  background-color: var(--background-color, #ffffff);
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  position: relative;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
+
+  &:hover {
+    border-color: var(--brand-dark, #333);
+  }
+
+  // Top Header: GL Account Label Left, Inline Actions Right
+  &__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.05);
+    padding-bottom: 0.25rem;
+    margin-bottom: 0.15rem;
+  }
+
+  &__account-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-color, #333);
+    padding: 1px 5px;
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+  }
+
+  // Main Split Layout Body
+  &__body {
+    display: grid;
+    grid-template-columns: 1fr auto; // Description takes left, financial stack takes right
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  &__desc {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-color, #333);
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
+  // Stacked Financial Figures (Right-Aligned)
+  &__financials {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  &__total {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-color, #000);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  &__sub-breakdown {
+    font-size: 0.72rem;
+    color: var(--text-color-light, #666);
+    margin: 0;
+    margin-top: 2px;
+  }
+}
+
+.payment-context-banner {
+  background-color: #f8fafc; // Soft, non-intrusive slate background
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--border-radius, 4px);
+  padding: 0.75rem 1rem;
+  //margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  &__vendor {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--brand-dark, #1e293b);
+    margin: 0;
+  }
+
+  &__details {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  // High-visibility structural financial metrics badges
+  .amount-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.75rem;
+
+    &--gross {
+      background-color: #e2e8f0;
+      color: #334155;
+    }
+
+    &--outstanding {
+      background-color: #fef3c7; // Amber warning warning field for variance
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+  }
+}

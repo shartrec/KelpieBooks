@@ -101,6 +101,45 @@ pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<Part
     .map(|row| row.map(|r| from_row_to_partner(&r)))
 }
 
+pub(crate) async fn search(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    term: &str,
+) -> Result<Vec<PartnerListItem>, sqlx::Error> {
+    sqlx::query(
+        r#"
+        SELECT
+            p.id,
+            p.legal_name,
+            p.trade_name,
+            p.is_vendor,
+            p.is_customer,
+            CASE
+                WHEN COUNT(vi.id) > 0 THEN FALSE
+                ELSE TRUE
+            END AS can_delete
+        FROM
+            partners p
+        LEFT JOIN
+            vendor_invoices vi ON p.id = vi.partner_id
+        WHERE
+            p.organization_id = $1
+            AND (p.legal_name ILIKE $2 OR p.trade_name ILIKE $2)
+        GROUP BY
+            p.id, p.legal_name
+        ORDER BY
+            p.legal_name
+        LIMIT 10
+        "#,
+    )
+    .bind(organization_id)
+    .bind(format!("%{}%", term))
+    .fetch_all(pool)
+    .await
+    .map(|rows| rows.iter().map(from_row_to_partner_list_item).collect())
+}
+
+
 pub(crate) async fn get_addresses(
     pool: &mut PgConnection,
     partner_id: Uuid,

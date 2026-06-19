@@ -234,7 +234,7 @@ CREATE UNIQUE INDEX idx_partner_single_primary_contact
 -- =============================================================================
 -- 3. Accounts Payable: Vendor Invoices (Bills)
 -- =============================================================================
-CREATE TYPE invoice_status AS ENUM ('open', 'paid', 'partially_paid', 'void');
+CREATE TYPE invoice_status AS ENUM ('draft', 'open', 'paid', 'partially_paid', 'void');
 
 CREATE TABLE vendor_invoices
 (

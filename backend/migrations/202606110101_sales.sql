@@ -64,6 +64,14 @@ CREATE TABLE items (
                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE organization_sequences (
+                                        org_id UUID NOT NULL,
+                                        document_type VARCHAR(50) NOT NULL, -- e.g., 'sales_invoice'
+                                        prefix VARCHAR(20) DEFAULT '',      -- e.g., 'INV-'
+                                        next_value INT NOT NULL DEFAULT 1000,
+                                        PRIMARY KEY (org_id, document_type)
+);
+
 CREATE TABLE sales_invoices (
                                 id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
                                 organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
