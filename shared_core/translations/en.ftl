@@ -2,6 +2,8 @@
 ## Fluent Translation File for KelpieBooks (en)
 ##
 
+## English is the master source for translation keys. Other languages should match this file layout
+
 # Privileges
 # Organization Administrator Role (Bootstrap)
 sys-privilege-security_admin-name = Organization Administrator
@@ -196,7 +198,6 @@ coa-error-add-account = Failed to add account: { $status }
 coa-error-update-account = Failed to update account: { $status }
 coa-error-not-found = Account not found
 coa-error-delete-account = Failed to delete account: { $status }
-
 
 # Add/Edit Account Modal
 account-modal-add-title = Add New Account
@@ -677,9 +678,6 @@ address-city = City
 address-region = State/Province/Region
 address-postal-code = Postal code
 address-country = Country
-
-
-
 
 # Sales items
 item-list-title = Items

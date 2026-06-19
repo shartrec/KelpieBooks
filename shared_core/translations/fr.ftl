@@ -9,14 +9,14 @@
 sys-privilege-security_admin-name = Administrateur de l'organisation
 sys-privilege-security_admin-description = Rôle d'administration racine avec un accès complet et non restreint à la configuration et à la modification des données de tout l'espace de l'entreprise.
 
-# Module Comptes
+# Accounts Module
 sys-privilege-use_accounts-name = Consulter les comptes
 sys-privilege-use_accounts-description = Permet de consulter le plan de comptes, de suivre l'historique des comptes opérationnels, les synthèses du grand livre et les soldes en temps réel.
 
 sys-privilege-manage_accounts-name = Gérer les comptes
 sys-privilege-manage_accounts-description = Permet de créer, de modifier les paramètres, de restructurer ou de désactiver des entrées dans le plan de comptes général.
 
-# Module Partenaires
+# Partners Module
 sys-privilege-use_partners-name = Consulter les partenaires
 sys-privilege-use_partners-description = Permet de consulter les profils, les coordonnées et l'historique des transactions des fournisseurs, clients et contreparties.
 
@@ -71,7 +71,6 @@ common-date = Date
 common-description = Description
 common-amount = Montant
 common-vendor = Fournisseur
-
 common-due-date = Date d’échéance
 common-loading = Chargement...
 common-toggle = Basculer
@@ -97,6 +96,7 @@ common-list = Liste
 common-aged = Ancienneté
 common-net = Net
 common-tax = Taxe
+common-tax-rate = Taux de taxe
 common-gross = Brut
 common-pay = Payer
 common-view = Voir
@@ -109,10 +109,14 @@ common-contacts = Contacts
 common-primary = Principal
 common-saved = Enregistré !
 common-items = Articles
+common-item = Article
 common-payments = Paiements
 common-save = Enregistrer
 common-toggle-password-visibility = Basculer la visibilité du mot de passe
 common-more = Plus+
+common-present = Présent
+common-quantity = Quantité
+common-price = Prix
 
 # Login Page
 login-help-text = Besoin d’aide ? Contactez votre administrateur.
@@ -644,6 +648,37 @@ role-modal-save-button = Enregistrer les modifications
 delete-role-confirm-title = Supprimer le rôle
 delete-role-confirm-message = Êtes-vous sûr de vouloir supprimer le rôle : { $role } ?
 
+# Sales Invoice — Create/Edit
+new-sales-invoice-title = Nouvelle facture de vente
+new-sales-invoice-number-label = Numéro de facture
+new-sales-invoice-date-label = Date
+new-sales-invoice-due-date-label = Date d’échéance
+new-sales-invoice-select-customer = Sélectionner le client
+new-sales-invoice-select-item = Sélectionner un article
+new-sales-invoice-add-line-button = + Ajouter une ligne
+new-sales-invoice-error-parse-items = Erreur lors de l’analyse des articles
+new-sales-invoice-save-button = Enregistrer
+new-sales-invoice-success = La facture de vente { $number } a été créée avec succès.
+new-sales-invoice-error-parse-response = Échec de l’analyse de la facture créée : { $error }
+
+# Sales Invoice — Addresses
+new-sales-invoice-billing-address = Adresse de facturation
+new-sales-invoice-select-billing = Sélectionner l'adresse de facturation
+new-sales-invoice-billing-override = Remplacer l'adresse de facturation
+new-sales-invoice-shipping-address = Adresse de livraison
+new-sales-invoice-select-shipping = Sélectionner l'adresse de livraison
+new-sales-invoice-shipping-override = Remplacer l'adresse de livraison
+
+# Address field labels/placeholders
+address-name = Nom
+address-attention = À l'attention de
+address-line1 = Adresse ligne 1
+address-line2 = Adresse ligne 2
+address-city = Ville
+address-region = État/Province/Région
+address-postal-code = Code postal
+address-country = Pays
+
 # Sales items
 item-list-title = Articles
 item-list-description = Ceci est une liste de tous les articles de votre organisation.
@@ -697,35 +732,31 @@ tax-category-list-name = Nom
 tax-category-list-is-active = Est actif
 tax-category-list-error-parse-tax-categories = Impossible d'analyser les catégories de taxes : { $error }
 tax-category-list-error-fetch-tax-categories = Impossible de récupérer les catégories de taxes : { $status }
+tax-category-add-title = Ajouter une catégorie de taxe
+tax-category-edit-title = Modifier la catégorie de taxe
+tax-category-name-label = Nom :
+tax-category-description-label = Description :
+tax-category-is-active-label = Est actif :
+tax-category-delete-title = Supprimer la catégorie de taxe
+tax-category-delete-confirm-message = Êtes-vous sûr de vouloir supprimer la catégorie de taxe : { $name } ?
+tax-category-delete-error = Impossible de supprimer la catégorie de taxe. Elle est peut-être utilisée.
+tax-category-row-manage-rates = Gérer les taux
 
-# Sales Invoice — Create/Edit
-new-sales-invoice-date-label = Date
-new-sales-invoice-due-date-label = Date d’échéance
-new-sales-invoice-select-customer = Sélectionner le client
-new-sales-invoice-select-item = Sélectionner un article
-new-sales-invoice-add-line-button = + Ajouter une ligne
-new-sales-invoice-error-parse-items = Erreur lors de l’analyse des articles
-new-sales-invoice-save-button = Enregistrer
-new-sales-invoice-success = La facture de vente { $number } a été créée avec succès.
-new-sales-invoice-error-parse-response = Échec de l’analyse de la facture créée : { $error }
+# Tiroir des taux de taxe
+tax-rate-drawer-error-parse-rates = Impossible d'analyser les taux de taxe : { $error }
+tax-rate-drawer-error-fetch-rates = Impossible de récupérer les taux de taxe : { $status }
+tax-rate-drawer-error-update-rates = Impossible de mettre à jour les taux de taxe : { $status }
+tax-rate-drawer-add-rate-button = + Ajouter un taux
+tax-rate-drawer-validity = Valide du { $from } au { $to }
+tax-rate-drawer-delete-rate-title = Supprimer le taux
+tax-rate-drawer-delete-rate-message = Êtes-vous sûr de vouloir supprimer le taux : { $name } ?
 
-# Sales Invoice — Addresses
-new-sales-invoice-billing-address = Adresse de facturation
-new-sales-invoice-select-billing = Sélectionner l'adresse de facturation
-new-sales-invoice-billing-override = Remplacer l'adresse de facturation
-new-sales-invoice-shipping-address = Adresse de livraison
-new-sales-invoice-select-shipping = Sélectionner l'adresse de livraison
-new-sales-invoice-shipping-override = Remplacer l'adresse de livraison
-
-# Address field labels/placeholders
-address-name = Nom
-address-attention = À l'attention de
-address-line1 = Adresse ligne 1
-address-line2 = Adresse ligne 2
-address-city = Ville
-address-region = État/Province/Région
-address-postal-code = Code postal
-address-country = Pays
+# Carte d'édition du taux de taxe
+tax-rate-edit-card-add-title = Ajouter un taux
+tax-rate-edit-card-edit-title = Modifier le taux
+tax-rate-edit-card-rate-label = Taux :
+tax-rate-edit-card-valid-from-label = Valide à partir du :
+tax-rate-edit-card-valid-to-label = Valide jusqu’au :
 
 # Security
 security-error-no-admin = Vous ne pouvez pas effectuer cette action. Au moins un administrateur de la sécurité doit rester.
