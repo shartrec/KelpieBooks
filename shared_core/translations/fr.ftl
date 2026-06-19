@@ -698,6 +698,35 @@ tax-category-list-is-active = Est actif
 tax-category-list-error-parse-tax-categories = Impossible d'analyser les catégories de taxes : { $error }
 tax-category-list-error-fetch-tax-categories = Impossible de récupérer les catégories de taxes : { $status }
 
+# Sales Invoice — Create/Edit
+new-sales-invoice-date-label = Date
+new-sales-invoice-due-date-label = Date d’échéance
+new-sales-invoice-select-customer = Sélectionner le client
+new-sales-invoice-select-item = Sélectionner un article
+new-sales-invoice-add-line-button = + Ajouter une ligne
+new-sales-invoice-error-parse-items = Erreur lors de l’analyse des articles
+new-sales-invoice-save-button = Enregistrer
+new-sales-invoice-success = La facture de vente { $number } a été créée avec succès.
+new-sales-invoice-error-parse-response = Échec de l’analyse de la facture créée : { $error }
+
+# Sales Invoice — Addresses
+new-sales-invoice-billing-address = Adresse de facturation
+new-sales-invoice-select-billing = Sélectionner l'adresse de facturation
+new-sales-invoice-billing-override = Remplacer l'adresse de facturation
+new-sales-invoice-shipping-address = Adresse de livraison
+new-sales-invoice-select-shipping = Sélectionner l'adresse de livraison
+new-sales-invoice-shipping-override = Remplacer l'adresse de livraison
+
+# Address field labels/placeholders
+address-name = Nom
+address-attention = À l'attention de
+address-line1 = Adresse ligne 1
+address-line2 = Adresse ligne 2
+address-city = Ville
+address-region = État/Province/Région
+address-postal-code = Code postal
+address-country = Pays
+
 # Security
 security-error-no-admin = Vous ne pouvez pas effectuer cette action. Au moins un administrateur de la sécurité doit rester.
 

@@ -660,6 +660,24 @@ new-sales-invoice-save-button = Save
 new-sales-invoice-success = Sales invoice { $number } was created successfully.
 new-sales-invoice-error-parse-response = Failed to parse created invoice: { $error }
 
+# Sales Invoice — Addresses
+new-sales-invoice-billing-address = Billing address
+new-sales-invoice-select-billing = Select billing address
+new-sales-invoice-billing-override = Billing address override
+new-sales-invoice-shipping-address = Shipping address
+new-sales-invoice-select-shipping = Select shipping address
+new-sales-invoice-shipping-override = Shipping address override
+
+# Address field labels/placeholders
+address-name = Name
+address-attention = Attention
+address-line1 = Address line 1
+address-line2 = Address line 2
+address-city = City
+address-region = State/Province/Region
+address-postal-code = Postal code
+address-country = Country
+
 
 
 

@@ -4,3 +4,4 @@ pub mod sales_invoice_item;
 
 pub mod item;
 pub mod tax;
+pub mod invoice_address;

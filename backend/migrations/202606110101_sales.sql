@@ -83,6 +83,30 @@ CREATE TABLE sales_invoices (
                                 issue_date DATE NOT NULL DEFAULT CURRENT_DATE,
                                 due_date DATE NOT NULL,
 
+    -- Addresses: selected saved IDs (optional) + immutable snapshots stored on the invoice
+                                billing_address_id UUID REFERENCES partner_addresses(id) ON DELETE SET NULL,
+                                shipping_address_id UUID REFERENCES partner_addresses(id) ON DELETE SET NULL,
+
+    -- Bill To snapshot
+                                bill_to_name TEXT,
+                                bill_to_attention TEXT,
+                                bill_to_line1 TEXT,
+                                bill_to_line2 TEXT,
+                                bill_to_city TEXT,
+                                bill_to_region TEXT,
+                                bill_to_postal_code TEXT,
+                                bill_to_country TEXT,
+
+    -- Ship To snapshot
+                                ship_to_name TEXT,
+                                ship_to_attention TEXT,
+                                ship_to_line1 TEXT,
+                                ship_to_line2 TEXT,
+                                ship_to_city TEXT,
+                                ship_to_region TEXT,
+                                ship_to_postal_code TEXT,
+                                ship_to_country TEXT,
+
     -- Financial Summary Fields (Denormalized slightly for fast reading)
                                 subtotal NUMERIC(15,4) NOT NULL DEFAULT 0,
                                 tax_total NUMERIC(15,4) NOT NULL DEFAULT 0,
@@ -95,6 +119,9 @@ CREATE TABLE sales_invoices (
 -- Indexing for standard A/R Aging reports ("Show me who is past due")
 CREATE INDEX idx_invoices_due_date_status ON sales_invoices(due_date, status);
 CREATE INDEX idx_invoices_partner ON sales_invoices(partner_id);
+-- Helpful when filtering by chosen address IDs
+CREATE INDEX idx_invoices_billing_address ON sales_invoices(billing_address_id);
+CREATE INDEX idx_invoices_shipping_address ON sales_invoices(shipping_address_id);
 
 CREATE TABLE sales_invoice_lines (
                                      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

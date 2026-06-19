@@ -60,11 +60,43 @@ pub(crate) async fn create_draft_invoice(
     invoice_number: &str,
     issue_date: NaiveDate,
     due_date: NaiveDate,
+    // New optional address references
+    billing_address_id: Option<Uuid>,
+    shipping_address_id: Option<Uuid>,
+    // Snapshot fields (all optional text)
+    bill_to_name: Option<&str>,
+    bill_to_attention: Option<&str>,
+    bill_to_line1: Option<&str>,
+    bill_to_line2: Option<&str>,
+    bill_to_city: Option<&str>,
+    bill_to_region: Option<&str>,
+    bill_to_postal_code: Option<&str>,
+    bill_to_country: Option<&str>,
+    ship_to_name: Option<&str>,
+    ship_to_attention: Option<&str>,
+    ship_to_line1: Option<&str>,
+    ship_to_line2: Option<&str>,
+    ship_to_city: Option<&str>,
+    ship_to_region: Option<&str>,
+    ship_to_postal_code: Option<&str>,
+    ship_to_country: Option<&str>,
 ) -> Result<SalesInvoice, sqlx::Error> {
     let row = sqlx::query(
         r#"
-        INSERT INTO sales_invoices (organization_id, partner_id, invoice_number, issue_date, due_date, status, subtotal, tax_total, total_amount, amount_due)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        INSERT INTO sales_invoices (
+            organization_id, partner_id, invoice_number, issue_date, due_date, status,
+            billing_address_id, shipping_address_id,
+            bill_to_name, bill_to_attention, bill_to_line1, bill_to_line2, bill_to_city, bill_to_region, bill_to_postal_code, bill_to_country,
+            ship_to_name, ship_to_attention, ship_to_line1, ship_to_line2, ship_to_city, ship_to_region, ship_to_postal_code, ship_to_country,
+            subtotal, tax_total, total_amount, amount_due
+        )
+        VALUES (
+            $1, $2, $3, $4, $5, $6,
+            $7, $8,
+            $9, $10, $11, $12, $13, $14, $15, $16,
+            $17, $18, $19, $20, $21, $22, $23, $24,
+            $25, $26, $27, $28
+        )
         RETURNING id, organization_id, partner_id, invoice_number, issue_date, due_date, status, subtotal, tax_total, total_amount, amount_due
         "#,
     )
@@ -74,6 +106,24 @@ pub(crate) async fn create_draft_invoice(
     .bind(issue_date)
     .bind(due_date)
     .bind(InvoiceStatus::Draft)
+    .bind(billing_address_id)
+    .bind(shipping_address_id)
+    .bind(bill_to_name)
+    .bind(bill_to_attention)
+    .bind(bill_to_line1)
+    .bind(bill_to_line2)
+    .bind(bill_to_city)
+    .bind(bill_to_region)
+    .bind(bill_to_postal_code)
+    .bind(bill_to_country)
+    .bind(ship_to_name)
+    .bind(ship_to_attention)
+    .bind(ship_to_line1)
+    .bind(ship_to_line2)
+    .bind(ship_to_city)
+    .bind(ship_to_region)
+    .bind(ship_to_postal_code)
+    .bind(ship_to_country)
     .bind(Decimal::ZERO)
     .bind(Decimal::ZERO)
     .bind(Decimal::ZERO)
