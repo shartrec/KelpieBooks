@@ -13,10 +13,13 @@ use rocket_db_pools::sqlx::{
     Row,
 };
 use rust_decimal::Decimal;
-use shared_core::sales::models::{
-    invoice_status::InvoiceStatus,
-    sales_invoice::SalesInvoice,
-    sales_invoice_item::SalesInvoiceLine,
+use shared_core::sales::{
+    dtos::sales_invoice_list_item::SalesInvoiceListItem,
+    models::{
+        invoice_status::InvoiceStatus,
+        sales_invoice::SalesInvoice,
+        sales_invoice_item::SalesInvoiceLine,
+    },
 };
 use uuid::Uuid;
 
@@ -241,4 +244,116 @@ pub(crate) async fn update_sales_invoice_totals(
     .execute(pool)
     .await?;
     Ok(())
+}
+
+fn from_row_to_sales_invoice_list_item(row: &sqlx::postgres::PgRow) -> SalesInvoiceListItem {
+    SalesInvoiceListItem {
+        id: row.get("id"),
+        partner_id: row.get("partner_id"),
+        partner_name: row.get("partner_name"),
+        invoice_number: row.get("invoice_number"),
+        status: row.get("status"),
+        issue_date: row.get("issue_date"),
+        due_date: row.get("due_date"),
+        // Map schema names to DTO expectations
+        net_amount: row.get("subtotal"),
+        tax_amount: row.get("tax_total"),
+        gross_amount: row.get("total_amount"),
+    }
+}
+
+pub(crate) async fn list_sales_invoices(
+    pool: &mut PgConnection,
+    org_id: Uuid,
+    start_date: Option<NaiveDate>,
+    end_date: Option<NaiveDate>,
+    partner_id: Option<Uuid>,
+    min_amount: Option<Decimal>,
+    statuses: Option<Vec<InvoiceStatus>>,
+) -> Result<Vec<SalesInvoiceListItem>, sqlx::Error> {
+    // Build dynamic WHERE clause
+    let mut conditions: Vec<String> = vec!["si.organization_id = $1".to_string()];
+    let mut binds: Vec<sqlx::types::Json<()>> = Vec::new(); // dummy to track indices; we'll bind manually below
+
+    // We'll keep a parallel Vec of bind closures is not possible; instead compute indices manually
+    // indices start after $1 (org_id)
+    let mut idx = 2;
+
+    if start_date.is_some() {
+        conditions.push(format!("si.issue_date >= ${}", idx));
+        idx += 1;
+    }
+    if end_date.is_some() {
+        conditions.push(format!("si.issue_date <= ${}", idx));
+        idx += 1;
+    }
+    if partner_id.is_some() {
+        conditions.push(format!("si.partner_id = ${}", idx));
+        idx += 1;
+    }
+    if min_amount.is_some() {
+        conditions.push(format!("si.total_amount >= ${}", idx));
+        idx += 1;
+    }
+    if let Some(sts) = statuses.as_ref() {
+        if !sts.is_empty() {
+            let or_clauses: Vec<String> = (0..sts.len())
+                .map(|_| {
+                    let clause = format!("vi.status = ${}", idx);
+                    idx += 1;
+                    clause
+                })
+                .collect();
+            conditions.push(format!(" AND ({})", or_clauses.join(" OR ")));
+        }
+    }
+
+    let where_sql = if conditions.is_empty() { String::new() } else { format!("WHERE {}", conditions.join(" AND ")) };
+
+    let base_sql = format!(
+        r#"
+        SELECT
+            si.id,
+            si.partner_id,
+            p.legal_name AS partner_name,
+            si.invoice_number,
+            si.status,
+            si.issue_date,
+            si.due_date,
+            si.subtotal,
+            si.tax_total,
+            si.total_amount
+        FROM sales_invoices si
+        JOIN partners p ON p.id = si.partner_id
+        {}
+        ORDER BY si.issue_date DESC, si.invoice_number DESC
+        "#,
+        where_sql
+    );
+
+    let mut query = sqlx::query(&base_sql).bind(org_id);
+    // Bind params in the same order as added
+    if let Some(sd) = start_date {
+        query = query.bind(sd);
+    }
+    if let Some(ed) = end_date {
+        query = query.bind(ed);
+    }
+    if let Some(pid) = partner_id {
+        query = query.bind(pid);
+    }
+    if let Some(mina) = min_amount {
+        query = query.bind(mina)
+    }
+    if let Some(sts) = statuses.as_ref() {
+        if !sts.is_empty() {
+            for status in sts {
+                query = query.bind(status);
+            }
+        }
+    }
+
+    let rows = query.fetch_all(&mut *pool).await?;
+    Ok(rows.iter().map(from_row_to_sales_invoice_list_item).collect())
+
 }

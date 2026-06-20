@@ -179,6 +179,9 @@ sidebar-users = Utilisateurs
 sidebar-roles = Rôles
 sidebar-sales = Ventes
 
+# Liste des factures de vente (Entrée barre latérale)
+sales-invoice-list = Factures de vente
+
 # Header
 header-toggle-menu-alt = Basculer le menu
 header-profile-alt = Profil
@@ -390,6 +393,10 @@ period-settings-current-lock = Verrouillage actuel :
 payables-ledger-title = Grand livre fournisseurs
 payables-ledger-new-invoice-button = + Nouvelle facture
 
+# Sales Ledger Page
+sales-ledger-title = Grand livre des ventes
+sales-ledger-new-invoice-button = + Nouvelle facture
+
 # Aged Trial Balance Matrix
 aged-trial-balance-current = Courant
 aged-trial-balance-1-30-days = 1-30 jours
@@ -411,10 +418,24 @@ vendor-invoice-filter-vendor-label = Fournisseur :
 vendor-invoice-filter-all-vendors = Tous les fournisseurs
 vendor-invoice-filter-min-amount-label = Montant minimum :
 
+# Sales Invoice Filter
+sales-invoice-filter-outstanding = Impayées
+sales-invoice-filter-fully-paid = Entièrement payées
+sales-invoice-filter-all-invoices = Toutes les factures
+sales-invoice-filter-from-label = De :
+sales-invoice-filter-to-label = À :
+sales-invoice-filter-customer-label = Client :
+sales-invoice-filter-all-customers = Tous les clients
+sales-invoice-filter-min-amount-label = Montant minimum :
+
 # Vendor Invoice Table
 vendor-invoice-table-invoice-number = Facture n°
 vendor-invoice-table-invoice-date = Date de facture
 vendor-invoice-table-balance-due = Solde dû
+
+# Sales Invoice Table
+sales-invoice-table-invoice-number = Facture n°
+sales-invoice-table-invoice-date = Date de facture
 
 # Vendor Invoice Table Error Messages
 vendor-invoice-table-error-parse-invoices = Impossible d’analyser les factures : { $error }
@@ -423,6 +444,10 @@ vendor-invoice-table-error-parse-partner = Impossible d’analyser le partenaire
 vendor-invoice-table-error-fetch-partner = Impossible de récupérer le partenaire : { $status }
 vendor-invoice-table-error-parse-invoice = Impossible d’analyser la facture : { $error }
 vendor-invoice-table-error-fetch-invoice = Impossible de récupérer la facture : { $status }
+
+# Sales Invoice Table Error Messages
+sales-invoice-table-error-parse-invoices = Impossible d’analyser les factures : { $error }
+sales-invoice-table-error-fetch-invoices = Impossible de récupérer les factures : { $status }
 
 # New Vendor Invoice Page
 new-vendor-invoice-title = Nouvelle facture fournisseur

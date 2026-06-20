@@ -7,9 +7,13 @@
  */
 
 use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use shared_core::sales::models::{
-    sales_invoice::SalesInvoice,
-    sales_invoice_item::SalesInvoiceLine,
+use shared_core::sales::{
+    dtos::sales_invoice_list_item::SalesInvoiceListItem,
+    models::{
+        invoice_status::InvoiceStatus,
+        sales_invoice::SalesInvoice,
+        sales_invoice_item::SalesInvoiceLine,
+    },
 };
 use sqlx::Acquire;
 use uuid::Uuid;
@@ -218,4 +222,26 @@ pub(crate) async fn get_sales_invoice(
     }
 
     Ok(invoice)
+}
+
+pub(crate) async fn get_sales_invoices(
+    pool: &mut PgConnection,
+    org_id: Uuid,
+    start_date: Option<chrono::NaiveDate>,
+    end_date: Option<chrono::NaiveDate>,
+    partner_id: Option<Uuid>,
+    min_amount: Option<rust_decimal::Decimal>,
+    statuses: Option<Vec<InvoiceStatus>>,
+) -> Result<Vec<SalesInvoiceListItem>, ApiError> {
+    let items = sales_invoice_db::list_sales_invoices(
+        pool,
+        org_id,
+        start_date,
+        end_date,
+        partner_id,
+        min_amount,
+        statuses,
+    )
+    .await?;
+    Ok(items)
 }

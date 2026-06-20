@@ -15,6 +15,7 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
+use rust_decimal::Decimal;
 use shared_core::sales::{
     models::{
         sales_invoice::SalesInvoice,
@@ -31,7 +32,7 @@ use crate::{
         UseSales,
     },
     util::{
-        types::PathUuid,
+        types::{PathDate, PathUuid, FormSalesInvoiceStatus},
         ApiError,
     },
     DbKelpie,
@@ -39,6 +40,7 @@ use crate::{
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
+        get_sales_invoices,
         get_sales_invoice,
         create_sales_invoice,
         update_sales_invoice_lines,
@@ -82,4 +84,28 @@ async fn update_sales_invoice_lines(
         sales_invoice_service::update_invoice_lines(&mut pool, user.organization_id, *id, &req)
             .await?;
     Ok(Json(updated_invoice))
+}
+
+#[get("/api/sales-invoices?<start_date>&<end_date>&<partner_id>&<min_amount>&<status>")]
+async fn get_sales_invoices(
+    mut pool: Connection<DbKelpie>,
+    guard: RequirePrivilege<UseSales>,
+    start_date: Option<PathDate>,
+    end_date: Option<PathDate>,
+    partner_id: Option<PathUuid>,
+    min_amount: Option<Decimal>,
+    status: Option<FormSalesInvoiceStatus>,
+) -> Result<Json<Vec<shared_core::sales::dtos::sales_invoice_list_item::SalesInvoiceListItem>>, ApiError> {
+    let user = guard.0;
+    let invoices = sales_invoice_service::get_sales_invoices(
+        &mut pool,
+        user.organization_id,
+        start_date.map(|d| *d),
+        end_date.map(|d| *d),
+        partner_id.map(|p| *p),
+        min_amount,
+        status.map(|s| vec![*s]),
+    )
+    .await?;
+    Ok(Json(invoices))
 }

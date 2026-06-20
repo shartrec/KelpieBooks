@@ -179,6 +179,9 @@ sidebar-users = Users
 sidebar-roles = Roles
 sidebar-sales = Sales
 
+# Sales invoice list
+sales-invoice-list = Sales Invoices
+
 # Header
 header-toggle-menu-alt = Toggle menu
 header-profile-alt = Profile
@@ -390,6 +393,10 @@ period-settings-current-lock = Current Lock:
 payables-ledger-title = Payables Ledger
 payables-ledger-new-invoice-button = + New Invoice
 
+# Sales Ledger Page
+sales-ledger-title = Sales Ledger
+sales-ledger-new-invoice-button = + New Invoice
+
 # Aged Trial Balance Matrix
 aged-trial-balance-current = Current
 aged-trial-balance-1-30-days = 1-30 Days
@@ -411,10 +418,24 @@ vendor-invoice-filter-vendor-label = Vendor:
 vendor-invoice-filter-all-vendors = All Vendors
 vendor-invoice-filter-min-amount-label = Min Amount:
 
+# Sales Invoice Filter
+sales-invoice-filter-outstanding = Outstanding
+sales-invoice-filter-fully-paid = Fully Paid
+sales-invoice-filter-all-invoices = All Invoices
+sales-invoice-filter-from-label = From:
+sales-invoice-filter-to-label = To:
+sales-invoice-filter-customer-label = Customer:
+sales-invoice-filter-all-customers = All Customers
+sales-invoice-filter-min-amount-label = Min Amount:
+
 # Vendor Invoice Table
 vendor-invoice-table-invoice-number = Invoice #
 vendor-invoice-table-invoice-date = Invoice Date
 vendor-invoice-table-balance-due = Balance Due
+
+# Sales Invoice Table
+sales-invoice-table-invoice-number = Invoice #
+sales-invoice-table-invoice-date = Invoice Date
 
 # Vendor Invoice Table Error Messages
 vendor-invoice-table-error-parse-invoices = Failed to parse invoices: { $error }
@@ -423,6 +444,10 @@ vendor-invoice-table-error-parse-partner = Failed to parse partner: { $error }
 vendor-invoice-table-error-fetch-partner = Failed to fetch partner: { $status }
 vendor-invoice-table-error-parse-invoice = Failed to parse invoice: { $error }
 vendor-invoice-table-error-fetch-invoice = Failed to fetch invoice: { $status }
+
+# Sales Invoice Table Error Messages
+sales-invoice-table-error-parse-invoices = Failed to parse invoices: { $error }
+sales-invoice-table-error-fetch-invoices = Failed to fetch invoices: { $status }
 
 # New Vendor Invoice Page
 new-vendor-invoice-title = New Vendor Invoice

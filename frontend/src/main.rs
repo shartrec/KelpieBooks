@@ -71,6 +71,7 @@ use frontend::sales::pages::item_list::ItemListPage;
 use frontend::sales::pages::new_sales_invoice::NewSalesInvoicePage;
 use frontend::sales::pages::uom_list::UomListPage;
 use frontend::sales::pages::tax_category_list::TaxCategoryListPage;
+use frontend::sales::pages::sales_ledger::SalesLedgerPage;
 use shared_core::core::dtos::user_detail::AuthUserDetail;
 
 /// The component that contains the router and switches between pages.
@@ -187,6 +188,8 @@ fn switch(routes: Route) -> Html {
         Route::NewVendorInvoice => html! { <NewVendorInvoicePage /> },
         #[cfg(feature = "payables")]
         Route::AgedPayables => html! { <AgedPayablesPage /> },
+        #[cfg(feature = "sales")]
+        Route::SalesLedger => html! { <SalesLedgerPage /> },
         #[cfg(feature = "sales")]
         Route::ItemList => html! { <ItemListPage /> },
         #[cfg(feature = "sales")]
