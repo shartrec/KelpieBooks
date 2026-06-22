@@ -16,7 +16,7 @@ use yew_router::prelude::use_navigator;
 use shared_core::core::models::auth::SystemPrivilege;
 use crate::sales::components::tax_category_row::TaxCategoryRow;
 use crate::sales::components::add_tax_category_modal::AddTaxCategoryModal;
-use crate::core::components::generic_delete_confirmation_modal::GenericDeleteConfirmationModal;
+use crate::core::components::delete_confirmation_modal::DeleteConfirmationModal;
 use crate::sales::components::tax_category_drawer::tax_category_drawer::Tab;
 
 #[derive(Properties, PartialEq, Clone)]
@@ -165,7 +165,7 @@ pub fn tax_category_list_table(props: &TaxCategoryListTableProps) -> Html {
                 <AddTaxCategoryModal on_close={on_modal_close.clone()} on_submit={on_submit.clone()} />
             }
             if let Some(tax_category) = &*tax_category_to_delete {
-                <GenericDeleteConfirmationModal
+                <DeleteConfirmationModal
                     title={i18n.t("tax-category-delete-title")}
                     message={i18n.t_args("tax-category-delete-confirm-message", &fluent_args!["name" => tax_category.name.clone()])}
                     on_confirm={on_delete_confirm}

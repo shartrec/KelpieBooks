@@ -30,7 +30,6 @@ use crate::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
-    core::components::delete_confirmation_modal::DeleteConfirmationModal,
     ledger::components::{
         account_row::{
             AccountNode,
@@ -40,6 +39,7 @@ use crate::{
         edit_account_modal::EditAccountModal,
     },
 };
+use crate::core::components::delete_confirmation_modal::DeleteConfirmationModal;
 
 #[function_component(ChartOfAccountsTable)]
 pub fn chart_of_accounts_table() -> Html {
@@ -330,7 +330,15 @@ pub fn chart_of_accounts_table() -> Html {
 
             if *show_add_modal { <AddAccountModal on_close={on_modal_close.clone()} on_submit={on_add_submit} parent_accounts={parent_accounts} /> }
             if let Some(account) = &*account_to_edit { <EditAccountModal account={account.clone()} on_close={on_modal_close.clone()} on_submit={on_edit_submit} /> }
-            if let Some(account) = &*account_to_delete { <DeleteConfirmationModal account={account.clone()} on_close={on_modal_close.clone()} on_confirm={on_delete_confirm} /> }
+            if let Some(account) = &*account_to_delete {
+                <DeleteConfirmationModal
+                    title={i18n.t("common-confirm-deletion")}
+                    message={i18n.t_args("account-delete-confirm-message", &fluent_args!["name" => account.name.clone()])}
+                    warning={ i18n.t("account-delete-confirm-warning")  }
+                    on_cancel={on_modal_close.clone()}
+                    on_confirm={on_delete_confirm}
+
+            /> }
 
             <table class="table coa-table">
                 <thead>

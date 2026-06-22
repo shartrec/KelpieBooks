@@ -86,6 +86,7 @@ common-expand = Expand
 common-collapse = Collapse
 common-confirm-deletion = Confirm Deletion
 common-confirm-delete-button = Confirm Delete
+common-deletion-confirm-warning = This action cannot be undone.
 common-debit = Debit
 common-credit = Credit
 common-account = Account
@@ -223,8 +224,8 @@ account-category-revenue = Revenue
 account-category-expense = Expense
 
 # Delete Confirmation Modal
-delete-confirm-message = Are you sure you want to delete the account: { $name }?
-delete-confirm-warning = This action cannot be undone. You can only delete accounts with no transactions.
+account-delete-confirm-message = Are you sure you want to delete the account: { $name }?
+account-delete-confirm-warning = This action cannot be undone. You can only delete accounts with no transactions.
 
 # Account Ledger
 ledger-title = Ledger: { $name }
@@ -257,8 +258,8 @@ reversal-confirm-warning = This action cannot be undone.
 reversal-confirm-button = Confirm Reversal
 
 # Deletion Confirmation Modal
-deletion-confirm-title = Confirm Transaction Deletion
-deletion-confirm-warning = This action cannot be undone. Deleting this transaction will permanently remove it from your records.
+transaction-deletion-confirm-title = Confirm Transaction Deletion
+transaction-deletion-confirm-warning = This action cannot be undone. Deleting this transaction will permanently remove it from your records.
 
 # Transaction Error Messages
 transaction-error-parse = Failed to parse transaction: { $error }
@@ -419,6 +420,7 @@ vendor-invoice-filter-all-vendors = All Vendors
 vendor-invoice-filter-min-amount-label = Min Amount:
 
 # Sales Invoice Filter
+sales-invoice-filter-draft = Draft
 sales-invoice-filter-outstanding = Outstanding
 sales-invoice-filter-fully-paid = Fully Paid
 sales-invoice-filter-all-invoices = All Invoices
@@ -448,6 +450,10 @@ vendor-invoice-table-error-fetch-invoice = Failed to fetch invoice: { $status }
 # Sales Invoice Table Error Messages
 sales-invoice-table-error-parse-invoices = Failed to parse invoices: { $error }
 sales-invoice-table-error-fetch-invoices = Failed to fetch invoices: { $status }
+sales-invoice-table-error-parse-partner = Failed to parse partner: { $error }
+sales-invoice-table-error-fetch-partner = Failed to fetch partner: { $status }
+sales-invoice-table-error-parse-invoice = Failed to parse invoice: { $error }
+sales-invoice-table-error-fetch-invoice = Failed to fetch invoice: { $status }
 
 # New Vendor Invoice Page
 new-vendor-invoice-title = New Vendor Invoice
@@ -568,6 +574,9 @@ delete-contact-confirm-message = Are you sure you want to delete the contact: { 
 vendor-invoice-drawer-inv-number = Inv #: { $number }
 vendor-invoice-drawer-gross = Gross: { $amount }
 vendor-invoice-drawer-outstanding-balance = Outstanding Balance: { $amount }
+
+# Sales Invoice Drawer
+sales-invoice-drawer-inv-number = Inv #: { $number }
 
 # Details View
 details-view-error-update = Failed to update invoice: { $status }

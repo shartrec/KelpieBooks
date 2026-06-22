@@ -13,7 +13,6 @@ use crate::{
 };
 
 pub mod add_partner_modal;
-pub mod delete_partner_confirmation_modal;
 pub mod partner_drawer;
 pub mod partner_list_table;
 pub mod partner_row;

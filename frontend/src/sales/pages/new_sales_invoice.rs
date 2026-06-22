@@ -23,7 +23,7 @@ use shared_core::{
     sales::{
         models::sales_invoice::SalesInvoice,
         models::sales_invoice_item::SalesInvoiceLine,
-        requests::create_sales_invoice_request::CreateSalesInvoiceRequest,
+        requests::sales_invoice::CreateSalesInvoiceRequest,
     },
 };
 use shared_core::sales::models::invoice_address::InvoiceAddress;

@@ -17,7 +17,7 @@ use shared_core::core::models::auth::SystemPrivilege;
 use crate::sales::components::uom_row::UomRow;
 use crate::sales::components::add_uom_modal::AddUomModal;
 use crate::sales::components::edit_uom_modal::EditUomModal;
-use crate::core::components::generic_delete_confirmation_modal::GenericDeleteConfirmationModal;
+use crate::core::components::delete_confirmation_modal::DeleteConfirmationModal;
 
 #[function_component(UomListTable)]
 pub fn uom_list_table() -> Html {
@@ -206,7 +206,7 @@ pub fn uom_list_table() -> Html {
                 <EditUomModal uom={uom.clone()} on_close={on_modal_close.clone()} on_submit={on_submit.clone()} />
             }
             if let Some(uom) = &*uom_to_delete {
-                <GenericDeleteConfirmationModal
+                <DeleteConfirmationModal
                     title={i18n.t("uom-delete-title")}
                     message={i18n.t_args("uom-delete-confirm-message", &fluent_args!["name" => uom.name.clone()])}
                     on_confirm={on_delete_confirm}

@@ -34,11 +34,11 @@ use crate::{
     },
     partners::components::{
         add_partner_modal::AddPartnerModal,
-        delete_partner_confirmation_modal::DeletePartnerConfirmationModal,
         partner_drawer::PartnerDrawer,
         partner_row::PartnerRow,
     },
 };
+use crate::core::components::delete_confirmation_modal::DeleteConfirmationModal;
 
 #[function_component(PartnerListTable)]
 pub fn partner_list_table() -> Html {
@@ -373,9 +373,11 @@ pub fn partner_list_table() -> Html {
                 />
             }
             if let Some(partner) = &*partner_to_delete {
-                <DeletePartnerConfirmationModal
-                    partner={partner.clone()}
-                    on_close={on_modal_close.clone()}
+                <DeleteConfirmationModal
+                    title={i18n.t("common-confirm-deletion")}
+                    message={i18n.t_args("delete-partner-confirm-message", &fluent_args!["name" => partner.legal_name.clone()])}
+                    warning = {i18n.t("common-deletion-confirm-warning")}
+                    on_cancel={on_modal_close.clone()}
                     on_confirm={on_delete_confirm}
                 />
             }

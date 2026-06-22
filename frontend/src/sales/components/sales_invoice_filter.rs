@@ -112,6 +112,13 @@ pub fn sales_invoice_filter() -> Html {
                     <div class="filter-segmented-control">
                         <button
                             type="button"
+                            class={classes!("segment-trigger", (filter_ctx.status == PaymentStatusFilter::Draft).then_some("segment-trigger--active"))}
+                            onclick={let s = set_status.clone(); move |_| s.emit(PaymentStatusFilter::Draft)}
+                        >
+                            { i18n.t("sales-invoice-filter-draft") }
+                        </button>
+                        <button
+                            type="button"
                             class={classes!("segment-trigger", (filter_ctx.status == PaymentStatusFilter::Outstanding).then_some("segment-trigger--active"))}
                             onclick={let s = set_status.clone(); move |_| s.emit(PaymentStatusFilter::Outstanding)}
                         >

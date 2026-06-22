@@ -14,7 +14,6 @@ pub mod uom_list_table;
 pub mod uom_row;
 pub mod add_uom_modal;
 pub mod edit_uom_modal;
-pub mod delete_uom_confirmation_modal;
 pub mod tax_category_list_table;
 pub mod tax_category_row;
 pub mod add_tax_category_modal;
@@ -23,6 +22,7 @@ pub mod tax_category_drawer;
 pub mod sales_invoice_item_row;
 pub mod sales_invoice_filter;
 pub mod sales_invoice_table;
+pub mod sales_invoice_drawer;
 
 use shared_core::core::models::auth::SystemPrivilege;
 use crate::core::components::sidebar::SidebarModuleContribution;

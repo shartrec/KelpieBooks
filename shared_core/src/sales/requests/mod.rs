@@ -7,4 +7,4 @@
  */
 
 pub mod item;
-pub mod create_sales_invoice_request;
+pub mod sales_invoice;

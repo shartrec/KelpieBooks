@@ -27,7 +27,7 @@ use crate::{
     core::components::{
         add_user_modal::AddUserModal,
         edit_user_modal::EditUserModal,
-        generic_delete_confirmation_modal::GenericDeleteConfirmationModal,
+        delete_confirmation_modal::DeleteConfirmationModal,
         layout::Layout,
     },
     core::pages,
@@ -340,7 +340,7 @@ pub fn users_page() -> Html {
                 <EditUserModal user={user.clone()} roles={(*roles).clone()} on_close={on_edit_modal_close} on_submit={on_edit_modal_submit.clone()} />
             }
             if let Some(user) = &*user_to_delete {
-                <GenericDeleteConfirmationModal
+                <DeleteConfirmationModal
                     title={i18n.t("delete-user-confirm-title")}
                     message={i18n.t_args("delete-user-confirm-message", &fluent_args!["user" => user.full_name.clone()])}
                     on_confirm={on_delete_confirm_click.clone()}

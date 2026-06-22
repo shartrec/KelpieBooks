@@ -26,7 +26,7 @@ use crate::{
     core::components::{
         add_role_modal::AddRoleModal,
         edit_role_modal::EditRoleModal,
-        generic_delete_confirmation_modal::GenericDeleteConfirmationModal,
+        delete_confirmation_modal::DeleteConfirmationModal,
         layout::Layout,
     },
     core::pages,
@@ -288,7 +288,7 @@ pub fn roles_page() -> Html {
                 <EditRoleModal role={role.clone()} on_close={on_edit_modal_close} on_submit={on_edit_modal_submit.clone()} />
             }
             if let Some(role) = &*role_to_delete {
-                <GenericDeleteConfirmationModal
+                <DeleteConfirmationModal
                     title={i18n.t("delete-role-confirm-title")}
                     message={i18n.t_args("delete-role-confirm-message", &fluent_args!["role" => role.name.clone()])}
                     on_confirm={on_delete_confirm_click}

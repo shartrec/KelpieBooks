@@ -15,6 +15,7 @@ use yew::{html::ChildrenProps, prelude::*};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PaymentStatusFilter {
+    Draft,
     All,
     Outstanding,
     Paid,

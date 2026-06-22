@@ -21,9 +21,9 @@ use shared_core::sales::{
         sales_invoice::SalesInvoice,
         sales_invoice_item::SalesInvoiceLine,
     },
-    requests::create_sales_invoice_request,
+    requests::sales_invoice,
 };
-use shared_core::sales::requests::create_sales_invoice_request::CreateSalesInvoiceRequest;
+use shared_core::sales::requests::sales_invoice::CreateSalesInvoiceRequest;
 use crate::{
     sales::services::sales_invoice_service,
     security::{

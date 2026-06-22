@@ -17,7 +17,7 @@ use yew_router::prelude::use_navigator;
 use crate::{
     api::Api,
     contexts::{auth_context::use_user_context, locale_context::use_locale},
-    core::components::generic_delete_confirmation_modal::GenericDeleteConfirmationModal,
+    core::components::delete_confirmation_modal::DeleteConfirmationModal,
 };
 use crate::sales::components::tax_category_drawer::tax_rate_edit_card::TaxRateEditCard;
 
@@ -254,7 +254,7 @@ pub fn rates_view(props: &RatesViewProps) -> Html {
                 </div>
             </form>
             if let Some(rate) = &*rate_to_delete {
-                <GenericDeleteConfirmationModal
+                <DeleteConfirmationModal
                     title={i18n.t("tax-rate-drawer-delete-rate-title")}
                     message={i18n.t_args("tax-rate-drawer-delete-rate-message", &fluent_args!["name" => rate.name.clone()])}
                     on_confirm={on_delete_confirm}

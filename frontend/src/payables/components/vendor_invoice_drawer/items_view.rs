@@ -24,7 +24,7 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    core::components::generic_delete_confirmation_modal::GenericDeleteConfirmationModal,
+    core::components::delete_confirmation_modal::DeleteConfirmationModal,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
@@ -288,7 +288,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                 </form>
 
             if let Some(item) = &*item_to_delete {
-                <GenericDeleteConfirmationModal
+                <DeleteConfirmationModal
                     title={i18n.t("items-view-delete-item-title")}
                     message={i18n.t_args("items-view-delete-item-message", &fluent_args!["description" => item.description.clone()])}
                     on_confirm={on_delete_confirm}

@@ -29,3 +29,18 @@ pub struct CreateSalesInvoiceRequest {
     pub bill_to: InvoiceAddress,
     pub ship_to: InvoiceAddress,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateSalesInvoiceRequest {
+    pub id: Uuid,
+    pub issue_date: NaiveDate,
+    pub due_date: NaiveDate,
+
+    // // Optional references to saved partner addresses used to populate the snapshots
+    // pub billing_address_id: Option<Uuid>,
+    // pub shipping_address_id: Option<Uuid>,
+    //
+    // // Snapshots stored on the invoice (overridable by user per-invoice)
+    // pub bill_to: InvoiceAddress,
+    // pub ship_to: InvoiceAddress,
+}

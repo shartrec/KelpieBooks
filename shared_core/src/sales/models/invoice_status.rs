@@ -26,7 +26,7 @@ use strum::{
 )]
 pub enum InvoiceStatus {
     Draft,
-    Approved,
+    Open,
     Paid,
     Overdue,
 }

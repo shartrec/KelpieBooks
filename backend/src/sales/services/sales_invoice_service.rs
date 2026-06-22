@@ -22,7 +22,7 @@ use crate::{
     sales::db::sales_invoice as sales_invoice_db,
     util::ApiError,
 };
-use shared_core::sales::requests::create_sales_invoice_request::CreateSalesInvoiceRequest;
+use shared_core::sales::requests::sales_invoice::CreateSalesInvoiceRequest;
 use crate::core::db::sequences::get_next_invoice_number;
 use shared_core::sales::models::invoice_address::InvoiceAddress;
 

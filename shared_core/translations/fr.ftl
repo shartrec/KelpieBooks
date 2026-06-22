@@ -223,8 +223,8 @@ account-category-revenue = Produits
 account-category-expense = Charges
 
 # Delete Confirmation Modal
-delete-confirm-message = Êtes-vous sûr de vouloir supprimer le compte : { $name } ?
-delete-confirm-warning = Cette action est irréversible. Vous ne pouvez supprimer que les comptes sans transactions.
+account-delete-confirm-message = Êtes-vous sûr de vouloir supprimer le compte : { $name } ?
+account-delete-confirm-warning = Cette action est irréversible. Vous ne pouvez supprimer que les comptes sans transactions.
 
 # Account Ledger
 ledger-title = Grand livre : { $name }
@@ -419,6 +419,7 @@ vendor-invoice-filter-all-vendors = Tous les fournisseurs
 vendor-invoice-filter-min-amount-label = Montant minimum :
 
 # Sales Invoice Filter
+sales-invoice-filter-draft = Provisoire
 sales-invoice-filter-outstanding = Impayées
 sales-invoice-filter-fully-paid = Entièrement payées
 sales-invoice-filter-all-invoices = Toutes les factures
@@ -448,6 +449,10 @@ vendor-invoice-table-error-fetch-invoice = Impossible de récupérer la facture 
 # Sales Invoice Table Error Messages
 sales-invoice-table-error-parse-invoices = Impossible d’analyser les factures : { $error }
 sales-invoice-table-error-fetch-invoices = Impossible de récupérer les factures : { $status }
+sales-invoice-table-error-parse-partner = Impossible d’analyser le partenaire : { $error }
+sales-invoice-table-error-fetch-partner = Impossible d’analyser la facture : { $status }
+sales-invoice-table-error-parse-invoice = Impossible d’analyser le partenaire : { $error }
+sales-invoice-table-error-fetch-invoice = Impossible d’analyser la facture : { $status }
 
 # New Vendor Invoice Page
 new-vendor-invoice-title = Nouvelle facture fournisseur
@@ -568,6 +573,9 @@ delete-contact-confirm-message = Êtes-vous sûr de vouloir supprimer le contact
 vendor-invoice-drawer-inv-number = Facture n° : { $number }
 vendor-invoice-drawer-gross = Brut : { $amount }
 vendor-invoice-drawer-outstanding-balance = Solde impayé : { $amount }
+
+# Sales Invoice Drawer
+sales-invoice-drawer-inv-number = Facture n° : { $number }
 
 # Details View
 details-view-error-update = Impossible de mettre à jour la facture : { $status }

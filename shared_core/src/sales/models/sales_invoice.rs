@@ -20,6 +20,7 @@ use crate::sales::models::{
     invoice_status::InvoiceStatus,
     sales_invoice_item::SalesInvoiceLine,
 };
+use crate::sales::models::invoice_address::InvoiceAddress;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SalesInvoice {
@@ -33,6 +34,14 @@ pub struct SalesInvoice {
     pub subtotal: Decimal,
     pub tax_total: Decimal,
     pub total_amount: Decimal,
+    pub amount_due: Decimal,
+    // Optional references to saved partner addresses used to populate the snapshots
+    pub billing_address_id: Option<Uuid>,
+    pub shipping_address_id: Option<Uuid>,
+
+    // Snapshots stored on the invoice (overridable by user per-invoice)
+    pub bill_to: InvoiceAddress,
+    pub ship_to: InvoiceAddress,
     pub lines: Vec<SalesInvoiceLine>,
 }
 

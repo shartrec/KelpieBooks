@@ -30,6 +30,11 @@ fn from_row_to_sales_invoice(row: &sqlx::postgres::PgRow) -> SalesInvoice {
         partner_id: row.get("partner_id"),
         invoice_number: row.get("invoice_number"),
         issue_date: row.get("issue_date"),
+        amount_due: row.get("amount_due"),
+        bill_to: Default::default(),
+        billing_address_id: None,
+        ship_to: Default::default(),
+        shipping_address_id: None,
         due_date: row.get("due_date"),
         status: row.get("status"),
         subtotal: row.get("subtotal"),
@@ -202,7 +207,7 @@ pub(crate) async fn get_sales_invoice_with_lines(
 
         let line_rows = sqlx::query(
             r#"
-            SELECT sil.id, invoice_id, item_id, sil.description, quantity, sil.unit_price, sil.tax_category_id, tax_amount, line_total, sort_order
+            SELECT sil.id, invoice_id, item_id, it.name, sil.description, quantity, sil.unit_price, sil.tax_category_id, tax_amount, line_total, sort_order
             FROM sales_invoice_lines sil, items it
             WHERE sil.item_id = it.id
                 AND invoice_id = $1
@@ -299,12 +304,12 @@ pub(crate) async fn list_sales_invoices(
         if !sts.is_empty() {
             let or_clauses: Vec<String> = (0..sts.len())
                 .map(|_| {
-                    let clause = format!("vi.status = ${}", idx);
+                    let clause = format!("si.status = ${}", idx);
                     idx += 1;
                     clause
                 })
                 .collect();
-            conditions.push(format!(" AND ({})", or_clauses.join(" OR ")));
+            conditions.push(format!("({})", or_clauses.join(" OR ")));
         }
     }
 
@@ -322,7 +327,8 @@ pub(crate) async fn list_sales_invoices(
             si.due_date,
             si.subtotal,
             si.tax_total,
-            si.total_amount
+            si.total_amount,
+            si.amount_due
         FROM sales_invoices si
         JOIN partners p ON p.id = si.partner_id
         {}
