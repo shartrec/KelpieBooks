@@ -8,14 +8,21 @@
 use chrono::NaiveDate;
 use fluent::fluent_args;
 use gloo_timers::callback::Timeout;
+use shared_core::sales::{
+    models::sales_invoice::SalesInvoice,
+    requests::sales_invoice::UpdateSalesInvoiceRequest,
+};
 use web_sys::HtmlInputElement;
-use shared_core::sales::models::sales_invoice::SalesInvoice;
 use yew::prelude::*;
 use yew_router::hooks::use_navigator;
-use shared_core::sales::requests::sales_invoice::UpdateSalesInvoiceRequest;
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::use_locale;
+
+use crate::{
+    api::Api,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+};
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct DetailsViewProps {
@@ -33,20 +40,14 @@ pub fn details_view(props: &DetailsViewProps) -> Html {
         id: props.invoice.id,
         issue_date: props.invoice.issue_date,
         due_date: props.invoice.due_date,
+        billing_address_id: props.invoice.billing_address_id,
+        shipping_address_id: props.invoice.shipping_address_id,
+        bill_to: props.invoice.bill_to.clone(),
+        ship_to: props.invoice.ship_to.clone(),
     });
 
     let error = use_state(|| None::<String>);
     let show_saved = use_state(|| false);
-
-    let on_input = |field_updater: fn(&mut UpdateSalesInvoiceRequest, String)| {
-        let state = request.clone();
-        Callback::from(move |e: InputEvent| {
-            let mut info = (*state).clone();
-            let value = e.target_unchecked_into::<HtmlInputElement>().value();
-            field_updater(&mut info, value);
-            state.set(info);
-        })
-    };
 
     let on_date_change = |field_updater: fn(&mut UpdateSalesInvoiceRequest, NaiveDate)| {
         let state = request.clone();
@@ -84,7 +85,7 @@ pub fn details_view(props: &DetailsViewProps) -> Html {
                     user_ctx,
                     navigator,
                 )
-                    .await;
+                .await;
                 match resp {
                     Ok(r) if r.ok() => {
                         on_change.emit(());

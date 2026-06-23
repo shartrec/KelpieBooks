@@ -7,13 +7,23 @@
  */
 use sqlx::{PgConnection, Row};
 use uuid::Uuid;
+use strum::Display;
+use crate::util::ApiError;
 
-    /// Safely increments and formats the next sequential invoice number for an organization without gaps.
+#[derive(Display)]
+#[strum(serialize_all = "snake_case")]
+pub enum SeqType {
+    SalesInvoice
+}
+
+
+
+/// Safely increments and formats the next sequential invoice number for an organization without gaps.
 pub async fn get_next_invoice_number(
     conn: &mut PgConnection,
     org_id: Uuid,
-    key: &str
-) -> Result<String, sqlx::Error> {
+    key: &SeqType
+) -> Result<String, ApiError> {
     // 1. Lock ONLY this organization's invoice counter row to prevent race conditions
     let row = sqlx::query(
         r#"
@@ -23,7 +33,7 @@ pub async fn get_next_invoice_number(
         FOR UPDATE
         "#)
         .bind(org_id)
-        .bind(key)
+        .bind(key.to_string())
         .fetch_optional(&mut *conn)
         .await?;
 
@@ -39,7 +49,7 @@ pub async fn get_next_invoice_number(
                 r#"INSERT INTO organization_sequences
                     (org_id, document_type, next_value) VALUES ($1, $2, 1000) RETURNING prefix, next_value"#)
                 .bind(org_id)
-                .bind(key)
+                .bind(key.to_string())
                 .fetch_one(&mut *conn).await?;
             let p: String = row.get("prefix");
             let n: i32 = row.get("next_value");
@@ -48,18 +58,21 @@ pub async fn get_next_invoice_number(
     };
 
     // 3. Increment the counter state for the next generation request
-    sqlx::query(
+    let rows = sqlx::query(
         r#"
         UPDATE organization_sequences
         SET next_value = next_value + 1
-        WHERE org_id = $1 AND document_type = '$2'
+        WHERE org_id = $1 AND document_type = $2
         "#
     )
         .bind(org_id)
-        .bind(key)
-        .fetch_optional(&mut *conn)
+        .bind(key.to_string())
+        .execute(&mut *conn)
         .await?;
 
+    if rows.rows_affected() != 1 {
+        return Err(ApiError::Internal(format!("Next {} number generation failed", key.to_string())));
+    }
     // 4. Return a perfectly padded sequential tracking string (e.g., "INV-1000")
     Ok(format!("{}{}", prefix, current_val))
 }

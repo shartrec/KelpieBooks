@@ -22,8 +22,32 @@ use shared_core::sales::{
     },
 };
 use uuid::Uuid;
+use shared_core::sales::models::invoice_address::InvoiceAddress;
+use shared_core::sales::requests::sales_invoice::UpdateSalesInvoiceRequest;
 
 fn from_row_to_sales_invoice(row: &sqlx::postgres::PgRow) -> SalesInvoice {
+    let baddr = InvoiceAddress {
+        name: row.get("bill_to_name"),
+        attention: row.get("bill_to_attention"),
+        address_line1: row.get("bill_to_line1"),
+        address_line2: row.get("bill_to_line2"),
+        city: row.get("bill_to_city"),
+        state_province: row.get("bill_to_region"),
+        postal_code: row.get("bill_to_postal_code"),
+        country: row.get("bill_to_country"),
+    };
+    let saddr = InvoiceAddress {
+        name: row.get("ship_to_name"),
+        attention: row.get("ship_to_attention"),
+        address_line1: row.get("ship_to_line1"),
+        address_line2: row.get("ship_to_line2"),
+        city: row.get("ship_to_city"),
+        state_province: row.get("ship_to_region"),
+        postal_code: row.get("ship_to_postal_code"),
+        country: row.get("ship_to_country"),
+    };
+
+
     SalesInvoice {
         id: row.get("id"),
         org_id: row.get("organization_id"),
@@ -31,12 +55,13 @@ fn from_row_to_sales_invoice(row: &sqlx::postgres::PgRow) -> SalesInvoice {
         invoice_number: row.get("invoice_number"),
         issue_date: row.get("issue_date"),
         amount_due: row.get("amount_due"),
-        bill_to: Default::default(),
-        billing_address_id: None,
-        ship_to: Default::default(),
-        shipping_address_id: None,
         due_date: row.get("due_date"),
         status: row.get("status"),
+        billing_address_id: row.get("billing_address_id"),
+        shipping_address_id: row.get("shipping_address_id"),
+        bill_to: baddr,
+        ship_to: saddr,
+
         subtotal: row.get("subtotal"),
         tax_total: row.get("tax_total"),
         total_amount: row.get("total_amount"),
@@ -105,7 +130,11 @@ pub(crate) async fn create_draft_invoice(
             $17, $18, $19, $20, $21, $22, $23, $24,
             $25, $26, $27, $28
         )
-        RETURNING id, organization_id, partner_id, invoice_number, issue_date, due_date, status, subtotal, tax_total, total_amount, amount_due
+        RETURNING id, organization_id, partner_id, invoice_number, issue_date, due_date, status,
+            billing_address_id, shipping_address_id,
+            bill_to_name, bill_to_attention, bill_to_line1, bill_to_line2, bill_to_city, bill_to_region, bill_to_postal_code, bill_to_country,
+            ship_to_name, ship_to_attention, ship_to_line1, ship_to_line2, ship_to_city, ship_to_region, ship_to_postal_code, ship_to_country,
+            subtotal, tax_total, total_amount, amount_due
         "#,
     )
     .bind(org_id)
@@ -192,7 +221,11 @@ pub(crate) async fn get_sales_invoice_with_lines(
 ) -> Result<Option<SalesInvoice>, sqlx::Error> {
     let invoice_row = sqlx::query(
         r#"
-        SELECT id, organization_id, partner_id, invoice_number, issue_date, due_date, status, subtotal, tax_total, total_amount, amount_due
+        SELECT id, organization_id, partner_id, invoice_number, issue_date, due_date, status,
+            billing_address_id, shipping_address_id,
+            bill_to_name, bill_to_attention, bill_to_line1, bill_to_line2, bill_to_city, bill_to_region, bill_to_postal_code, bill_to_country,
+            ship_to_name, ship_to_attention, ship_to_line1, ship_to_line2, ship_to_city, ship_to_region, ship_to_postal_code, ship_to_country,
+            subtotal, tax_total, total_amount, amount_due
         FROM sales_invoices
         WHERE id = $1 AND organization_id = $2
         "#,
@@ -265,6 +298,66 @@ fn from_row_to_sales_invoice_list_item(row: &sqlx::postgres::PgRow) -> SalesInvo
         tax_amount: row.get("tax_total"),
         gross_amount: row.get("total_amount"),
     }
+}
+
+pub(crate) async fn update_sales_invoice(
+    executor: &mut sqlx::PgConnection,
+    org_id: Uuid,
+    req: &shared_core::sales::requests::sales_invoice::UpdateSalesInvoiceRequest,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        UPDATE sales_invoices
+        SET
+            issue_date = $1,
+            due_date = $2,
+            billing_address_id = $3,
+            shipping_address_id = $4,
+            bill_to_name = $5,
+            bill_to_attention = $6,
+            bill_to_line1 = $7,
+            bill_to_line2 = $8,
+            bill_to_city = $9,
+            bill_to_region = $10,
+            bill_to_postal_code = $11,
+            bill_to_country = $12,
+            ship_to_name = $13,
+            ship_to_attention = $14,
+            ship_to_line1 = $15,
+            ship_to_line2 = $16,
+            ship_to_city = $17,
+            ship_to_region = $18,
+            ship_to_postal_code = $19,
+            ship_to_country = $20
+        WHERE id = $21 AND organization_id = $22
+        "#
+    )
+        .bind(req.issue_date)
+        .bind(req.due_date)
+        .bind(req.billing_address_id)
+        .bind(req.shipping_address_id)
+        .bind(&req.bill_to.name)
+        .bind(&req.bill_to.attention)
+        .bind(&req.bill_to.address_line1)
+        .bind(&req.bill_to.address_line2)
+        .bind(&req.bill_to.city)
+        .bind(&req.bill_to.state_province)
+        .bind(&req.bill_to.postal_code)
+        .bind(&req.bill_to.country)
+        .bind(&req.ship_to.name)
+        .bind(&req.ship_to.attention)
+        .bind(&req.ship_to.address_line1)
+        .bind(&req.ship_to.address_line2)
+        .bind(&req.ship_to.city)
+        .bind(&req.ship_to.state_province)
+        .bind(&req.ship_to.postal_code)
+        .bind(&req.ship_to.country)
+        .bind(req.id)
+        .bind(org_id)
+        .execute(executor)
+        .await?;
+
+    Ok(())
 }
 
 pub(crate) async fn list_sales_invoices(

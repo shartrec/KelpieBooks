@@ -6,17 +6,27 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+pub mod address_edit_card;
+pub mod addresses_view;
 pub mod details_view;
 
 use fluent::fluent_args;
 use shared_core::{
     partners::models::partner::Partner,
-    sales::models::sales_invoice::SalesInvoice,
+    sales::models::{
+        invoice_address::AddressType,
+        sales_invoice::SalesInvoice,
+    },
 };
 use yew::prelude::*;
 
-use crate::contexts::locale_context::use_locale;
-use crate::sales::components::sales_invoice_drawer::details_view::DetailsView;
+use crate::{
+    contexts::locale_context::use_locale,
+    sales::components::sales_invoice_drawer::{
+        addresses_view::AddressesView,
+        details_view::DetailsView,
+    },
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SalesInvoiceDrawerTab {
@@ -57,6 +67,12 @@ pub fn sales_invoice_drawer(props: &SalesInvoiceDrawerProps) -> Html {
     let total_gross = props.invoice.total_amount;
     // Todo Fix balance remaining
     let balance_remaining = props.invoice.subtotal;
+
+    // Build the address objects
+    let addresses = vec![
+        (AddressType::Billing, props.invoice.bill_to.clone()),
+        (AddressType::Shipping, props.invoice.ship_to.clone()),
+    ];
 
     html! {
         <div class="drawer-overlay" onclick={on_close.clone()}>
@@ -118,8 +134,19 @@ pub fn sales_invoice_drawer(props: &SalesInvoiceDrawerProps) -> Html {
                 <div class="drawer__content">
                     {
                         match *active_tab {
-                            SalesInvoiceDrawerTab::General => html! { <DetailsView invoice={props.invoice.clone()} on_change={props.on_change.clone()} /> },
-                            SalesInvoiceDrawerTab::Addresses => html! { <p>{"Addresses go here"} </p> },
+                            SalesInvoiceDrawerTab::General => html! {
+                                <DetailsView
+                                    invoice={props.invoice.clone()}
+                                    on_change={props.on_change.clone()}
+                                />
+                            },
+                            SalesInvoiceDrawerTab::Addresses => html! {
+                                <AddressesView
+                                    addresses={addresses}
+                                    invoice_id={props.invoice.id.clone()}
+                                    on_change={props.on_change.clone()}
+                                />
+                            },
                             SalesInvoiceDrawerTab::Items => html! { <p>{"Items go here"} </p> },
                             SalesInvoiceDrawerTab::Payments => html! { <p>{"Payments go here"} </p> },
                         }

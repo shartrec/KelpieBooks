@@ -23,7 +23,7 @@ use shared_core::sales::{
     },
     requests::sales_invoice,
 };
-use shared_core::sales::requests::sales_invoice::CreateSalesInvoiceRequest;
+use shared_core::sales::requests::sales_invoice::{CreateSalesInvoiceRequest, UpdateSalesInvoiceRequest};
 use crate::{
     sales::services::sales_invoice_service,
     security::{
@@ -43,6 +43,7 @@ pub(crate) fn routes() -> Vec<Route> {
         get_sales_invoices,
         get_sales_invoice,
         create_sales_invoice,
+        update_sales_invoice,
         update_sales_invoice_lines,
     ]
 }
@@ -68,6 +69,20 @@ async fn create_sales_invoice(
     let user = guard.0;
     let new_invoice =
         sales_invoice_service::create_draft_invoice(&mut pool, user.organization_id, &req)
+            .await?;
+    Ok(Json(new_invoice))
+}
+
+#[put("/api/sales-invoices/<id>", data = "<req>")]
+async fn update_sales_invoice(
+    mut pool: Connection<DbKelpie>,
+    guard: RequirePrivilege<ManageSales>,
+    id: PathUuid,
+    req: Json<UpdateSalesInvoiceRequest>,
+) -> Result<Json<SalesInvoice>, ApiError> {
+    let user = guard.0;
+    let new_invoice =
+        sales_invoice_service::update_sales_invoice(&mut pool, user.organization_id, &req)
             .await?;
     Ok(Json(new_invoice))
 }

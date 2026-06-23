@@ -23,7 +23,7 @@ use crate::{
     util::ApiError,
 };
 use shared_core::sales::requests::sales_invoice::CreateSalesInvoiceRequest;
-use crate::core::db::sequences::get_next_invoice_number;
+use crate::core::db::sequences::{get_next_invoice_number, SeqType};
 use shared_core::sales::models::invoice_address::InvoiceAddress;
 
 pub(crate) async fn create_draft_invoice(
@@ -34,7 +34,7 @@ pub(crate) async fn create_draft_invoice(
     let mut tx = pool.begin().await?;
 
     // Get next invoice number
-    let inv_number =  get_next_invoice_number(&mut tx, org_id, "sales-invoice").await?;
+    let inv_number =  get_next_invoice_number(&mut tx, org_id, &SeqType::SalesInvoice).await?;
 
     // Resolve address snapshots: prefer provided snapshots; if empty and IDs provided, load from DB
     let resolve_snapshot = |
@@ -44,10 +44,10 @@ pub(crate) async fn create_draft_invoice(
         // Determine if snapshot is effectively empty (all fields None or empty strings)
         let is_empty = snap.name.as_deref().map_or(true, |s| s.trim().is_empty())
             && snap.attention.as_deref().map_or(true, |s| s.trim().is_empty())
-            && snap.line1.as_deref().map_or(true, |s| s.trim().is_empty())
-            && snap.line2.as_deref().map_or(true, |s| s.trim().is_empty())
+            && snap.address_line1.as_deref().map_or(true, |s| s.trim().is_empty())
+            && snap.address_line2.as_deref().map_or(true, |s| s.trim().is_empty())
             && snap.city.as_deref().map_or(true, |s| s.trim().is_empty())
-            && snap.region.as_deref().map_or(true, |s| s.trim().is_empty())
+            && snap.state_province.as_deref().map_or(true, |s| s.trim().is_empty())
             && snap.postal_code.as_deref().map_or(true, |s| s.trim().is_empty())
             && snap.country.as_deref().map_or(true, |s| s.trim().is_empty());
         (maybe_id, if is_empty { InvoiceAddress::default() } else { snap.clone() })
@@ -81,17 +81,17 @@ pub(crate) async fn create_draft_invoice(
         match row {
             Some(r) => {
                 // Only fill missing fields, allow frontend overrides to take precedence
-                if target.line1.as_deref().map_or(true, |s| s.is_empty()) {
-                    target.line1 = Some(r.get::<String, _>("address_line1"));
+                if target.address_line1.as_deref().map_or(true, |s| s.is_empty()) {
+                    target.address_line1 = Some(r.get::<String, _>("address_line1"));
                 }
-                if target.line2.as_deref().map_or(true, |s| s.is_empty()) {
-                    target.line2 = r.try_get::<String, _>("address_line2").ok();
+                if target.address_line2.as_deref().map_or(true, |s| s.is_empty()) {
+                    target.address_line2 = r.try_get::<String, _>("address_line2").ok();
                 }
                 if target.city.as_deref().map_or(true, |s| s.is_empty()) {
                     target.city = r.try_get::<String, _>("city").ok();
                 }
-                if target.region.as_deref().map_or(true, |s| s.is_empty()) {
-                    target.region = r.try_get::<String, _>("state_province").ok();
+                if target.state_province.as_deref().map_or(true, |s| s.is_empty()) {
+                    target.state_province = r.try_get::<String, _>("state_province").ok();
                 }
                 if target.postal_code.as_deref().map_or(true, |s| s.is_empty()) {
                     target.postal_code = r.try_get::<String, _>("postal_code").ok();
@@ -125,18 +125,18 @@ pub(crate) async fn create_draft_invoice(
         shipping_id,
         bill_to_snap.name.as_deref(),
         bill_to_snap.attention.as_deref(),
-        bill_to_snap.line1.as_deref(),
-        bill_to_snap.line2.as_deref(),
+        bill_to_snap.address_line1.as_deref(),
+        bill_to_snap.address_line2.as_deref(),
         bill_to_snap.city.as_deref(),
-        bill_to_snap.region.as_deref(),
+        bill_to_snap.state_province.as_deref(),
         bill_to_snap.postal_code.as_deref(),
         bill_to_snap.country.as_deref(),
         ship_to_snap.name.as_deref(),
         ship_to_snap.attention.as_deref(),
-        ship_to_snap.line1.as_deref(),
-        ship_to_snap.line2.as_deref(),
+        ship_to_snap.address_line1.as_deref(),
+        ship_to_snap.address_line2.as_deref(),
         ship_to_snap.city.as_deref(),
-        ship_to_snap.region.as_deref(),
+        ship_to_snap.state_province.as_deref(),
         ship_to_snap.postal_code.as_deref(),
         ship_to_snap.country.as_deref(),
     )
@@ -164,6 +164,41 @@ pub(crate) async fn create_draft_invoice(
     tx.commit().await?;
 
     Ok(invoice)
+}
+
+
+pub(crate) async fn update_sales_invoice(
+    pool: &mut PgConnection,
+    org_id: Uuid,
+    req: &shared_core::sales::requests::sales_invoice::UpdateSalesInvoiceRequest,
+) -> Result<SalesInvoice, ApiError> {
+    // 1. Fetch current record first to verify ownership tenancy & structural lock eligibility
+    let current_invoice = sales_invoice_db::get_sales_invoice_with_lines(&mut *pool, req.id, org_id)
+        .await?
+        .ok_or_else(|| ApiError::NotFound("Sales invoice not found.".to_string()))?;
+
+    if current_invoice.org_id != org_id {
+        return Err(ApiError::Forbidden(
+            "You do not have permission to modify this invoice.".to_string(),
+        ));
+    }
+
+    // 💡 Accounting Guard: Prevent modifying historical addresses/dates if already finalized
+    if current_invoice.status == InvoiceStatus::Paid {
+        return Err(ApiError::BadRequest(
+            "Cannot update details on an invoice that has already been marked as Paid.".to_string(),
+        ));
+    }
+
+    // 2. Perform the database write update operation
+    sales_invoice_db::update_sales_invoice(&mut *pool, org_id, req).await?;
+
+    // 3. Fetch and return the freshly updated invoice record layout matching our web UI view loop
+    let updated_invoice = sales_invoice_db::get_sales_invoice_with_lines(&mut *pool, req.id, org_id)
+        .await?
+        .ok_or_else(|| ApiError::NotFound("Failed to retrieve updated invoice details.".to_string()))?;
+
+    Ok(updated_invoice)
 }
 
 pub(crate) async fn update_invoice_lines(
