@@ -28,12 +28,12 @@ use crate::services::dashboard::{
     get_recent_transactions,
 };
 use crate::{
-    core::components::layout::Layout,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
         org_context::use_org_context,
     },
+    core::components::layout::Layout,
     router::Route,
 };
 

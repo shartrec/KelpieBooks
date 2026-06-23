@@ -8,10 +8,16 @@
 
 use std::rc::Rc;
 
-use chrono::{Datelike, NaiveDate};
+use chrono::{
+    Datelike,
+    NaiveDate,
+};
 use rust_decimal::Decimal;
 use uuid::Uuid;
-use yew::{html::ChildrenProps, prelude::*};
+use yew::{
+    html::ChildrenProps,
+    prelude::*,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PaymentStatusFilter {

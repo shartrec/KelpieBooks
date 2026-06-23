@@ -8,7 +8,10 @@
 
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use rust_decimal::{dec, Decimal};
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use shared_core::ledger::models::{
     account::Account,
     account_category::AccountCategory,
@@ -19,7 +22,6 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    core::components::currency_input::DecimalInput,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
@@ -28,6 +30,7 @@ use crate::{
             ReportContext,
         },
     },
+    core::components::currency_input::DecimalInput,
 };
 
 #[derive(Properties, PartialEq)]

@@ -11,7 +11,12 @@ use chrono::{
 };
 use fluent::FluentArgs;
 use rust_decimal::Decimal;
-use shared_core::i18n::{format_currency_icu, format_date_icu, format_decimal_icu, format_percentage_icu};
+use shared_core::i18n::{
+    format_currency_icu,
+    format_date_icu,
+    format_decimal_icu,
+    format_percentage_icu,
+};
 use yew::prelude::*;
 
 use crate::services::web::detect_browser_locale;

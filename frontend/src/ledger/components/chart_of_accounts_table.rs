@@ -13,23 +13,27 @@ use std::collections::{
 
 use fluent::fluent_args;
 use log::info;
-use shared_core::ledger::{
-    dtos::account_with_balance::AccountWithBalance,
-    requests::account::{
-        CreateAccountRequest,
-        UpdateAccountRequest,
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    ledger::{
+        dtos::account_with_balance::AccountWithBalance,
+        requests::account::{
+            CreateAccountRequest,
+            UpdateAccountRequest,
+        },
     },
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::core::models::auth::SystemPrivilege;
+
 use crate::{
     api::Api,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
+    core::components::delete_confirmation_modal::DeleteConfirmationModal,
     ledger::components::{
         account_row::{
             AccountNode,
@@ -39,7 +43,6 @@ use crate::{
         edit_account_modal::EditAccountModal,
     },
 };
-use crate::core::components::delete_confirmation_modal::DeleteConfirmationModal;
 
 #[function_component(ChartOfAccountsTable)]
 pub fn chart_of_accounts_table() -> Html {

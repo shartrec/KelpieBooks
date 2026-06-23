@@ -10,7 +10,10 @@ use chrono::{
     NaiveDate,
 };
 use fluent::fluent_args;
-use rust_decimal::{dec, Decimal};
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use serde::{
     Deserialize,
     Serialize,
@@ -30,12 +33,12 @@ use yew_router::prelude::*;
 
 use crate::{
     api::Api,
-    core::components::layout::Layout,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
         org_context::OrgContextHandle,
     },
+    core::components::layout::Layout,
     ledger::components::journal_entry_row::JournalEntryRow,
     router::Route,
 };
@@ -204,7 +207,8 @@ pub fn new_transaction_page() -> Html {
             if is_balanced {
                 let mut req = (*request).clone();
                 req.entries.retain(|entry| {
-                    !entry.account_id.is_nil() && (entry.debit != dec!(0.00) || entry.credit != dec!(0.00))
+                    !entry.account_id.is_nil()
+                        && (entry.debit != dec!(0.00) || entry.credit != dec!(0.00))
                 });
                 let navigator = navigator.clone();
                 let user_ctx = user_ctx.clone();

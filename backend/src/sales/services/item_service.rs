@@ -7,12 +7,20 @@
  */
 
 use rocket_db_pools::Connection;
-use shared_core::sales::models::item::{Item, ItemType};
+use shared_core::sales::{
+    models::item::{
+        Item,
+        ItemType,
+    },
+    requests::item::CreateItemRequest,
+};
 use uuid::Uuid;
-use crate::DbKelpie;
-use crate::sales::db::item as item_db;
-use crate::util::ApiError;
-use shared_core::sales::requests::item::CreateItemRequest;
+
+use crate::{
+    sales::db::item as item_db,
+    util::ApiError,
+    DbKelpie,
+};
 
 pub async fn get_items(
     pool: &mut Connection<DbKelpie>,
@@ -22,28 +30,50 @@ pub async fn get_items(
     include_inactive: bool,
     limit: u32,
 ) -> Result<Vec<Item>, sqlx::Error> {
-    item_db::all(pool, org_id, search_term, item_type, include_inactive, limit).await
+    item_db::all(
+        pool,
+        org_id,
+        search_term,
+        item_type,
+        include_inactive,
+        limit,
+    )
+    .await
 }
 
-pub async fn get_item(pool: &mut Connection<DbKelpie>, id: Uuid, org_id: Uuid) -> Result<Option<Item>, sqlx::Error> {
+pub async fn get_item(
+    pool: &mut Connection<DbKelpie>,
+    id: Uuid,
+    org_id: Uuid,
+) -> Result<Option<Item>, sqlx::Error> {
     item_db::get(pool, id, org_id).await
 }
 
-pub async fn create_item(pool: &mut Connection<DbKelpie>, org_id: Uuid, item: &CreateItemRequest) -> Result<Item, sqlx::Error> {
+pub async fn create_item(
+    pool: &mut Connection<DbKelpie>,
+    org_id: Uuid,
+    item: &CreateItemRequest,
+) -> Result<Item, sqlx::Error> {
     item_db::create(pool, org_id, item).await
 }
 
-pub async fn update_item(pool: &mut Connection<DbKelpie>, id: Uuid, org_id: Uuid, item: &Item) -> Result<Item, sqlx::Error> {
+pub async fn update_item(
+    pool: &mut Connection<DbKelpie>,
+    id: Uuid,
+    org_id: Uuid,
+    item: &Item,
+) -> Result<Item, sqlx::Error> {
     item_db::update(pool, id, org_id, item).await
 }
 
-pub async fn delete_item(pool: &mut Connection<DbKelpie>, id: Uuid, org_id: Uuid) -> Result<u64, ApiError> {
-
-
+pub async fn delete_item(
+    pool: &mut Connection<DbKelpie>,
+    id: Uuid,
+    org_id: Uuid,
+) -> Result<u64, ApiError> {
     let rows_affected = item_db::delete(pool, id, org_id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Account not found.".to_string()));
     }
     Ok(rows_affected)
-
 }

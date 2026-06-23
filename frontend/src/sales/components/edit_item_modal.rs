@@ -6,16 +6,29 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use rust_decimal::Decimal;
-use yew::prelude::*;
-use shared_core::sales::models::item::{Item, UnitOfMeasure, ItemType};
+use shared_core::{
+    ledger::models::{
+        account::Account,
+        account_category::AccountCategory,
+    },
+    sales::models::item::{
+        Item,
+        ItemType,
+        UnitOfMeasure,
+    },
+};
 use uuid::Uuid;
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::use_locale;
+use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::ledger::models::account::Account;
-use shared_core::ledger::models::account_category::AccountCategory;
-use crate::core::components::currency_input::DecimalInput;
+
+use crate::{
+    api::Api,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    core::components::currency_input::DecimalInput,
+};
 
 #[derive(Properties, PartialEq)]
 pub struct EditItemModalProps {
@@ -46,12 +59,17 @@ pub fn edit_item_modal(props: &EditItemModalProps) -> Html {
             let user_ctx = user_ctx.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                if let Ok(response) = Api::get("/api/sales/uoms", user_ctx.clone(), navigator.clone()).await {
+                if let Ok(response) =
+                    Api::get("/api/sales/uoms", user_ctx.clone(), navigator.clone()).await
+                {
                     if let Ok(data) = response.json::<Vec<UnitOfMeasure>>().await {
                         uoms.set(data);
                     }
                 }
-                let url = format!("/api/accounts_by_category/{}", AccountCategory::Revenue.to_string());
+                let url = format!(
+                    "/api/accounts_by_category/{}",
+                    AccountCategory::Revenue.to_string()
+                );
                 if let Ok(response) = Api::get(&url, user_ctx, navigator).await {
                     if let Ok(data) = response.json::<Vec<Account>>().await {
                         income_accounts.set(data);
@@ -66,7 +84,9 @@ pub fn edit_item_modal(props: &EditItemModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: InputEvent| {
             let mut info = (*state).clone();
-            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
             field_updater(&mut info, value);
             state.set(info);
         })
@@ -76,7 +96,9 @@ pub fn edit_item_modal(props: &EditItemModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: Event| {
             let mut info = (*state).clone();
-            let value = e.target_unchecked_into::<web_sys::HtmlSelectElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlSelectElement>()
+                .value();
             if let Ok(id) = Uuid::parse_str(&value) {
                 field_updater(&mut info, id);
                 state.set(info);
@@ -97,7 +119,9 @@ pub fn edit_item_modal(props: &EditItemModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: Event| {
             let mut info = (*state).clone();
-            let value = e.target_unchecked_into::<web_sys::HtmlSelectElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlSelectElement>()
+                .value();
             info.item_type = match value.as_str() {
                 "Stocked" => ItemType::Stocked,
                 "NonStocked" => ItemType::NonStocked,
@@ -112,7 +136,9 @@ pub fn edit_item_modal(props: &EditItemModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: Event| {
             let mut info = (*state).clone();
-            info.is_active = e.target_unchecked_into::<web_sys::HtmlInputElement>().checked();
+            info.is_active = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .checked();
             state.set(info);
         })
     };
@@ -131,7 +157,13 @@ pub fn edit_item_modal(props: &EditItemModalProps) -> Html {
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 let resp = if is_edit {
-                    Api::put(&format!("/api/sales/items/{}", request.id), &*request, user_ctx, navigator).await
+                    Api::put(
+                        &format!("/api/sales/items/{}", request.id),
+                        &*request,
+                        user_ctx,
+                        navigator,
+                    )
+                    .await
                 } else {
                     Api::post("/api/sales/items", &*request, user_ctx, navigator).await
                 };
@@ -149,7 +181,11 @@ pub fn edit_item_modal(props: &EditItemModalProps) -> Html {
         })
     };
 
-    let title = if props.item.is_some() { "item-edit-title" } else { "item-add-title" };
+    let title = if props.item.is_some() {
+        "item-edit-title"
+    } else {
+        "item-add-title"
+    };
 
     html! {
         <div class="modal-overlay" onclick={on_cancel.clone()}>

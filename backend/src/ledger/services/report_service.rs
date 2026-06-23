@@ -16,7 +16,10 @@ use rocket_db_pools::sqlx::{
     PgConnection,
     Row,
 };
-use rust_decimal::{dec, Decimal};
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use shared_core::ledger::{
     dtos::{
         account_with_balance::AccountWithBalance,
@@ -58,7 +61,9 @@ pub(crate) async fn get_profit_loss(
     let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
 
     for entry in &entries {
-        *balances.entry(entry.get("account_id")).or_insert(dec!(0.00)) +=
+        *balances
+            .entry(entry.get("account_id"))
+            .or_insert(dec!(0.00)) +=
             entry.get::<Decimal, _>("debit") - entry.get::<Decimal, _>("credit");
     }
 
@@ -142,7 +147,9 @@ pub(crate) async fn get_expense_breakdown(
     let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
 
     for entry in &entries {
-        *balances.entry(entry.get("account_id")).or_insert(dec!(0.00)) +=
+        *balances
+            .entry(entry.get("account_id"))
+            .or_insert(dec!(0.00)) +=
             entry.get::<Decimal, _>("debit") - entry.get::<Decimal, _>("credit");
     }
 
@@ -224,7 +231,9 @@ pub(crate) async fn get_balance_sheet(
     for entry in &entries {
         let debit: Decimal = entry.get("debit");
         let credit: Decimal = entry.get("credit");
-        *balances.entry(entry.get("account_id")).or_insert(dec!(0.00)) += debit - credit;
+        *balances
+            .entry(entry.get("account_id"))
+            .or_insert(dec!(0.00)) += debit - credit;
     }
 
     let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
@@ -341,7 +350,9 @@ pub(crate) async fn get_trial_balance(
     let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
 
     for entry in &entries {
-        *balances.entry(entry.get("account_id")).or_insert(dec!(0.00)) +=
+        *balances
+            .entry(entry.get("account_id"))
+            .or_insert(dec!(0.00)) +=
             entry.get::<Decimal, _>("debit") - entry.get::<Decimal, _>("credit");
     }
 

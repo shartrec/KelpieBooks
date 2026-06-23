@@ -14,11 +14,11 @@ use crate::contexts::locale_context::LocaleContext;
 
 pub mod configuration;
 pub mod dashboard;
-pub mod login;
 pub mod forgot_password;
-pub mod reset_password;
+pub mod login;
 pub mod profile;
 pub mod register;
+pub mod reset_password;
 pub mod roles;
 pub mod style_guide;
 pub mod users;

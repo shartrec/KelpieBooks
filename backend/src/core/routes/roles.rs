@@ -16,13 +16,20 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::core::requests::role::{
-    CreateRoleRequest,
-    UpdateRoleRequest,
+use shared_core::core::{
+    models::role::Role,
+    requests::role::{
+        CreateRoleRequest,
+        UpdateRoleRequest,
+    },
 };
 use sqlx::Acquire;
-use shared_core::core::models::role::Role;
+
 use crate::{
+    core::db::{
+        roles,
+        user as db_user,
+    },
     security::{
         RequirePrivilege,
         SecurityAdmin,
@@ -33,10 +40,6 @@ use crate::{
         ApiError,
     },
     DbKelpie,
-};
-use crate::core::db::{
-    roles,
-    user as db_user,
 };
 
 pub(crate) fn routes() -> Vec<Route> {

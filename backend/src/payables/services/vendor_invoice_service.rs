@@ -13,7 +13,10 @@ use rocket_db_pools::sqlx::{
     self,
     PgConnection,
 };
-use rust_decimal::{dec, Decimal};
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use shared_core::{
     ledger::{
         models::system_tag::SystemTag,
@@ -25,6 +28,7 @@ use shared_core::{
     payables::{
         dtos::vendor_invoice_list_item::VendorInvoiceListItem,
         models::{
+            invoice_status::InvoiceStatus,
             vendor_invoice::VendorInvoice,
             vendor_invoice_item::VendorInvoiceItem,
         },
@@ -36,7 +40,7 @@ use shared_core::{
 };
 use sqlx::Acquire;
 use uuid::Uuid;
-use shared_core::payables::models::invoice_status::InvoiceStatus;
+
 use crate::{
     ledger::{
         db::account as account_db,
@@ -62,7 +66,11 @@ pub(crate) async fn get_vendor_invoices(
         end_date,
         partner_id,
         min_amount,
-        if let Some(status) = &status {vec![status]} else {vec![]},
+        if let Some(status) = &status {
+            vec![status]
+        } else {
+            vec![]
+        },
     )
     .await?;
     Ok(invoices)
@@ -104,20 +112,14 @@ pub(crate) async fn create_vendor_invoice(
     let total_tax: Decimal = req.items.iter().map(|item| item.tax_amount).sum();
     let gross_amount = total_net + total_tax;
 
-    let ap_account = account_db::get_by_system_tag(
-        &mut tx,
-        organization_id,
-        &SystemTag::AccountsPayable,
-    )
-    .await?
-    .ok_or_else(|| ApiError::NotFound("Accounts Payable account not found.".to_string()))?;
-    let tax_account = account_db::get_by_system_tag(
-        &mut tx,
-        organization_id,
-        &SystemTag::SalesTaxClearing,
-    )
-    .await?
-    .ok_or_else(|| ApiError::NotFound("Tax account not found.".to_string()))?;
+    let ap_account =
+        account_db::get_by_system_tag(&mut tx, organization_id, &SystemTag::AccountsPayable)
+            .await?
+            .ok_or_else(|| ApiError::NotFound("Accounts Payable account not found.".to_string()))?;
+    let tax_account =
+        account_db::get_by_system_tag(&mut tx, organization_id, &SystemTag::SalesTaxClearing)
+            .await?
+            .ok_or_else(|| ApiError::NotFound("Tax account not found.".to_string()))?;
 
     let mut jels = vec![];
     for item in &req.items {

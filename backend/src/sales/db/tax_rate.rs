@@ -8,7 +8,10 @@
 use chrono::NaiveDate;
 use rocket_db_pools::sqlx;
 use shared_core::sales::models::tax::TaxRate;
-use sqlx::{Acquire, PgConnection};
+use sqlx::{
+    Acquire,
+    PgConnection,
+};
 use uuid::Uuid;
 
 pub async fn get_tax_rates_for_category(

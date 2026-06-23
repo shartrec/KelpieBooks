@@ -64,13 +64,10 @@ pub(crate) async fn create_vendor_payment(
 ) -> Result<VendorPayment, ApiError> {
     let mut tx = pool.begin().await?;
 
-    let ap_account = account_db::get_by_system_tag(
-        &mut tx,
-        organization_id,
-        &SystemTag::AccountsPayable,
-    )
-    .await?
-    .ok_or_else(|| ApiError::NotFound("Accounts Payable account not found.".to_string()))?;
+    let ap_account =
+        account_db::get_by_system_tag(&mut tx, organization_id, &SystemTag::AccountsPayable)
+            .await?
+            .ok_or_else(|| ApiError::NotFound("Accounts Payable account not found.".to_string()))?;
 
     let jels = vec![
         JournalEntryLine {

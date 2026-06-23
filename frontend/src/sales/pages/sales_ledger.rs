@@ -10,8 +10,8 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 
 use crate::{
-    core::components::layout::Layout,
     contexts::locale_context::use_locale,
+    core::components::layout::Layout,
     router::Route,
     sales::{
         components::{

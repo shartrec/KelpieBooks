@@ -6,33 +6,50 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::core::components::progressive_search::ProgressiveSearch;
-use crate::core::components::SearchableItem;
-use crate::{
-    api::Api,
-    contexts::{auth_context::use_user_context, locale_context::use_locale},
-    core::components::layout::Layout,
-    router::Route,
-    sales::components::sales_invoice_item_row::SalesInvoiceItemRow,
+use chrono::{
+    Local,
+    NaiveDate,
 };
-use chrono::{Local, NaiveDate};
 use fluent::fluent_args;
 use rust_decimal::Decimal;
 use shared_core::{
-    partners::dtos::partner_list_item::PartnerListItem,
+    partners::{
+        dtos::partner_list_item::PartnerListItem,
+        models::{
+            address_type::AddressType,
+            partner_address::PartnerAddress,
+        },
+    },
     sales::{
-        models::sales_invoice::SalesInvoice,
-        models::sales_invoice_item::SalesInvoiceLine,
+        models::{
+            invoice_address::InvoiceAddress,
+            sales_invoice::SalesInvoice,
+            sales_invoice_item::SalesInvoiceLine,
+        },
         requests::sales_invoice::CreateSalesInvoiceRequest,
     },
 };
-use shared_core::sales::models::invoice_address::InvoiceAddress;
-use shared_core::partners::models::partner_address::PartnerAddress;
-use shared_core::partners::models::address_type::AddressType;
 use uuid::Uuid;
-use web_sys::{HtmlInputElement, HtmlSelectElement};
+use web_sys::{
+    HtmlInputElement,
+    HtmlSelectElement,
+};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
+
+use crate::{
+    api::Api,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    core::components::{
+        layout::Layout,
+        progressive_search::ProgressiveSearch,
+        SearchableItem,
+    },
+    sales::components::sales_invoice_item_row::SalesInvoiceItemRow,
+};
 
 #[derive(PartialEq, Clone, Copy)]
 enum AddressTab {
@@ -133,7 +150,7 @@ pub fn new_sales_invoice_page() -> Html {
         let i18n = i18n.clone();
         let navigator = navigator.clone();
         let error_for_select = error.clone();
-        Callback::from(move |customer: PartnerListItem | {
+        Callback::from(move |customer: PartnerListItem| {
             let mut info = (*state).clone();
             info.partner_id = customer.id;
             state.set(info);
@@ -151,39 +168,49 @@ pub fn new_sales_invoice_page() -> Html {
             let i18n2 = i18n.clone();
             let display_name2 = display_name.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                match Api::get(&format!("/api/partners/{}/addresses", partner_id), user_ctx2, navigator2).await {
+                match Api::get(
+                    &format!("/api/partners/{}/addresses", partner_id),
+                    user_ctx2,
+                    navigator2,
+                )
+                .await
+                {
                     Ok(resp) if resp.ok() => {
                         match resp.json::<Vec<PartnerAddress>>().await {
                             Ok(addresses) => {
                                 partner_addresses_state.set(addresses.clone());
                                 // Choose defaults: look for explicit billing/shipping; fall back to first
                                 let mut req = (*state2).clone();
-                                if let Some(bill) = addresses.iter().find(|a| matches!(a.address_type, AddressType::Billing))
+                                if let Some(bill) = addresses
+                                    .iter()
+                                    .find(|a| matches!(a.address_type, AddressType::Billing))
                                     .or_else(|| addresses.first())
                                 {
                                     req.billing_address_id = Some(bill.id);
                                     req.bill_to = InvoiceAddress {
                                         name: Some(display_name2.clone()),
                                         attention: req.bill_to.attention.clone(),
-                                        line1: Some(bill.address_line1.clone()),
-                                        line2: bill.address_line2.clone(),
+                                        address_line1: Some(bill.address_line1.clone()),
+                                        address_line2: bill.address_line2.clone(),
                                         city: Some(bill.city.clone()),
-                                        region: bill.state_province.clone(),
+                                        state_province: bill.state_province.clone(),
                                         postal_code: bill.postal_code.clone(),
                                         country: Some(bill.country.clone()),
                                     };
                                 }
-                                if let Some(ship) = addresses.iter().find(|a| matches!(a.address_type, AddressType::Shipping))
+                                if let Some(ship) = addresses
+                                    .iter()
+                                    .find(|a| matches!(a.address_type, AddressType::Shipping))
                                     .or_else(|| addresses.first())
                                 {
                                     req.shipping_address_id = Some(ship.id);
                                     req.ship_to = InvoiceAddress {
                                         name: Some(display_name2.clone()),
                                         attention: req.ship_to.attention.clone(),
-                                        line1: Some(ship.address_line1.clone()),
-                                        line2: ship.address_line2.clone(),
+                                        address_line1: Some(ship.address_line1.clone()),
+                                        address_line2: ship.address_line2.clone(),
                                         city: Some(ship.city.clone()),
-                                        region: ship.state_province.clone(),
+                                        state_province: ship.state_province.clone(),
                                         postal_code: ship.postal_code.clone(),
                                         country: Some(ship.country.clone()),
                                     };
@@ -323,12 +350,10 @@ pub fn new_sales_invoice_page() -> Html {
                                 // Optionally, you can keep the user on the page to add another invoice
                                 // or later navigate to a detail page if desired.
                             }
-                            Err(e) => {
-                                error.set(Some(i18n.t_args(
-                                    "new-sales-invoice-error-parse-response",
-                                    &fluent_args!["error" => e.to_string()],
-                                )))
-                            }
+                            Err(e) => error.set(Some(i18n.t_args(
+                                "new-sales-invoice-error-parse-response",
+                                &fluent_args!["error" => e.to_string()],
+                            ))),
                         }
                     }
                     Ok(r) => error.set(Some(i18n.t_args(
@@ -345,196 +370,196 @@ pub fn new_sales_invoice_page() -> Html {
     };
 
     html! {
-            <Layout>
-                <h1>{ i18n.t("new-sales-invoice-title") }</h1>
-                <form onsubmit={on_submit} class="sale__form">
-                    <div class="sale__form__header">
-                        if !request.invoice_number.is_empty() {
-                            <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
-                                <label>{ i18n.t("new-sales-invoice-number-label") }{":"}</label>
-                                <span class="sale__form__invoice">{ request.invoice_number.clone() }</span>
-                            </div>
-                        }
-                    </div>
-                    <div class="data-form">
-                        <label>{i18n.t("common-customer")}</label>
-                        <ProgressiveSearch<PartnerListItem>
-                            placeholder="Search partners..."
-                            query={(*customer_search).clone()}
-                            suggestions={(*customers).clone()}
-                            on_input={on_partner_search}
-                            on_select={on_partner_select}
-                        />
-                    </div>
-                {
-                if request.partner_id != Uuid::nil() {
-                    html! {
-                        <>
-                        <div class="data-form">
-                            <label>{i18n.t("new-sales-invoice-date-label")}</label>
-                            <input type="date" value={request.issue_date.format("%Y-%m-%d").to_string()} onchange={on_date_change(|r, v| r.issue_date = v)} required=true />
-
-                            <label>{i18n.t("new-sales-invoice-due-date-label")}</label>
-                            <input type="date" value={request.due_date.format("%Y-%m-%d").to_string()} onchange={on_date_change(|r, v| r.due_date = v)} required=true />
+        <Layout>
+            <h1>{ i18n.t("new-sales-invoice-title") }</h1>
+            <form onsubmit={on_submit} class="sale__form">
+                <div class="sale__form__header">
+                    if !request.invoice_number.is_empty() {
+                        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem;">
+                            <label>{ i18n.t("new-sales-invoice-number-label") }{":"}</label>
+                            <span class="sale__form__invoice">{ request.invoice_number.clone() }</span>
                         </div>
-
-
-                        <div class="address-section">
-                            <div class="tabs-nav">
-                                <button type="button"
-                                    class={classes!("tab-button", (*active_tab == AddressTab::Billing).then_some("active"))}
-                                    onclick={let active_tab = active_tab.clone(); Callback::from(move |_| active_tab.set(AddressTab::Billing))}
-                                >
-                                    { i18n.t("new-sales-invoice-billing-address") }
-                                </button>
-                                <button type="button"
-                                    class={classes!("tab-button", (*active_tab == AddressTab::Shipping).then_some("active"))}
-                                    onclick={let active_tab = active_tab.clone(); Callback::from(move |_| active_tab.set(AddressTab::Shipping))}
-                                >
-                                    { i18n.t("new-sales-invoice-shipping-address") }
-                                </button>
-                            </div>
-
-                            <div class="tab-content-panel">
-                                if *active_tab == AddressTab::Billing {
-                                    <div class="compact-address-grid">
-                                        <div class="full-width-row">
-                                            <label>{ i18n.t("new-sales-invoice-select-billing") }</label>
-                                            <select onchange={
-                                                let state = request.clone();
-                                                let partner_addresses = partner_addresses.clone();
-                                                Callback::from(move |e: Event| {
-                                                    let value = e.target_unchecked_into::<HtmlSelectElement>().value();
-                                                    if let Ok(id) = Uuid::parse_str(&value) {
-                                                        if let Some(addr) = (*partner_addresses).iter().find(|a| a.id == id) {
-                                                            let mut req = (*state).clone();
-                                                            req.billing_address_id = Some(id);
-                                                            req.bill_to.line1 = Some(addr.address_line1.clone());
-                                                            req.bill_to.line2 = addr.address_line2.clone();
-                                                            req.bill_to.city = Some(addr.city.clone());
-                                                            req.bill_to.region = addr.state_province.clone();
-                                                            req.bill_to.postal_code = addr.postal_code.clone();
-                                                            req.bill_to.country = Some(addr.country.clone());
-                                                            state.set(req);
-                                                        }
-                                                    }
-                                                })
-                                            }>
-                                                { for (*partner_addresses).iter().map(|a| html! {
-                                                    <option value={a.id.to_string()} selected={request.billing_address_id == Some(a.id)}>
-                                                        { format!("{}{}, {}", a.address_line1, a.address_line2.as_ref().map(|s| format!(", {}", s)).unwrap_or_default(), a.city) }
-                                                    </option>
-                                                }) }
-                                            </select>
-                                        </div>
-
-                                        <div class="split-row">
-                                            <input value={request.bill_to.name.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.name = Some(v))} placeholder={i18n.t("common-name")} />
-                                            <input value={request.bill_to.attention.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.attention = Some(v))} placeholder={i18n.t("address-attention")} />
-                                        </div>
-
-                                        <textarea class="full-width-row" rows="1" value={request.bill_to.line1.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.line1 = Some(v))} placeholder={i18n.t("address-line1")} />
-                                        <input class="full-width-row" value={request.bill_to.line2.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.line2 = Some(v))} placeholder={i18n.t("address-line2")} />
-
-                                        <div class="geo-quad-row">
-                                            <input value={request.bill_to.city.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.city = Some(v))} placeholder={i18n.t("address-city")} />
-                                            <input value={request.bill_to.region.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.region = Some(v))} placeholder={i18n.t("address-region")} />
-                                            <input value={request.bill_to.postal_code.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.postal_code = Some(v))} placeholder={i18n.t("address-postal-code")} />
-                                            <input value={request.bill_to.country.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.country = Some(v))} placeholder={i18n.t("address-country")} />
-                                        </div>
-                                    </div>
-                                } else {
-                                    <div class="compact-address-grid">
-                                        <div class="full-width-row">
-                                            <label>{ i18n.t("new-sales-invoice-select-shipping") }</label>
-                                            <select onchange={
-                                                let state = request.clone();
-                                                let partner_addresses = partner_addresses.clone();
-                                                Callback::from(move |e: Event| {
-                                                    let value = e.target_unchecked_into::<HtmlSelectElement>().value();
-                                                    if let Ok(id) = Uuid::parse_str(&value) {
-                                                        if let Some(addr) = (*partner_addresses).iter().find(|a| a.id == id) {
-                                                            let mut req = (*state).clone();
-                                                            req.shipping_address_id = Some(id);
-                                                            req.ship_to.line1 = Some(addr.address_line1.clone());
-                                                            req.ship_to.line2 = addr.address_line2.clone();
-                                                            req.ship_to.city = Some(addr.city.clone());
-                                                            req.ship_to.region = addr.state_province.clone();
-                                                            req.ship_to.postal_code = addr.postal_code.clone();
-                                                            req.ship_to.country = Some(addr.country.clone());
-                                                            state.set(req);
-                                                        }
-                                                    }
-                                                })
-                                            }>
-                                                { for (*partner_addresses).iter().map(|a| html! {
-                                                    <option value={a.id.to_string()} selected={request.shipping_address_id == Some(a.id)}>
-                                                        { format!("{}{}, {}", a.address_line1, a.address_line2.as_ref().map(|s| format!(", {}", s)).unwrap_or_default(), a.city) }
-                                                    </option>
-                                                }) }
-                                            </select>
-                                        </div>
-
-                                        <div class="split-row">
-                                            <input value={request.ship_to.name.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.name = Some(v))} placeholder={i18n.t("common-name")} />
-                                            <input value={request.ship_to.attention.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.attention = Some(v))} placeholder={i18n.t("address-attention")} />
-                                        </div>
-
-                                        <textarea class="full-width-row" rows="1" value={request.ship_to.line1.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.line1 = Some(v))} placeholder={i18n.t("address-line1")} />
-                                        <input class="full-width-row" value={request.ship_to.line2.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.line2 = Some(v))} placeholder={i18n.t("address-line2")} />
-
-                                        <div class="geo-quad-row">
-                                            <input value={request.ship_to.city.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.city = Some(v))} placeholder={i18n.t("address-city")} />
-                                            <input value={request.ship_to.region.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.region = Some(v))} placeholder={i18n.t("address-region")} />
-                                            <input value={request.ship_to.postal_code.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.postal_code = Some(v))} placeholder={i18n.t("address-postal-code")} />
-                                            <input value={request.ship_to.country.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.country = Some(v))} placeholder={i18n.t("address-country")} />
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        </div>
-
-                        <div class="sale__entries">
-                            <div class="sale__entry-header">
-                                <span class="table__text-col">{i18n.t("common-item")}</span>
-                                <span class="table__text-col">{i18n.t("common-description")}</span>
-                                <span class="table__value-col">{i18n.t("common-quantity")}</span>
-                                <span class="table__value-col">{i18n.t("common-price")}</span>
-                                <span class="table__value-col">{i18n.t("common-tax-rate")}</span>
-                                <span class="table__value-col">{i18n.t("common-tax")}</span>
-                                <span class="table__value-col">{i18n.t("common-total")}</span>
-                                <span class="table__col-actions"></span>
-                            </div>
-                            { for request.lines.iter().map(|item| html! {
-                                <SalesInvoiceItemRow
-                                    key={item.id.to_string()} // Added key prop
-                                    item={item.clone()}
-                                    on_change={on_item_change.clone()}
-                                    on_delete={on_item_delete.clone()}
-                                />
-                            })}
-                        </div>
-                        <div class="table-actions">
-                            <button type="button" class="button-primary" onclick={add_item}>{ i18n.t("new-sales-invoice-add-line-button") }</button>
-                        </div>
-                        <div class="sale-footer">
-                            if let Some(msg) = &*success {
-                                <div class="message message__success">{ msg }</div>
-                            }
-                            if let Some(e) = &*error {
-                                <div class="error">{e}</div>
-                            }
-                            <button type="submit" class="button-primary">{ i18n.t("new-sales-invoice-save-button") }</button>
-                        </div>
-                    </>
                     }
-                    } else {
-                    html! {
+                </div>
+                <div class="data-form">
+                    <label>{i18n.t("common-customer")}</label>
+                    <ProgressiveSearch<PartnerListItem>
+                        placeholder="Search partners..."
+                        query={(*customer_search).clone()}
+                        suggestions={(*customers).clone()}
+                        on_input={on_partner_search}
+                        on_select={on_partner_select}
+                    />
+                </div>
+            {
+            if request.partner_id != Uuid::nil() {
+                html! {
+                    <>
+                    <div class="data-form">
+                        <label>{i18n.t("new-sales-invoice-date-label")}</label>
+                        <input type="date" value={request.issue_date.format("%Y-%m-%d").to_string()} onchange={on_date_change(|r, v| r.issue_date = v)} required=true />
 
+                        <label>{i18n.t("new-sales-invoice-due-date-label")}</label>
+                        <input type="date" value={request.due_date.format("%Y-%m-%d").to_string()} onchange={on_date_change(|r, v| r.due_date = v)} required=true />
+                    </div>
+
+
+                    <div class="address-section">
+                        <div class="tabs-nav">
+                            <button type="button"
+                                class={classes!("tab-button", (*active_tab == AddressTab::Billing).then_some("active"))}
+                                onclick={let active_tab = active_tab.clone(); Callback::from(move |_| active_tab.set(AddressTab::Billing))}
+                            >
+                                { i18n.t("new-sales-invoice-billing-address") }
+                            </button>
+                            <button type="button"
+                                class={classes!("tab-button", (*active_tab == AddressTab::Shipping).then_some("active"))}
+                                onclick={let active_tab = active_tab.clone(); Callback::from(move |_| active_tab.set(AddressTab::Shipping))}
+                            >
+                                { i18n.t("new-sales-invoice-shipping-address") }
+                            </button>
+                        </div>
+
+                        <div class="tab-content-panel">
+                            if *active_tab == AddressTab::Billing {
+                                <div class="compact-address-grid">
+                                    <div class="full-width-row">
+                                        <label>{ i18n.t("new-sales-invoice-select-billing") }</label>
+                                        <select onchange={
+                                            let state = request.clone();
+                                            let partner_addresses = partner_addresses.clone();
+                                            Callback::from(move |e: Event| {
+                                                let value = e.target_unchecked_into::<HtmlSelectElement>().value();
+                                                if let Ok(id) = Uuid::parse_str(&value) {
+                                                    if let Some(addr) = (*partner_addresses).iter().find(|a| a.id == id) {
+                                                        let mut req = (*state).clone();
+                                                        req.billing_address_id = Some(id);
+                                                        req.bill_to.address_line1 = Some(addr.address_line1.clone());
+                                                        req.bill_to.address_line2 = addr.address_line2.clone();
+                                                        req.bill_to.city = Some(addr.city.clone());
+                                                        req.bill_to.state_province = addr.state_province.clone();
+                                                        req.bill_to.postal_code = addr.postal_code.clone();
+                                                        req.bill_to.country = Some(addr.country.clone());
+                                                        state.set(req);
+                                                    }
+                                                }
+                                            })
+                                        }>
+                                            { for (*partner_addresses).iter().map(|a| html! {
+                                                <option value={a.id.to_string()} selected={request.billing_address_id == Some(a.id)}>
+                                                    { format!("{}{}, {}", a.address_line1, a.address_line2.as_ref().map(|s| format!(", {}", s)).unwrap_or_default(), a.city) }
+                                                </option>
+                                            }) }
+                                        </select>
+                                    </div>
+
+                                    <div class="split-row">
+                                        <input value={request.bill_to.name.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.name = Some(v))} placeholder={i18n.t("common-name")} />
+                                        <input value={request.bill_to.attention.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.attention = Some(v))} placeholder={i18n.t("address-attention")} />
+                                    </div>
+
+                                    <textarea class="full-width-row" rows="1" value={request.bill_to.address_line1.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.address_line1 = Some(v))} placeholder={i18n.t("address-line1")} />
+                                    <input class="full-width-row" value={request.bill_to.address_line2.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.address_line2 = Some(v))} placeholder={i18n.t("address-line2")} />
+
+                                    <div class="geo-quad-row">
+                                        <input value={request.bill_to.city.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.city = Some(v))} placeholder={i18n.t("address-city")} />
+                                        <input value={request.bill_to.state_province.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.state_province = Some(v))} placeholder={i18n.t("address-region")} />
+                                        <input value={request.bill_to.postal_code.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.postal_code = Some(v))} placeholder={i18n.t("address-postal-code")} />
+                                        <input value={request.bill_to.country.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.country = Some(v))} placeholder={i18n.t("address-country")} />
+                                    </div>
+                                </div>
+                            } else {
+                                <div class="compact-address-grid">
+                                    <div class="full-width-row">
+                                        <label>{ i18n.t("new-sales-invoice-select-shipping") }</label>
+                                        <select onchange={
+                                            let state = request.clone();
+                                            let partner_addresses = partner_addresses.clone();
+                                            Callback::from(move |e: Event| {
+                                                let value = e.target_unchecked_into::<HtmlSelectElement>().value();
+                                                if let Ok(id) = Uuid::parse_str(&value) {
+                                                    if let Some(addr) = (*partner_addresses).iter().find(|a| a.id == id) {
+                                                        let mut req = (*state).clone();
+                                                        req.shipping_address_id = Some(id);
+                                                        req.ship_to.address_line1 = Some(addr.address_line1.clone());
+                                                        req.ship_to.address_line2 = addr.address_line2.clone();
+                                                        req.ship_to.city = Some(addr.city.clone());
+                                                        req.ship_to.state_province = addr.state_province.clone();
+                                                        req.ship_to.postal_code = addr.postal_code.clone();
+                                                        req.ship_to.country = Some(addr.country.clone());
+                                                        state.set(req);
+                                                    }
+                                                }
+                                            })
+                                        }>
+                                            { for (*partner_addresses).iter().map(|a| html! {
+                                                <option value={a.id.to_string()} selected={request.shipping_address_id == Some(a.id)}>
+                                                    { format!("{}{}, {}", a.address_line1, a.address_line2.as_ref().map(|s| format!(", {}", s)).unwrap_or_default(), a.city) }
+                                                </option>
+                                            }) }
+                                        </select>
+                                    </div>
+
+                                    <div class="split-row">
+                                        <input value={request.ship_to.name.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.name = Some(v))} placeholder={i18n.t("common-name")} />
+                                        <input value={request.ship_to.attention.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.attention = Some(v))} placeholder={i18n.t("address-attention")} />
+                                    </div>
+
+                                    <textarea class="full-width-row" rows="1" value={request.ship_to.address_line1.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.address_line1 = Some(v))} placeholder={i18n.t("address-line1")} />
+                                    <input class="full-width-row" value={request.ship_to.address_line2.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.address_line2 = Some(v))} placeholder={i18n.t("address-line2")} />
+
+                                    <div class="geo-quad-row">
+                                        <input value={request.ship_to.city.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.city = Some(v))} placeholder={i18n.t("address-city")} />
+                                        <input value={request.ship_to.state_province.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.state_province = Some(v))} placeholder={i18n.t("address-region")} />
+                                        <input value={request.ship_to.postal_code.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.postal_code = Some(v))} placeholder={i18n.t("address-postal-code")} />
+                                        <input value={request.ship_to.country.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.country = Some(v))} placeholder={i18n.t("address-country")} />
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="sale__entries">
+                        <div class="sale__entry-header">
+                            <span class="table__text-col">{i18n.t("common-item")}</span>
+                            <span class="table__text-col">{i18n.t("common-description")}</span>
+                            <span class="table__value-col">{i18n.t("common-quantity")}</span>
+                            <span class="table__value-col">{i18n.t("common-price")}</span>
+                            <span class="table__value-col">{i18n.t("common-tax-rate")}</span>
+                            <span class="table__value-col">{i18n.t("common-tax")}</span>
+                            <span class="table__value-col">{i18n.t("common-total")}</span>
+                            <span class="table__col-actions"></span>
+                        </div>
+                        { for request.lines.iter().map(|item| html! {
+                            <SalesInvoiceItemRow
+                                key={item.id.to_string()} // Added key prop
+                                item={item.clone()}
+                                on_change={on_item_change.clone()}
+                                on_delete={on_item_delete.clone()}
+                            />
+                        })}
+                    </div>
+                    <div class="table-actions">
+                        <button type="button" class="button-primary" onclick={add_item}>{ i18n.t("new-sales-invoice-add-line-button") }</button>
+                    </div>
+                    <div class="sale-footer">
+                        if let Some(msg) = &*success {
+                            <div class="message message__success">{ msg }</div>
                         }
+                        if let Some(e) = &*error {
+                            <div class="error">{e}</div>
+                        }
+                        <button type="submit" class="button-primary">{ i18n.t("new-sales-invoice-save-button") }</button>
+                    </div>
+                </>
+                }
+                } else {
+                html! {
+
                     }
                 }
-                </form>
-            </Layout>
-        }
+            }
+            </form>
+        </Layout>
+    }
 }

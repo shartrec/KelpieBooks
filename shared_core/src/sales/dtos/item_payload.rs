@@ -5,10 +5,10 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use crate::sales::models::item::ItemType;
 use rust_decimal::Decimal;
 use serde::Deserialize;
 use uuid::Uuid;
-use crate::sales::models::item::ItemType;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct ItemPayload {

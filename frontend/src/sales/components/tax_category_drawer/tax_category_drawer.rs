@@ -5,12 +5,15 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use yew::prelude::*;
 use shared_core::sales::models::tax::TaxCategory;
-use crate::contexts::locale_context::use_locale;
-use crate::sales::components::tax_category_drawer::{
-    general_view::GeneralView,
-    rates_view::RatesView,
+use yew::prelude::*;
+
+use crate::{
+    contexts::locale_context::use_locale,
+    sales::components::tax_category_drawer::{
+        general_view::GeneralView,
+        rates_view::RatesView,
+    },
 };
 
 #[derive(Properties, PartialEq, Clone)]

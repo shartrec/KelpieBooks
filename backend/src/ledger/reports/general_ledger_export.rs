@@ -10,18 +10,21 @@ use chrono::NaiveDate;
 use fluent::fluent_args;
 use rust_decimal::dec;
 use shared_core::{
+    core::models::organization::Organization,
     i18n::format_currency_icu_typ,
     ledger::dtos::general_ledger_line::GeneralLedgerLine,
 };
-use shared_core::core::models::organization::Organization;
-use crate::util::{
-    locale_context::LocaleContext,
-    reports::{
-        build_table_header,
-        wrap_report_layout,
+
+use crate::{
+    core::routes::security::AuthenticatedUser,
+    util::{
+        locale_context::LocaleContext,
+        reports::{
+            build_table_header,
+            wrap_report_layout,
+        },
     },
 };
-use crate::core::routes::security::AuthenticatedUser;
 
 pub(crate) fn generate_general_ledger_csv(
     user: &AuthenticatedUser,
@@ -83,8 +86,7 @@ pub(crate) fn generate_general_ledger_typst(
     }
 
     for (_account_name, account_lines) in grouped {
-
-        account_lines.iter().enumerate().for_each(|(index, entry)|  {
+        account_lines.iter().enumerate().for_each(|(index, entry)| {
             if index == 0 {
                 typst_content.push_str(&format!(
                     "text(weight: \"bold\", size: 1.2em)[{}], [], [], [],\n",

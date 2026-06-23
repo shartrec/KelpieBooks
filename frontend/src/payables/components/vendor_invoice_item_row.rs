@@ -14,8 +14,8 @@ use uuid::Uuid;
 use yew::prelude::*;
 
 use crate::{
-    core::components::currency_input::DecimalInput,
     contexts::locale_context::use_locale,
+    core::components::currency_input::DecimalInput,
 };
 
 #[derive(Properties, PartialEq)]

@@ -7,6 +7,8 @@
  */
 
 use std::env;
+
+use fluent::fluent_args;
 use lettre::{
     transport::smtp::authentication::Credentials,
     AsyncSmtpTransport,
@@ -15,11 +17,17 @@ use lettre::{
     Tokio1Executor,
 };
 
-use crate::config::load_config;
-use crate::util::locale_context::LocaleContext;
-use fluent::fluent_args;
+use crate::{
+    config::load_config,
+    util::locale_context::LocaleContext,
+};
 
-pub async fn send_reset_email(to_email: &str, token_id: i32, raw_secret: &str, locale: &str) -> Result<(), String> {
+pub async fn send_reset_email(
+    to_email: &str,
+    token_id: i32,
+    raw_secret: &str,
+    locale: &str,
+) -> Result<(), String> {
     let config = load_config();
     let i18n = LocaleContext::new(locale);
 
@@ -31,28 +39,33 @@ pub async fn send_reset_email(to_email: &str, token_id: i32, raw_secret: &str, l
 
     // 2. Build the email headers and body segments safely
     let email = Message::builder()
-        .from(config.smtp.from.parse().map_err(|_| "Invalid sender syntax")?)
+        .from(
+            config
+                .smtp
+                .from
+                .parse()
+                .map_err(|_| "Invalid sender syntax")?,
+        )
         .to(to_email.parse().map_err(|_| "Invalid recipient syntax")?)
         .subject(i18n.t("email-reset-subject"))
         .multipart(
             lettre::message::MultiPart::alternative()
-                .singlepart(
-                    lettre::message::SinglePart::plain(
-                        i18n.t_args("email-reset-body-plain", &fluent_args!["reset_link" => reset_link.clone()])
-                    )
-                )
-                .singlepart(
-                    lettre::message::SinglePart::html(
-                        i18n.t_args("email-reset-body-html", &fluent_args!["reset_link" => reset_link])
-                    )
-                )
+                .singlepart(lettre::message::SinglePart::plain(i18n.t_args(
+                    "email-reset-body-plain",
+                    &fluent_args!["reset_link" => reset_link.clone()],
+                )))
+                .singlepart(lettre::message::SinglePart::html(i18n.t_args(
+                    "email-reset-body-html",
+                    &fluent_args!["reset_link" => reset_link],
+                ))),
         )
         .map_err(|e| e.to_string())?;
 
     // 3. Instantiate the secure asynchronous SMTP transport engine
-    let mut mailer_builder = AsyncSmtpTransport::<Tokio1Executor>::starttls_relay(&config.smtp.server)
-        .map_err(|e| e.to_string())?
-        .port(config.smtp.port);
+    let mut mailer_builder =
+        AsyncSmtpTransport::<Tokio1Executor>::starttls_relay(&config.smtp.server)
+            .map_err(|e| e.to_string())?
+            .port(config.smtp.port);
 
     // Inject credentials if the target agent requires user authentication
     let username = env::var("SMTP_USERNAME").ok();

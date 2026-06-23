@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 pub(crate) mod item_service;
+pub(crate) mod sales_invoice_service;
 pub(crate) mod tax_category_service;
 pub(crate) mod tax_rate_service;
 pub(crate) mod uom_service;
-pub(crate) mod sales_invoice_service;

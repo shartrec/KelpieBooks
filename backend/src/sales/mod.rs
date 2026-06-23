@@ -6,6 +6,6 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+pub(crate) mod db;
 pub(crate) mod routes;
 pub(crate) mod services;
-pub(crate) mod db;

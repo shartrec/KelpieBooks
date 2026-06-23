@@ -7,12 +7,16 @@
  */
 
 use std::collections::HashSet;
+
 use rust_decimal::dec;
-use shared_core::ledger::dtos::account_with_balance::AccountWithBalance;
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    ledger::dtos::account_with_balance::AccountWithBalance,
+};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::core::models::auth::SystemPrivilege;
+
 use crate::{
     contexts::{
         auth_context::use_user_context,

@@ -21,11 +21,9 @@ use crate::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
-    partners::components::partner_drawer::{
-        address_edit_card::AddressEditCard,
-    },
+    core::components::delete_confirmation_modal::DeleteConfirmationModal,
+    partners::components::partner_drawer::address_edit_card::AddressEditCard,
 };
-use crate::core::components::delete_confirmation_modal::DeleteConfirmationModal;
 
 #[derive(Clone, Debug, PartialEq)]
 enum EditState {

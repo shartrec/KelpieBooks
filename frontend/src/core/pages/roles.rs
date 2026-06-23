@@ -9,27 +9,32 @@
 use std::rc::Rc;
 
 use fluent::fluent_args;
-use shared_core::core::requests::role::{
-    CreateRoleRequest,
-    UpdateRoleRequest,
+use shared_core::core::{
+    models::role::Role,
+    requests::role::{
+        CreateRoleRequest,
+        UpdateRoleRequest,
+    },
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::core::models::role::Role;
+
 use crate::{
     api::Api,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
-    core::components::{
-        add_role_modal::AddRoleModal,
-        edit_role_modal::EditRoleModal,
-        delete_confirmation_modal::DeleteConfirmationModal,
-        layout::Layout,
+    core::{
+        components::{
+            add_role_modal::AddRoleModal,
+            delete_confirmation_modal::DeleteConfirmationModal,
+            edit_role_modal::EditRoleModal,
+            layout::Layout,
+        },
+        pages,
     },
-    core::pages,
 };
 
 #[function_component(RolesPage)]

@@ -6,7 +6,6 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-
 use rocket_db_pools::sqlx::{
     self,
     PgConnection,
@@ -138,7 +137,6 @@ pub(crate) async fn search(
     .await
     .map(|rows| rows.iter().map(from_row_to_partner_list_item).collect())
 }
-
 
 pub(crate) async fn get_addresses(
     pool: &mut PgConnection,

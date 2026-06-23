@@ -6,25 +6,35 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket::{delete, get, post, put, routes, Route};
-use rocket::serde::json::Json;
+use rocket::{
+    delete,
+    get,
+    post,
+    put,
+    routes,
+    serde::json::Json,
+    Route,
+};
 use rocket_db_pools::Connection;
 use shared_core::sales::models::item::UnitOfMeasure;
-use crate::core::routes::security::AuthenticatedUser;
-use crate::DbKelpie;
-use crate::sales::services::uom_service;
-use crate::security::{ManageSales, RequirePrivilege, UseSales};
-use crate::util::ApiError;
-use crate::util::types::PathUuid;
+
+use crate::{
+    core::routes::security::AuthenticatedUser,
+    sales::services::uom_service,
+    security::{
+        ManageSales,
+        RequirePrivilege,
+        UseSales,
+    },
+    util::{
+        types::PathUuid,
+        ApiError,
+    },
+    DbKelpie,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![
-        get_uoms,
-        get_uom,
-        create_uom,
-        update_uom,
-        delete_uom,
-    ]
+    routes![get_uoms, get_uom, create_uom, update_uom, delete_uom,]
 }
 
 #[get("/api/sales/uoms")]

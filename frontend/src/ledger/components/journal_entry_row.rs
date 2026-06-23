@@ -5,15 +5,18 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use rust_decimal::{dec, Decimal};
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use shared_core::ledger::requests::transaction::JournalEntryLine;
 use uuid::Uuid;
 use web_sys::HtmlSelectElement;
 use yew::prelude::*;
 
 use crate::{
-    core::components::currency_input::DecimalInput,
     contexts::locale_context::use_locale,
+    core::components::currency_input::DecimalInput,
 };
 
 #[derive(Properties, PartialEq)]

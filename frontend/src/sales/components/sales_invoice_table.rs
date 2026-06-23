@@ -11,25 +11,30 @@ use shared_core::{
     partners::models::partner::Partner,
     sales::{
         dtos::sales_invoice_list_item::SalesInvoiceListItem,
-        models::sales_invoice::SalesInvoice,
+        models::{
+            invoice_status::InvoiceStatus,
+            sales_invoice::SalesInvoice,
+        },
     },
 };
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::sales::models::invoice_status::InvoiceStatus;
+
 use crate::{
     api::Api,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
-    sales::components::sales_invoice_drawer::{
-        SalesInvoiceDrawer,
-        SalesInvoiceDrawerTab,
-    },
-    sales::contexts::sales_invoice_filter_context::{
-        use_sales_invoice_filter,
-        PaymentStatusFilter,
+    sales::{
+        components::sales_invoice_drawer::{
+            SalesInvoiceDrawer,
+            SalesInvoiceDrawerTab,
+        },
+        contexts::sales_invoice_filter_context::{
+            use_sales_invoice_filter,
+            PaymentStatusFilter,
+        },
     },
 };
 
@@ -77,22 +82,13 @@ pub fn sales_invoice_table() -> Html {
                 }
                 match filter_ctx.status {
                     PaymentStatusFilter::Draft => {
-                        url.push_str(&format!(
-                            "&status={}",
-                            InvoiceStatus::Draft
-                        ));
+                        url.push_str(&format!("&status={}", InvoiceStatus::Draft));
                     }
                     PaymentStatusFilter::Outstanding => {
-                        url.push_str(&format!(
-                            "&status={}",
-                            InvoiceStatus::Open
-                        ));
+                        url.push_str(&format!("&status={}", InvoiceStatus::Open));
                     }
                     PaymentStatusFilter::Paid => {
-                        url.push_str(&format!(
-                            "&status={}",
-                            InvoiceStatus::Paid
-                        ));
+                        url.push_str(&format!("&status={}", InvoiceStatus::Paid));
                     }
                     PaymentStatusFilter::All => {}
                 }

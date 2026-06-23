@@ -8,6 +8,8 @@
 
 // Import pages conditionally based on features
 #[cfg(feature = "ledger")]
+use frontend::core::pages::configuration::ConfigurationPage;
+#[cfg(feature = "ledger")]
 use frontend::ledger::pages::account_ledger::AccountLedgerPage;
 #[cfg(feature = "ledger")]
 use frontend::ledger::pages::balance_sheet::BalanceSheetPage;
@@ -25,8 +27,6 @@ use frontend::ledger::pages::period_settings::PeriodSettings;
 use frontend::ledger::pages::profit_loss::ProfitLossPage;
 #[cfg(feature = "ledger")]
 use frontend::ledger::pages::trial_balance::TrialBalancePage;
-#[cfg(feature = "ledger")]
-use frontend::core::pages::configuration::ConfigurationPage;
 #[cfg(feature = "partners")]
 use frontend::partners::pages::partner_list_page::PartnerListPage;
 #[cfg(feature = "payables")]
@@ -51,28 +51,32 @@ use frontend::{
     },
     core::pages::{
         dashboard::DashboardPage,
-        login::LoginPage,
         forgot_password::ForgotPasswordPage,
-        reset_password::ResetPasswordPage,
+        login::LoginPage,
         profile::ProfilePage,
         register::RegisterPage,
+        reset_password::ResetPasswordPage,
         roles::RolesPage,
         style_guide::StyleGuide,
         users::UsersPage,
     },
     router::Route,
+    sales::pages::{
+        item_list::ItemListPage,
+        new_sales_invoice::NewSalesInvoicePage,
+        sales_ledger::SalesLedgerPage,
+        tax_category_list::TaxCategoryListPage,
+        uom_list::UomListPage,
+    },
 };
 use gloo_net::http::Request;
 use log::info;
-use shared_core::core::models::organization::Organization;
+use shared_core::core::{
+    dtos::user_detail::AuthUserDetail,
+    models::organization::Organization,
+};
 use yew::prelude::*;
 use yew_router::prelude::*;
-use frontend::sales::pages::item_list::ItemListPage;
-use frontend::sales::pages::new_sales_invoice::NewSalesInvoicePage;
-use frontend::sales::pages::uom_list::UomListPage;
-use frontend::sales::pages::tax_category_list::TaxCategoryListPage;
-use frontend::sales::pages::sales_ledger::SalesLedgerPage;
-use shared_core::core::dtos::user_detail::AuthUserDetail;
 
 /// The component that contains the router and switches between pages.
 #[function_component(AppRouter)]

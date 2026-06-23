@@ -6,25 +6,32 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+    Row,
+};
 use shared_core::sales::{
     dtos::sales_invoice_list_item::SalesInvoiceListItem,
     models::{
+        invoice_address::InvoiceAddress,
         invoice_status::InvoiceStatus,
         sales_invoice::SalesInvoice,
         sales_invoice_item::SalesInvoiceLine,
     },
+    requests::sales_invoice::CreateSalesInvoiceRequest,
 };
 use sqlx::Acquire;
 use uuid::Uuid;
 
 use crate::{
+    core::db::sequences::{
+        get_next_invoice_number,
+        SeqType,
+    },
     sales::db::sales_invoice as sales_invoice_db,
     util::ApiError,
 };
-use shared_core::sales::requests::sales_invoice::CreateSalesInvoiceRequest;
-use crate::core::db::sequences::{get_next_invoice_number, SeqType};
-use shared_core::sales::models::invoice_address::InvoiceAddress;
 
 pub(crate) async fn create_draft_invoice(
     pool: &mut PgConnection,
@@ -34,24 +41,47 @@ pub(crate) async fn create_draft_invoice(
     let mut tx = pool.begin().await?;
 
     // Get next invoice number
-    let inv_number =  get_next_invoice_number(&mut tx, org_id, &SeqType::SalesInvoice).await?;
+    let inv_number = get_next_invoice_number(&mut tx, org_id, &SeqType::SalesInvoice).await?;
 
     // Resolve address snapshots: prefer provided snapshots; if empty and IDs provided, load from DB
-    let resolve_snapshot = |
-        snap: &InvoiceAddress,
-        maybe_id: Option<Uuid>,
-    | -> (Option<Uuid>, InvoiceAddress) {
-        // Determine if snapshot is effectively empty (all fields None or empty strings)
-        let is_empty = snap.name.as_deref().map_or(true, |s| s.trim().is_empty())
-            && snap.attention.as_deref().map_or(true, |s| s.trim().is_empty())
-            && snap.address_line1.as_deref().map_or(true, |s| s.trim().is_empty())
-            && snap.address_line2.as_deref().map_or(true, |s| s.trim().is_empty())
-            && snap.city.as_deref().map_or(true, |s| s.trim().is_empty())
-            && snap.state_province.as_deref().map_or(true, |s| s.trim().is_empty())
-            && snap.postal_code.as_deref().map_or(true, |s| s.trim().is_empty())
-            && snap.country.as_deref().map_or(true, |s| s.trim().is_empty());
-        (maybe_id, if is_empty { InvoiceAddress::default() } else { snap.clone() })
-    };
+    let resolve_snapshot =
+        |snap: &InvoiceAddress, maybe_id: Option<Uuid>| -> (Option<Uuid>, InvoiceAddress) {
+            // Determine if snapshot is effectively empty (all fields None or empty strings)
+            let is_empty = snap.name.as_deref().map_or(true, |s| s.trim().is_empty())
+                && snap
+                    .attention
+                    .as_deref()
+                    .map_or(true, |s| s.trim().is_empty())
+                && snap
+                    .address_line1
+                    .as_deref()
+                    .map_or(true, |s| s.trim().is_empty())
+                && snap
+                    .address_line2
+                    .as_deref()
+                    .map_or(true, |s| s.trim().is_empty())
+                && snap.city.as_deref().map_or(true, |s| s.trim().is_empty())
+                && snap
+                    .state_province
+                    .as_deref()
+                    .map_or(true, |s| s.trim().is_empty())
+                && snap
+                    .postal_code
+                    .as_deref()
+                    .map_or(true, |s| s.trim().is_empty())
+                && snap
+                    .country
+                    .as_deref()
+                    .map_or(true, |s| s.trim().is_empty());
+            (
+                maybe_id,
+                if is_empty {
+                    InvoiceAddress::default()
+                } else {
+                    snap.clone()
+                },
+            )
+        };
 
     let (billing_id, mut bill_to_snap) = resolve_snapshot(&req.bill_to, req.billing_address_id);
     let (shipping_id, mut ship_to_snap) = resolve_snapshot(&req.ship_to, req.shipping_address_id);
@@ -81,16 +111,28 @@ pub(crate) async fn create_draft_invoice(
         match row {
             Some(r) => {
                 // Only fill missing fields, allow frontend overrides to take precedence
-                if target.address_line1.as_deref().map_or(true, |s| s.is_empty()) {
+                if target
+                    .address_line1
+                    .as_deref()
+                    .map_or(true, |s| s.is_empty())
+                {
                     target.address_line1 = Some(r.get::<String, _>("address_line1"));
                 }
-                if target.address_line2.as_deref().map_or(true, |s| s.is_empty()) {
+                if target
+                    .address_line2
+                    .as_deref()
+                    .map_or(true, |s| s.is_empty())
+                {
                     target.address_line2 = r.try_get::<String, _>("address_line2").ok();
                 }
                 if target.city.as_deref().map_or(true, |s| s.is_empty()) {
                     target.city = r.try_get::<String, _>("city").ok();
                 }
-                if target.state_province.as_deref().map_or(true, |s| s.is_empty()) {
+                if target
+                    .state_province
+                    .as_deref()
+                    .map_or(true, |s| s.is_empty())
+                {
                     target.state_province = r.try_get::<String, _>("state_province").ok();
                 }
                 if target.postal_code.as_deref().map_or(true, |s| s.is_empty()) {
@@ -166,16 +208,16 @@ pub(crate) async fn create_draft_invoice(
     Ok(invoice)
 }
 
-
 pub(crate) async fn update_sales_invoice(
     pool: &mut PgConnection,
     org_id: Uuid,
     req: &shared_core::sales::requests::sales_invoice::UpdateSalesInvoiceRequest,
 ) -> Result<SalesInvoice, ApiError> {
     // 1. Fetch current record first to verify ownership tenancy & structural lock eligibility
-    let current_invoice = sales_invoice_db::get_sales_invoice_with_lines(&mut *pool, req.id, org_id)
-        .await?
-        .ok_or_else(|| ApiError::NotFound("Sales invoice not found.".to_string()))?;
+    let current_invoice =
+        sales_invoice_db::get_sales_invoice_with_lines(&mut *pool, req.id, org_id)
+            .await?
+            .ok_or_else(|| ApiError::NotFound("Sales invoice not found.".to_string()))?;
 
     if current_invoice.org_id != org_id {
         return Err(ApiError::Forbidden(
@@ -194,9 +236,12 @@ pub(crate) async fn update_sales_invoice(
     sales_invoice_db::update_sales_invoice(&mut *pool, org_id, req).await?;
 
     // 3. Fetch and return the freshly updated invoice record layout matching our web UI view loop
-    let updated_invoice = sales_invoice_db::get_sales_invoice_with_lines(&mut *pool, req.id, org_id)
-        .await?
-        .ok_or_else(|| ApiError::NotFound("Failed to retrieve updated invoice details.".to_string()))?;
+    let updated_invoice =
+        sales_invoice_db::get_sales_invoice_with_lines(&mut *pool, req.id, org_id)
+            .await?
+            .ok_or_else(|| {
+                ApiError::NotFound("Failed to retrieve updated invoice details.".to_string())
+            })?;
 
     Ok(updated_invoice)
 }
@@ -207,7 +252,6 @@ pub(crate) async fn update_invoice_lines(
     invoice_id: Uuid,
     lines: &[SalesInvoiceLine],
 ) -> Result<SalesInvoice, ApiError> {
-
     let mut invoice = sales_invoice_db::get_sales_invoice_with_lines(pool, invoice_id, org_id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Invoice not found.".to_string()))?;
@@ -269,13 +313,7 @@ pub(crate) async fn get_sales_invoices(
     statuses: Option<Vec<InvoiceStatus>>,
 ) -> Result<Vec<SalesInvoiceListItem>, ApiError> {
     let items = sales_invoice_db::list_sales_invoices(
-        pool,
-        org_id,
-        start_date,
-        end_date,
-        partner_id,
-        min_amount,
-        statuses,
+        pool, org_id, start_date, end_date, partner_id, min_amount, statuses,
     )
     .await?;
     Ok(items)

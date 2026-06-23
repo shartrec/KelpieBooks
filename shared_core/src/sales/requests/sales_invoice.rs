@@ -7,11 +7,11 @@
  */
 
 
+use crate::sales::models::invoice_address::InvoiceAddress;
+use crate::sales::models::sales_invoice_item::SalesInvoiceLine;
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::sales::models::sales_invoice_item::SalesInvoiceLine;
-use crate::sales::models::invoice_address::InvoiceAddress;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateSalesInvoiceRequest {
@@ -36,11 +36,11 @@ pub struct UpdateSalesInvoiceRequest {
     pub issue_date: NaiveDate,
     pub due_date: NaiveDate,
 
-    // // Optional references to saved partner addresses used to populate the snapshots
-    // pub billing_address_id: Option<Uuid>,
-    // pub shipping_address_id: Option<Uuid>,
-    //
-    // // Snapshots stored on the invoice (overridable by user per-invoice)
-    // pub bill_to: InvoiceAddress,
-    // pub ship_to: InvoiceAddress,
+    // Optional references to saved partner addresses used to populate the snapshots
+    pub billing_address_id: Option<Uuid>,
+    pub shipping_address_id: Option<Uuid>,
+
+    // Snapshots stored on the invoice (overridable by user per-invoice)
+    pub bill_to: InvoiceAddress,
+    pub ship_to: InvoiceAddress,
 }

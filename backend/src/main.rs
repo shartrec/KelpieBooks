@@ -7,15 +7,6 @@
  */
 #![forbid(unsafe_code)]
 
-use std::env;
-use std::path::PathBuf;
-use log::error;
-use rocket::{fairing::AdHoc, fs::{
-    relative,
-    FileServer,
-    NamedFile,
-}, get, routes, Build, Rocket};
-use rocket_db_pools::Database;
 use core::routes::{
     configurations,
     dashboard,
@@ -27,6 +18,26 @@ use core::routes::{
     security as security_routes,
     users,
 };
+use std::{
+    env,
+    path::PathBuf,
+};
+
+use log::error;
+use rocket::{
+    fairing::AdHoc,
+    fs::{
+        relative,
+        FileServer,
+        NamedFile,
+    },
+    get,
+    routes,
+    Build,
+    Rocket,
+};
+use rocket_db_pools::Database;
+
 use crate::util::logging::setup_logging;
 
 #[cfg(feature = "ledger")]
@@ -38,10 +49,10 @@ pub(crate) mod payables;
 #[cfg(feature = "sales")]
 pub mod sales;
 
+pub mod config;
+pub mod core;
 pub(crate) mod security;
 mod util;
-pub mod core;
-pub mod config;
 
 #[derive(Database)]
 #[database("kelpie_db")]

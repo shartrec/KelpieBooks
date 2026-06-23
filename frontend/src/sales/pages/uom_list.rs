@@ -7,9 +7,12 @@
  */
 
 use yew::prelude::*;
-use crate::core::components::layout::Layout;
-use crate::contexts::locale_context::use_locale;
-use crate::sales::components::uom_list_table::UomListTable;
+
+use crate::{
+    contexts::locale_context::use_locale,
+    core::components::layout::Layout,
+    sales::components::uom_list_table::UomListTable,
+};
 
 #[function_component(UomListPage)]
 pub fn uom_list_page() -> Html {

@@ -6,12 +6,20 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use yew::prelude::*;
 use shared_core::sales::models::tax::TaxCategory;
-use crate::core::components::layout::Layout;
-use crate::contexts::locale_context::use_locale;
-use crate::sales::components::tax_category_list_table::TaxCategoryListTable;
-use crate::sales::components::tax_category_drawer::tax_category_drawer::{TaxCategoryDrawer, Tab};
+use yew::prelude::*;
+
+use crate::{
+    contexts::locale_context::use_locale,
+    core::components::layout::Layout,
+    sales::components::{
+        tax_category_drawer::tax_category_drawer::{
+            Tab,
+            TaxCategoryDrawer,
+        },
+        tax_category_list_table::TaxCategoryListTable,
+    },
+};
 
 #[function_component(TaxCategoryListPage)]
 pub fn tax_category_list_page() -> Html {

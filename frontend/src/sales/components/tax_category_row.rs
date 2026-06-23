@@ -6,11 +6,16 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    sales::models::tax::TaxCategory,
+};
 use yew::prelude::*;
-use shared_core::sales::models::tax::TaxCategory;
-use crate::contexts::locale_context::use_locale;
-use shared_core::core::models::auth::SystemPrivilege;
-use crate::contexts::auth_context::use_user_context;
+
+use crate::contexts::{
+    auth_context::use_user_context,
+    locale_context::use_locale,
+};
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct TaxCategoryRowProps {

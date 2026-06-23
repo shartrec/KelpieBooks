@@ -8,24 +8,27 @@
 use fluent::fluent_args;
 use log::info;
 use rust_decimal::Decimal;
-use shared_core::sales::{
-    models::{
-        sales_invoice_item::SalesInvoiceLine,
-        item::Item,
-        tax::TaxRate, // Import TaxRate
-    },
+use shared_core::sales::models::{
+    item::Item,
+    sales_invoice_item::SalesInvoiceLine,
+    tax::TaxRate, // Import TaxRate
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::hooks::use_navigator;
+
 use crate::{
-    core::components::currency_input::DecimalInput,
-    contexts::locale_context::use_locale,
+    api::Api,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    core::components::{
+        currency_input::DecimalInput,
+        progressive_search::ProgressiveSearch,
+        SearchableItem,
+    },
 };
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
-use crate::core::components::progressive_search::ProgressiveSearch;
-use crate::core::components::SearchableItem;
 
 #[derive(Properties, PartialEq)]
 pub struct SalesInvoiceItemRowProps {
@@ -59,7 +62,7 @@ pub fn sales_invoice_item_row(props: &SalesInvoiceItemRowProps) -> Html {
         let user_ctx = user_ctx.clone();
         let i18n = i18n.clone();
         let navigator = navigator.clone();
-        Callback::from(move | text: String| {
+        Callback::from(move |text: String| {
             item_search.set(text.clone());
             let items = items.clone();
             let error = error.clone();
@@ -70,17 +73,16 @@ pub fn sales_invoice_item_row(props: &SalesInvoiceItemRowProps) -> Html {
                 let fetched_items = Api::get(
                     &format!("/api/sales/items?search_term={}&limit=20", text),
                     user_ctx,
-                    navigator
-                ).await;
+                    navigator,
+                )
+                .await;
                 match fetched_items {
-                    Ok(response) if response.ok() => {
-                        match response.json::<Vec<Item>>().await {
-                            Ok(data) => items.set(data),
-                            Err(e) => error.set(Some(i18n.t_args(
-                                "new-sales-invoice-error-parse-items",
-                                &fluent_args!["error" => e.to_string()],
-                            ))),
-                        }
+                    Ok(response) if response.ok() => match response.json::<Vec<Item>>().await {
+                        Ok(data) => items.set(data),
+                        Err(e) => error.set(Some(i18n.t_args(
+                            "new-sales-invoice-error-parse-items",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     },
                     Ok(response) => error.set(Some(i18n.t_args(
                         "new-sales-invoice-error-fetch-items",
@@ -104,7 +106,7 @@ pub fn sales_invoice_item_row(props: &SalesInvoiceItemRowProps) -> Html {
         let error = error.clone(); // Clone error for the async block
         let i18n = i18n.clone(); // Clone i18n for the async block
 
-        Callback::from(move |selected_item: Item | {
+        Callback::from(move |selected_item: Item| {
             item_search.set(selected_item.display_label());
 
             let mut new_item = item.clone();
@@ -127,24 +129,28 @@ pub fn sales_invoice_item_row(props: &SalesInvoiceItemRowProps) -> Html {
                     let fetched_tax_rate = Api::get(
                         &format!("/api/sales/tax-categories/{}/current-rate", tax_category_id),
                         user_ctx,
-                        navigator
-                    ).await;
+                        navigator,
+                    )
+                    .await;
 
                     match fetched_tax_rate {
                         Ok(response) if response.ok() => {
                             match response.json::<Option<TaxRate>>().await {
                                 Ok(Some(tax_rate_data)) => {
                                     new_item.tax_rate = tax_rate_data.rate;
-                                },
+                                }
                                 Ok(None) => {
-                                    info!("No current tax rate found for category {}", tax_category_id);
-                                },
+                                    info!(
+                                        "No current tax rate found for category {}",
+                                        tax_category_id
+                                    );
+                                }
                                 Err(e) => error.set(Some(i18n.t_args(
                                     "new-sales-invoice-error-parse-tax-rate",
                                     &fluent_args!["error" => e.to_string()],
                                 ))),
                             }
-                        },
+                        }
                         Ok(response) => error.set(Some(i18n.t_args(
                             "new-sales-invoice-error-fetch-tax-rate",
                             &fluent_args!["status" => response.status()],
@@ -158,7 +164,8 @@ pub fn sales_invoice_item_row(props: &SalesInvoiceItemRowProps) -> Html {
 
                 // Recalculate line_total and tax_amount
                 new_item.line_total = new_item.quantity * new_item.unit_price;
-                new_item.tax_amount = new_item.line_total * (new_item.tax_rate / Decimal::new(100, 0));
+                new_item.tax_amount =
+                    new_item.line_total * (new_item.tax_rate / Decimal::new(100, 0));
 
                 on_change.emit(new_item);
                 items.set(vec![]);

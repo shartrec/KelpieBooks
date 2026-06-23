@@ -6,19 +6,31 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection};
-use shared_core::sales::models::item::{Item, UnitOfMeasure, ItemType};
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+};
+use shared_core::sales::{
+    models::item::{
+        Item,
+        ItemType,
+        UnitOfMeasure,
+    },
+    requests::item::CreateItemRequest,
+};
 use uuid::Uuid;
-use shared_core::sales::requests::item::CreateItemRequest;
 
-pub(crate) async fn get_active_uoms(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<UnitOfMeasure>, sqlx::Error> {
+pub(crate) async fn get_active_uoms(
+    conn: &mut PgConnection,
+    org_id: Uuid,
+) -> Result<Vec<UnitOfMeasure>, sqlx::Error> {
     sqlx::query_as::<_, UnitOfMeasure>(
         r#"SELECT id, organization_id ,code, name, is_active FROM units_of_measure
-                             WHERE organization_id = $1 AND is_active = true ORDER BY name ASC"#
-        )
-        .bind(org_id)
-        .fetch_all(conn)
-        .await
+                             WHERE organization_id = $1 AND is_active = true ORDER BY name ASC"#,
+    )
+    .bind(org_id)
+    .fetch_all(conn)
+    .await
 }
 
 pub async fn all(
@@ -63,7 +75,11 @@ pub async fn all(
     query_builder.fetch_all(conn).await
 }
 
-pub async fn get(conn: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<Option<Item>, sqlx::Error> {
+pub async fn get(
+    conn: &mut PgConnection,
+    id: Uuid,
+    org_id: Uuid,
+) -> Result<Option<Item>, sqlx::Error> {
     sqlx::query_as::<_, Item>("SELECT * FROM items WHERE id = $1 AND organization_id = $2")
         .bind(id)
         .bind(org_id)
@@ -71,7 +87,11 @@ pub async fn get(conn: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<Opti
         .await
 }
 
-pub async fn create(conn: &mut PgConnection, org_id: Uuid, item: &CreateItemRequest) -> Result<Item, sqlx::Error> {
+pub async fn create(
+    conn: &mut PgConnection,
+    org_id: Uuid,
+    item: &CreateItemRequest,
+) -> Result<Item, sqlx::Error> {
     sqlx::query_as::<_, Item>(
         r#"INSERT INTO items (
                id, organization_id, code, name, description, item_type, uom_id, unit_price, income_account_id, tax_category_id, is_active)
@@ -91,7 +111,12 @@ pub async fn create(conn: &mut PgConnection, org_id: Uuid, item: &CreateItemRequ
         .await
 }
 
-pub async fn update(conn: &mut PgConnection, id: Uuid, org_id: Uuid, item: &Item) -> Result<Item, sqlx::Error> {
+pub async fn update(
+    conn: &mut PgConnection,
+    id: Uuid,
+    org_id: Uuid,
+    item: &Item,
+) -> Result<Item, sqlx::Error> {
     sqlx::query_as::<_, Item>(
         r#"UPDATE items SET
                  code = $1,
@@ -103,19 +128,19 @@ pub async fn update(conn: &mut PgConnection, id: Uuid, org_id: Uuid, item: &Item
                  income_account_id = $7,
                  tax_category_id = $8,
                  is_active = $9
-             WHERE id = $10 AND organization_id = $11 RETURNING *"#)
-        .bind(&item.code)
-        .bind(&item.name)
-        .bind(&item.description)
-        .bind(&item.item_type)
-        .bind(&item.uom_id)
-        .bind(&item.unit_price)
-        .bind(&item.income_account_id)
-        .bind(&item.tax_category_id)
-        .bind(&item.is_active)
-        .bind(&id)
-        .bind(&org_id)
-
+             WHERE id = $10 AND organization_id = $11 RETURNING *"#,
+    )
+    .bind(&item.code)
+    .bind(&item.name)
+    .bind(&item.description)
+    .bind(&item.item_type)
+    .bind(&item.uom_id)
+    .bind(&item.unit_price)
+    .bind(&item.income_account_id)
+    .bind(&item.tax_category_id)
+    .bind(&item.is_active)
+    .bind(&id)
+    .bind(&org_id)
     .fetch_one(conn)
     .await
 }

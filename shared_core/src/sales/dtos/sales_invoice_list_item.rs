@@ -6,11 +6,11 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+use crate::sales::models::invoice_status::InvoiceStatus;
 use chrono::NaiveDate;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::sales::models::invoice_status::InvoiceStatus;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SalesInvoiceListItem {

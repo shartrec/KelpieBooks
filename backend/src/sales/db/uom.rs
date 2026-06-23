@@ -6,7 +6,10 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection};
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+};
 use shared_core::sales::models::item::UnitOfMeasure;
 use uuid::Uuid;
 
@@ -17,7 +20,11 @@ pub async fn all(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<UnitOfMeas
         .await
 }
 
-pub async fn get(conn: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<Option<UnitOfMeasure>, sqlx::Error> {
+pub async fn get(
+    conn: &mut PgConnection,
+    id: Uuid,
+    org_id: Uuid,
+) -> Result<Option<UnitOfMeasure>, sqlx::Error> {
     sqlx::query_as("SELECT * FROM units_of_measure WHERE id = $1 AND organization_id = $2")
         .bind(id)
         .bind(org_id)
@@ -25,7 +32,11 @@ pub async fn get(conn: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<Opti
         .await
 }
 
-pub async fn create(conn: &mut PgConnection, org_id: Uuid, uom: &UnitOfMeasure) -> Result<UnitOfMeasure, sqlx::Error> {
+pub async fn create(
+    conn: &mut PgConnection,
+    org_id: Uuid,
+    uom: &UnitOfMeasure,
+) -> Result<UnitOfMeasure, sqlx::Error> {
     sqlx::query_as(
         "INSERT INTO units_of_measure (id, organization_id, code, name, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING *",
     )
@@ -38,7 +49,12 @@ pub async fn create(conn: &mut PgConnection, org_id: Uuid, uom: &UnitOfMeasure) 
     .await
 }
 
-pub async fn update(conn: &mut PgConnection, id: Uuid, org_id: Uuid, uom: &UnitOfMeasure) -> Result<UnitOfMeasure, sqlx::Error> {
+pub async fn update(
+    conn: &mut PgConnection,
+    id: Uuid,
+    org_id: Uuid,
+    uom: &UnitOfMeasure,
+) -> Result<UnitOfMeasure, sqlx::Error> {
     sqlx::query_as(
         "UPDATE units_of_measure SET code = $1, name = $2, is_active = $3 WHERE id = $4 AND organization_id = $5 RETURNING *",
     )
@@ -51,7 +67,11 @@ pub async fn update(conn: &mut PgConnection, id: Uuid, org_id: Uuid, uom: &UnitO
     .await
 }
 
-pub async fn delete(conn: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
+pub async fn delete(
+    conn: &mut PgConnection,
+    id: Uuid,
+    org_id: Uuid,
+) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
     sqlx::query("DELETE FROM units_of_measure WHERE id = $1 AND organization_id = $2")
         .bind(id)
         .bind(org_id)

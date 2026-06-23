@@ -6,12 +6,17 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use yew::prelude::*;
 use shared_core::sales::models::tax::TaxCategory;
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::use_locale;
+use yew::prelude::*;
 use yew_router::prelude::use_navigator;
+
+use crate::{
+    api::Api,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+};
 
 #[derive(Properties, PartialEq)]
 pub struct EditTaxCategoryModalProps {
@@ -32,7 +37,9 @@ pub fn edit_tax_category_modal(props: &EditTaxCategoryModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: InputEvent| {
             let mut info = (*state).clone();
-            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
             field_updater(&mut info, value);
             state.set(info);
         })
@@ -42,7 +49,9 @@ pub fn edit_tax_category_modal(props: &EditTaxCategoryModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: Event| {
             let mut info = (*state).clone();
-            info.is_active = e.target_unchecked_into::<web_sys::HtmlInputElement>().checked();
+            info.is_active = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .checked();
             state.set(info);
         })
     };
@@ -59,7 +68,13 @@ pub fn edit_tax_category_modal(props: &EditTaxCategoryModalProps) -> Html {
             let user_ctx = user_ctx.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let resp = Api::put(&format!("/api/sales/tax-categories/{}", request.id), &*request, user_ctx, navigator).await;
+                let resp = Api::put(
+                    &format!("/api/sales/tax-categories/{}", request.id),
+                    &*request,
+                    user_ctx,
+                    navigator,
+                )
+                .await;
                 if resp.is_ok() {
                     on_submit.emit(());
                 }

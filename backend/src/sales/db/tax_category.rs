@@ -6,11 +6,17 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket_db_pools::sqlx::{self, PgConnection};
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+};
 use shared_core::sales::models::tax::TaxCategory;
 use uuid::Uuid;
 
-pub(crate) async fn get_active_tax_categories(pool: &mut PgConnection, org_id: Uuid) -> Result<Vec<TaxCategory>, sqlx::Error> {
+pub(crate) async fn get_active_tax_categories(
+    pool: &mut PgConnection,
+    org_id: Uuid,
+) -> Result<Vec<TaxCategory>, sqlx::Error> {
     sqlx::query_as(
         r#"SELECT c.id, c.organization_id, c.name, c.description, r.rate, c.is_active FROM tax_categories c, tax_rates r
                  WHERE c.organization_id = $1 AND is_active = true
@@ -31,7 +37,11 @@ pub async fn all(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<TaxCategor
         .await
 }
 
-pub async fn get(conn: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<Option<TaxCategory>, sqlx::Error> {
+pub async fn get(
+    conn: &mut PgConnection,
+    id: Uuid,
+    org_id: Uuid,
+) -> Result<Option<TaxCategory>, sqlx::Error> {
     sqlx::query_as("SELECT * FROM tax_categories WHERE id = $1 AND organization_id = $2")
         .bind(id)
         .bind(org_id)
@@ -39,7 +49,11 @@ pub async fn get(conn: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<Opti
         .await
 }
 
-pub async fn create(conn: &mut PgConnection, org_id: Uuid, tax_category: &TaxCategory) -> Result<TaxCategory, sqlx::Error> {
+pub async fn create(
+    conn: &mut PgConnection,
+    org_id: Uuid,
+    tax_category: &TaxCategory,
+) -> Result<TaxCategory, sqlx::Error> {
     sqlx::query_as(
         "INSERT INTO tax_categories (id, organization_id, name, description, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING *",
     )
@@ -52,7 +66,12 @@ pub async fn create(conn: &mut PgConnection, org_id: Uuid, tax_category: &TaxCat
     .await
 }
 
-pub async fn update(conn: &mut PgConnection, id: Uuid, org_id: Uuid, tax_category: &TaxCategory) -> Result<TaxCategory, sqlx::Error> {
+pub async fn update(
+    conn: &mut PgConnection,
+    id: Uuid,
+    org_id: Uuid,
+    tax_category: &TaxCategory,
+) -> Result<TaxCategory, sqlx::Error> {
     sqlx::query_as(
         "UPDATE tax_categories SET name = $1, description = $2, is_active = $3 WHERE id = $4 AND organization_id = $5 RETURNING *",
     )

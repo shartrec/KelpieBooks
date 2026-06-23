@@ -9,15 +9,20 @@
 use std::collections::HashMap;
 
 use fluent::fluent_args;
-use shared_core::ledger::models::{
-    account::Account,
-    system_tag::SystemTag,
+use shared_core::{
+    core::models::organization::Organization,
+    ledger::{
+        models::{
+            account::Account,
+            system_tag::SystemTag,
+        },
+        requests::configuration::UpdateConfigurationRequest,
+    },
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::core::models::organization::Organization;
-use shared_core::ledger::requests::configuration::UpdateConfigurationRequest;
+
 use crate::{
     api::Api,
     contexts::{

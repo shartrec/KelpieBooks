@@ -16,7 +16,10 @@ use chrono::{
     NaiveDate,
 };
 use rocket_db_pools::sqlx::PgConnection;
-use rust_decimal::{dec, Decimal};
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use shared_core::ledger::{
     dtos::{
         account_with_balance::AccountWithBalance,
@@ -27,12 +30,16 @@ use shared_core::ledger::{
         account_category::AccountCategory,
         system_tag::SystemTag,
     },
-    requests::transaction::CreateTransactionRequest,
+    requests::{
+        configuration::UpdateConfigurationRequest,
+        transaction::CreateTransactionRequest,
+    },
 };
 use sqlx::Acquire;
 use uuid::Uuid;
-use shared_core::ledger::requests::configuration::UpdateConfigurationRequest;
+
 use crate::{
+    core::db,
     ledger::db::{
         account,
         account::{
@@ -45,7 +52,6 @@ use crate::{
     },
     util::ApiError,
 };
-use crate::core::db;
 
 pub(crate) async fn get_accounts(
     pool: &mut PgConnection,

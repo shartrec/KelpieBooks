@@ -8,24 +8,31 @@
 
 // backend/src/services/onboarding.rs
 
-use shared_core::core::requests::onboard::OnboardingRequest;
+use shared_core::core::{
+    models::{
+        auth::SystemPrivilege,
+        user::User,
+    },
+    requests::onboard::OnboardingRequest,
+};
 use sqlx::{
     Acquire,
     PgConnection,
     Postgres,
     Transaction,
 };
-use shared_core::core::models::{
-    auth::SystemPrivilege,
-    user::User,
+
+use crate::{
+    core::{
+        db::{
+            organization as db_org,
+            roles as db_role,
+            user as db_user,
+        },
+        routes::security::hash_pwd,
+    },
+    util::ApiError,
 };
-use crate::core::db::{
-    organization as db_org,
-    roles as db_role,
-    user as db_user,
-};
-use crate::core::routes::security::hash_pwd;
-use crate::util::ApiError;
 
 pub(crate) async fn bootstrap_tenant_organization(
     pool: &mut PgConnection,

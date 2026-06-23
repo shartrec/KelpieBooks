@@ -14,6 +14,7 @@ use yew::{
     prelude::*,
 };
 use yew_router::prelude::Link;
+
 use crate::{
     contexts::locale_context::use_locale,
     router::Route,

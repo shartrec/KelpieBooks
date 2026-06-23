@@ -6,10 +6,16 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use yew::prelude::*;
-use crate::sales::contexts::item_filter_context::{use_item_filter, ItemFilterAction};
 use shared_core::sales::models::item::ItemType;
-use crate::contexts::locale_context::use_locale;
+use yew::prelude::*;
+
+use crate::{
+    contexts::locale_context::use_locale,
+    sales::contexts::item_filter_context::{
+        use_item_filter,
+        ItemFilterAction,
+    },
+};
 
 #[function_component(ItemFilter)]
 pub fn item_filter() -> Html {
@@ -19,7 +25,9 @@ pub fn item_filter() -> Html {
     let on_search_change = {
         let filter_ctx = filter_ctx.clone();
         Callback::from(move |e: InputEvent| {
-            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
             filter_ctx.dispatch(ItemFilterAction::SetSearchTerm(value));
         })
     };
@@ -27,7 +35,9 @@ pub fn item_filter() -> Html {
     let on_item_type_change = {
         let filter_ctx = filter_ctx.clone();
         Callback::from(move |e: Event| {
-            let value = e.target_unchecked_into::<web_sys::HtmlSelectElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlSelectElement>()
+                .value();
             let item_type = match value.as_str() {
                 "Stocked" => Some(ItemType::Stocked),
                 "NonStocked" => Some(ItemType::NonStocked),
@@ -41,7 +51,9 @@ pub fn item_filter() -> Html {
     let on_include_inactive_change = {
         let filter_ctx = filter_ctx.clone();
         Callback::from(move |e: Event| {
-            let checked = e.target_unchecked_into::<web_sys::HtmlInputElement>().checked();
+            let checked = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .checked();
             filter_ctx.dispatch(ItemFilterAction::SetIncludeInactive(checked));
         })
     };
@@ -49,7 +61,9 @@ pub fn item_filter() -> Html {
     let on_limit_change = {
         let filter_ctx = filter_ctx.clone();
         Callback::from(move |e: Event| {
-            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
             if let Ok(limit) = value.parse::<u32>() {
                 filter_ctx.dispatch(ItemFilterAction::SetLimit(limit));
             }

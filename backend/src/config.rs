@@ -6,11 +6,15 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use serde::Deserialize;
-use std::{env, fs};
-use std::path::PathBuf;
-use std::sync::OnceLock;
+use std::{
+    env,
+    fs,
+    path::PathBuf,
+    sync::OnceLock,
+};
+
 use rocket::fs::relative;
+use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct SmtpConfig {

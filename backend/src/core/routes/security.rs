@@ -11,8 +11,16 @@ use base64::{
     engine::general_purpose,
     Engine as _,
 };
-use bcrypt::{hash, verify, BcryptError, DEFAULT_COST};
-use chrono::{Utc, Duration};
+use bcrypt::{
+    hash,
+    verify,
+    BcryptError,
+    DEFAULT_COST,
+};
+use chrono::{
+    Duration,
+    Utc,
+};
 use jsonwebtoken::{
     decode,
     encode,
@@ -23,10 +31,14 @@ use jsonwebtoken::{
     TokenData,
     Validation,
 };
-use log::{error, log};
+use log::{
+    error,
+    log,
+};
 use rand::{
     rngs::OsRng,
-    RngCore, thread_rng,
+    thread_rng,
+    RngCore,
 };
 use rocket::{
     get,
@@ -50,20 +62,27 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::core::requests::auth::{ForgotPasswordRequest, LoginRequest, ResetPasswordSubmit};
-use uuid::Uuid;
-use shared_core::core::dtos::user_detail::AuthUserDetail;
-use shared_core::core::models::role::Role;
-use crate::{
-    util::ApiError,
-    DbKelpie,
+use shared_core::core::{
+    dtos::user_detail::AuthUserDetail,
+    models::role::Role,
+    requests::auth::{
+        ForgotPasswordRequest,
+        LoginRequest,
+        ResetPasswordSubmit,
+    },
 };
-use crate::config::load_config;
-use crate::core::db::user;
+use uuid::Uuid;
+
 #[cfg(feature = "password-reset")]
 use crate::core::db::password_reset;
 #[cfg(feature = "email")]
 use crate::core::services::email_service;
+use crate::{
+    config::load_config,
+    core::db::user,
+    util::ApiError,
+    DbKelpie,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     let mut routes = routes![login, me, logout];
@@ -85,8 +104,7 @@ async fn login(
 
     match db_user {
         Ok(Some(user)) => {
-            let valid =
-                verify(&login_request.password_raw, &user.password_hash).unwrap_or(false);
+            let valid = verify(&login_request.password_raw, &user.password_hash).unwrap_or(false);
             if !valid {
                 return Err(Status::Unauthorized);
             }
@@ -162,7 +180,10 @@ fn logout(cookies: &CookieJar<'_>) -> Status {
 
 #[cfg(feature = "email")]
 #[post("/api/auth/forgot-password", data = "<payload>")]
-async fn forgot_password(mut conn: Connection<DbKelpie>, payload: Json<ForgotPasswordRequest>) -> Status {
+async fn forgot_password(
+    mut conn: Connection<DbKelpie>,
+    payload: Json<ForgotPasswordRequest>,
+) -> Status {
     let email = &payload.email;
 
     // 1. Check if the user exists
@@ -177,12 +198,20 @@ async fn forgot_password(mut conn: Connection<DbKelpie>, payload: Json<ForgotPas
         let expires_at = Utc::now() + Duration::minutes(20);
 
         // 4. Save to password_reset_tokens table
-        if let Ok(id) = password_reset::save_reset_token(&mut conn, user.id, &token_hash, expires_at).await {
-
+        if let Ok(id) =
+            password_reset::save_reset_token(&mut conn, user.id, &token_hash, expires_at).await
+        {
             let config = load_config();
 
             // 5. Send the email (ideally queued via a background worker thread)
-            match email_service::send_reset_email(&user.email, id, &raw_token, &config.app.default_locale).await {
+            match email_service::send_reset_email(
+                &user.email,
+                id,
+                &raw_token,
+                &config.app.default_locale,
+            )
+            .await
+            {
                 Ok(_) => {}
                 Err(e) => {
                     error!("Email not sent, Error {}", e);
@@ -200,11 +229,15 @@ async fn forgot_password(mut conn: Connection<DbKelpie>, payload: Json<ForgotPas
 
 #[cfg(feature = "password-reset")]
 #[post("/api/auth/reset-password", data = "<payload>")]
-async fn reset_password(mut db: Connection<DbKelpie>, payload: Json<ResetPasswordSubmit>) -> Result<Status, ApiError> {
+async fn reset_password(
+    mut db: Connection<DbKelpie>,
+    payload: Json<ResetPasswordSubmit>,
+) -> Result<Status, ApiError> {
     let raw_token: String = payload.raw_token.clone().to_string();
 
     // 1. Locate token records that match, aren't expired, and haven't been used yet
-    let token_record = password_reset::find_active_token(&mut db, &payload.id).await?
+    let token_record = password_reset::find_active_token(&mut db, &payload.id)
+        .await?
         .ok_or(ApiError::NotFound("Invalid or expired token".to_string()))?;
 
     if token_record.expires_at < Utc::now() {
@@ -225,7 +258,6 @@ async fn reset_password(mut db: Connection<DbKelpie>, payload: Json<ResetPasswor
     } else {
         return Err(ApiError::BadRequest("Invalid token".to_string()));
     }
-
 }
 
 pub(crate) struct AuthenticatedUser {

@@ -16,9 +16,12 @@ use rocket::{
     serde::json::Json,
 };
 use rocket_db_pools::Connection;
-use shared_core::ledger::models::system_tag::SystemTag;
+use shared_core::ledger::{
+    models::system_tag::SystemTag,
+    requests::configuration::UpdateConfigurationRequest,
+};
 use uuid::Uuid;
-use shared_core::ledger::requests::configuration::UpdateConfigurationRequest;
+
 use crate::{
     ledger::services::account_service,
     security::{

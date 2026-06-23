@@ -16,14 +16,13 @@ use rust_decimal::Decimal;
 use shared_core::sales::{
     dtos::sales_invoice_list_item::SalesInvoiceListItem,
     models::{
+        invoice_address::InvoiceAddress,
         invoice_status::InvoiceStatus,
         sales_invoice::SalesInvoice,
         sales_invoice_item::SalesInvoiceLine,
     },
 };
 use uuid::Uuid;
-use shared_core::sales::models::invoice_address::InvoiceAddress;
-use shared_core::sales::requests::sales_invoice::UpdateSalesInvoiceRequest;
 
 fn from_row_to_sales_invoice(row: &sqlx::postgres::PgRow) -> SalesInvoice {
     let baddr = InvoiceAddress {
@@ -46,7 +45,6 @@ fn from_row_to_sales_invoice(row: &sqlx::postgres::PgRow) -> SalesInvoice {
         postal_code: row.get("ship_to_postal_code"),
         country: row.get("ship_to_country"),
     };
-
 
     SalesInvoice {
         id: row.get("id"),
@@ -330,32 +328,32 @@ pub(crate) async fn update_sales_invoice(
             ship_to_postal_code = $19,
             ship_to_country = $20
         WHERE id = $21 AND organization_id = $22
-        "#
+        "#,
     )
-        .bind(req.issue_date)
-        .bind(req.due_date)
-        .bind(req.billing_address_id)
-        .bind(req.shipping_address_id)
-        .bind(&req.bill_to.name)
-        .bind(&req.bill_to.attention)
-        .bind(&req.bill_to.address_line1)
-        .bind(&req.bill_to.address_line2)
-        .bind(&req.bill_to.city)
-        .bind(&req.bill_to.state_province)
-        .bind(&req.bill_to.postal_code)
-        .bind(&req.bill_to.country)
-        .bind(&req.ship_to.name)
-        .bind(&req.ship_to.attention)
-        .bind(&req.ship_to.address_line1)
-        .bind(&req.ship_to.address_line2)
-        .bind(&req.ship_to.city)
-        .bind(&req.ship_to.state_province)
-        .bind(&req.ship_to.postal_code)
-        .bind(&req.ship_to.country)
-        .bind(req.id)
-        .bind(org_id)
-        .execute(executor)
-        .await?;
+    .bind(req.issue_date)
+    .bind(req.due_date)
+    .bind(req.billing_address_id)
+    .bind(req.shipping_address_id)
+    .bind(&req.bill_to.name)
+    .bind(&req.bill_to.attention)
+    .bind(&req.bill_to.address_line1)
+    .bind(&req.bill_to.address_line2)
+    .bind(&req.bill_to.city)
+    .bind(&req.bill_to.state_province)
+    .bind(&req.bill_to.postal_code)
+    .bind(&req.bill_to.country)
+    .bind(&req.ship_to.name)
+    .bind(&req.ship_to.attention)
+    .bind(&req.ship_to.address_line1)
+    .bind(&req.ship_to.address_line2)
+    .bind(&req.ship_to.city)
+    .bind(&req.ship_to.state_province)
+    .bind(&req.ship_to.postal_code)
+    .bind(&req.ship_to.country)
+    .bind(req.id)
+    .bind(org_id)
+    .execute(executor)
+    .await?;
 
     Ok(())
 }
@@ -406,7 +404,11 @@ pub(crate) async fn list_sales_invoices(
         }
     }
 
-    let where_sql = if conditions.is_empty() { String::new() } else { format!("WHERE {}", conditions.join(" AND ")) };
+    let where_sql = if conditions.is_empty() {
+        String::new()
+    } else {
+        format!("WHERE {}", conditions.join(" AND "))
+    };
 
     let base_sql = format!(
         r#"
@@ -453,6 +455,8 @@ pub(crate) async fn list_sales_invoices(
     }
 
     let rows = query.fetch_all(&mut *pool).await?;
-    Ok(rows.iter().map(from_row_to_sales_invoice_list_item).collect())
-
+    Ok(rows
+        .iter()
+        .map(from_row_to_sales_invoice_list_item)
+        .collect())
 }

@@ -6,18 +6,34 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use rust_decimal::Decimal;
-use yew::prelude::*;
-use shared_core::sales::models::item::{UnitOfMeasure, ItemType};
+use shared_core::{
+    ledger::models::{
+        account::Account,
+        account_category::AccountCategory,
+    },
+    sales::{
+        models::{
+            item::{
+                ItemType,
+                UnitOfMeasure,
+            },
+            tax::TaxCategory,
+        },
+        requests::item::CreateItemRequest,
+    },
+};
 use uuid::Uuid;
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::use_locale;
+use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::ledger::models::account::Account;
-use shared_core::ledger::models::account_category::AccountCategory;
-use shared_core::sales::models::tax::TaxCategory;
-use shared_core::sales::requests::item::CreateItemRequest;
-use crate::core::components::currency_input::DecimalInput;
+
+use crate::{
+    api::Api,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    core::components::currency_input::DecimalInput,
+};
 
 #[derive(Properties, PartialEq)]
 pub struct AddItemModalProps {
@@ -49,18 +65,25 @@ pub fn add_item_modal(props: &AddItemModalProps) -> Html {
             let user_ctx = user_ctx.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                if let Ok(response) = Api::get("/api/sales/uoms", user_ctx.clone(), navigator.clone()).await {
+                if let Ok(response) =
+                    Api::get("/api/sales/uoms", user_ctx.clone(), navigator.clone()).await
+                {
                     if let Ok(data) = response.json::<Vec<UnitOfMeasure>>().await {
                         uoms.set(data);
                     }
                 }
-                let url = format!("/api/accounts_by_category/{}", AccountCategory::Revenue.to_string());
+                let url = format!(
+                    "/api/accounts_by_category/{}",
+                    AccountCategory::Revenue.to_string()
+                );
                 if let Ok(response) = Api::get(&url, user_ctx.clone(), navigator.clone()).await {
                     if let Ok(data) = response.json::<Vec<Account>>().await {
                         income_accounts.set(data);
                     }
                 }
-                if let Ok(response) = Api::get("/api/sales/tax-categories", user_ctx, navigator).await {
+                if let Ok(response) =
+                    Api::get("/api/sales/tax-categories", user_ctx, navigator).await
+                {
                     if let Ok(data) = response.json::<Vec<TaxCategory>>().await {
                         tax_categories.set(data);
                     }
@@ -83,7 +106,9 @@ pub fn add_item_modal(props: &AddItemModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: InputEvent| {
             let mut info = (*state).clone();
-            let value = e.target_unchecked_into::<web_sys::HtmlInputElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
             field_updater(&mut info, value);
             state.set(info);
         })
@@ -93,7 +118,9 @@ pub fn add_item_modal(props: &AddItemModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: Event| {
             let mut info = (*state).clone();
-            let value = e.target_unchecked_into::<web_sys::HtmlSelectElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlSelectElement>()
+                .value();
             if let Ok(id) = Uuid::parse_str(&value) {
                 field_updater(&mut info, id);
                 state.set(info);
@@ -105,7 +132,9 @@ pub fn add_item_modal(props: &AddItemModalProps) -> Html {
         let state = request.clone();
         Callback::from(move |e: Event| {
             let mut info = (*state).clone();
-            let value = e.target_unchecked_into::<web_sys::HtmlSelectElement>().value();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlSelectElement>()
+                .value();
             info.item_type = match value.as_str() {
                 "Stocked" => ItemType::Stocked,
                 "NonStocked" => ItemType::NonStocked,

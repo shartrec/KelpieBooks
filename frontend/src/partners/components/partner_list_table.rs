@@ -8,6 +8,7 @@
 
 use fluent::fluent_args;
 use shared_core::{
+    core::models::auth::SystemPrivilege,
     ledger::models::{
         account::Account,
         account_category::AccountCategory,
@@ -25,20 +26,20 @@ use shared_core::{
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::core::models::auth::SystemPrivilege;
+
 use crate::{
     api::Api,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
+    core::components::delete_confirmation_modal::DeleteConfirmationModal,
     partners::components::{
         add_partner_modal::AddPartnerModal,
         partner_drawer::PartnerDrawer,
         partner_row::PartnerRow,
     },
 };
-use crate::core::components::delete_confirmation_modal::DeleteConfirmationModal;
 
 #[function_component(PartnerListTable)]
 pub fn partner_list_table() -> Html {

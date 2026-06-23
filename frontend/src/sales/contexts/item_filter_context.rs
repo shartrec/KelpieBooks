@@ -7,8 +7,9 @@
  */
 
 use std::rc::Rc;
-use yew::prelude::*;
+
 use shared_core::sales::models::item::ItemType;
+use yew::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct ItemFilterState {

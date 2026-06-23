@@ -20,7 +20,10 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use rust_decimal::{dec, Decimal};
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 #[cfg(feature = "ledger")]
 use shared_core::ledger::{
     dtos::dashboard::FinancialHealth,

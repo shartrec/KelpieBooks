@@ -8,10 +8,13 @@
 
 use std::str::FromStr;
 
-use shared_core::core::requests::user::CreateUserRequest;
+use shared_core::core::{
+    models::role::Role,
+    requests::user::CreateUserRequest,
+};
 use uuid::Uuid;
 use yew::prelude::*;
-use shared_core::core::models::role::Role;
+
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]

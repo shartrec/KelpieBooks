@@ -355,9 +355,9 @@ pub fn format_date_icu(year: i32, month: u32, day: u32, target_locale: Option<&s
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use fluent::fluent_args;
     use rust_decimal::dec;
-    use super::*;
     // Define a clear, readable alias for the Narrow No-Break Space character
     const NNBSP: &str = "\u{202f}";
 

@@ -13,10 +13,6 @@ use yew_router::prelude::*;
 
 use crate::{
     api::Api,
-    core::components::{
-        layout::Layout,
-        report_options::ReportOptions,
-    },
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
@@ -24,6 +20,10 @@ use crate::{
             use_report_context,
             ReportAction,
         },
+    },
+    core::components::{
+        layout::Layout,
+        report_options::ReportOptions,
     },
     router::Route,
 };

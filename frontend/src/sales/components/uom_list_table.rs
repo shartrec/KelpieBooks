@@ -6,18 +6,27 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use yew::prelude::*;
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::use_locale;
 use fluent::fluent_args;
-use shared_core::sales::models::item::UnitOfMeasure;
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    sales::models::item::UnitOfMeasure,
+};
+use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::core::models::auth::SystemPrivilege;
-use crate::sales::components::uom_row::UomRow;
-use crate::sales::components::add_uom_modal::AddUomModal;
-use crate::sales::components::edit_uom_modal::EditUomModal;
-use crate::core::components::delete_confirmation_modal::DeleteConfirmationModal;
+
+use crate::{
+    api::Api,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    core::components::delete_confirmation_modal::DeleteConfirmationModal,
+    sales::components::{
+        add_uom_modal::AddUomModal,
+        edit_uom_modal::EditUomModal,
+        uom_row::UomRow,
+    },
+};
 
 #[function_component(UomListTable)]
 pub fn uom_list_table() -> Html {
@@ -138,7 +147,9 @@ pub fn uom_list_table() -> Html {
             if let Some(uom) = &*uom_to_delete {
                 let uom_id = uom.id;
                 wasm_bindgen_futures::spawn_local(async move {
-                    let resp = Api::delete(&format!("/api/sales/uoms/{}", uom_id), user_ctx, navigator).await;
+                    let resp =
+                        Api::delete(&format!("/api/sales/uoms/{}", uom_id), user_ctx, navigator)
+                            .await;
                     match resp {
                         Ok(r) if r.ok() => {
                             on_submit.emit(());

@@ -6,9 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use std::{
-    collections::HashMap,
-};
+use std::collections::HashMap;
 
 use rocket_db_pools::sqlx::{
     self,
@@ -29,7 +27,6 @@ use shared_core::ledger::{
 use uuid::Uuid;
 
 fn from_row_to_account(row: &sqlx::postgres::PgRow) -> Account {
-
     Account {
         id: row.get("id"),
         organization_id: row.get("organization_id"),
@@ -185,7 +182,8 @@ pub(crate) async fn get_all_by_category(
     organization_id: Uuid,
     categories: &[AccountCategory],
 ) -> Result<Vec<Account>, sqlx::Error> {
-    let mut query = String::from(r#"
+    let mut query = String::from(
+        r#"
         SELECT
             id,
             organization_id,
@@ -199,25 +197,26 @@ pub(crate) async fn get_all_by_category(
             created_at
         FROM accounts
         WHERE organization_id = $1
-        "#);
+        "#,
+    );
     let mut i = 2i32;
-            let or_clauses: Vec<String> = (0..categories.len())
-                .map(|_| {
-                    let clause = format!("category = ${}", i);
-                    i += 1;
-                    clause
-                })
-                .collect();
-            query.push_str(&format!(" AND ({})", or_clauses.join(" OR ")));
+    let or_clauses: Vec<String> = (0..categories.len())
+        .map(|_| {
+            let clause = format!("category = ${}", i);
+            i += 1;
+            clause
+        })
+        .collect();
+    query.push_str(&format!(" AND ({})", or_clauses.join(" OR ")));
 
-    let mut query = sqlx::query(&query)
-        .bind(organization_id);
+    let mut query = sqlx::query(&query).bind(organization_id);
     for category in categories {
         query = query.bind(category);
     }
-    query.fetch_all(pool)
-    .await
-    .map(|rows| rows.iter().map(from_row_to_account).collect())
+    query
+        .fetch_all(pool)
+        .await
+        .map(|rows| rows.iter().map(from_row_to_account).collect())
 }
 
 pub(crate) async fn get_by_system_tag(

@@ -5,10 +5,17 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use rust_decimal::{dec, Decimal};
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
-use crate::contexts::locale_context::{use_locale, LocaleContext};
+
+use crate::contexts::locale_context::{
+    use_locale,
+    LocaleContext,
+};
 
 #[derive(Properties, PartialEq)]
 pub struct DecimalInputProps {

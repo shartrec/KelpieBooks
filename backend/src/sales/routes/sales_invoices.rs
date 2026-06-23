@@ -21,9 +21,15 @@ use shared_core::sales::{
         sales_invoice::SalesInvoice,
         sales_invoice_item::SalesInvoiceLine,
     },
-    requests::sales_invoice,
+    requests::{
+        sales_invoice,
+        sales_invoice::{
+            CreateSalesInvoiceRequest,
+            UpdateSalesInvoiceRequest,
+        },
+    },
 };
-use shared_core::sales::requests::sales_invoice::{CreateSalesInvoiceRequest, UpdateSalesInvoiceRequest};
+
 use crate::{
     sales::services::sales_invoice_service,
     security::{
@@ -32,7 +38,11 @@ use crate::{
         UseSales,
     },
     util::{
-        types::{PathDate, PathUuid, FormSalesInvoiceStatus},
+        types::{
+            FormSalesInvoiceStatus,
+            PathDate,
+            PathUuid,
+        },
         ApiError,
     },
     DbKelpie,
@@ -68,8 +78,7 @@ async fn create_sales_invoice(
 ) -> Result<Json<SalesInvoice>, ApiError> {
     let user = guard.0;
     let new_invoice =
-        sales_invoice_service::create_draft_invoice(&mut pool, user.organization_id, &req)
-            .await?;
+        sales_invoice_service::create_draft_invoice(&mut pool, user.organization_id, &req).await?;
     Ok(Json(new_invoice))
 }
 
@@ -82,8 +91,7 @@ async fn update_sales_invoice(
 ) -> Result<Json<SalesInvoice>, ApiError> {
     let user = guard.0;
     let new_invoice =
-        sales_invoice_service::update_sales_invoice(&mut pool, user.organization_id, &req)
-            .await?;
+        sales_invoice_service::update_sales_invoice(&mut pool, user.organization_id, &req).await?;
     Ok(Json(new_invoice))
 }
 
@@ -110,7 +118,10 @@ async fn get_sales_invoices(
     partner_id: Option<PathUuid>,
     min_amount: Option<Decimal>,
     status: Option<FormSalesInvoiceStatus>,
-) -> Result<Json<Vec<shared_core::sales::dtos::sales_invoice_list_item::SalesInvoiceListItem>>, ApiError> {
+) -> Result<
+    Json<Vec<shared_core::sales::dtos::sales_invoice_list_item::SalesInvoiceListItem>>,
+    ApiError,
+> {
     let user = guard.0;
     let invoices = sales_invoice_service::get_sales_invoices(
         &mut pool,

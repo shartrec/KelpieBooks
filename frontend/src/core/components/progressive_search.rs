@@ -8,6 +8,7 @@
 
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
+
 use super::SearchableItem;
 
 #[derive(Properties, PartialEq)]
@@ -69,12 +70,20 @@ pub fn progressive_search<T: SearchableItem>(props: &Props<T>) -> Html {
             match e.key().as_str() {
                 "ArrowDown" => {
                     e.prevent_default(); // Prevent the text cursor from jumping around
-                    let next_idx = if current_idx >= max_idx { 0 } else { current_idx + 1 };
+                    let next_idx = if current_idx >= max_idx {
+                        0
+                    } else {
+                        current_idx + 1
+                    };
                     active_index.set(next_idx);
                 }
                 "ArrowUp" => {
                     e.prevent_default();
-                    let next_idx = if current_idx <= 0 { max_idx } else { current_idx - 1 };
+                    let next_idx = if current_idx <= 0 {
+                        max_idx
+                    } else {
+                        current_idx - 1
+                    };
                     active_index.set(next_idx);
                 }
                 "Enter" => {
@@ -103,7 +112,8 @@ pub fn progressive_search<T: SearchableItem>(props: &Props<T>) -> Html {
             let dropdown_open = dropdown_open.clone();
             gloo_timers::callback::Timeout::new(150, move || {
                 dropdown_open.set(false);
-            }).forget();
+            })
+            .forget();
         })
     };
 

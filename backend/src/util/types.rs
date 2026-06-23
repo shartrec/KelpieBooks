@@ -6,8 +6,10 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use std::ops::Deref;
-use std::str::FromStr;
+use std::{
+    ops::Deref,
+    str::FromStr,
+};
 
 use chrono::NaiveDate;
 use rocket::{
@@ -18,10 +20,14 @@ use rocket::{
     },
     request::FromParam,
 };
-use shared_core::payables::models::invoice_status::InvoiceStatus;
-use shared_core::sales::models::invoice_status::InvoiceStatus as SalesInvoiceStatus;
+use shared_core::{
+    payables::models::invoice_status::InvoiceStatus,
+    sales::models::{
+        invoice_status::InvoiceStatus as SalesInvoiceStatus,
+        item::ItemType,
+    },
+};
 use uuid::Uuid;
-use shared_core::sales::models::item::ItemType;
 
 /// A newtype wrapper for `Uuid` to implement `FromParam` and satisfy the orphan rule.
 /// This allows Rocket to parse `Uuid` values from URL path segments.

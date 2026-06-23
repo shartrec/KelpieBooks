@@ -16,7 +16,10 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use rust_decimal::{dec, Decimal};
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use shared_core::ledger::{
     dtos::transaction_detail::TransactionDetail,
     requests::transaction::{
@@ -28,6 +31,7 @@ use shared_core::ledger::{
 use sqlx::Acquire;
 
 use crate::{
+    core::db,
     ledger::{
         db::{
             journal_entry,
@@ -46,7 +50,6 @@ use crate::{
     },
     DbKelpie,
 };
-use crate::core::db;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![

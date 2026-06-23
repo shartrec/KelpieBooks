@@ -7,11 +7,18 @@
  */
 
 use yew::prelude::*;
-use crate::core::components::layout::Layout;
-use crate::sales::components::item_list_table::ItemListTable;
-use crate::contexts::locale_context::use_locale;
-use crate::sales::contexts::item_filter_context::ItemFilterProvider;
-use crate::sales::components::item_filter::ItemFilter;
+
+use crate::{
+    contexts::locale_context::use_locale,
+    core::components::layout::Layout,
+    sales::{
+        components::{
+            item_filter::ItemFilter,
+            item_list_table::ItemListTable,
+        },
+        contexts::item_filter_context::ItemFilterProvider,
+    },
+};
 
 #[function_component(ItemListPage)]
 pub fn item_list_page() -> Html {

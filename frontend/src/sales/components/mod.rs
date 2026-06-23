@@ -5,28 +5,31 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+pub mod add_item_modal;
+pub mod add_tax_category_modal;
+pub mod add_uom_modal;
 pub mod edit_item_modal;
+pub mod edit_tax_category_modal;
+pub mod edit_uom_modal;
 pub mod item_filter;
 pub mod item_list_table;
 pub mod item_row;
-pub mod add_item_modal;
-pub mod uom_list_table;
-pub mod uom_row;
-pub mod add_uom_modal;
-pub mod edit_uom_modal;
+pub mod sales_invoice_drawer;
+pub mod sales_invoice_filter;
+pub mod sales_invoice_item_row;
+pub mod sales_invoice_table;
+pub mod tax_category_drawer;
 pub mod tax_category_list_table;
 pub mod tax_category_row;
-pub mod add_tax_category_modal;
-pub mod edit_tax_category_modal;
-pub mod tax_category_drawer;
-pub mod sales_invoice_item_row;
-pub mod sales_invoice_filter;
-pub mod sales_invoice_table;
-pub mod sales_invoice_drawer;
+pub mod uom_list_table;
+pub mod uom_row;
 
 use shared_core::core::models::auth::SystemPrivilege;
-use crate::core::components::sidebar::SidebarModuleContribution;
-use crate::router::Route;
+
+use crate::{
+    core::components::sidebar::SidebarModuleContribution,
+    router::Route,
+};
 
 #[cfg(feature = "sales")]
 pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {

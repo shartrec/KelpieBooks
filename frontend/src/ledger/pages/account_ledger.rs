@@ -13,15 +13,18 @@ use std::{
 
 use fluent::fluent_args;
 use rust_decimal::dec;
-use shared_core::ledger::{
-    dtos::journal_entry_with_balance::JournalEntryWithBalance,
-    models::account::Account,
-    requests::transaction::ReverseTransactionRequest,
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    ledger::{
+        dtos::journal_entry_with_balance::JournalEntryWithBalance,
+        models::account::Account,
+        requests::transaction::ReverseTransactionRequest,
+    },
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::core::models::auth::SystemPrivilege;
+
 use crate::{
     api::Api,
     contexts::{

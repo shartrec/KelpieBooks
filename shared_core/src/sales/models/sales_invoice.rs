@@ -6,9 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use chrono::{
-    NaiveDate,
-};
+use chrono::NaiveDate;
 use rust_decimal::Decimal;
 use serde::{
     Deserialize,
@@ -16,11 +14,11 @@ use serde::{
 };
 use uuid::Uuid;
 
+use crate::sales::models::invoice_address::InvoiceAddress;
 use crate::sales::models::{
     invoice_status::InvoiceStatus,
     sales_invoice_item::SalesInvoiceLine,
 };
-use crate::sales::models::invoice_address::InvoiceAddress;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SalesInvoice {

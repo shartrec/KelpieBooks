@@ -6,13 +6,16 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::core::requests::role::UpdateRoleRequest;
+use shared_core::core::{
+    models::{
+        auth::SystemPrivilege,
+        role::Role,
+    },
+    requests::role::UpdateRoleRequest,
+};
 use uuid::Uuid;
 use yew::prelude::*;
-use shared_core::core::models::{
-    auth::SystemPrivilege,
-    role::Role,
-};
+
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]

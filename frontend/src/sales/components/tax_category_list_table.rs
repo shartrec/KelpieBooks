@@ -6,18 +6,27 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use yew::prelude::*;
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::use_locale;
 use fluent::fluent_args;
-use shared_core::sales::models::tax::TaxCategory;
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    sales::models::tax::TaxCategory,
+};
+use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::core::models::auth::SystemPrivilege;
-use crate::sales::components::tax_category_row::TaxCategoryRow;
-use crate::sales::components::add_tax_category_modal::AddTaxCategoryModal;
-use crate::core::components::delete_confirmation_modal::DeleteConfirmationModal;
-use crate::sales::components::tax_category_drawer::tax_category_drawer::Tab;
+
+use crate::{
+    api::Api,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    core::components::delete_confirmation_modal::DeleteConfirmationModal,
+    sales::components::{
+        add_tax_category_modal::AddTaxCategoryModal,
+        tax_category_drawer::tax_category_drawer::Tab,
+        tax_category_row::TaxCategoryRow,
+    },
+};
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct TaxCategoryListTableProps {
@@ -51,7 +60,8 @@ pub fn tax_category_list_table(props: &TaxCategoryListTableProps) -> Html {
             let navigator = navigator.clone();
             loading.set(true);
             wasm_bindgen_futures::spawn_local(async move {
-                let fetched_tax_categories = Api::get("/api/sales/tax-categories", user_ctx, navigator).await;
+                let fetched_tax_categories =
+                    Api::get("/api/sales/tax-categories", user_ctx, navigator).await;
                 loading.set(false);
                 match fetched_tax_categories {
                     Ok(response) if response.ok() => {
@@ -131,7 +141,12 @@ pub fn tax_category_list_table(props: &TaxCategoryListTableProps) -> Html {
             if let Some(tax_category) = &*tax_category_to_delete {
                 let tax_category_id = tax_category.id;
                 wasm_bindgen_futures::spawn_local(async move {
-                    let resp = Api::delete(&format!("/api/sales/tax-categories/{}", tax_category_id), user_ctx, navigator).await;
+                    let resp = Api::delete(
+                        &format!("/api/sales/tax-categories/{}", tax_category_id),
+                        user_ctx,
+                        navigator,
+                    )
+                    .await;
                     if resp.is_ok() {
                         on_submit.emit(());
                     } else {

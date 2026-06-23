@@ -7,7 +7,10 @@
  */
 
 use chrono::NaiveDate;
-use rust_decimal::{dec, Decimal};
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use shared_core::partners::dtos::partner_list_item::PartnerListItem;
 use uuid::Uuid;
 use yew::prelude::*;
@@ -15,11 +18,11 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    core::components::currency_input::DecimalInput,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
+    core::components::currency_input::DecimalInput,
     sales::contexts::sales_invoice_filter_context::{
         use_sales_invoice_filter,
         PaymentStatusFilter,

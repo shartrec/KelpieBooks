@@ -7,16 +7,41 @@
  */
 
 use chrono::NaiveDate;
-use rocket::{delete, get, post, put, routes, Route};
-use rocket::serde::json::Json;
+use rocket::{
+    delete,
+    get,
+    post,
+    put,
+    routes,
+    serde::json::Json,
+    Route,
+};
 use rocket_db_pools::Connection;
-use shared_core::sales::models::tax::{TaxCategory, TaxRate};
-use crate::core::routes::security::AuthenticatedUser;
-use crate::DbKelpie;
-use crate::sales::services::{tax_category_service, tax_rate_service};
-use crate::security::{ManageSales, RequirePrivilege, UseSales};
-use crate::util::ApiError;
-use crate::util::types::{PathDate, PathUuid};
+use shared_core::sales::models::tax::{
+    TaxCategory,
+    TaxRate,
+};
+
+use crate::{
+    core::routes::security::AuthenticatedUser,
+    sales::services::{
+        tax_category_service,
+        tax_rate_service,
+    },
+    security::{
+        ManageSales,
+        RequirePrivilege,
+        UseSales,
+    },
+    util::{
+        types::{
+            PathDate,
+            PathUuid,
+        },
+        ApiError,
+    },
+    DbKelpie,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -37,7 +62,8 @@ async fn get_tax_categories(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseSales>,
 ) -> Result<Json<Vec<TaxCategory>>, ApiError> {
-    let tax_categories = tax_category_service::get_tax_categories(&mut pool, user.organization_id).await?;
+    let tax_categories =
+        tax_category_service::get_tax_categories(&mut pool, user.organization_id).await?;
     Ok(Json(tax_categories))
 }
 
@@ -61,7 +87,9 @@ async fn create_tax_category(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<Json<TaxCategory>, ApiError> {
-    let new_tax_category = tax_category_service::create_tax_category(&mut pool, user.organization_id, &tax_category).await?;
+    let new_tax_category =
+        tax_category_service::create_tax_category(&mut pool, user.organization_id, &tax_category)
+            .await?;
     Ok(Json(new_tax_category))
 }
 
@@ -73,7 +101,13 @@ async fn update_tax_category(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<Json<TaxCategory>, ApiError> {
-    let updated_tax_category = tax_category_service::update_tax_category(&mut pool, *id, user.organization_id, &tax_category).await?;
+    let updated_tax_category = tax_category_service::update_tax_category(
+        &mut pool,
+        *id,
+        user.organization_id,
+        &tax_category,
+    )
+    .await?;
     Ok(Json(updated_tax_category))
 }
 
@@ -84,7 +118,8 @@ async fn delete_tax_category(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<&'static str, ApiError> {
-    let rows_affected = tax_category_service::delete_tax_category(&mut pool, *id, user.organization_id).await?;
+    let rows_affected =
+        tax_category_service::delete_tax_category(&mut pool, *id, user.organization_id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Tax Category not found.".to_string()));
     }
@@ -98,7 +133,8 @@ async fn get_tax_rates_for_category(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseSales>,
 ) -> Result<Json<Vec<TaxRate>>, ApiError> {
-    let rates = tax_rate_service::get_tax_rates_for_category(&mut pool, *id, user.organization_id).await?;
+    let rates =
+        tax_rate_service::get_tax_rates_for_category(&mut pool, *id, user.organization_id).await?;
     Ok(Json(rates))
 }
 
@@ -110,8 +146,16 @@ async fn get_current_tax_rate_for_category_route(
     _guard: RequirePrivilege<UseSales>,
     effective_date: Option<PathDate>,
 ) -> Result<Json<Option<TaxRate>>, ApiError> {
-    let date = effective_date.map(|d| *d).unwrap_or_else(|| chrono::Local::now().naive_local().date());
-    let rate = tax_rate_service::get_current_tax_rate_for_category(&mut pool, *id, user.organization_id, date).await?;
+    let date = effective_date
+        .map(|d| *d)
+        .unwrap_or_else(|| chrono::Local::now().naive_local().date());
+    let rate = tax_rate_service::get_current_tax_rate_for_category(
+        &mut pool,
+        *id,
+        user.organization_id,
+        date,
+    )
+    .await?;
     Ok(Json(rate))
 }
 
@@ -123,6 +167,7 @@ async fn update_tax_rates_for_category(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<&'static str, ApiError> {
-    tax_rate_service::update_tax_rates_for_category(&mut pool, *id, user.organization_id, &rates).await?;
+    tax_rate_service::update_tax_rates_for_category(&mut pool, *id, user.organization_id, &rates)
+        .await?;
     Ok("Tax rates updated successfully.")
 }

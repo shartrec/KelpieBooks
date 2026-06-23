@@ -24,11 +24,11 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    core::components::delete_confirmation_modal::DeleteConfirmationModal,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
+    core::components::delete_confirmation_modal::DeleteConfirmationModal,
     payables::components::vendor_invoice_drawer::item_edit_card::ItemEditCard,
 };
 

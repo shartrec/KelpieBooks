@@ -6,18 +6,29 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use yew::prelude::*;
-use crate::api::Api;
-use crate::contexts::auth_context::use_user_context;
-use crate::contexts::locale_context::use_locale;
 use fluent::fluent_args;
-use shared_core::sales::models::item::Item;
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    sales::models::item::Item,
+};
+use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use crate::sales::components::item_row::ItemRow;
-use crate::sales::components::edit_item_modal::EditItemModal;
-use crate::sales::components::add_item_modal::AddItemModal;
-use shared_core::core::models::auth::SystemPrivilege;
-use crate::sales::contexts::item_filter_context::use_item_filter;
+
+use crate::{
+    api::Api,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    sales::{
+        components::{
+            add_item_modal::AddItemModal,
+            edit_item_modal::EditItemModal,
+            item_row::ItemRow,
+        },
+        contexts::item_filter_context::use_item_filter,
+    },
+};
 
 #[function_component(ItemListTable)]
 pub fn item_list_table() -> Html {
@@ -63,15 +74,13 @@ pub fn item_list_table() -> Html {
                 let fetched_items = Api::get(&url, user_ctx, navigator).await;
                 loading.set(false);
                 match fetched_items {
-                    Ok(response) if response.ok() => {
-                        match response.json::<Vec<Item>>().await {
-                            Ok(data) => items.set(data),
-                            Err(e) => error.set(Some(i18n.t_args(
-                                "item-list-error-parse-items",
-                                &fluent_args!["error" => e.to_string()],
-                            ))),
-                        }
-                    }
+                    Ok(response) if response.ok() => match response.json::<Vec<Item>>().await {
+                        Ok(data) => items.set(data),
+                        Err(e) => error.set(Some(i18n.t_args(
+                            "item-list-error-parse-items",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
+                    },
                     Ok(response) => error.set(Some(i18n.t_args(
                         "item-list-error-fetch-items",
                         &fluent_args!["status" => response.status()],

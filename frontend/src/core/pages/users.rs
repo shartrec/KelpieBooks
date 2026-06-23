@@ -9,28 +9,33 @@
 use std::rc::Rc;
 
 use fluent::fluent_args;
-use shared_core::core::requests::user::{
-    CreateUserRequest,
-    UpdateUserRequest,
+use shared_core::core::{
+    dtos::user_detail::UserDetail,
+    models::role::Role,
+    requests::user::{
+        CreateUserRequest,
+        UpdateUserRequest,
+    },
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::core::dtos::user_detail::UserDetail;
-use shared_core::core::models::role::Role;
+
 use crate::{
     api::Api,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
-    core::components::{
-        add_user_modal::AddUserModal,
-        edit_user_modal::EditUserModal,
-        delete_confirmation_modal::DeleteConfirmationModal,
-        layout::Layout,
+    core::{
+        components::{
+            add_user_modal::AddUserModal,
+            delete_confirmation_modal::DeleteConfirmationModal,
+            edit_user_modal::EditUserModal,
+            layout::Layout,
+        },
+        pages,
     },
-    core::pages,
 };
 
 #[function_component(UsersPage)]

@@ -7,8 +7,14 @@
  */
 use fluent::fluent_args;
 use shared_core::{
-    ledger::models::{account::Account, account_category::AccountCategory},
-    sales::models::tax::{TaxCategory, TaxRate},
+    ledger::models::{
+        account::Account,
+        account_category::AccountCategory,
+    },
+    sales::models::tax::{
+        TaxCategory,
+        TaxRate,
+    },
 };
 use uuid::Uuid;
 use yew::prelude::*;
@@ -16,10 +22,13 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    contexts::{auth_context::use_user_context, locale_context::use_locale},
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
     core::components::delete_confirmation_modal::DeleteConfirmationModal,
+    sales::components::tax_category_drawer::tax_rate_edit_card::TaxRateEditCard,
 };
-use crate::sales::components::tax_category_drawer::tax_rate_edit_card::TaxRateEditCard;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct RatesViewProps {
@@ -57,10 +66,19 @@ pub fn rates_view(props: &RatesViewProps) -> Html {
                 match fetched_rates {
                     Ok(response) if response.ok() => match response.json::<Vec<TaxRate>>().await {
                         Ok(data) => rates.set(data),
-                        Err(e) => error.set(Some(i18n.t_args("tax-rate-drawer-error-parse-rates", &fluent_args!["error" => e.to_string()]))),
+                        Err(e) => error.set(Some(i18n.t_args(
+                            "tax-rate-drawer-error-parse-rates",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     },
-                    Ok(response) => error.set(Some(i18n.t_args("tax-rate-drawer-error-fetch-rates", &fluent_args!["status" => response.status()]))),
-                    Err(e) => error.set(Some(i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]))),
+                    Ok(response) => error.set(Some(i18n.t_args(
+                        "tax-rate-drawer-error-fetch-rates",
+                        &fluent_args!["status" => response.status()],
+                    ))),
+                    Err(e) => error.set(Some(i18n.t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -79,15 +97,27 @@ pub fn rates_view(props: &RatesViewProps) -> Html {
             let i18n = i18n.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let url = format!("/api/accounts_by_category/{}", AccountCategory::Liability.to_string());
+                let url = format!(
+                    "/api/accounts_by_category/{}",
+                    AccountCategory::Liability.to_string()
+                );
                 let fetched_accounts = Api::get(&url, user_ctx, navigator).await;
                 match fetched_accounts {
                     Ok(response) if response.ok() => match response.json::<Vec<Account>>().await {
                         Ok(data) => accounts.set(data),
-                        Err(e) => error.set(Some(i18n.t_args("new-vendor-invoice-error-parse-accounts", &fluent_args!["error" => e.to_string()]))),
+                        Err(e) => error.set(Some(i18n.t_args(
+                            "new-vendor-invoice-error-parse-accounts",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     },
-                    Ok(response) => error.set(Some(i18n.t_args("new-vendor-invoice-error-fetch-accounts", &fluent_args!["status" => response.status()]))),
-                    Err(e) => error.set(Some(i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]))),
+                    Ok(response) => error.set(Some(i18n.t_args(
+                        "new-vendor-invoice-error-fetch-accounts",
+                        &fluent_args!["status" => response.status()],
+                    ))),
+                    Err(e) => error.set(Some(i18n.t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -182,13 +212,25 @@ pub fn rates_view(props: &RatesViewProps) -> Html {
             let navigator = navigator.clone();
             let error = error.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let resp = Api::put(&format!("/api/tax-categories/{}/rates", category_id), &*rates, user_ctx, navigator).await;
+                let resp = Api::put(
+                    &format!("/api/tax-categories/{}/rates", category_id),
+                    &*rates,
+                    user_ctx,
+                    navigator,
+                )
+                .await;
                 match resp {
                     Ok(r) if r.ok() => {
                         on_change.emit(());
                     }
-                    Ok(r) => error.set(Some(i18n.t_args("tax-rate-drawer-error-update-rates", &fluent_args!["status" => r.status()]))),
-                    Err(e) => error.set(Some(i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]))),
+                    Ok(r) => error.set(Some(i18n.t_args(
+                        "tax-rate-drawer-error-update-rates",
+                        &fluent_args!["status" => r.status()],
+                    ))),
+                    Err(e) => error.set(Some(i18n.t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })

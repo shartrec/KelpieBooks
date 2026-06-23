@@ -28,6 +28,7 @@ use shared_core::payables::{
         UpdateVendorInvoiceRequest,
     },
 };
+
 use crate::{
     payables::services::{
         vendor_invoice_service,
@@ -40,6 +41,7 @@ use crate::{
     },
     util::{
         types::{
+            FormInvoiceStatus,
             PathDate,
             PathUuid,
         },
@@ -47,7 +49,6 @@ use crate::{
     },
     DbKelpie,
 };
-use crate::util::types::FormInvoiceStatus;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![

@@ -11,13 +11,16 @@ use shared_core::{
     sales::models::tax::TaxRate,
 };
 use uuid::Uuid;
-use web_sys::{HtmlInputElement, HtmlSelectElement};
+use web_sys::{
+    HtmlInputElement,
+    HtmlSelectElement,
+};
 use yew::prelude::*;
 
 use crate::{
     contexts::locale_context::use_locale,
+    core::components::currency_input::DecimalInput,
 };
-use crate::core::components::currency_input::DecimalInput;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct TaxRateEditCardProps {

@@ -6,26 +6,41 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket::{delete, get, post, put, routes, Route};
-use rocket::serde::json::Json;
+use rocket::{
+    delete,
+    get,
+    post,
+    put,
+    routes,
+    serde::json::Json,
+    Route,
+};
 use rocket_db_pools::Connection;
-use shared_core::sales::models::item::Item;
-use crate::core::routes::security::AuthenticatedUser;
-use crate::DbKelpie;
-use crate::sales::services::item_service;
-use crate::security::{ManageSales, RequirePrivilege, UseSales};
-use crate::util::ApiError;
-use crate::util::types::{FormItemType, PathUuid};
-use shared_core::sales::requests::item::CreateItemRequest;
+use shared_core::sales::{
+    models::item::Item,
+    requests::item::CreateItemRequest,
+};
+
+use crate::{
+    core::routes::security::AuthenticatedUser,
+    sales::services::item_service,
+    security::{
+        ManageSales,
+        RequirePrivilege,
+        UseSales,
+    },
+    util::{
+        types::{
+            FormItemType,
+            PathUuid,
+        },
+        ApiError,
+    },
+    DbKelpie,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![
-        get_items,
-        get_item,
-        create_item,
-        update_item,
-        delete_item,
-    ]
+    routes![get_items, get_item, create_item, update_item, delete_item,]
 }
 
 #[get("/api/sales/items?<search_term>&<item_type>&<include_inactive>&<limit>")]
@@ -45,7 +60,8 @@ async fn get_items(
         item_type.map(|it| *it),
         include_inactive.unwrap_or(false),
         limit.unwrap_or(20),
-    ).await?;
+    )
+    .await?;
     Ok(Json(items))
 }
 
@@ -79,7 +95,8 @@ async fn update_item(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<Json<Item>, ApiError> {
-    let updated_item = item_service::update_item(&mut pool, *id, user.organization_id, &item).await?;
+    let updated_item =
+        item_service::update_item(&mut pool, *id, user.organization_id, &item).await?;
     Ok(Json(updated_item))
 }
 

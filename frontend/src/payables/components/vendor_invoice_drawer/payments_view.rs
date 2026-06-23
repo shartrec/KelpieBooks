@@ -34,11 +34,11 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    core::components::currency_input::DecimalInput,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
+    core::components::currency_input::DecimalInput,
 };
 
 #[derive(Properties, PartialEq, Clone)]
