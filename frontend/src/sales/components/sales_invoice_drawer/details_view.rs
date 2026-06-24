@@ -123,7 +123,6 @@ pub fn details_view(props: &DetailsViewProps) -> Html {
 
                     <label>{ i18n.t("common-due-date") }</label>
                     <input type="date" value={inv.due_date.format("%Y-%m-%d").to_string()} onchange={on_date_change(|r, v| r.due_date = v)} required=true />
-                    <div>{ i18n.format_date(inv.due_date) }</div>
                 </div>
                 <div class="voucher-footer">
                     if let Some(e) = &*error {

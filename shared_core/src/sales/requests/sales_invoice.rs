@@ -8,7 +8,7 @@
 
 
 use crate::sales::models::invoice_address::InvoiceAddress;
-use crate::sales::models::sales_invoice_item::SalesInvoiceLine;
+use crate::sales::models::sales_invoice_item::SalesInvoiceItem;
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -19,7 +19,7 @@ pub struct CreateSalesInvoiceRequest {
     pub invoice_number: String,
     pub issue_date: NaiveDate,
     pub due_date: NaiveDate,
-    pub lines: Vec<SalesInvoiceLine>,
+    pub lines: Vec<SalesInvoiceItem>,
 
     // Optional references to saved partner addresses used to populate the snapshots
     pub billing_address_id: Option<Uuid>,

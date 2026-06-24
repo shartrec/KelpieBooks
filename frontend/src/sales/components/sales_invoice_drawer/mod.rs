@@ -6,9 +6,11 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-pub mod address_edit_card;
-pub mod addresses_view;
-pub mod details_view;
+pub(crate) mod address_edit_card;
+pub(crate) mod addresses_view;
+pub(crate) mod details_view;
+pub(crate) mod items_view;
+pub(crate) mod item_edit_card;
 
 use fluent::fluent_args;
 use shared_core::{
@@ -27,9 +29,10 @@ use crate::{
         details_view::DetailsView,
     },
 };
+use crate::sales::components::sales_invoice_drawer::items_view::ItemsView;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum SalesInvoiceDrawerTab {
+pub(crate) enum SalesInvoiceDrawerTab {
     General,
     Addresses,
     Items,
@@ -37,17 +40,17 @@ pub enum SalesInvoiceDrawerTab {
 }
 
 #[derive(Properties, PartialEq, Clone)]
-pub struct SalesInvoiceDrawerProps {
-    pub invoice: SalesInvoice,
-    pub partner: Partner,
-    pub on_close: Callback<()>,
-    pub on_change: Callback<()>,
-    #[prop_or(SalesInvoiceDrawerTab::General)]
-    pub initial_tab: SalesInvoiceDrawerTab,
+pub(crate) struct SalesInvoiceDrawerProps {
+    pub(crate) invoice: SalesInvoice,
+    pub(crate) partner: Partner,
+    pub(crate) on_close: Callback<()>,
+    pub(crate) on_change: Callback<()>,
+    #[prop_or(SalesInvoiceDrawerTab::Items)]
+    pub(crate) initial_tab: SalesInvoiceDrawerTab,
 }
 
 #[function_component(SalesInvoiceDrawer)]
-pub fn sales_invoice_drawer(props: &SalesInvoiceDrawerProps) -> Html {
+pub(crate) fn sales_invoice_drawer(props: &SalesInvoiceDrawerProps) -> Html {
     let active_tab = use_state(|| props.initial_tab);
     let i18n = use_locale();
 
@@ -147,7 +150,12 @@ pub fn sales_invoice_drawer(props: &SalesInvoiceDrawerProps) -> Html {
                                     on_change={props.on_change.clone()}
                                 />
                             },
-                            SalesInvoiceDrawerTab::Items => html! { <p>{"Items go here"} </p> },
+                            SalesInvoiceDrawerTab::Items => html! {
+                                <ItemsView
+                                    invoice={props.invoice.clone()}
+                                    on_change={props.on_change.clone()}
+                                />
+                            },
                             SalesInvoiceDrawerTab::Payments => html! { <p>{"Payments go here"} </p> },
                         }
                     }

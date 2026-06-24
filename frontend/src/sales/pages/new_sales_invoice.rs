@@ -24,7 +24,7 @@ use shared_core::{
         models::{
             invoice_address::InvoiceAddress,
             sales_invoice::SalesInvoice,
-            sales_invoice_item::SalesInvoiceLine,
+            sales_invoice_item::SalesInvoiceItem,
         },
         requests::sales_invoice::CreateSalesInvoiceRequest,
     },
@@ -70,7 +70,7 @@ pub fn new_sales_invoice_page() -> Html {
             invoice_number: String::new(),
             issue_date: today,
             due_date: today,
-            lines: vec![SalesInvoiceLine {
+            lines: vec![SalesInvoiceItem {
                 id: Uuid::new_v4(),
                 invoice_id: Uuid::nil(),
                 item_id: Uuid::nil(),
@@ -81,7 +81,7 @@ pub fn new_sales_invoice_page() -> Html {
                 tax_category_id: None,
                 tax_amount: Decimal::ZERO,
                 tax_rate: Decimal::ZERO,
-                line_total: Decimal::ZERO, // Ensure line_total is zero for new lines
+                net_amount: Decimal::ZERO, // Ensure net_amount is zero for new lines
                 sort_order: 1,
             }],
             // New address fields (initialized with sensible defaults)
@@ -266,7 +266,7 @@ pub fn new_sales_invoice_page() -> Html {
 
     let on_item_change = {
         let request = request.clone();
-        Callback::from(move |item: SalesInvoiceLine| {
+        Callback::from(move |item: SalesInvoiceItem| {
             let mut req = (*request).clone();
             if let Some(pos) = req.lines.iter().position(|i| i.id == item.id) {
                 req.lines[pos] = item;
@@ -288,7 +288,7 @@ pub fn new_sales_invoice_page() -> Html {
         let request = request.clone();
         Callback::from(move |_| {
             let mut req = (*request).clone();
-            req.lines.push(SalesInvoiceLine {
+            req.lines.push(SalesInvoiceItem {
                 id: Uuid::new_v4(),
                 invoice_id: Uuid::nil(),
                 item_id: Uuid::nil(),
@@ -299,7 +299,7 @@ pub fn new_sales_invoice_page() -> Html {
                 tax_category_id: None,
                 tax_amount: Decimal::ZERO,
                 tax_rate: Decimal::ZERO,
-                line_total: Decimal::ZERO,
+                net_amount: Decimal::ZERO,
                 sort_order: (req.lines.len() + 1) as i32,
             });
             request.set(req);

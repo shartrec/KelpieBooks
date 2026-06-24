@@ -13,7 +13,7 @@ use serde::{
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct SalesInvoiceLine {
+pub struct SalesInvoiceItem {
     pub id: Uuid,
     pub invoice_id: Uuid,
     pub item_id: Uuid,
@@ -22,8 +22,8 @@ pub struct SalesInvoiceLine {
     pub quantity: Decimal,
     pub unit_price: Decimal,
     pub tax_category_id: Option<Uuid>,
-    pub tax_rate: Decimal, // Added tax_rate field
+    pub tax_rate: Decimal,
     pub tax_amount: Decimal,
-    pub line_total: Decimal,
+    pub net_amount: Decimal,
     pub sort_order: i32,
 }

@@ -17,7 +17,7 @@ use shared_core::sales::{
         invoice_address::InvoiceAddress,
         invoice_status::InvoiceStatus,
         sales_invoice::SalesInvoice,
-        sales_invoice_item::SalesInvoiceLine,
+        sales_invoice_item::SalesInvoiceItem,
     },
     requests::sales_invoice::CreateSalesInvoiceRequest,
 };
@@ -246,11 +246,11 @@ pub(crate) async fn update_sales_invoice(
     Ok(updated_invoice)
 }
 
-pub(crate) async fn update_invoice_lines(
+pub(crate) async fn update_invoice_items(
     pool: &mut PgConnection,
     org_id: Uuid,
     invoice_id: Uuid,
-    lines: &[SalesInvoiceLine],
+    lines: &[SalesInvoiceItem],
 ) -> Result<SalesInvoice, ApiError> {
     let mut invoice = sales_invoice_db::get_sales_invoice_with_lines(pool, invoice_id, org_id)
         .await?

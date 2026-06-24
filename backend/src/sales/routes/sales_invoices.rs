@@ -19,7 +19,7 @@ use rust_decimal::Decimal;
 use shared_core::sales::{
     models::{
         sales_invoice::SalesInvoice,
-        sales_invoice_item::SalesInvoiceLine,
+        sales_invoice_item::SalesInvoiceItem,
     },
     requests::{
         sales_invoice,
@@ -54,7 +54,7 @@ pub(crate) fn routes() -> Vec<Route> {
         get_sales_invoice,
         create_sales_invoice,
         update_sales_invoice,
-        update_sales_invoice_lines,
+        update_sales_invoice_items,
     ]
 }
 
@@ -82,11 +82,11 @@ async fn create_sales_invoice(
     Ok(Json(new_invoice))
 }
 
-#[put("/api/sales-invoices/<id>", data = "<req>")]
+#[put("/api/sales-invoices/<_id>", data = "<req>")]
 async fn update_sales_invoice(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageSales>,
-    id: PathUuid,
+    _id: PathUuid,
     req: Json<UpdateSalesInvoiceRequest>,
 ) -> Result<Json<SalesInvoice>, ApiError> {
     let user = guard.0;
@@ -95,16 +95,16 @@ async fn update_sales_invoice(
     Ok(Json(new_invoice))
 }
 
-#[put("/api/sales-invoices/<id>/lines", data = "<req>")]
-async fn update_sales_invoice_lines(
+#[put("/api/sales-invoices/<id>/items", data = "<req>")]
+async fn update_sales_invoice_items(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageSales>,
     id: PathUuid,
-    req: Json<Vec<SalesInvoiceLine>>,
+    req: Json<Vec<SalesInvoiceItem>>,
 ) -> Result<Json<SalesInvoice>, ApiError> {
     let user = guard.0;
     let updated_invoice =
-        sales_invoice_service::update_invoice_lines(&mut pool, user.organization_id, *id, &req)
+        sales_invoice_service::update_invoice_items(&mut pool, user.organization_id, *id, &req)
             .await?;
     Ok(Json(updated_invoice))
 }

@@ -19,7 +19,7 @@ use shared_core::sales::{
         invoice_address::InvoiceAddress,
         invoice_status::InvoiceStatus,
         sales_invoice::SalesInvoice,
-        sales_invoice_item::SalesInvoiceLine,
+        sales_invoice_item::SalesInvoiceItem,
     },
 };
 use uuid::Uuid;
@@ -67,8 +67,8 @@ fn from_row_to_sales_invoice(row: &sqlx::postgres::PgRow) -> SalesInvoice {
     }
 }
 
-fn from_row_to_sales_invoice_line(row: &sqlx::postgres::PgRow) -> SalesInvoiceLine {
-    SalesInvoiceLine {
+fn from_row_to_sales_invoice_line(row: &sqlx::postgres::PgRow) -> SalesInvoiceItem {
+    SalesInvoiceItem {
         id: row.get("id"),
         invoice_id: row.get("invoice_id"),
         item_id: row.get("item_id"),
@@ -79,7 +79,7 @@ fn from_row_to_sales_invoice_line(row: &sqlx::postgres::PgRow) -> SalesInvoiceLi
         tax_category_id: row.get("tax_category_id"),
         tax_amount: row.get("tax_amount"),
         tax_rate: Decimal::ZERO,
-        line_total: row.get("line_total"),
+        net_amount: row.get("net_amount"),
         sort_order: row.get("sort_order"),
     }
 }
@@ -173,11 +173,11 @@ pub(crate) async fn insert_sales_invoice_line(
     pool: &mut PgConnection,
     inv_id: Uuid,
     org_id: Uuid,
-    line: &SalesInvoiceLine,
+    line: &SalesInvoiceItem,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         r#"
-        INSERT INTO sales_invoice_lines (organization_id, invoice_id, item_id, description, quantity, unit_price, tax_category_id, tax_amount, line_total, sort_order)
+        INSERT INTO sales_invoice_lines (organization_id, invoice_id, item_id, description, quantity, unit_price, tax_category_id, tax_amount, net_amount, sort_order)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         "#,
     )
@@ -189,7 +189,7 @@ pub(crate) async fn insert_sales_invoice_line(
     .bind(line.unit_price)
     .bind(line.tax_category_id)
     .bind(line.tax_amount)
-    .bind(line.line_total)
+    .bind(line.net_amount)
     .bind(line.sort_order)
     .execute(pool)
     .await?;
@@ -238,7 +238,7 @@ pub(crate) async fn get_sales_invoice_with_lines(
 
         let line_rows = sqlx::query(
             r#"
-            SELECT sil.id, invoice_id, item_id, it.name, sil.description, quantity, sil.unit_price, sil.tax_category_id, tax_amount, line_total, sort_order
+            SELECT sil.id, invoice_id, item_id, it.name, sil.description, quantity, sil.unit_price, sil.tax_category_id, tax_amount, net_amount, sort_order
             FROM sales_invoice_lines sil, items it
             WHERE sil.item_id = it.id
                 AND invoice_id = $1
@@ -369,7 +369,6 @@ pub(crate) async fn list_sales_invoices(
 ) -> Result<Vec<SalesInvoiceListItem>, sqlx::Error> {
     // Build dynamic WHERE clause
     let mut conditions: Vec<String> = vec!["si.organization_id = $1".to_string()];
-    let mut binds: Vec<sqlx::types::Json<()>> = Vec::new(); // dummy to track indices; we'll bind manually below
 
     // We'll keep a parallel Vec of bind closures is not possible; instead compute indices manually
     // indices start after $1 (org_id)

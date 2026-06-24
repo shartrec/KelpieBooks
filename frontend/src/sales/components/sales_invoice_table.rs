@@ -29,7 +29,6 @@ use crate::{
     sales::{
         components::sales_invoice_drawer::{
             SalesInvoiceDrawer,
-            SalesInvoiceDrawerTab,
         },
         contexts::sales_invoice_filter_context::{
             use_sales_invoice_filter,
@@ -50,7 +49,6 @@ pub fn sales_invoice_table() -> Html {
     let invoice_to_view = use_state(|| None::<SalesInvoice>);
     let partner_to_view = use_state(|| None::<Partner>);
     let show_actions = use_state(|| None::<uuid::Uuid>);
-    let initial_tab = use_state(|| SalesInvoiceDrawerTab::General);
 
     let fetch_invoices = {
         let invoices = invoices.clone();
@@ -141,15 +139,13 @@ pub fn sales_invoice_table() -> Html {
         let user_ctx = user_ctx.clone();
         let i18n = i18n.clone();
         let navigator = navigator.clone();
-        let initial_tab = initial_tab.clone();
-        Callback::from(move |(id, tab): (uuid::Uuid, SalesInvoiceDrawerTab)| {
+        Callback::from(move |id: uuid::Uuid| {
             let invoice_to_view = invoice_to_view.clone();
             let partner_to_view = partner_to_view.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();
             let i18n = i18n.clone();
             let navigator = navigator.clone();
-            initial_tab.set(tab);
             wasm_bindgen_futures::spawn_local(async move {
                 let resp = Api::get(
                     &format!("/api/sales-invoices/{}", id),
@@ -213,13 +209,12 @@ pub fn sales_invoice_table() -> Html {
     };
 
     let on_drawer_change = {
-        let invoice_id = invoice_to_view.as_ref().map(|i| i.id);
-        let on_view_click = on_view_click.clone();
+        let invoice_to_view = invoice_to_view.clone();
+        let partner_to_view = partner_to_view.clone();
         let fetch_invoices = fetch_invoices.clone();
         Callback::from(move |()| {
-            if let Some(id) = invoice_id {
-                on_view_click.emit((id, SalesInvoiceDrawerTab::General));
-            }
+            invoice_to_view.set(None);
+            partner_to_view.set(None);
             fetch_invoices.emit(());
         })
     };
@@ -239,7 +234,6 @@ pub fn sales_invoice_table() -> Html {
                     partner={partner.clone()}
                     on_close={on_drawer_close}
                     on_change={on_drawer_change}
-                    initial_tab={*initial_tab}
                 />
             }
             <table class="table">
@@ -259,9 +253,11 @@ pub fn sales_invoice_table() -> Html {
                     { for (*invoices).iter().map(|inv| {
                         let on_view = {
                             let on_view_click = on_view_click.clone();
+                            let show_actions = show_actions.clone();
                             let invoice_id = inv.id;
                             Callback::from(move |_| {
-                                on_view_click.emit((invoice_id, SalesInvoiceDrawerTab::General));
+                                show_actions.set(None);
+                                on_view_click.emit(invoice_id);
                             })
                         };
                         let on_actions_toggle = {

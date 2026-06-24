@@ -15,9 +15,9 @@ use serde::{
 use uuid::Uuid;
 
 use crate::sales::models::invoice_address::InvoiceAddress;
-use crate::sales::models::{
+pub use crate::sales::models::{
     invoice_status::InvoiceStatus,
-    sales_invoice_item::SalesInvoiceLine,
+    sales_invoice_item::SalesInvoiceItem,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -40,21 +40,21 @@ pub struct SalesInvoice {
     // Snapshots stored on the invoice (overridable by user per-invoice)
     pub bill_to: InvoiceAddress,
     pub ship_to: InvoiceAddress,
-    pub lines: Vec<SalesInvoiceLine>,
+    pub lines: Vec<SalesInvoiceItem>,
 }
 
 impl SalesInvoice {
     pub fn calculate(&mut self) {
-        let mut gross_amount = Decimal::ZERO;
+        let mut net_amount = Decimal::ZERO;
         let mut tax_amount = Decimal::ZERO;
 
         for line in &mut self.lines {
-            gross_amount += line.line_total;
+            net_amount += line.net_amount;
             tax_amount += line.tax_amount;
         }
 
-        self.total_amount = gross_amount;
+        self.subtotal = net_amount;
         self.tax_total = tax_amount;
-        self.subtotal = gross_amount - tax_amount;
+        self.total_amount = net_amount - tax_amount;
     }
 }

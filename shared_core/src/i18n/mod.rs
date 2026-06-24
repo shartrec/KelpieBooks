@@ -274,7 +274,8 @@ impl I18n for I18nManager {
 /// Formats standard decimal into localized decimal strings.
 /// e.g., 123456 -> "1,234.56" (en-AU) or "1 234,56" (fr-FR)
 pub fn format_currency_icu(amount: Decimal, target_locale: Option<&str>) -> String {
-    format_decimal_icu(amount, target_locale)
+    let currency = amount.round_dp(2);
+    format_decimal_icu(currency, target_locale)
 }
 
 /// Formats standard decimal into localized decimal strings.

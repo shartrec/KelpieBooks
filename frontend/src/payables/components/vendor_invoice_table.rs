@@ -264,16 +264,20 @@ pub fn vendor_invoice_table() -> Html {
                 <tbody>
                     { for (*invoices).iter().map(|invoice| {
                         let on_edit = {
+                            let show_actions = show_actions.clone();
                             let on_edit_click = on_edit_click.clone();
                             let invoice_id = invoice.id;
                             Callback::from(move |_| {
+                                show_actions.set(None);
                                 on_edit_click.emit((invoice_id, InvoiceDrawerTab::General));
                             })
                         };
                         let on_pay = {
+                            let show_actions = show_actions.clone();
                             let on_edit_click = on_edit_click.clone();
                             let invoice_id = invoice.id;
                             Callback::from(move |_| {
+                                show_actions.set(None);
                                 on_edit_click.emit((invoice_id, InvoiceDrawerTab::Payments));
                             })
                         };

@@ -10,7 +10,7 @@ use log::info;
 use rust_decimal::Decimal;
 use shared_core::sales::models::{
     item::Item,
-    sales_invoice_item::SalesInvoiceLine,
+    sales_invoice_item::SalesInvoiceItem,
     tax::TaxRate, // Import TaxRate
 };
 use uuid::Uuid;
@@ -32,8 +32,8 @@ use crate::{
 
 #[derive(Properties, PartialEq)]
 pub struct SalesInvoiceItemRowProps {
-    pub item: SalesInvoiceLine,
-    pub on_change: Callback<SalesInvoiceLine>,
+    pub item: SalesInvoiceItem,
+    pub on_change: Callback<SalesInvoiceItem>,
     pub on_delete: Callback<Uuid>,
 }
 
@@ -116,6 +116,7 @@ pub fn sales_invoice_item_row(props: &SalesInvoiceItemRowProps) -> Html {
             new_item.unit_price = selected_item.unit_price;
             new_item.tax_category_id = selected_item.tax_category_id;
             new_item.tax_rate = Decimal::new(0, 4); // Default to 0
+            new_item.net_amount = new_item.quantity * new_item.unit_price;
 
             let on_change = on_change.clone();
             let items = items.clone();
@@ -160,15 +161,14 @@ pub fn sales_invoice_item_row(props: &SalesInvoiceItemRowProps) -> Html {
                             &fluent_args!["error" => e.to_string()],
                         ))),
                     }
+                    // Recalculate net_amount and tax_amount
+                    new_item.tax_amount =
+                        new_item.net_amount * (new_item.tax_rate / Decimal::new(100, 0));
+
+                    on_change.emit(new_item);
+                    items.set(vec![]);
                 }
 
-                // Recalculate line_total and tax_amount
-                new_item.line_total = new_item.quantity * new_item.unit_price;
-                new_item.tax_amount =
-                    new_item.line_total * (new_item.tax_rate / Decimal::new(100, 0));
-
-                on_change.emit(new_item);
-                items.set(vec![]);
             });
         })
     };
@@ -179,8 +179,8 @@ pub fn sales_invoice_item_row(props: &SalesInvoiceItemRowProps) -> Html {
         Callback::from(move |value: Decimal| {
             let mut new_item = item.clone();
             new_item.quantity = value;
-            new_item.line_total = new_item.quantity * new_item.unit_price;
-            new_item.tax_amount = new_item.line_total * (new_item.tax_rate / Decimal::new(100, 0));
+            new_item.net_amount = new_item.quantity * new_item.unit_price;
+            new_item.tax_amount = new_item.net_amount * (new_item.tax_rate / Decimal::new(100, 0));
             on_change.emit(new_item);
         })
     };
@@ -191,8 +191,8 @@ pub fn sales_invoice_item_row(props: &SalesInvoiceItemRowProps) -> Html {
         Callback::from(move |value: Decimal| {
             let mut new_item = item.clone();
             new_item.unit_price = value;
-            new_item.line_total = new_item.quantity * new_item.unit_price;
-            new_item.tax_amount = new_item.line_total * (new_item.tax_rate / Decimal::new(100, 0));
+            new_item.net_amount = new_item.quantity * new_item.unit_price;
+            new_item.tax_amount = new_item.net_amount * (new_item.tax_rate / Decimal::new(100, 0));
             on_change.emit(new_item);
         })
     };
@@ -220,7 +220,7 @@ pub fn sales_invoice_item_row(props: &SalesInvoiceItemRowProps) -> Html {
             // Display the tax rate
             <DecimalInput class="table__value-col" value={props.item.tax_rate} on_change={Callback::noop()} readonly=true />
             <DecimalInput class="table__value-col" value={props.item.tax_amount} on_change={Callback::noop()} />
-            <DecimalInput class="table__value-col" value={props.item.line_total} on_change={Callback::noop()} />
+            <DecimalInput class="table__value-col" value={props.item.net_amount} on_change={Callback::noop()} />
             <button class="icon-button btn-action" onclick={on_delete_click}>
                 <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
             </button>

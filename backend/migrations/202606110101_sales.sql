@@ -135,7 +135,7 @@ CREATE TABLE sales_invoice_lines (
                                      tax_category_id UUID REFERENCES tax_categories(id) ON DELETE SET NULL,
                                      tax_amount NUMERIC(15,4) NOT NULL DEFAULT 0,
     -- Subtotals calculated automatically per line
-                                     line_total NUMERIC(15,4) NOT NULL DEFAULT 0,
+                                     net_amount NUMERIC(15,4) NOT NULL DEFAULT 0,
 
     -- Track sorting sequence for rendering PDFs correctly
                                      sort_order INT NOT NULL DEFAULT 0
