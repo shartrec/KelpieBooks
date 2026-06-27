@@ -9,3 +9,4 @@
 pub(crate) mod db;
 pub(crate) mod routes;
 pub(crate) mod services;
+pub mod reports;

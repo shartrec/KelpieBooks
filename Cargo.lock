@@ -793,20 +793,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "derive_typst_intoval"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f6efc4e922a436e0468168c9f5f2013ca599b7d6d0a0456b771413637319725"
-dependencies = [
- "heck 0.5.0",
- "proc-macro2",
- "quote",
- "syn 2.0.117",
- "typst",
- "typst-macros",
-]
-
-[[package]]
 name = "devise"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2665,14 +2651,11 @@ dependencies = [
  "bcrypt",
  "chrono",
  "csv",
- "derive_typst_intoval",
  "fluent",
  "hex",
- "include_dir",
  "jsonwebtoken",
  "lettre",
  "log",
- "once_cell",
  "rand",
  "rocket",
  "rocket_db_pools",
@@ -2685,11 +2668,10 @@ dependencies = [
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
- "typst",
  "typst-as-lib",
- "typst-assets 0.11.1",
+ "typst-assets",
+ "typst-library",
  "typst-pdf",
- "unic-langid",
  "uuid",
 ]
 
@@ -5000,9 +4982,9 @@ dependencies = [
 
 [[package]]
 name = "subsetter"
-version = "0.2.5"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b474f1790ddab89b72ab193574e41b4f18de5c65e131043207e0197f2f6c64f"
+checksum = "38803281d1c23166c5ebcb455439a5d2afe711cc909cf88af72448c297756ad6"
 dependencies = [
  "kurbo 0.13.1",
  "rustc-hash 2.1.2",
@@ -5610,12 +5592,6 @@ dependencies = [
 
 [[package]]
 name = "typst-assets"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b3061f8d268e8eec7481c9ab24540455cb4912983c49aae38fa6e8bf8ef4d9c"
-
-[[package]]
-name = "typst-assets"
 version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5613cb719a6222fe9b74027c3625d107767ec187bff26b8fc931cf58942c834f"
@@ -5652,7 +5628,7 @@ dependencies = [
  "palette",
  "rustc-hash 2.1.2",
  "time",
- "typst-assets 0.14.2",
+ "typst-assets",
  "typst-library",
  "typst-macros",
  "typst-svg",
@@ -5672,7 +5648,7 @@ dependencies = [
  "once_cell",
  "serde",
  "serde_json",
- "typst-assets 0.14.2",
+ "typst-assets",
  "typst-library",
  "typst-syntax",
  "typst-timing",
@@ -5703,7 +5679,7 @@ dependencies = [
  "rustybuzz",
  "smallvec",
  "ttf-parser",
- "typst-assets 0.14.2",
+ "typst-assets",
  "typst-library",
  "typst-macros",
  "typst-syntax",
@@ -5766,7 +5742,7 @@ dependencies = [
  "ttf-parser",
  "two-face",
  "typed-arena",
- "typst-assets 0.14.2",
+ "typst-assets",
  "typst-macros",
  "typst-syntax",
  "typst-timing",
@@ -5811,7 +5787,7 @@ dependencies = [
  "rustc-hash 2.1.2",
  "serde",
  "smallvec",
- "typst-assets 0.14.2",
+ "typst-assets",
  "typst-library",
  "typst-macros",
  "typst-syntax",
@@ -5852,7 +5828,7 @@ dependencies = [
  "image",
  "rustc-hash 2.1.2",
  "ttf-parser",
- "typst-assets 0.14.2",
+ "typst-assets",
  "typst-library",
  "typst-macros",
  "typst-timing",

@@ -7,19 +7,14 @@
  */
 
 use chrono::NaiveDate;
-use rocket_db_pools::sqlx::{
-    self,
-    PgConnection,
-    Row,
-};
+use rocket_db_pools::sqlx::{self, PgConnection, Row};
+use rust_decimal::prelude::Zero;
 use rust_decimal::Decimal;
 use shared_core::sales::{
     dtos::sales_invoice_list_item::SalesInvoiceListItem,
     models::{
-        invoice_address::InvoiceAddress,
-        invoice_status::InvoiceStatus,
-        sales_invoice::SalesInvoice,
-        sales_invoice_item::SalesInvoiceItem,
+        invoice_address::InvoiceAddress, invoice_status::InvoiceStatus,
+        sales_invoice::SalesInvoice, sales_invoice_item::SalesInvoiceItem,
     },
 };
 use uuid::Uuid;
@@ -212,6 +207,35 @@ pub(crate) async fn delete_sales_invoice_lines(
     Ok(())
 }
 
+pub(crate) async fn get(
+    pool: &mut PgConnection,
+    id: Uuid,
+    org_id: Uuid,
+) -> Result<Option<SalesInvoice>, sqlx::Error> {
+    let invoice_row = sqlx::query(
+        r#"
+        SELECT id, organization_id, partner_id, invoice_number, issue_date, due_date, status,
+            billing_address_id, shipping_address_id,
+            bill_to_name, bill_to_attention, bill_to_line1, bill_to_line2, bill_to_city, bill_to_region, bill_to_postal_code, bill_to_country,
+            ship_to_name, ship_to_attention, ship_to_line1, ship_to_line2, ship_to_city, ship_to_region, ship_to_postal_code, ship_to_country,
+            subtotal, tax_total, total_amount, amount_due
+        FROM sales_invoices
+        WHERE id = $1 AND organization_id = $2
+        "#,
+    )
+    .bind(id)
+    .bind(org_id)
+    .fetch_optional(&mut *pool)
+    .await?;
+
+    if let Some(invoice_row) = invoice_row {
+        let mut sales_invoice = from_row_to_sales_invoice(&invoice_row);
+        Ok(Some(sales_invoice))
+    } else {
+        Ok(None)
+    }
+}
+
 pub(crate) async fn get_sales_invoice_with_lines(
     pool: &mut PgConnection,
     id: Uuid,
@@ -265,17 +289,19 @@ pub(crate) async fn update_sales_invoice_totals(
     net_amount: Decimal,
     tax_amount: Decimal,
     gross_amount: Decimal,
+    amount_due: Decimal,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         r#"
         UPDATE sales_invoices
-        SET subtotal = $1, tax_total = $2, total_amount = $3
+        SET subtotal = $1, tax_total = $2, total_amount = $3, amount_due = $3
         WHERE id = $4
         "#,
     )
     .bind(net_amount)
     .bind(tax_amount)
     .bind(gross_amount)
+    .bind(amount_due)
     .bind(id)
     .execute(pool)
     .await?;
@@ -458,4 +484,35 @@ pub(crate) async fn list_sales_invoices(
         .iter()
         .map(from_row_to_sales_invoice_list_item)
         .collect())
+}
+
+pub(crate) async fn update_amount_remaining(
+    pool: &mut PgConnection,
+    id: Uuid,
+    amount: Decimal,
+) -> Result<(), sqlx::Error> {
+    let mut query = if amount == Decimal::zero() {
+        sqlx::query(
+            r#"
+        UPDATE sales_invoices
+        SET amount_due = amount_due + $1, status = $2
+        WHERE id = $2
+        "#,
+        )
+    } else {
+        sqlx::query(
+            r#"
+        UPDATE sales_invoices
+        SET amount_due = amount_due + $1
+        WHERE id = $2
+        "#,
+        )
+    };
+
+    query = query.bind(amount).bind(id);
+    if amount == Decimal::zero() {
+        query = query.bind(InvoiceStatus::Paid);
+    }
+    query.execute(pool).await?;
+    Ok(())
 }

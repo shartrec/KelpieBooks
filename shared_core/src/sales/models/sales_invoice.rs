@@ -47,6 +47,8 @@ impl SalesInvoice {
     pub fn calculate(&mut self) {
         let mut net_amount = Decimal::ZERO;
         let mut tax_amount = Decimal::ZERO;
+        let old_amount_due = self.amount_due;
+        let old_total_amount = self.total_amount;
 
         for line in &mut self.lines {
             net_amount += line.net_amount;
@@ -56,5 +58,6 @@ impl SalesInvoice {
         self.subtotal = net_amount;
         self.tax_total = tax_amount;
         self.total_amount = net_amount - tax_amount;
+        self.amount_due = old_amount_due + (self.total_amount - old_total_amount) ;
     }
 }

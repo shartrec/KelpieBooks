@@ -11,29 +11,44 @@ use rocket_db_pools::sqlx::{
     PgConnection,
     Row,
 };
-use shared_core::sales::{
-    dtos::sales_invoice_list_item::SalesInvoiceListItem,
-    models::{
-        invoice_address::InvoiceAddress,
-        invoice_status::InvoiceStatus,
-        sales_invoice::SalesInvoice,
-        sales_invoice_item::SalesInvoiceItem,
+use rust_decimal::dec;
+use shared_core::{
+    ledger::{
+        models::system_tag::SystemTag,
+        requests::transaction::{
+            CreateTransactionRequest,
+            JournalEntryLine,
+        },
     },
-    requests::sales_invoice::CreateSalesInvoiceRequest,
+    sales::{
+        dtos::sales_invoice_list_item::SalesInvoiceListItem,
+        models::{
+            invoice_address::InvoiceAddress,
+            invoice_status::InvoiceStatus,
+            sales_invoice::SalesInvoice,
+            sales_invoice_item::SalesInvoiceItem,
+        },
+        requests::sales_invoice::CreateSalesInvoiceRequest,
+    }
 };
 use sqlx::Acquire;
 use uuid::Uuid;
 
 use crate::{
+    ledger::{
+        db::account as account_db,
+        services::account_service,
+    },
     core::db::sequences::{
         get_next_invoice_number,
         SeqType,
     },
     sales::db::sales_invoice as sales_invoice_db,
+    sales::db::item as item_db,
     util::ApiError,
 };
 
-pub(crate) async fn create_draft_invoice(
+pub(crate) async fn create_invoice(
     pool: &mut PgConnection,
     org_id: Uuid,
     req: &CreateSalesInvoiceRequest,
@@ -200,8 +215,74 @@ pub(crate) async fn create_draft_invoice(
         invoice.subtotal,
         invoice.tax_total,
         invoice.total_amount,
+        invoice.total_amount,
     )
     .await?;
+    // 1. Fetch Accounts Receivable (Asset) and Tax Clearing accounts
+    let ar_account =
+        account_db::get_by_system_tag(&mut tx, org_id, &SystemTag::AccountsReceivable)
+            .await?
+            .ok_or_else(|| ApiError::NotFound("Accounts Receivable account not found.".to_string()))?;
+    let tax_account =
+        account_db::get_by_system_tag(&mut tx, org_id, &SystemTag::SalesTaxClearing)
+            .await?
+            .ok_or_else(|| ApiError::NotFound("Tax account not found.".to_string()))?;
+
+    let mut jels = vec![];
+
+    // 2. Loop through lines to credit the revenue accounts
+    for item in &req.lines {
+        if item.net_amount > dec!(0.00) {
+            let item_master = item_db::get(&mut tx, org_id, item.id)
+                .await?
+                .ok_or_else(|| ApiError::NotFound("Item not found.".to_string()))?;
+
+            // Sales revenue lines are CREDITED
+            let jel = JournalEntryLine {
+                line_id: Uuid::new_v4(),
+                account_id: item_master.income_account_id,
+                debit: dec!(0.00),
+                credit: item.net_amount,
+                description: Some(item.description.clone()),
+            };
+            jels.push(jel);
+        }
+    }
+
+    // 3. Add tax liability entry if applicable
+    if invoice.tax_total > dec!(0.00) {
+        // Tax collected from customers is a liability or clearing credit
+        let jel = JournalEntryLine {
+            line_id: Uuid::new_v4(),
+            account_id: tax_account.id,
+            debit: dec!(0.00),
+            credit: invoice.tax_total,
+            description: Some(format!("Tax collected on invoice {}", invoice.invoice_number)),
+        };
+        jels.push(jel);
+    }
+
+    // 4. Add the balancing Accounts Receivable debit entry
+    let jel = JournalEntryLine {
+        line_id: Uuid::new_v4(),
+        account_id: ar_account.id,
+        debit: invoice.total_amount, // Gross amount (Net + Tax)
+        credit: dec!(0.00),
+        description: Some(format!("Customer sales invoice summary")),
+    };
+    jels.push(jel);
+
+    // 5. Fire off transaction registration
+    let ct_req = CreateTransactionRequest {
+        date: invoice.issue_date, // Matches the invoice document date rather than Local time
+        description: Some(format!("Sales Invoice {}", invoice.invoice_number)),
+        reference: Some(invoice.invoice_number.clone()),
+        entries: jels,
+    };
+
+    let transaction_id =
+        account_service::create_transaction(&mut tx, org_id, &ct_req).await?;
+
 
     tx.commit().await?;
 
@@ -277,6 +358,7 @@ pub(crate) async fn update_invoice_items(
         invoice.subtotal,
         invoice.tax_total,
         invoice.total_amount,
+        invoice.amount_due,
     )
     .await?;
 

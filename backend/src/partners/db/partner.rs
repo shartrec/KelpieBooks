@@ -154,6 +154,24 @@ pub(crate) async fn get_addresses(
     .await
     .map(|rows| rows.iter().map(from_row_to_partner_address).collect())
 }
+pub(crate) async fn get_address(
+    pool: &mut PgConnection,
+    partner_id: Uuid,
+    address_id: Uuid,
+) -> Result<Option<PartnerAddress>, sqlx::Error> {
+    sqlx::query(
+        r#"
+        SELECT id, organization_id, partner_id, address_type, is_primary, address_line1, address_line2, city, state_province, postal_code, country, created_at, updated_at
+        FROM partner_addresses
+        WHERE partner_id = $1
+          AND id = $1
+        "#,
+    )
+    .bind(partner_id)
+    .fetch_optional(pool)
+    .await
+    .map(|row| row.map(|row| from_row_to_partner_address(&row)))
+}
 
 pub(crate) async fn get_contacts(
     pool: &mut PgConnection,

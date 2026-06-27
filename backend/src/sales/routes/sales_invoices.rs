@@ -29,7 +29,7 @@ use shared_core::sales::{
         },
     },
 };
-
+use shared_core::sales::models::customer_payment::CustomerPayment;
 use crate::{
     sales::services::sales_invoice_service,
     security::{
@@ -47,11 +47,13 @@ use crate::{
     },
     DbKelpie,
 };
+use crate::sales::services::customer_payment_service;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
         get_sales_invoices,
         get_sales_invoice,
+        get_sales_invoice_payments,
         create_sales_invoice,
         update_sales_invoice,
         update_sales_invoice_items,
@@ -78,7 +80,7 @@ async fn create_sales_invoice(
 ) -> Result<Json<SalesInvoice>, ApiError> {
     let user = guard.0;
     let new_invoice =
-        sales_invoice_service::create_draft_invoice(&mut pool, user.organization_id, &req).await?;
+        sales_invoice_service::create_invoice(&mut pool, user.organization_id, &req).await?;
     Ok(Json(new_invoice))
 }
 
@@ -134,4 +136,20 @@ async fn get_sales_invoices(
     )
     .await?;
     Ok(Json(invoices))
+}
+
+#[get("/api/sales-invoices/<invoice_id>/payments")]
+async fn get_sales_invoice_payments(
+    mut pool: Connection<DbKelpie>,
+    guard: RequirePrivilege<UseSales>,
+    invoice_id: PathUuid,
+) -> Result<Json<Vec<CustomerPayment>>, ApiError> {
+    let user = guard.0;
+    let payments = customer_payment_service::get_customer_invoice_payments(
+        &mut pool,
+        user.organization_id,
+        *invoice_id,
+    )
+        .await?;
+    Ok(Json(payments))
 }

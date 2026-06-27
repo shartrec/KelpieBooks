@@ -11,6 +11,7 @@ pub(crate) mod addresses_view;
 pub(crate) mod details_view;
 pub(crate) mod items_view;
 pub(crate) mod item_edit_card;
+pub(crate) mod payments_view;
 
 use fluent::fluent_args;
 use shared_core::{
@@ -30,6 +31,7 @@ use crate::{
     },
 };
 use crate::sales::components::sales_invoice_drawer::items_view::ItemsView;
+use crate::sales::components::sales_invoice_drawer::payments_view::PaymentsView;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum SalesInvoiceDrawerTab {
@@ -68,8 +70,7 @@ pub(crate) fn sales_invoice_drawer(props: &SalesInvoiceDrawerProps) -> Html {
     };
 
     let total_gross = props.invoice.total_amount;
-    // Todo Fix balance remaining
-    let balance_remaining = props.invoice.subtotal;
+    let balance_remaining = props.invoice.amount_due;
 
     // Build the address objects
     let addresses = vec![
@@ -156,7 +157,12 @@ pub(crate) fn sales_invoice_drawer(props: &SalesInvoiceDrawerProps) -> Html {
                                     on_change={props.on_change.clone()}
                                 />
                             },
-                            SalesInvoiceDrawerTab::Payments => html! { <p>{"Payments go here"} </p> },
+                            SalesInvoiceDrawerTab::Payments => html! {
+                                <PaymentsView
+                                    invoice={props.invoice.clone()}
+                                    on_change={props.on_change.clone()}
+                                />
+                            },
                         }
                     }
                 </div>

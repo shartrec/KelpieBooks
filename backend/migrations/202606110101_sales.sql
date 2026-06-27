@@ -141,22 +141,44 @@ CREATE TABLE sales_invoice_lines (
                                      sort_order INT NOT NULL DEFAULT 0
 );
 
-CREATE TYPE ar_transaction_type AS ENUM ('invoice_charge', 'payment_received', 'credit_memo');
+-- =============================================================================
+-- 1. Customer Payments
+-- =============================================================================
+CREATE TABLE customer_payments
+(
+    id                 UUID PRIMARY KEY         DEFAULT gen_random_uuid(),
+    organization_id    UUID            NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
+    partner_id        UUID            NOT NULL REFERENCES partners (id) ON DELETE RESTRICT,
 
-CREATE TABLE accounts_receivable_ledger (
-                                            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-                                            organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-                                            customer_id UUID NOT NULL,
-                                            invoice_id UUID NOT NULL REFERENCES sales_invoices(id) ON DELETE CASCADE,
-                                            transaction_type ar_transaction_type NOT NULL,
+    -- The transaction clearing the asset (Debit Bank, Credit AR)
+    transaction_id     UUID                     REFERENCES transactions (id) ON DELETE SET NULL,
 
-    -- Accounts Receivable is an Asset, so:
-    -- Invoices INCREASE the balance (Debit)
-    -- Payments DECREASE the balance (Credit)
-                                            amount NUMERIC(15,4) NOT NULL,
+    payment_date       DATE            NOT NULL,
+    deposited_to_account UUID          NOT NULL, -- Ledger Account (e.g., Operating Bank Account)
+    amount             NUMERIC(15,4)   NOT NULL, -- Total payment amount received
+    reference          TEXT,                     -- Check number, Stripe transfer ID, or EFT reference
 
-                                            entry_date DATE NOT NULL DEFAULT CURRENT_DATE,
-                                            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at         TIMESTAMPTZ     NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_ar_ledger_customer ON accounts_receivable_ledger(customer_id);
+CREATE INDEX idx_customer_payments_org ON customer_payments (organization_id);
+CREATE INDEX idx_customer_payments_customer ON customer_payments (partner_id);
+
+-- =============================================================================
+-- 2. Customer Payment Allocations
+-- =============================================================================
+CREATE TABLE customer_payment_allocations
+(
+    id                 UUID PRIMARY KEY         DEFAULT gen_random_uuid(),
+    organization_id    UUID            NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
+    sales_invoice_id   UUID            NOT NULL REFERENCES sales_invoices (id) ON DELETE CASCADE,
+    customer_payment_id UUID           NOT NULL REFERENCES customer_payments (id) ON DELETE CASCADE,
+
+    allocated_amount   NUMERIC(15,4)   NOT NULL, -- Amount applied to this specific invoice
+    created_at         TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT check_customer_alloc_positive CHECK (allocated_amount > 0)
+);
+
+CREATE INDEX idx_cust_allocations_invoice ON customer_payment_allocations (sales_invoice_id);
+CREATE INDEX idx_cust_allocations_payment ON customer_payment_allocations (customer_payment_id);

@@ -8,14 +8,19 @@
 
 use chrono::NaiveDate;
 use rust_decimal::Decimal;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
+use crate::sales::models::customer_payment_allocation::CustomerPaymentAllocation;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct CreateVendorInvoicePaymentRequest {
-    pub vendor_invoice_id: Uuid,
+pub struct CreateCustomerPaymentRequest {
+    pub partner_id: Uuid,
     pub payment_date: NaiveDate,
     pub bank_account_id: Uuid,
     pub amount: Decimal,
     pub reference: Option<String>,
+    pub allocations: Vec<CustomerPaymentAllocation>,
 }
