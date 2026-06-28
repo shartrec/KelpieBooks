@@ -710,6 +710,7 @@ address-postal-code = Postal code
 address-country = Country
 
 # Sales items
+item-search-placeholder = Item search
 item-list-title = Items
 item-list-description = This is a list of all the items in your organization.
 item-list-code = Code
@@ -734,6 +735,7 @@ item-income-account-label = Income Account:
 item-select-income-account = Select an income account
 item-is-active-label = Is Active:
 item-filter-search-placeholder = Search by code or name
+item-search-placeholder = Search by code or name
 item-filter-all-types = All Types
 item-type-service = Service
 item-type-stocked = Stocked

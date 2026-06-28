@@ -734,6 +734,7 @@ item-income-account-label = Compte de revenus :
 item-select-income-account = Sélectionner un compte de revenus
 item-is-active-label = Est actif:
 item-filter-search-placeholder = Rechercher par code ou nom
+item-search-placeholder = Rechercher par code ou nom
 item-filter-all-types = Tous les types
 item-type-service = Service
 item-type-stocked = Stocké
