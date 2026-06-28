@@ -16,8 +16,6 @@ pub mod configuration;
 pub mod dashboard;
 pub mod forgot_password;
 pub mod login;
-pub mod forgot_password;
-pub mod reset_password;
 pub mod profile;
 pub mod register;
 pub mod reset_password;
