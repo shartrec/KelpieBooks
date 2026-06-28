@@ -9,8 +9,8 @@
 use yew::prelude::*;
 
 use crate::{
-    core::components::layout::Layout,
     contexts::locale_context::use_locale,
+    core::components::layout::Layout,
     payables::components::aged_trial_balance_matrix::AgedTrialBalanceMatrix,
 };
 

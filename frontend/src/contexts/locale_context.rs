@@ -10,9 +10,12 @@ use chrono::{
     NaiveDate,
 };
 use fluent::FluentArgs;
+use rust_decimal::Decimal;
 use shared_core::i18n::{
     format_currency_icu,
     format_date_icu,
+    format_decimal_icu,
+    format_percentage_icu,
 };
 use yew::prelude::*;
 
@@ -43,8 +46,17 @@ impl LocaleContext {
     }
 
     // Pass-through wrapper for currency
-    pub fn format_currency(&self, amount_cents: i64) -> String {
-        format_currency_icu(amount_cents, Some(self.as_str()))
+    pub fn format_currency(&self, amount: Decimal) -> String {
+        format_currency_icu(amount, Some(self.as_str()))
+    }
+
+    pub fn format_decimal(&self, amount: Decimal) -> String {
+        format_decimal_icu(amount, Some(self.as_str()))
+    }
+
+    // Pass-through wrapper for percentages
+    pub fn format_percentage(&self, amount: Decimal) -> String {
+        format_percentage_icu(amount, Some(self.as_str()))
     }
 
     // Pass-through wrapper for dates

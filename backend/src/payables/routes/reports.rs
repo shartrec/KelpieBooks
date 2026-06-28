@@ -37,7 +37,7 @@ async fn get_aged_payables(
 ) -> Result<Json<Vec<AgedPayableSummary>>, ApiError> {
     let user = guard.0;
     let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
-        .map_err(|_| ApiError::Invalid("Invalid date".to_string()))?;
+        .map_err(|_| ApiError::BadRequest("Invalid date".to_string()))?;
 
     let report =
         report_service::get_aged_payables(&mut pool, user.organization_id, report_date).await?;

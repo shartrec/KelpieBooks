@@ -27,64 +27,78 @@ pub(crate) trait GuardPrivilege {
 // Create structural markers
 pub(crate) struct SecurityAdmin;
 impl GuardPrivilege for SecurityAdmin {
-    const VALUE: SystemPrivilege = SystemPrivilege::security_admin;
+    const VALUE: SystemPrivilege = SystemPrivilege::SecurityAdmin;
 }
 
 pub(crate) struct UseAccounts;
 impl GuardPrivilege for UseAccounts {
-    const VALUE: SystemPrivilege = SystemPrivilege::use_accounts;
+    const VALUE: SystemPrivilege = SystemPrivilege::UseAccounts;
 }
 
 pub(crate) struct ManageAccounts;
 impl GuardPrivilege for ManageAccounts {
-    const VALUE: SystemPrivilege = SystemPrivilege::manage_accounts;
+    const VALUE: SystemPrivilege = SystemPrivilege::ManageAccounts;
 }
 
 #[cfg(feature = "partners")]
 pub(crate) struct UsePartners;
 #[cfg(feature = "partners")]
 impl GuardPrivilege for UsePartners {
-    const VALUE: SystemPrivilege = SystemPrivilege::use_partners;
+    const VALUE: SystemPrivilege = SystemPrivilege::UsePartners;
 }
 
 #[cfg(feature = "partners")]
 pub(crate) struct ManagePartners;
 #[cfg(feature = "partners")]
 impl GuardPrivilege for ManagePartners {
-    const VALUE: SystemPrivilege = SystemPrivilege::manage_partners;
+    const VALUE: SystemPrivilege = SystemPrivilege::ManagePartners;
 }
 
 #[cfg(feature = "payables")]
 pub(crate) struct UseVendorInvoices;
 #[cfg(feature = "payables")]
 impl GuardPrivilege for UseVendorInvoices {
-    const VALUE: SystemPrivilege = SystemPrivilege::use_vendor_invoices;
+    const VALUE: SystemPrivilege = SystemPrivilege::UseVendorInvoices;
 }
 #[cfg(feature = "payables")]
 pub(crate) struct ManageVendorInvoices;
 #[cfg(feature = "payables")]
 impl GuardPrivilege for ManageVendorInvoices {
-    const VALUE: SystemPrivilege = SystemPrivilege::manage_vendor_invoices;
+    const VALUE: SystemPrivilege = SystemPrivilege::ManageVendorInvoices;
+}
+
+#[cfg(feature = "sales")]
+pub(crate) struct UseSales;
+#[cfg(feature = "sales")]
+impl GuardPrivilege for UseSales {
+    const VALUE: SystemPrivilege = SystemPrivilege::UseSales;
+}
+
+#[cfg(feature = "sales")]
+pub(crate) struct ManageSales;
+#[cfg(feature = "sales")]
+impl GuardPrivilege for ManageSales {
+    const VALUE: SystemPrivilege = SystemPrivilege::ManageSales;
 }
 
 pub(crate) struct UseTransactions;
 impl GuardPrivilege for UseTransactions {
-    const VALUE: SystemPrivilege = SystemPrivilege::use_transactions;
+    const VALUE: SystemPrivilege = SystemPrivilege::UseTransactions;
 }
 
 pub(crate) struct ManageTransactions;
 impl GuardPrivilege for ManageTransactions {
-    const VALUE: SystemPrivilege = SystemPrivilege::manage_transactions;
+    const VALUE: SystemPrivilege = SystemPrivilege::ManageTransactions;
 }
 
 pub(crate) struct ManageUsers;
 impl GuardPrivilege for ManageUsers {
-    const VALUE: SystemPrivilege = SystemPrivilege::manage_users;
+    const VALUE: SystemPrivilege = SystemPrivilege::ManageUsers;
 }
 
 pub(crate) struct ManageOrganization;
 impl GuardPrivilege for ManageOrganization {
-    const VALUE: SystemPrivilege = SystemPrivilege::manage_organization;
+    const VALUE: SystemPrivilege = SystemPrivilege::ManageOrganization;
 }
 
 // 💡 The Request Guard now takes the Trait Type instead of the Enum constant!

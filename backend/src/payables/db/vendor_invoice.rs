@@ -6,14 +6,13 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use std::str::FromStr;
-
 use chrono::NaiveDate;
 use rocket_db_pools::sqlx::{
     self,
     PgConnection,
     Row,
 };
+use rust_decimal::Decimal;
 use shared_core::payables::{
     dtos::{
         top_payable::TopPayable,
@@ -32,15 +31,13 @@ use shared_core::payables::{
 use uuid::Uuid;
 
 fn from_row_to_vendor_invoice(row: &sqlx::postgres::PgRow) -> VendorInvoice {
-    let status_str: String = row.get("status");
-    let status = InvoiceStatus::from_str(&status_str).unwrap();
     VendorInvoice {
         id: row.get("id"),
         organization_id: row.get("organization_id"),
         partner_id: row.get("partner_id"),
         transaction_id: row.get("transaction_id"),
         invoice_number: row.get("invoice_number"),
-        status,
+        status: row.get("status"),
         issue_date: row.get("issue_date"),
         due_date: row.get("due_date"),
         net_amount: row.get("net_amount"),
@@ -55,20 +52,18 @@ fn from_row_to_vendor_invoice(row: &sqlx::postgres::PgRow) -> VendorInvoice {
 }
 
 fn from_row_to_vendor_invoice_list_item(row: &sqlx::postgres::PgRow) -> VendorInvoiceListItem {
-    let status_str: String = row.get("status");
-    let status = InvoiceStatus::from_str(&status_str).unwrap();
     VendorInvoiceListItem {
         id: row.get("id"),
         partner_id: row.get("partner_id"),
         partner_name: row.get("partner_name"),
         invoice_number: row.get("invoice_number"),
+        status: row.get("status"),
         issue_date: row.get("issue_date"),
         due_date: row.get("due_date"),
         net_amount: row.get("net_amount"),
         tax_amount: row.get("tax_amount"),
         gross_amount: row.get("gross_amount"),
         amount_remaining: row.get("amount_remaining"),
-        status,
     }
 }
 
@@ -98,7 +93,7 @@ pub(crate) async fn get(
 ) -> Result<Option<VendorInvoice>, sqlx::Error> {
     sqlx::query(
         r#"
-        SELECT id, organization_id, partner_id, transaction_id, invoice_number, status::TEXT, issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at
+        SELECT id, organization_id, partner_id, transaction_id, invoice_number, status, issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at
         FROM vendor_invoices
         WHERE id = $1
         "#,
@@ -132,8 +127,8 @@ pub(crate) async fn get_by_org(
     start_date: Option<NaiveDate>,
     end_date: Option<NaiveDate>,
     partner_id: Option<Uuid>,
-    min_amount: Option<i64>,
-    status: Option<String>,
+    min_amount: Option<Decimal>,
+    statuses: Vec<&InvoiceStatus>,
 ) -> Result<Vec<VendorInvoiceListItem>, sqlx::Error> {
     let mut query = String::from(
         r#"
@@ -148,7 +143,7 @@ pub(crate) async fn get_by_org(
             vi.tax_amount,
             vi.gross_amount,
             vi.amount_remaining,
-            vi.status::TEXT
+            vi.status
         FROM vendor_invoices vi
         JOIN partners p ON vi.partner_id = p.id
         WHERE vi.organization_id = $1
@@ -172,8 +167,15 @@ pub(crate) async fn get_by_org(
         query.push_str(&format!(" AND vi.gross_amount >= ${}", i));
         i += 1;
     }
-    if let Some(_status) = &status {
-        query.push_str(&format!(" AND vi.status::TEXT = ANY(${})", i));
+    if !&statuses.is_empty() {
+        let or_clauses: Vec<String> = (0..statuses.len())
+            .map(|_| {
+                let clause = format!("vi.status = ${}", i);
+                i += 1;
+                clause
+            })
+            .collect();
+        query.push_str(&format!(" AND ({})", or_clauses.join(" OR ")));
     }
 
     query.push_str(" ORDER BY vi.issue_date DESC");
@@ -192,9 +194,11 @@ pub(crate) async fn get_by_org(
     if let Some(min_amount) = min_amount {
         query_builder = query_builder.bind(min_amount);
     }
-    if let Some(status) = &status {
-        let statuses: Vec<&str> = status.split(',').collect();
-        query_builder = query_builder.bind(statuses);
+
+    if !&statuses.is_empty() {
+        for status in statuses {
+            query_builder = query_builder.bind(status);
+        }
     }
 
     query_builder.fetch_all(pool).await.map(|rows| {
@@ -218,7 +222,7 @@ pub(crate) async fn get_top_payables(
         FROM vendor_invoices vi
         JOIN partners p ON vi.partner_id = p.id
         WHERE vi.organization_id = $1
-          AND vi.status::TEXT IN ('Open', 'PartiallyPaid')
+          AND (vi.status = $3 OR vi.status = $4)
           AND vi.due_date <= $2
         ORDER BY vi.amount_remaining DESC
         LIMIT 5
@@ -226,6 +230,8 @@ pub(crate) async fn get_top_payables(
     )
     .bind(organization_id)
     .bind(due_date_before)
+    .bind(InvoiceStatus::Open)
+    .bind(InvoiceStatus::PartiallyPaid)
     .fetch_all(pool)
     .await
     .map(|rows| rows.iter().map(from_row_to_top_payable).collect())
@@ -237,14 +243,14 @@ pub(crate) async fn insert(
     transaction_id: Uuid,
     req: &CreateVendorInvoiceRequest,
 ) -> Result<VendorInvoice, sqlx::Error> {
-    let net_amount = req.items.iter().map(|i| i.net_amount).sum::<i64>();
-    let tax_amount = req.items.iter().map(|i| i.tax_amount).sum::<i64>();
+    let net_amount = req.items.iter().map(|i| i.net_amount).sum::<Decimal>();
+    let tax_amount = req.items.iter().map(|i| i.tax_amount).sum::<Decimal>();
     let gross_amount = net_amount + tax_amount;
     let row = sqlx::query(
         r#"
         INSERT INTO vendor_invoices (organization_id, partner_id, transaction_id, invoice_number, issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-        RETURNING id, organization_id, partner_id, transaction_id, invoice_number, status::TEXT, issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at
+        RETURNING id, organization_id, partner_id, transaction_id, invoice_number, status, issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at
         "#,
     )
     .bind(org_id)
@@ -273,7 +279,7 @@ pub(crate) async fn update(
         UPDATE vendor_invoices
         SET invoice_number = $1, issue_date = $2, due_date = $3, notes = $4
         WHERE id = $5
-        RETURNING id, organization_id, partner_id, transaction_id, invoice_number, status::TEXT, issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at
+        RETURNING id, organization_id, partner_id, transaction_id, invoice_number, status, issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at
         "#,
     )
     .bind(&req.invoice_number)
@@ -289,9 +295,9 @@ pub(crate) async fn update(
 pub(crate) async fn update_totals(
     pool: &mut PgConnection,
     id: Uuid,
-    net_amount: i64,
-    tax_amount: i64,
-    gross_amount: i64,
+    net_amount: Decimal,
+    tax_amount: Decimal,
+    gross_amount: Decimal,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         r#"
@@ -312,7 +318,7 @@ pub(crate) async fn update_totals(
 pub(crate) async fn update_amount_remaining(
     pool: &mut PgConnection,
     id: Uuid,
-    amount: i64,
+    amount: Decimal,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         r#"

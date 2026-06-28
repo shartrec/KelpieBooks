@@ -9,28 +9,33 @@
 use std::rc::Rc;
 
 use fluent::fluent_args;
-use shared_core::core::requests::user::{
-    CreateUserRequest,
-    UpdateUserRequest,
+use shared_core::core::{
+    dtos::user_detail::UserDetail,
+    models::role::Role,
+    requests::user::{
+        CreateUserRequest,
+        UpdateUserRequest,
+    },
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::core::dtos::user_detail::UserDetail;
-use shared_core::core::models::role::Role;
+
 use crate::{
     api::Api,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
-    core::components::{
-        add_user_modal::AddUserModal,
-        edit_user_modal::EditUserModal,
-        generic_delete_confirmation_modal::GenericDeleteConfirmationModal,
-        layout::Layout,
+    core::{
+        components::{
+            add_user_modal::AddUserModal,
+            delete_confirmation_modal::DeleteConfirmationModal,
+            edit_user_modal::EditUserModal,
+            layout::Layout,
+        },
+        pages,
     },
-    core::pages,
 };
 
 #[function_component(UsersPage)]
@@ -164,7 +169,7 @@ pub fn users_page() -> Html {
                         fetch_users.emit(());
                     }
                     Ok(r) => {
-                        pages::set_error(error, i18n, r, "users-error-delete");
+                        pages::set_error(error, i18n, r, "users-error-add");
                     }
                     Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
@@ -208,7 +213,7 @@ pub fn users_page() -> Html {
                         fetch_users.emit(());
                     }
                     Ok(r) => {
-                        pages::set_error(error, i18n, r, "users-error-delete");
+                        pages::set_error(error, i18n, r, "users-error-update");
                     }
                     Err(e) => error.set(Some(i18n.t_args(
                         "common-network-error",
@@ -340,7 +345,7 @@ pub fn users_page() -> Html {
                 <EditUserModal user={user.clone()} roles={(*roles).clone()} on_close={on_edit_modal_close} on_submit={on_edit_modal_submit.clone()} />
             }
             if let Some(user) = &*user_to_delete {
-                <GenericDeleteConfirmationModal
+                <DeleteConfirmationModal
                     title={i18n.t("delete-user-confirm-title")}
                     message={i18n.t_args("delete-user-confirm-message", &fluent_args!["user" => user.full_name.clone()])}
                     on_confirm={on_delete_confirm_click.clone()}

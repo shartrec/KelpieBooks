@@ -8,8 +8,8 @@
 use yew::prelude::*;
 
 use crate::{
-    core::components::layout::Layout,
     contexts::locale_context::use_locale,
+    core::components::layout::Layout,
     partners::components::partner_list_table::PartnerListTable,
 };
 

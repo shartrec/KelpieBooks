@@ -5,7 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
+use rust_decimal::{dec, Decimal};
 use serde::{
     Deserialize,
     Serialize,
@@ -18,10 +18,10 @@ pub struct BalanceSheet {
     pub assets: Vec<AccountWithBalance>,
     pub liabilities: Vec<AccountWithBalance>,
     pub equity: Vec<AccountWithBalance>,
-    pub total_assets: i64,
-    pub total_liabilities: i64,
-    pub total_equity: i64,
-    pub net_income: i64,
+    pub total_assets: Decimal,
+    pub total_liabilities: Decimal,
+    pub total_equity: Decimal,
+    pub net_income: Decimal,
 }
 
 impl Default for BalanceSheet {
@@ -30,10 +30,10 @@ impl Default for BalanceSheet {
             assets: vec![],
             liabilities: vec![],
             equity: vec![],
-            total_assets: 0,
-            total_liabilities: 0,
-            total_equity: 0,
-            net_income: 0,
+            total_assets: dec!(0.00),
+            total_liabilities: dec!(0.00),
+            total_equity: dec!(0.00),
+            net_income: dec!(0.00),
         }
     }
 }

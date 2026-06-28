@@ -34,6 +34,15 @@ pub(crate) async fn get_partners(
     Ok(partners)
 }
 
+pub(crate) async fn search_partners(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    term: &str,
+) -> Result<Vec<PartnerListItem>, ApiError> {
+    let partners = partner_db::search(pool, organization_id, term).await?;
+    Ok(partners)
+}
+
 pub(crate) async fn get_partner(
     pool: &mut PgConnection,
     partner_id: Uuid,

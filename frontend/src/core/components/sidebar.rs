@@ -22,6 +22,7 @@ use crate::{
         locale_context::use_locale,
     },
     router::Route,
+    sales,
 };
 
 #[function_component(Sidebar)]
@@ -33,27 +34,34 @@ pub fn sidebar() -> Html {
 
     // Core Ledger Module
     #[cfg(feature = "ledger")]
-    if user_ctx.has_privilege(&SystemPrivilege::use_accounts) {
+    if user_ctx.has_privilege(&SystemPrivilege::UseAccounts) {
         if let Some(contrib) = ledger::components::get_sidebar_contribution() {
             registry.push(contrib);
         }
     }
 
     #[cfg(feature = "payables")]
-    if user_ctx.has_privilege(&SystemPrivilege::use_vendor_invoices) {
+    if user_ctx.has_privilege(&SystemPrivilege::UseVendorInvoices) {
         if let Some(contrib) = payables::components::get_sidebar_contribution() {
             registry.push(contrib);
         }
     }
 
+    #[cfg(feature = "sales")]
+    if user_ctx.has_privilege(&SystemPrivilege::UseVendorInvoices) {
+        if let Some(contrib) = sales::components::get_sidebar_contribution() {
+            registry.push(contrib);
+        }
+    }
+
     #[cfg(feature = "partners")]
-    if user_ctx.has_privilege(&SystemPrivilege::use_accounts) {
+    if user_ctx.has_privilege(&SystemPrivilege::UseAccounts) {
         if let Some(contrib) = partners::components::get_sidebar_contribution() {
             registry.push(contrib);
         }
     }
 
-    if user_ctx.has_privilege(&SystemPrivilege::manage_users) {
+    if user_ctx.has_privilege(&SystemPrivilege::ManageUsers) {
         if let Some(contrib) = get_core_contribution() {
             registry.push(contrib);
         }
@@ -165,20 +173,20 @@ pub fn get_core_contribution() -> Option<SidebarModuleContribution> {
     Some(SidebarModuleContribution {
         id: "sidebar-admin",
         label_key: "sidebar-admin",
-        privilege: Some(SystemPrivilege::manage_users),
+        privilege: Some(SystemPrivilege::ManageUsers),
         target_route: None,
         children: vec![
             SidebarModuleContribution {
                 id: "sidebar-users",
                 label_key: "sidebar-users",
-                privilege: Some(SystemPrivilege::manage_users),
+                privilege: Some(SystemPrivilege::ManageUsers),
                 target_route: Some(Route::Users),
                 children: vec![],
             },
             SidebarModuleContribution {
                 id: "sidebar-roles",
                 label_key: "sidebar-roles",
-                privilege: Some(SystemPrivilege::manage_users),
+                privilege: Some(SystemPrivilege::ManageUsers),
                 target_route: Some(Route::Roles),
                 children: vec![],
             },

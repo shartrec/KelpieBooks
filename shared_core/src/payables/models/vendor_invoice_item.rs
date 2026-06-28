@@ -5,7 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
+use rust_decimal::Decimal;
 use serde::{
     Deserialize,
     Serialize,
@@ -18,7 +18,7 @@ pub struct VendorInvoiceItem {
     pub vendor_invoice_id: Uuid,
     pub account_id: Uuid, // Target GL Expense Account
     pub description: String,
-    pub net_amount: i64,
-    pub tax_amount: i64,
-    pub total_amount: i64,
+    pub net_amount: Decimal,
+    pub tax_amount: Decimal,
+    pub total_amount: Decimal,
 }

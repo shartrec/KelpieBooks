@@ -10,6 +10,7 @@ use chrono::{
     DateTime,
     Utc,
 };
+use rust_decimal::Decimal;
 use serde::{
     Deserialize,
     Serialize,
@@ -22,6 +23,6 @@ pub struct VendorPaymentAllocation {
     pub organization_id: Uuid,
     pub vendor_invoice_id: Uuid,
     pub vendor_payment_id: Uuid,
-    pub allocated_amount: i64,
+    pub allocated_amount: Decimal,
     pub created_at: DateTime<Utc>,
 }

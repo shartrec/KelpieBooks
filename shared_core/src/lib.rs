@@ -12,6 +12,8 @@ pub mod ledger;
 pub mod partners;
 #[cfg(feature = "payables")]
 pub mod payables;
+#[cfg(feature = "sales")]
+pub mod sales;
 
 pub mod i18n;
 pub mod util;

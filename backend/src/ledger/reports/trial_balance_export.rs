@@ -10,20 +10,26 @@ use std::collections::HashMap;
 
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use shared_core::ledger::{
-    dtos::account_with_balance::AccountWithBalance,
-    models::account_category::AccountCategory,
-};
-use uuid::Uuid;
-use shared_core::core::models::organization::Organization;
-use crate::util::{
-    locale_context::LocaleContext,
-    reports::{
-        build_table_header,
-        wrap_report_layout,
+use rust_decimal::dec;
+use shared_core::{
+    core::models::organization::Organization,
+    ledger::{
+        dtos::account_with_balance::AccountWithBalance,
+        models::account_category::AccountCategory,
     },
 };
-use crate::core::routes::security::AuthenticatedUser;
+use uuid::Uuid;
+
+use crate::{
+    core::routes::security::AuthenticatedUser,
+    util::{
+        locale_context::LocaleContext,
+        reports::{
+            build_table_header,
+            wrap_report_layout,
+        },
+    },
+};
 
 #[derive(Clone, Debug)]
 pub(crate) struct AccountNode {
@@ -99,7 +105,7 @@ pub(crate) fn generate_trial_balance_csv(
         let indent = " ".repeat(depth * 2);
         let (debit_display, credit_display) = match node.account.category {
             AccountCategory::Asset | AccountCategory::Expense => {
-                if node.account.balance >= 0 {
+                if node.account.balance >= dec!(0.00) {
                     (i18n.format_money(node.account.balance), "".to_string())
                 } else {
                     (
@@ -109,7 +115,7 @@ pub(crate) fn generate_trial_balance_csv(
                 }
             }
             AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
-                if node.account.balance <= 0 {
+                if node.account.balance <= dec!(0.00) {
                     (
                         "".to_string(),
                         i18n.format_money(node.account.balance.abs()),
@@ -172,7 +178,7 @@ pub(crate) fn generate_trial_balance_typst(
         let indent = "#h(2.0em)".repeat(depth);
         let (debit_display, credit_display) = match node.account.category {
             AccountCategory::Asset | AccountCategory::Expense => {
-                if node.account.balance >= 0 {
+                if node.account.balance >= dec!(0.00) {
                     (i18n.format_money_typ(node.account.balance), "".to_string())
                 } else {
                     (
@@ -182,7 +188,7 @@ pub(crate) fn generate_trial_balance_typst(
                 }
             }
             AccountCategory::Liability | AccountCategory::Equity | AccountCategory::Revenue => {
-                if node.account.balance <= 0 {
+                if node.account.balance <= dec!(0.00) {
                     (
                         "".to_string(),
                         i18n.format_money_typ(node.account.balance.abs()),
@@ -207,8 +213,8 @@ pub(crate) fn generate_trial_balance_typst(
     typst_content.push_str(&format!(
         "  [*{}*], align(right)[*{}*], align(right)[*{}*],\n",
         i18n.t("common-total"),
-        (total_debit as f64) / 100.0,
-        (total_credit as f64) / 100.0
+        total_debit,
+        total_credit
     ));
     typst_content.push_str(")\n");
 

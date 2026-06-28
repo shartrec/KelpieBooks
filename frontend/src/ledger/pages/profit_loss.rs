@@ -15,6 +15,10 @@ use std::{
 };
 
 use fluent::fluent_args;
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use shared_core::ledger::{
     dtos::account_with_balance::AccountWithBalance,
     models::account_category::AccountCategory,
@@ -25,10 +29,6 @@ use yew_router::prelude::*;
 
 use crate::{
     api::Api,
-    core::components::{
-        layout::Layout,
-        report_options::ReportOptions,
-    },
     contexts::{
         auth_context::use_user_context,
         locale_context::{
@@ -39,6 +39,10 @@ use crate::{
             use_report_context,
             ReportAction,
         },
+    },
+    core::components::{
+        layout::Layout,
+        report_options::ReportOptions,
     },
     router::Route,
 };
@@ -51,9 +55,9 @@ pub struct AccountNode {
 
 fn build_account_nodes(
     accounts: &[AccountWithBalance],
-) -> (Vec<AccountNode>, Vec<AccountNode>, i64) {
-    let mut revenue_total = 0;
-    let mut expense_total = 0;
+) -> (Vec<AccountNode>, Vec<AccountNode>, Decimal) {
+    let mut revenue_total = dec!(0.00);
+    let mut expense_total = dec!(0.00);
 
     let mut acc_map: HashMap<Uuid, AccountWithBalance> = HashMap::new();
     let mut pc_map: HashMap<Uuid, Vec<Uuid>> = HashMap::new();

@@ -21,10 +21,8 @@ use crate::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
-    partners::components::partner_drawer::{
-        address_edit_card::AddressEditCard,
-        delete_address_confirmation_modal::DeleteAddressConfirmationModal,
-    },
+    core::components::delete_confirmation_modal::DeleteConfirmationModal,
+    partners::components::partner_drawer::address_edit_card::AddressEditCard,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -227,7 +225,13 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
                 })}
             </div>
             if let Some(address) = &*address_to_delete {
-                <DeleteAddressConfirmationModal address={address.clone()} on_close={Callback::from(move |_| address_to_delete.set(None))} on_confirm={on_delete_confirm} />
+                <DeleteConfirmationModal
+                    title={i18n.t("common-confirm-deletion")}
+                    message={i18n.t_args("delete-address-confirm-message", &fluent_args!["address" => &address.address_line1])}
+                    warning = {i18n.t("common-deletion-confirm-warning")}
+                    on_cancel={{Callback::from(move |_| address_to_delete.set(None))}}
+                    on_confirm={on_delete_confirm}
+                />
             }
         </div>
     }

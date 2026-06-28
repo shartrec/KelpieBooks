@@ -2,6 +2,8 @@
 ## Fluent Translation File for KelpieBooks (en)
 ##
 
+## English is the master source for translation keys. Other languages should match this file layout
+
 # Privileges
 # Organization Administrator Role (Bootstrap)
 sys-privilege-security_admin-name = Organization Administrator
@@ -27,6 +29,13 @@ sys-privilege-use_vendor_invoices-description = Permits viewing vendor invoices.
 
 sys-privilege-manage_vendor_invoices-name = Manage Vendor Invoices
 sys-privilege-manage_vendor_invoices-description = Permits entering, updating and paying of vendor invoices.
+
+# Sales Module
+sys-privilege-use_sales-name = View item and sales invoices
+sys-privilege-use_sales-description = Permites view sales invoices and item details.
+
+sys-privilege-manage_sales-name = Mangage items and sales invoices
+sys-privilege-manage_sales-description = Permits maintenance of items and entering, updating sales invoices.
 
 # Transactions Module
 sys-privilege-use_transactions-name = Record Transactions
@@ -77,6 +86,7 @@ common-expand = Expand
 common-collapse = Collapse
 common-confirm-deletion = Confirm Deletion
 common-confirm-delete-button = Confirm Delete
+common-deletion-confirm-warning = This action cannot be undone.
 common-debit = Debit
 common-credit = Credit
 common-account = Account
@@ -87,6 +97,7 @@ common-list = List
 common-aged = Aged
 common-net = Net
 common-tax = Tax
+common-tax-rate = Tax rate
 common-gross = Gross
 common-pay = Pay
 common-view = View
@@ -99,8 +110,14 @@ common-contacts = Contacts
 common-primary = Primary
 common-saved = Saved!
 common-items = Items
+common-item = Item
 common-payments = Payments
 common-save = Save
+common-toggle-password-visibility = Toggle password visibility
+common-more = More+
+common-present = Present
+common-quantity = Quantity
+common-price = Price
 
 # Login Page
 login-help-text = Need help? Contact your administrator.
@@ -108,10 +125,39 @@ login-form-email-label = User Email:
 login-form-password-label = Password:
 login-form-submit-button = Sign In
 login-logo-alt-text = KelpieBooks Logo
+login-forgot-password = Forgot Password?
 
 # Login Error Messages
 login-error-parse-response = Failed to parse login response.
 login-error-failed = Login failed: { $status }
+
+# Forgot Password Page
+forgot-password-subtitle = Reset your password
+forgot-password-success-message = If an account with that email exists, a password reset link has been sent.
+forgot-password-back-to-login = Back to Login
+forgot-password-email-label = Email:
+forgot-password-submit-button = Send Reset Link
+
+# Reset Password Page
+reset-password-subtitle = Reset Your Password
+reset-password-success-message = Your password has been reset successfully.
+reset-password-back-to-login = Back to Login
+reset-password-new-password-label = New Password:
+reset-password-confirm-password-label = Confirm New Password:
+reset-password-submit-button = Reset Password
+reset-password-error-server = Error resetting password: { $status }
+
+# Email
+email-reset-subject = KelpieBooks - Secure Password Reset Request
+email-reset-body-plain =
+    Hello,
+        A password reset request was made for your KelpieBooks account. Please visit the following link within 20 minutes to initialize a new password:
+        { $reset_link }
+email-reset-body-html =
+    <h3>KelpieBooks Security Authentication</h3>
+    <p>A password reset request was initiated for your profile access.</p>
+    <p><a href="{ $reset_link }" style="display:inline-block; padding:10px 20px; background:#2563eb; color:white; text-decoration:none; border-radius:5px;">Reset My Password</a></p>
+    <p><small>If you did not make this request, you can safely ignore this correspondence.</small></p>
 
 # Sidebar
 sidebar-logo-alt = Logo
@@ -132,6 +178,10 @@ sidebar-configuration = Configuration
 sidebar-admin = Admin
 sidebar-users = Users
 sidebar-roles = Roles
+sidebar-sales = Sales
+
+# Sales invoice list
+sales-invoice-list = Sales Invoices
 
 # Header
 header-toggle-menu-alt = Toggle menu
@@ -152,7 +202,6 @@ coa-error-add-account = Failed to add account: { $status }
 coa-error-update-account = Failed to update account: { $status }
 coa-error-not-found = Account not found
 coa-error-delete-account = Failed to delete account: { $status }
-
 
 # Add/Edit Account Modal
 account-modal-add-title = Add New Account
@@ -175,8 +224,8 @@ account-category-revenue = Revenue
 account-category-expense = Expense
 
 # Delete Confirmation Modal
-delete-confirm-message = Are you sure you want to delete the account: { $name }?
-delete-confirm-warning = This action cannot be undone. You can only delete accounts with no transactions.
+account-delete-confirm-message = Are you sure you want to delete the account: { $name }?
+account-delete-confirm-warning = This action cannot be undone. You can only delete accounts with no transactions.
 
 # Account Ledger
 ledger-title = Ledger: { $name }
@@ -209,8 +258,8 @@ reversal-confirm-warning = This action cannot be undone.
 reversal-confirm-button = Confirm Reversal
 
 # Deletion Confirmation Modal
-deletion-confirm-title = Confirm Transaction Deletion
-deletion-confirm-warning = This action cannot be undone. Deleting this transaction will permanently remove it from your records.
+transaction-deletion-confirm-title = Confirm Transaction Deletion
+transaction-deletion-confirm-warning = This action cannot be undone. Deleting this transaction will permanently remove it from your records.
 
 # Transaction Error Messages
 transaction-error-parse = Failed to parse transaction: { $error }
@@ -345,6 +394,10 @@ period-settings-current-lock = Current Lock:
 payables-ledger-title = Payables Ledger
 payables-ledger-new-invoice-button = + New Invoice
 
+# Sales Ledger Page
+sales-ledger-title = Sales Ledger
+sales-ledger-new-invoice-button = + New Invoice
+
 # Aged Trial Balance Matrix
 aged-trial-balance-current = Current
 aged-trial-balance-1-30-days = 1-30 Days
@@ -366,10 +419,25 @@ vendor-invoice-filter-vendor-label = Vendor:
 vendor-invoice-filter-all-vendors = All Vendors
 vendor-invoice-filter-min-amount-label = Min Amount:
 
+# Sales Invoice Filter
+sales-invoice-filter-draft = Draft
+sales-invoice-filter-outstanding = Outstanding
+sales-invoice-filter-fully-paid = Fully Paid
+sales-invoice-filter-all-invoices = All Invoices
+sales-invoice-filter-from-label = From:
+sales-invoice-filter-to-label = To:
+sales-invoice-filter-customer-label = Customer:
+sales-invoice-filter-all-customers = All Customers
+sales-invoice-filter-min-amount-label = Min Amount:
+
 # Vendor Invoice Table
 vendor-invoice-table-invoice-number = Invoice #
 vendor-invoice-table-invoice-date = Invoice Date
 vendor-invoice-table-balance-due = Balance Due
+
+# Sales Invoice Table
+sales-invoice-table-invoice-number = Invoice #
+sales-invoice-table-invoice-date = Invoice Date
 
 # Vendor Invoice Table Error Messages
 vendor-invoice-table-error-parse-invoices = Failed to parse invoices: { $error }
@@ -378,6 +446,14 @@ vendor-invoice-table-error-parse-partner = Failed to parse partner: { $error }
 vendor-invoice-table-error-fetch-partner = Failed to fetch partner: { $status }
 vendor-invoice-table-error-parse-invoice = Failed to parse invoice: { $error }
 vendor-invoice-table-error-fetch-invoice = Failed to fetch invoice: { $status }
+
+# Sales Invoice Table Error Messages
+sales-invoice-table-error-parse-invoices = Failed to parse invoices: { $error }
+sales-invoice-table-error-fetch-invoices = Failed to fetch invoices: { $status }
+sales-invoice-table-error-parse-partner = Failed to parse partner: { $error }
+sales-invoice-table-error-fetch-partner = Failed to fetch partner: { $status }
+sales-invoice-table-error-parse-invoice = Failed to parse invoice: { $error }
+sales-invoice-table-error-fetch-invoice = Failed to fetch invoice: { $status }
 
 # New Vendor Invoice Page
 new-vendor-invoice-title = New Vendor Invoice
@@ -452,6 +528,7 @@ address-edit-card-edit-title = Edit Address
 address-edit-card-add-title = Add Address
 address-edit-card-line1-label = Addr line 1:
 address-edit-card-line1-placeholder = Address Line 1
+address-edit-card-line2-label = Addr line 2:
 address-edit-card-line2-placeholder = Address Line 2 (Optional)
 address-edit-card-city-label = City:
 address-edit-card-city-placeholder = City
@@ -461,6 +538,7 @@ address-edit-card-post-code-label = Post Code:
 address-edit-card-post-code-placeholder = Postcode
 address-edit-card-country-label = Country:
 address-edit-card-country-placeholder = Country
+address-edit-card-address-type-label = Address Type:
 address-edit-card-save-button = Save Address
 
 # Addresses View
@@ -496,6 +574,9 @@ delete-contact-confirm-message = Are you sure you want to delete the contact: { 
 vendor-invoice-drawer-inv-number = Inv #: { $number }
 vendor-invoice-drawer-gross = Gross: { $amount }
 vendor-invoice-drawer-outstanding-balance = Outstanding Balance: { $amount }
+
+# Sales Invoice Drawer
+sales-invoice-drawer-inv-number = Inv #: { $number }
 
 # Details View
 details-view-error-update = Failed to update invoice: { $status }
@@ -581,8 +662,8 @@ delete-user-confirm-title = Delete User
 delete-user-confirm-message = Are you sure you want to delete the user: { $user }?
 
 # Roles Page
-roles-title = User Roles
-roles-list-description = This is a list of all the user roles in your organization.
+roles-title = Roles
+roles-list-description = This is a list of all the roles in your organization.
 roles-add-button = Add Role
 roles-header-name = Name
 roles-error-parse = Failed to parse roles: { $error }
@@ -601,8 +682,118 @@ role-modal-save-button = Save Changes
 delete-role-confirm-title = Delete Role
 delete-role-confirm-message = Are you sure you want to delete the role: { $role }?
 
+#Sales
+new-sales-invoice-title = New Sales Invoice
+new-sales-invoice-number-label = Invoice number
+new-sales-invoice-date-label = Date
+new-sales-invoice-due-date-label = Due Date
+new-sales-invoice-select-customer = Select Item
+new-sales-invoice-select-item = Select Item
+new-sales-invoice-add-line-button = + Add line
+new-sales-invoice-error-parse-items = Error parsing items
+new-sales-invoice-save-button = Save
+new-sales-invoice-success = Sales invoice { $number } was created successfully.
+new-sales-invoice-error-parse-response = Failed to parse created invoice: { $error }
+
+# Sales Invoice — Addresses
+new-sales-invoice-billing-address = Billing address
+new-sales-invoice-select-billing = Select billing address
+new-sales-invoice-billing-override = Billing address override
+new-sales-invoice-shipping-address = Shipping address
+new-sales-invoice-select-shipping = Select shipping address
+new-sales-invoice-shipping-override = Shipping address override
+
+# Address field labels/placeholders
+address-name = Name
+address-attention = Attention
+address-line1 = Address line 1
+address-line2 = Address line 2
+address-city = City
+address-region = State/Province/Region
+address-postal-code = Postal code
+address-country = Country
+
+# Sales items
+item-list-title = Items
+item-list-description = This is a list of all the items in your organization.
+item-list-code = Code
+item-list-name = Name
+item-list-type = Type
+item-list-price = Price
+item-list-add-item-button = Add Item
+item-list-error-parse-items = Failed to parse items: { $error }
+item-list-error-fetch-items = Failed to fetch items: { $status }
+item-edit-title = Edit Item
+item-add-title = Add Item
+item-code-label = Code:
+item-name-label = Name:
+item-description-label = Description:
+item-type-label = Type:
+item-uom-label = Unit of Measure:
+item-select-uom = Select a unit of measure
+item-price-label = Price:
+item-tax-category-label = Tax Category:
+item-select-tax-category = Select a tax category
+item-income-account-label = Income Account:
+item-select-income-account = Select an income account
+item-is-active-label = Is Active:
+item-filter-search-placeholder = Search by code or name
+item-filter-all-types = All Types
+item-type-service = Service
+item-type-stocked = Stocked
+item-type-non-stocked = Non-Stocked
+item-filter-include-inactive = Include Inactive
+uom-list-title = Units of Measure
+uom-list-description = This is a list of all the units of measure in your organization.
+uom-list-add-uom-button = Add Unit of Measure
+uom-list-code = Code
+uom-list-name = Name
+uom-list-is-active = Is Active
+uom-list-error-parse-uoms = Failed to parse units of measure: { $error }
+uom-list-error-fetch-uoms = Failed to fetch units of measure: { $status }
+uom-add-title = Add Unit of Measure
+uom-edit-title = Edit Unit of Measure
+uom-code-label = Code:
+uom-name-label = Name:
+uom-is-active-label = Is Active:
+uom-delete-title = Delete Unit of Measure
+uom-delete-confirm-message = Are you sure you want to delete the unit of measure: { $name }?
+uom-delete-error = Failed to delete unit of measure. It may be in use.
+tax-category-list-title = Tax Categories
+tax-category-list-description = This is a list of all the tax categories in your organization.
+tax-category-list-add-tax-category-button = Add Tax Category
+tax-category-list-name = Name
+tax-category-list-is-active = Is Active
+tax-category-list-error-parse-tax-categories = Failed to parse tax categories: { $error }
+tax-category-list-error-fetch-tax-categories = Failed to fetch tax categories: { $status }
+tax-category-add-title = Add Tax Category
+tax-category-edit-title = Edit Tax Category
+tax-category-name-label = Name:
+tax-category-description-label = Description:
+tax-category-is-active-label = Is Active:
+tax-category-delete-title = Delete Tax Category
+tax-category-delete-confirm-message = Are you sure you want to delete the tax category: { $name }?
+tax-category-delete-error = Failed to delete tax category. It may be in use.
+tax-category-row-manage-rates = Manage Rates
+
+# Tax Rate Drawer
+tax-rate-drawer-error-parse-rates = Failed to parse tax rates: { $error }
+tax-rate-drawer-error-fetch-rates = Failed to fetch tax rates: { $status }
+tax-rate-drawer-error-update-rates = Failed to update tax rates: { $status }
+tax-rate-drawer-add-rate-button = + Add Rate
+tax-rate-drawer-validity = Valid from { $from } to { $to }
+tax-rate-drawer-delete-rate-title = Delete Rate
+tax-rate-drawer-delete-rate-message = Are you sure you want to delete the rate: { $name }?
+
+# Tax Rate Edit Card
+tax-rate-edit-card-add-title = Add Rate
+tax-rate-edit-card-edit-title = Edit Rate
+tax-rate-edit-card-rate-label = Rate:
+tax-rate-edit-card-valid-from-label = Valid From:
+tax-rate-edit-card-valid-to-label = Valid To:
+
 # Security
-security-error-no-admin = You cannot perform this action. At least one Security Administrator must remain.
+security-error-no-admin = You cannot perform this action. At least one security administrator must remain.
 
 # Test keys
 test-key = Test Value

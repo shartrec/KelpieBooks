@@ -21,8 +21,7 @@ will not be merged:
 ### Rule A: Zero Floating-Point Numbers for Currency
 
 * __Never__ use `f32` or `f64` for tracking financial values.
-* All monetary values must be represented as `i64` whole cents (e.g., `$10.50` is stored and calculated as `1050`).
-* All mathematical modifications must happen via safe integer calculations to completely eliminate rounding errors.
+* All monetary values must be represented as rust_decimal::Decimal and stored in the database as NUMERIC(15, 4).
 * Use the available i18n module for all currency and date formatting. See
   the [Developer Guidelines](@/General/dev-guidelines.md)
 

@@ -10,6 +10,7 @@ use shared_core::partners::models::{
     address_type::AddressType,
     partner_address::PartnerAddress,
 };
+use strum::IntoEnumIterator;
 use uuid::Uuid;
 use yew::prelude::*;
 
@@ -125,11 +126,11 @@ pub fn address_edit_card(props: &AddressEditCardProps) -> Html {
                 <input type="text" placeholder={i18n.t("address-edit-card-post-code-placeholder")} value={address_state.postal_code.clone().unwrap_or_default()} oninput={on_input(|a, v| a.postal_code = Some(v))} />
                 <label>{i18n.t("address-edit-card-country-label")}</label>
                 <input type="text" placeholder={i18n.t("address-edit-card-country-placeholder")} value={address_state.country.clone()} oninput={on_input(|a, v| a.country = v)} />
-                <label>{i18n.t("address-edit-card-country-label")}</label>
+                <label>{i18n.t("address-edit-card-address-type-label")}</label>
                 <div class="select-wrapper-compact">
                     <select onchange={on_select_change}>
-                        { for AddressType::iterator().map(|t| html!{
-                            <option value={t.to_string()} selected={address_state.address_type == t}>{t.display_name()}</option>
+                        { for AddressType::iter().map(|t| html!{
+                            <option value={t.to_string()} selected={address_state.address_type == t}>{t.to_string()}</option>
                         })}
                     </select>
                 </div>

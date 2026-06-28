@@ -13,10 +13,6 @@ use yew_router::prelude::*;
 
 use crate::{
     api::Api,
-    core::components::{
-        layout::Layout,
-        report_options::ReportOptions,
-    },
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
@@ -24,6 +20,10 @@ use crate::{
             use_report_context,
             ReportAction,
         },
+    },
+    core::components::{
+        layout::Layout,
+        report_options::ReportOptions,
     },
     router::Route,
 };
@@ -164,7 +164,7 @@ pub fn general_ledger_report_page() -> Html {
         let mut grouped = std::collections::BTreeMap::new();
         for line in data.iter() {
             grouped
-                .entry(line.account_name.clone())
+                .entry(line.code.clone())
                 .or_insert_with(Vec::new)
                 .push(line.clone());
         }
@@ -196,25 +196,36 @@ pub fn general_ledger_report_page() -> Html {
                             </tr>
                         </thead>
                         <tbody>
-                            { for grouped_data.iter().map(|(account_name, lines)| html! {
-                                <>
-                                    <tr class="report__section-header">
-                                        <td colspan="5">{ account_name }</td>
-                                    </tr>
-                                    { for lines.iter().map(|line| html! {
-                                        <tr>
-                                            <td>
-                                                <Link<Route> to={Route::AccountLedger { id: line.account_id }}>
-                                                    { i18n.format_date(line.date) }
-                                                </Link<Route>>
-                                            </td>
-                                            <td>{ line.description.clone().unwrap_or_default() }</td>
-                                            <td class="text-amount">{ i18n.format_currency(line.debit) }</td>
-                                            <td class="text-amount">{ i18n.format_currency(line.credit) }</td>
-                                            <td class="text-amount">{ i18n.format_currency(line.balance) }</td>
-                                        </tr>
-                                    })}
-                                </>
+                            { for grouped_data.iter().map(|(_code, lines)| html! {
+                                { for lines.iter().enumerate().map(|(index, line)| {
+                                    let header = if index == 0 {
+                                        html! {
+                                            <tr class="report__section-header">
+                                                // Use account_name from the group key for a consistent header
+                                                <td colspan="5">{ line.account_name.clone() }</td>
+                                            </tr>
+                                        }
+                                    } else {
+                                        html! {}
+                                    };
+
+                                    html! {
+                                        <>
+                                            { header }
+                                            <tr>
+                                                <td>
+                                                    <Link<Route> to={Route::AccountLedger { id: line.account_id }}>
+                                                        { i18n.format_date(line.date) }
+                                                    </Link<Route>>
+                                                </td>
+                                                <td>{ line.description.clone().unwrap_or_default() }</td>
+                                                <td class="text-amount">{ i18n.format_currency(line.debit) }</td>
+                                                <td class="text-amount">{ i18n.format_currency(line.credit) }</td>
+                                                <td class="text-amount">{ i18n.format_currency(line.balance) }</td>
+                                            </tr>
+                                        </>
+                                    }
+                                }) }
                             })}
                         </tbody>
                     </table>

@@ -14,11 +14,11 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    core::components::layout::Layout,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
+    core::components::layout::Layout,
     router::Route,
 };
 
@@ -48,6 +48,9 @@ pub fn profile_page() -> Html {
     // Password form state
     let password_update = use_state(PasswordUpdate::default);
     let confirm_password = use_state(String::new);
+    let show_old_password = use_state(|| false);
+    let show_new_password = use_state(|| false);
+    let show_confirm_password = use_state(|| false);
     let password_error = use_state(|| None::<String>);
     let password_success = use_state(|| false);
 
@@ -236,6 +239,12 @@ pub fn profile_page() -> Html {
         })
     };
 
+    let toggle_password_visibility = |state: UseStateHandle<bool>| {
+        Callback::from(move |_| {
+            state.set(!*state);
+        })
+    };
+
     html! {
         <Layout>
             <h1>{ i18n.t("profile-title") }</h1>
@@ -265,18 +274,33 @@ pub fn profile_page() -> Html {
                 <form onsubmit={on_submit_password} class="profile__form">
                     <h2>{ i18n.t("profile-change-password-title") }</h2>
                     <label>{i18n.t("profile-old-password-label")}</label>
-                    <input type="password" oninput={on_old_password_input} required=true />
+                    <div class="password-input-wrapper">
+                        <input type={if *show_old_password { "text" } else { "password" }} oninput={on_old_password_input} required=true />
+                        <button type="button" class="icon-button" onclick={toggle_password_visibility(show_old_password.clone())}>
+                            { if *show_old_password { "⊘" } else { "👁" } }
+                        </button>
+                    </div>
 
                     <label>{i18n.t("profile-new-password-label")}</label>
-                    <input type="password" oninput={on_new_password_input} required=true />
+                    <div class="password-input-wrapper">
+                        <input type={if *show_new_password { "text" } else { "password" }} oninput={on_new_password_input} required=true />
+                        <button type="button" class="icon-button" onclick={toggle_password_visibility(show_new_password.clone())}>
+                            { if *show_new_password { "⊘" } else { "👁" } }
+                        </button>
+                    </div>
 
                     <label>{i18n.t("profile-confirm-password-label")}</label>
-                    <input
-                        type="password"
-                        oninput={on_confirm_password_input}
-                        required=true
-                        class={if !confirm_password.is_empty() { if passwords_match { "input-success" } else { "input-error" } } else { "" }}
-                    />
+                    <div class="password-input-wrapper">
+                        <input
+                            type={if *show_confirm_password { "text" } else { "password" }}
+                            oninput={on_confirm_password_input}
+                            required=true
+                            class={if !confirm_password.is_empty() { if passwords_match { "input-success" } else { "input-error" } } else { "" }}
+                        />
+                        <button type="button" class="icon-button" onclick={toggle_password_visibility(show_confirm_password.clone())}>
+                            { if *show_confirm_password { "⊘" } else { "👁" } }
+                        </button>
+                    </div>
 
                     <div class="profile__form-actions">
                         <button type="submit" disabled={!can_submit_password}>{i18n.t("profile-change-password-button")}</button>

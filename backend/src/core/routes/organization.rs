@@ -13,12 +13,19 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::core::models::organization::Organization;
-use shared_core::core::dtos::organization::{
-    AuditModeRequest,
-    LockDateRequest,
+use shared_core::core::{
+    dtos::organization::{
+        AuditModeRequest,
+        LockDateRequest,
+    },
+    models::organization::Organization,
 };
+
 use crate::{
+    core::{
+        db,
+        routes::security::AuthenticatedUser,
+    },
     security::{
         ManageOrganization,
         RequirePrivilege,
@@ -29,8 +36,6 @@ use crate::{
     },
     DbKelpie,
 };
-use crate::core::db;
-use crate::core::routes::security::AuthenticatedUser;
 
 pub(crate) fn routes() -> Vec<Route> {
     rocket::routes![get_organization, set_lock_date, set_audit_mode]

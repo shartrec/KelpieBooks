@@ -18,10 +18,8 @@ use crate::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
-    partners::components::partner_drawer::{
-        contact_edit_card::ContactEditCard,
-        delete_contact_confirmation_modal::DeleteContactConfirmationModal,
-    },
+    core::components::delete_confirmation_modal::DeleteConfirmationModal,
+    partners::components::partner_drawer::contact_edit_card::ContactEditCard,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -215,7 +213,13 @@ pub fn contacts_view(props: &ContactsViewProps) -> Html {
                 })}
             </div>
             if let Some(contact) = &*contact_to_delete {
-                <DeleteContactConfirmationModal contact={contact.clone()} on_close={Callback::from(move |_| contact_to_delete.set(None))} on_confirm={on_delete_confirm} />
+                <DeleteConfirmationModal
+                    title={i18n.t("common-confirm-deletion")}
+                    message={i18n.t_args("delete-contact-confirm-message", &fluent_args!["name" => &contact.full_name, "preferred_name" => &contact.preferred_name])}
+                    warning = {i18n.t("delete-confirm-warning")}
+                    on_cancel={{Callback::from(move |_| contact_to_delete.set(None))}}
+                    on_confirm={on_delete_confirm}
+                />
             }
         </div>
     }

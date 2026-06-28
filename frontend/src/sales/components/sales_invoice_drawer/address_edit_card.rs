@@ -1,0 +1,99 @@
+/*
+ * Copyright (c) 2026.
+ *
+ * This file is part of KelpieBooks. For terms of use, please see the file
+ * called LICENSE at the top level of the KelpieBooks source tree
+ *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
+ */
+
+use shared_core::sales::models::invoice_address::{
+    AddressType,
+    InvoiceAddress,
+};
+use yew::prelude::*;
+
+use crate::contexts::locale_context::use_locale;
+
+#[derive(Properties, PartialEq)]
+pub struct AddressEditCardProps {
+    pub address_type: AddressType,
+    pub address: InvoiceAddress,
+    pub on_save: Callback<(InvoiceAddress, AddressType)>,
+    pub on_cancel: Callback<()>,
+}
+
+#[function_component(AddressEditCard)]
+pub fn address_edit_card(props: &AddressEditCardProps) -> Html {
+    let i18n = use_locale();
+
+    let address_state = use_state(|| props.address.clone());
+
+    let on_input = |field_updater: fn(&mut InvoiceAddress, String)| {
+        let address_state = address_state.clone();
+        Callback::from(move |e: InputEvent| {
+            let mut address = (*address_state).clone();
+            let value = e
+                .target_unchecked_into::<web_sys::HtmlInputElement>()
+                .value();
+            field_updater(&mut address, value);
+            address_state.set(address);
+        })
+    };
+
+    let on_save_click = {
+        let on_save = props.on_save.clone();
+        let address_state = address_state.clone();
+        let address_type = props.address_type.clone();
+        Callback::from(move |_| {
+            on_save.emit(((*address_state).clone(), address_type.clone()));
+        })
+    };
+
+    let on_cancel_click = {
+        let on_cancel = props.on_cancel.clone();
+        Callback::from(move |_| {
+            on_cancel.emit(());
+        })
+    };
+
+    html! {
+        <div class="card card--editing" style="padding: 1rem; margin-bottom: 1rem;">
+            <div class="card__meta-line" style="margin-bottom: 0.75rem;">
+                <div class="card__title">
+                    <strong style="font-size: 0.85rem; text-transform: uppercase; color: var(--brand-dark);">
+                        { i18n.t("address-edit-card-add-title") }
+                    </strong>
+                </div>
+            </div>
+
+            <div class="card-form-compact">
+                // Full-width entry 1
+                <label>{i18n.t("address-edit-card-line1-label")}</label>
+                <input type="text" placeholder={i18n.t("address-edit-card-line1-placeholder")} value={address_state.address_line1.clone()} oninput={on_input(|a, v| a.address_line1 = Some(v))} />
+
+                <label>{i18n.t("address-edit-card-line1-label")}</label>
+                <input type="text" placeholder={i18n.t("address-edit-card-line2-placeholder")} value={address_state.address_line2.clone().unwrap_or_default()} oninput={on_input(|a, v| a.address_line2 = Some(v))} />
+
+                // Row split: City & State side-by-side
+                <label>{i18n.t("address-edit-card-city-label")}</label>
+                <input type="text" placeholder={i18n.t("address-edit-card-city-placeholder")} value={address_state.city.clone()} oninput={on_input(|a, v| a.state_province = Some(v))} />
+                <label>{i18n.t("address-edit-card-state-label")}</label>
+                <input type="text" placeholder={i18n.t("address-edit-card-state-placeholder")} value={address_state.state_province.clone().unwrap_or_default()} oninput={on_input(|a, v| a.state_province = Some(v))} />
+
+                // Row split: Postcode & Country side-by-side
+                <label>{i18n.t("address-edit-card-post-code-label")}</label>
+                <input type="text" placeholder={i18n.t("address-edit-card-post-code-placeholder")} value={address_state.postal_code.clone().unwrap_or_default()} oninput={on_input(|a, v| a.postal_code = Some(v))} />
+                <label>{i18n.t("address-edit-card-country-label")}</label>
+                <input type="text" placeholder={i18n.t("address-edit-card-country-placeholder")} value={address_state.country.clone()} oninput={on_input(|a, v| a.country = Some(v))} />
+                <label>{i18n.t("address-edit-card-address-type-label")}</label>
+
+            </div>
+
+            // Tightly bundled actionable context footer links
+            <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed rgba(0,0,0,0.05);">
+                <button class="button-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick={on_cancel_click}>{ i18n.t("common-cancel") }</button>
+                <button class="button-primary" style="padding: 4px 10px; font-size: 0.8rem;" onclick={on_save_click}>{ i18n.t("address-edit-card-save-button") }</button>
+            </div>
+        </div>
+    }
+}

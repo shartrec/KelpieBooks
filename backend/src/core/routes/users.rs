@@ -17,16 +17,26 @@ use rocket::{
 };
 use rocket_db_pools::Connection;
 use serde::Deserialize;
-use shared_core::core::requests::user::{
-    CreateUserRequest,
-    UpdateUserRequest,
+use shared_core::core::{
+    dtos::user_detail::{
+        AuthUserDetail,
+        UserDetail,
+    },
+    requests::user::{
+        CreateUserRequest,
+        UpdateUserRequest,
+    },
 };
 use sqlx::Acquire;
-use shared_core::core::dtos::user_detail::{
-    AuthUserDetail,
-    UserDetail,
-};
+
 use crate::{
+    core::{
+        db::user,
+        routes::security::{
+            hash_pwd,
+            AuthenticatedUser,
+        },
+    },
     security::{
         ManageUsers,
         RequirePrivilege,
@@ -37,11 +47,6 @@ use crate::{
         ApiError,
     },
     DbKelpie,
-};
-use crate::core::db::user;
-use crate::core::routes::security::{
-    hash_pwd,
-    AuthenticatedUser,
 };
 
 #[derive(Deserialize)]
@@ -126,9 +131,12 @@ pub(crate) async fn update_user(
     .await?;
 
     // Check we haven't accidentally deleted our admin
-    let _ =
-        crate::core::db::user::check_security_admin_remains(&mut tx, auth_user.organization_id, &i18n)
-            .await?;
+    let _ = crate::core::db::user::check_security_admin_remains(
+        &mut tx,
+        auth_user.organization_id,
+        &i18n,
+    )
+    .await?;
 
     tx.commit().await?;
 
@@ -204,7 +212,7 @@ pub(crate) async fn update_password(
 
     let valid = bcrypt::verify(&password_data.old_password, &original_user.password_hash)?;
     if !valid {
-        return Err(ApiError::Invalid("Incorrect old password".to_string()));
+        return Err(ApiError::BadRequest("Incorrect old password".to_string()));
     }
 
     let new_password_hash = hash_pwd(&password_data.new_password)?;

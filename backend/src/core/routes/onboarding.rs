@@ -16,10 +16,10 @@ use rocket_db_pools::Connection;
 use shared_core::core::requests::onboard::OnboardingRequest;
 
 use crate::{
+    core::services::onboarding,
     util::ApiError,
     DbKelpie,
 };
-use crate::core::services::onboarding;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![register]

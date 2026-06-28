@@ -11,9 +11,11 @@ pub mod ledger;
 pub mod partners;
 #[cfg(feature = "payables")]
 pub mod payables;
+#[cfg(feature = "sales")]
+pub mod sales;
 
-pub mod core;
 pub mod api;
 pub mod contexts;
+pub mod core;
 pub mod router;
 pub mod services;

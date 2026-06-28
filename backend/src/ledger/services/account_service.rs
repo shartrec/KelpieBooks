@@ -16,6 +16,10 @@ use chrono::{
     NaiveDate,
 };
 use rocket_db_pools::sqlx::PgConnection;
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use shared_core::ledger::{
     dtos::{
         account_with_balance::AccountWithBalance,
@@ -26,12 +30,16 @@ use shared_core::ledger::{
         account_category::AccountCategory,
         system_tag::SystemTag,
     },
-    requests::transaction::CreateTransactionRequest,
+    requests::{
+        configuration::UpdateConfigurationRequest,
+        transaction::CreateTransactionRequest,
+    },
 };
 use sqlx::Acquire;
 use uuid::Uuid;
-use shared_core::core::requests::configuration::UpdateConfigurationRequest;
+
 use crate::{
+    core::db,
     ledger::db::{
         account,
         account::{
@@ -44,7 +52,6 @@ use crate::{
     },
     util::ApiError,
 };
-use crate::core::db;
 
 pub(crate) async fn get_accounts(
     pool: &mut PgConnection,
@@ -102,11 +109,11 @@ pub(crate) async fn get_accounts_with_balances(
     let accounts = get_all_by_org(pool, organization_id).await?;
     let entries = journal_entry::get_all_by_org(pool, organization_id).await?;
 
-    let mut balances: HashMap<Uuid, i64> = HashMap::new();
+    let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
 
     // 1. Calculate the direct balance for each account from its journal entries.
     for entry in &entries {
-        *balances.entry(entry.account_id).or_insert(0) += entry.debit - entry.credit;
+        *balances.entry(entry.account_id).or_insert(dec!(0.00)) += entry.debit - entry.credit;
     }
 
     // 2. Build a map of parent to children and child counts for topological sort.
@@ -130,8 +137,8 @@ pub(crate) async fn get_accounts_with_balances(
 
     while let Some(account_id) = queue.pop_front() {
         if let Some(&parent_id) = parent_map.get(&account_id) {
-            let balance = *balances.get(&account_id).unwrap_or(&0);
-            *balances.entry(parent_id).or_insert(0) += balance;
+            let balance = *balances.get(&account_id).unwrap_or(&dec!(0.00));
+            *balances.entry(parent_id).or_insert(dec!(0.00)) += balance;
 
             if let Some(count) = child_count.get_mut(&parent_id) {
                 *count -= 1;
@@ -146,7 +153,7 @@ pub(crate) async fn get_accounts_with_balances(
     let result = accounts
         .into_iter()
         .map(|acc| AccountWithBalance {
-            balance: *balances.get(&acc.id).unwrap_or(&0),
+            balance: *balances.get(&acc.id).unwrap_or(&dec!(0.00)),
             id: acc.id,
             organization_id: acc.organization_id,
             parent_id: acc.parent_id,
@@ -199,15 +206,15 @@ pub(crate) async fn get_journal_entries_with_running_balance(
         account_id,
         date: start_date,
         description: Some("Opening Balance".to_string()),
-        debit: if opening_balance > 0 {
+        debit: if opening_balance > dec!(0.00) {
             opening_balance
         } else {
-            0
+            dec!(0.00)
         },
-        credit: if opening_balance < 0 {
+        credit: if opening_balance < dec!(0.00) {
             -opening_balance
         } else {
-            0
+            dec!(0.00)
         },
         running_balance: opening_balance,
     });
@@ -269,11 +276,11 @@ pub(crate) async fn create_transaction(
     organization_id: Uuid,
     req: &CreateTransactionRequest,
 ) -> Result<Uuid, ApiError> {
-    let total_debits: i64 = req.entries.iter().map(|e| e.debit).sum();
-    let total_credits: i64 = req.entries.iter().map(|e| e.credit).sum();
+    let total_debits: Decimal = req.entries.iter().map(|e| e.debit).sum();
+    let total_credits: Decimal = req.entries.iter().map(|e| e.credit).sum();
 
-    if total_debits == 0 || total_credits == 0 || total_debits != total_credits {
-        return Err(ApiError::Invalid(
+    if total_debits == dec!(0.00) || total_credits == dec!(0.00) || total_debits != total_credits {
+        return Err(ApiError::BadRequest(
             "Transaction must be balanced and not zero.".to_string(),
         ));
     }

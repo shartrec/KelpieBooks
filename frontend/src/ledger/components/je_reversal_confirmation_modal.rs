@@ -7,6 +7,7 @@
  */
 use fluent::fluent_args;
 use gloo_net::http::Request;
+use rust_decimal::dec;
 use shared_core::ledger::dtos::{
     journal_entry_with_balance::JournalEntryWithBalance,
     transaction_detail::TransactionDetail,
@@ -109,8 +110,8 @@ pub fn reversal_confirmation_modal(props: &ReversalConfirmationModalProps) -> Ht
                                 { for detail.entries.iter().map(|entry| html! {
                                     <tr>
                                         <td>{ &entry.account_name }</td>
-                                        <td class="amount">{ if entry.debit != 0 { format!("{:.2}", entry.debit as f64 / 100.0) } else { "".to_string() } }</td>
-                                        <td class="amount">{ if entry.credit != 0 { format!("{:.2}", entry.credit as f64 / 100.0) } else { "".to_string() } }</td>
+                                        <td class="amount">{ if entry.debit != dec!(0.00) { i18n.format_currency(entry.debit) } else { "".to_string() } }</td>
+                                        <td class="amount">{ if entry.credit != dec!(0.00) { i18n.format_currency(entry.credit) } else { "".to_string() } }</td>
                                     </tr>
                                 })}
                             </tbody>

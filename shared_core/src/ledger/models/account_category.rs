@@ -16,7 +16,11 @@ use strum::{
 };
 
 #[derive(Debug, Display, EnumString, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
-#[strum(serialize_all = "PascalCase")]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(
+    feature = "backend",
+    sqlx(type_name = "account_category", rename_all = "snake_case")
+)]
 pub enum AccountCategory {
     Asset,
     Liability,

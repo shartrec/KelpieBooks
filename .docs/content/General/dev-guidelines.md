@@ -18,17 +18,28 @@ planning documents, and deployment/configuration assets.
 ### backend/
 
 The backend contains the Rocket-based server application.
-
-Key areas:
-
-* `backend/src/main.rs`: Application entry point and server setup.
-* `backend/src/db/`: Database access layer. Files are grouped by domain concept, such as accounts, users, organisations,
-  transactions, journal entries, and security.
-* `backend/src/routes/`: HTTP route handlers grouped by feature area.
-* `backend/src/services/`: Business logic that sits between routes and database access.
 * `backend/src/util/`: Shared backend utilities, such as logging and common types.
 * `backend/migrations/`: SQL database migrations.
 * `backend/static/`: Static files served by the backend if required.
+* `backend/src/`: Rust code.
+*
+The Rust code is divided into key functional and utility areas
+
+* `core`: Components common across the application, such as users and security
+* `ledger`: General Ledger
+* `partners`: Customers and vendor
+* `payables`: Vendor invoice
+* `sales`: Sales and Sales invoicing
+* `util` : Utility functions
+
+Each functional area is divided into
+
+* `db`/ : Database access layer. Files are grouped by domain concept, such as accounts, users, organisations,
+  transactions, journal entries, and security.
+* `routes/`: HTTP route handlers grouped by feature area.
+* `services/`: Business logic that sits between routes and database access.
+* `reports/`: Reports
+
 
 ### frontend/
 
@@ -37,16 +48,16 @@ The frontend is a Yew application compiled to WebAssembly and built with Trunk.
 Key areas:
 
 * `frontend/src/main.rs`: Frontend application entry point.
-* `frontend/src/lib.rs`: Main frontend library module.
-* `frontend/src/auth.rs`: Frontend authentication-related logic.
-* `frontend/src/components/`: Reusable UI components such as layout, sidebar, header, account rows, journal entry rows,
-  and modal dialogs.
-* `frontend/src/pages/`: Route-level page components such as dashboard, login, register, profile, ledger, account
-  ledger, and transaction entry pages.
 * `frontend/assets/`: Static frontend assets, including images and CSS assets.
-* `frontend/styles/kelpie.css`: Primary shared stylesheet for the frontend.
 * `frontend/index.html`: HTML entry point used by Trunk.
 * `frontend/Trunk.toml`: Trunk build configuration.
+* `frontend/src`: Rust code
+
+The src is divided into functional area in the same manner as the backend
+
+Each functional area is divided into
+* `pages`: UI pages
+* `components`: UI Components
 
 ### shared_core/
 
@@ -60,7 +71,7 @@ Typical responsibilities include:
 * Utility functions
 * Common business/domain types
 
-Use this crate for types that must remain consistent between client and server.
+It is organised like the other top level modules into functional areas
 
 ### .docs/
 
@@ -104,7 +115,7 @@ Good candidates for `shared_core` include:
 
 ### Handling Currency values
 
-* All monetary values must be represented as `i64` whole cents (e.g., `$10.50` is stored and calculated as `1050`).
+* All monetary values must be represented as rust_decimal::Decimal and stored in the database as NUMERIC(15, 4).
 * __Never__ use `f32` or `f64` for tracking financial values.
 * All mathematical modifications must happen via safe integer calculations to completely eliminate rounding errors.
 
@@ -229,6 +240,8 @@ Avoid placing complex business logic directly inside route handlers or database 
 Use __transactions__ where appropriate. Any route that makes multiple transaction entries, that must remain in balance
 in the accounts, __must__ be placed in a transaction.
 Most of the database updates are write only so there is generally little need to consider deadlocks in this situation.
+
+__Do not__ use sqlx macros suxh as ```sqlx::query_as!```. They break CI.
 
 ### Keep Frontend Components Focused
 

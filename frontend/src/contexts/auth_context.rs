@@ -8,9 +8,11 @@
 
 use std::rc::Rc;
 
-use shared_core::core::models::auth::SystemPrivilege;
+use shared_core::core::{
+    dtos::user_detail::AuthUserDetail,
+    models::auth::SystemPrivilege,
+};
 use yew::prelude::*;
-use shared_core::core::dtos::user_detail::AuthUserDetail;
 
 pub type UserContextHandle = UseReducerHandle<UserContext>;
 
@@ -34,7 +36,7 @@ impl UserContext {
         // 👑 Shortcut: Organization administrators automatically bypass individual module blocks
         if privileges
             .iter()
-            .any(|p| p == SystemPrivilege::security_admin.as_str())
+            .any(|p| p == SystemPrivilege::SecurityAdmin.as_str())
         {
             return true;
         }

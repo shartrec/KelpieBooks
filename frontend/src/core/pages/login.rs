@@ -8,14 +8,20 @@
 
 use fluent::fluent_args;
 use gloo_net::http::Request;
-use shared_core::core::requests::auth::LoginRequest;
+use shared_core::core::{
+    dtos::user_detail::AuthUserDetail,
+    requests::auth::LoginRequest,
+};
 use yew::{
     function_component,
     html,
     prelude::*,
 };
-use yew_router::hooks::use_navigator;
-use shared_core::core::dtos::user_detail::AuthUserDetail;
+use yew_router::{
+    hooks::use_navigator,
+    prelude::Link,
+};
+
 use crate::{
     contexts::{
         auth_context::UserContextHandle,
@@ -102,9 +108,12 @@ pub fn login_page() -> Html {
                         on_login={on_login_submit}
                         error={(*error_state).clone()}
                     />
-                <div class="login-footer">
-                    <p>{ i18n.t("login-help-text") }</p>
-                </div>
+                if cfg!(feature = "password-reset") {
+                    <div class="login-footer">
+                        <p><Link<Route> to={Route::ForgotPassword}>{ i18n.t("login-forgot-password") }</Link<Route>></p>
+                        <p>{ i18n.t("login-help-text") }</p>
+                    </div>
+                }
             </div>
         </div>
     }
@@ -122,6 +131,7 @@ pub fn login_form(props: &LoginFormProps) -> Html {
 
     let user_email = use_state(|| "".to_string());
     let password = use_state(|| "".to_string());
+    let show_password = use_state(|| false);
     let error = props.error.clone();
 
     let on_user_email_input = {
@@ -154,6 +164,15 @@ pub fn login_form(props: &LoginFormProps) -> Html {
         })
     };
 
+    let toggle_password_visibility = {
+        let show_password = show_password.clone();
+        Callback::from(move |_| {
+            show_password.set(!*show_password);
+        })
+    };
+
+    let password_input_type = if *show_password { "text" } else { "password" };
+
     html! {
         <form onsubmit={on_submit} class="auth-form">
             <div class="input-field-group">
@@ -162,7 +181,12 @@ pub fn login_form(props: &LoginFormProps) -> Html {
             </div>
             <div class="input-field-group">
                 <label>{i18n.t("login-form-password-label")}</label>
-                <input type="password" value={(*password).clone()} oninput={on_password_input} required=true autocomplete="current-password" />
+                <div class="password-input-wrapper">
+                    <input type={password_input_type} value={(*password).clone()} oninput={on_password_input} required=true autocomplete="current-password" />
+                    <button type="button" class="icon-button" onclick={toggle_password_visibility}>
+                        { if *show_password { "⊘" } else { "👁" } }
+                    </button>
+                </div>
             </div>
             <button type="submit" class="button-primary login-btn">
                     { i18n.t("login-form-submit-button") }

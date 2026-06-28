@@ -12,5 +12,5 @@ secret_key = "xN/bUkQ7qIvf+LXvzn7By8BLWRagrazRJwiV9eD00cE="
 
 log_level = "normal"
 
-[default.databases.kelpie_db]
-url = "postgres://shartrec:laverda21@127.0.0.1:5432/kelpie_books"
+##[default.databases.kelpie_db]
+##url = "postgres://user:pass@127.0.0.1:5432/kelpie_books"

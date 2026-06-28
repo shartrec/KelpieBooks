@@ -12,6 +12,7 @@ use chrono::{
     Datelike,
     NaiveDate,
 };
+use rust_decimal::Decimal;
 use uuid::Uuid;
 use yew::{
     html::ChildrenProps,
@@ -30,7 +31,7 @@ pub struct VendorInvoiceFilterState {
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
     pub partner_id: Option<Uuid>,
-    pub min_amount: Option<i64>,
+    pub min_amount: Option<Decimal>,
     pub status: PaymentStatusFilter,
 }
 
@@ -51,7 +52,7 @@ pub enum VendorInvoiceFilterAction {
     SetStartDate(NaiveDate),
     SetEndDate(NaiveDate),
     SetPartnerId(Option<Uuid>),
-    SetMinAmount(Option<i64>),
+    SetMinAmount(Option<Decimal>),
     SetStatus(PaymentStatusFilter),
 }
 
