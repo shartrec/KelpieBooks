@@ -77,8 +77,8 @@ pub async fn all(
 
 pub async fn get(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<Option<Item>, sqlx::Error> {
     sqlx::query_as::<_, Item>("SELECT * FROM items WHERE id = $1 AND organization_id = $2")
         .bind(id)

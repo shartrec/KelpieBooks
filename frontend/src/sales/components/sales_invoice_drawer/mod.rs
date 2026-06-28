@@ -78,11 +78,25 @@ pub(crate) fn sales_invoice_drawer(props: &SalesInvoiceDrawerProps) -> Html {
         (AddressType::Shipping, props.invoice.ship_to.clone()),
     ];
 
+    let pdf_url = format!("/api/sales-invoices/{}/print", props.invoice.id);
+    let on_print = Callback::from(
+        move |_| {
+            web_sys::window()
+                .unwrap().open_with_url_and_target(&pdf_url, "_blank")
+                // .location()
+                // .set_href(&pdf_url)
+                .unwrap();
+        },
+    );
+
     html! {
         <div class="drawer-overlay" onclick={on_close.clone()}>
             <div class="drawer" onclick={|e: MouseEvent| e.stop_propagation()}>
                 <header class="drawer__header">
                     <h3 class="payment-context-banner__vendor">{ &props.partner.trade_name.clone().unwrap_or(props.partner.legal_name.clone()) }</h3>
+                    <button class="icon-button" onclick={on_print} title={i18n.t("report-options-export-pdf-tooltip")}>
+                        <img src="/images/export-pdf.svg" alt={i18n.t("report-options-export-pdf-tooltip")} />
+                    </button>
                     <button class="btn-close" type="button" onclick={on_close.clone()}>
                         <img src="/images/x.svg" alt={i18n.t("common-close")} />
                     </button>

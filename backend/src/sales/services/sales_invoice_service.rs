@@ -231,9 +231,9 @@ pub(crate) async fn create_invoice(
     let mut jels = vec![];
 
     // 2. Loop through lines to credit the revenue accounts
-    for item in &req.lines {
-        if item.net_amount > dec!(0.00) {
-            let item_master = item_db::get(&mut tx, org_id, item.id)
+    for line in &req.lines {
+        if line.net_amount > dec!(0.00) {
+            let item_master = item_db::get(&mut tx, org_id, line.item_id)
                 .await?
                 .ok_or_else(|| ApiError::NotFound("Item not found.".to_string()))?;
 
@@ -242,8 +242,8 @@ pub(crate) async fn create_invoice(
                 line_id: Uuid::new_v4(),
                 account_id: item_master.income_account_id,
                 debit: dec!(0.00),
-                credit: item.net_amount,
-                description: Some(item.description.clone()),
+                credit: line.net_amount,
+                description: Some(line.description.clone()),
             };
             jels.push(jel);
         }

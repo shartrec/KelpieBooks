@@ -14,6 +14,7 @@ use rocket::{
     serde::json::Json,
     Route,
 };
+use rocket::http::ContentType;
 use rocket_db_pools::Connection;
 use rust_decimal::Decimal;
 use shared_core::sales::{
@@ -47,7 +48,9 @@ use crate::{
     },
     DbKelpie,
 };
+use crate::sales::reports;
 use crate::sales::services::customer_payment_service;
+use crate::util::reports::DownloadFile;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -57,6 +60,7 @@ pub(crate) fn routes() -> Vec<Route> {
         create_sales_invoice,
         update_sales_invoice,
         update_sales_invoice_items,
+        print_sales_invoice,
     ]
 }
 
@@ -70,6 +74,17 @@ async fn get_sales_invoice(
     let invoice =
         sales_invoice_service::get_sales_invoice(&mut pool, user.organization_id, *id).await?;
     Ok(Json(invoice))
+}
+#[get("/api/sales-invoices/<id>/print")]
+async fn print_sales_invoice(
+    mut pool: Connection<DbKelpie>,
+    guard: RequirePrivilege<UseSales>,
+    id: PathUuid,
+) -> Result<DownloadFile, ApiError> {
+    let user = guard.0;
+    let invoice =
+        reports::invoice::generate_invoice(&mut pool, user, *id).await?;
+    Ok(DownloadFile::new(invoice, "Invoice.pdf".to_string(), ContentType::PDF))
 }
 
 #[post("/api/sales-invoices", data = "<req>")]

@@ -294,8 +294,8 @@ pub(crate) async fn update_sales_invoice_totals(
     sqlx::query(
         r#"
         UPDATE sales_invoices
-        SET subtotal = $1, tax_total = $2, total_amount = $3, amount_due = $3
-        WHERE id = $4
+        SET subtotal = $1, tax_total = $2, total_amount = $3, amount_due = $4
+        WHERE id = $5
         "#,
     )
     .bind(net_amount)

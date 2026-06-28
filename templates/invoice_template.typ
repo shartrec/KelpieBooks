@@ -5,18 +5,21 @@
 #let invoice-num = inputs.at("invoice-number")
 #let invoice-date = inputs.at("invoice-date")
 #let due-date = inputs.at("due-date")
+#let invoice-net = inputs.at("invoice-net")
+#let invoice-tax = inputs.at("invoice-tax")
+#let invoice-gross = inputs.at("invoice-gross")
 
 // Define global page and branding properties
 #set page(
   paper: "a4",
-  margin: (x: 2cm, top: 2.5cm, bottom: 2.5cm),
+  margin: (x: 1.2cm, top: 2.0cm, bottom: 2.5cm),
   header: align(right)[
 #grid(  columns: (auto,  1fr),
   align(left)[
     #text(size: 20pt, weight: "bold", fill: rgb("#3b0000"))[#company-name]
   ],
   align(right)[
-    #text(size: 10pt, weight: "bold", fill: rgb("#3b0000"))[INVOICE]
+    #text(size: 14pt, weight: "bold", fill: rgb("#3b0000"))[Tax Invoice]
   ],
 )],
   footer: context [
@@ -33,16 +36,11 @@
           ]
         ]
       ],
-      [ \ Page - #counter(page).display()]
+      [ \ Page:  #counter(page).display() of #counter(page).final().at(0)]
     )
   ]]
 )
 #set text(font: "Liberation Sans", size: 10pt, fill: rgb("#2c3e50"))
-
-// Helper functions for currency layout formatting
-#let format-currency(amount) = {
-  "$" + str(format("{:.2}", amount))
-}
 
 // --- Header Section ---
 #grid(
@@ -75,47 +73,65 @@
 #v(15pt)
 
 // --- Bill To / Ship To Section ---
+#let bill_to = inputs.at("bill_to")
+#let ship_to = inputs.at("ship_to")
+
+
 #grid(
-  columns: (1fr, 1fr),
+  columns: (1fr, 30%, 1fr),
   gutter: 20pt,
   [
     #text(weight: "bold", size: 11pt, fill: rgb("#3b0000"))[Bill To:] \
     #v(3pt)
-    *Acme Corporation* \
-    Attn: Accounts Payable \
-    456 Enterprise Way \
-    Sydney, NSW 2000
+    #let attn = bill_to.at("attn")
+    #if attn != "" [
+      Attn: #attn \
+    ]
+    *#bill_to.at("name")* \
+    #bill_to.at("addr_line1") \
+    #let l2 = bill_to.at("addr_line2")
+    #if l2 != "" [
+      #l2
+    ]
+    #bill_to.at("city"), #bill_to.at("state") #bill_to.at("post_code")
   ],
+  [],
   [
     #text(weight: "bold", size: 11pt, fill: rgb("#3b0000"))[Ship To:] \
     #v(3pt)
-    *Acme Corp Warehouse* \
-    Dock 2, 456 Enterprise Way \
-    Sydney, NSW 2000
+    #let attn = ship_to.at("attn")
+    #if attn != "" [
+      Attn: #attn \
+    ]
+    *#ship_to.at("name")* \
+    #ship_to.at("addr_line1") \
+    #let l2 = bill_to.at("addr_line2")
+    #if l2 != "" [
+      #l2
+    ]
+    #ship_to.at("city"), #ship_to.at("state") #ship_to.at("post_code")
   ]
 )
 
-#v(30pt)
+#v(20pt)
 
-// --- Line Items Table Section ---
-#text(weight: "bold", size: 12pt)[Line Items]
-#v(5pt)
+#let lines = inputs.at("lines")
+
 
 #table(
-  columns: (1fr, auto, auto, auto),
-  align: (left, right, right, right),
+  columns: (1fr, auto, auto, auto, auto, auto),
+  align: (left, right, right, right, right, right),
   stroke: (x, y) => if y == 0 { (bottom: 2pt + rgb("#3b0000")) } else { (bottom: 0.5pt + rgb("#ecf0f1")) },
   fill: (x, y) => if y == 0 { rgb("#b3efe2").lighten(60%) } else if calc.even(y) { rgb("#f8fafc") } else { none },
   inset: 10pt,
 
   // Header definition
-  [*Description*], [*Qty*], [*Unit Price*], [*Amount*],
+  [*Description*], [*Qty*], [*Unit*], [*Net*], [*Tax*], [*Amount*],
 
-  // Row lines (Description, Qty, Unit Price, Extension)
-  [Software Development Consulting - Phase 3 Setup], [10.00], [\$150.00], [\$1,500.00],
-  [Custom API Integration Layer Optimization], [4.50], [\$120.00], [\$540.00],
-  [Database Schema Sub-ledger Redesign Package], [1.00], [\$450.00], [\$450.00],
-  [Software Development Consulting - Phase 3 Setup], [10.00], [\$150.00], [\$1,500.00],
+  ..lines.map(line => (
+    // Row lines (Description, Qty, Unit Price, Extension)
+    [#line.at("name")], [#line.at("qty")], [\$#line.at("unit_price")], [\$#line.at("net")], [\$#line.at("tax")], [\$#line.at("gross")],
+  )).flatten()
 )
 
 #v(15pt)
@@ -127,11 +143,11 @@
       columns: (1fr, auto),
       gutter: 10pt,
       align: (left, right),
-      [Subtotal:], [\$2,490.00],
-      [Tax (GST 10%):], [\$249.00],
+      [Subtotal:], [\$#invoice-net],
+      [Tax (GST 10%):], [\$#invoice-tax],
       grid.hline(stroke: 1pt + rgb("#bdc3c7")),
       [],[],
-      text(weight: "bold")[Total Amount Due:], text(weight: "bold", fill: rgb("#3b0000"))[\$2,739.00]
+      text(weight: "bold")[Total Amount Due:], text(weight: "bold", fill: rgb("#3b0000"))[\$#invoice-gross]
     )
   ]
 ]
@@ -145,7 +161,8 @@
   inset: 12pt,
   radius: 5%,
   stroke: 1pt + rgb("#bdc3c7").lighten(50%),
-  width: 100%
+  width: 100%,
+  above: 1fr
 )[
   #text(weight: "bold", fill: rgb("#3b0000"))[How to Pay:] \
   #v(2pt)

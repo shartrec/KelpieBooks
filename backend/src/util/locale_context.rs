@@ -51,6 +51,17 @@ impl<'a> LocaleContext<'a> {
         //
     }
 
+    // Standard decimal format
+    pub(crate) fn format_decimal(&self, amount: Decimal) -> String {
+        shared_core::i18n::format_decimal_icu(amount, Some(self.locale)) //
+    }
+
+    /// Typst-safe decimal formatting ("−1,234.56")
+    pub(crate) fn format_decimal_typ(&self, amount: Decimal) -> String {
+        shared_core::i18n::format_decimal_icu_typ(amount, Some(self.locale))
+        //
+    }
+
     /// Date formatting ("25 May 2026")
     pub(crate) fn format_date(&self, date: NaiveDate) -> String {
         format_date_icu(date.year(), date.month(), date.day(), Some(self.as_str()))

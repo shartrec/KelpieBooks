@@ -57,7 +57,7 @@ impl SalesInvoice {
 
         self.subtotal = net_amount;
         self.tax_total = tax_amount;
-        self.total_amount = net_amount - tax_amount;
+        self.total_amount = net_amount + tax_amount;
         self.amount_due = old_amount_due + (self.total_amount - old_total_amount) ;
     }
 }
