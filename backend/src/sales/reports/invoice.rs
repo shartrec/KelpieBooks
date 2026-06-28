@@ -79,6 +79,7 @@ pub(crate) async fn generate_invoice(
         for line in invoice.lines {
             let mut item = Dict::new();
             item.insert("name".into(), Value::Str(line.name.into()));
+            item.insert("code".into(), Value::Str(line.code.into()));
             let qty = i18n.format_decimal_typ(line.quantity.normalize());
             item.insert("qty".into(), Value::Str(qty.into()));
             let up = i18n.format_money_typ(line.unit_price);

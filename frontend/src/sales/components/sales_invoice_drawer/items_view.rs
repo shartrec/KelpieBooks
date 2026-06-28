@@ -163,6 +163,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                 tax_category_id: None,
                 tax_amount: dec!(0.00),
                 net_amount: Default::default(),
+                code: "".to_string(),
                 name: "".to_string(),
                 tax_rate: Default::default(),
                 sort_order: 0,

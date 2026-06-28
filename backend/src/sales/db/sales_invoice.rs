@@ -67,6 +67,7 @@ fn from_row_to_sales_invoice_line(row: &sqlx::postgres::PgRow) -> SalesInvoiceIt
         id: row.get("id"),
         invoice_id: row.get("invoice_id"),
         item_id: row.get("item_id"),
+        code: row.get("code"),
         name: row.get("name"),
         description: row.get("description"),
         quantity: row.get("quantity"),
@@ -262,7 +263,7 @@ pub(crate) async fn get_sales_invoice_with_lines(
 
         let line_rows = sqlx::query(
             r#"
-            SELECT sil.id, invoice_id, item_id, it.name, sil.description, quantity, sil.unit_price, sil.tax_category_id, tax_amount, net_amount, sort_order
+            SELECT sil.id, invoice_id, item_id, it.code,  it.name, it.code, sil.description, quantity, sil.unit_price, sil.tax_category_id, tax_amount, net_amount, sort_order
             FROM sales_invoice_lines sil, items it
             WHERE sil.item_id = it.id
                 AND invoice_id = $1

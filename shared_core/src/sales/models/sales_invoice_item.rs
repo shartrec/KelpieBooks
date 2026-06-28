@@ -17,6 +17,7 @@ pub struct SalesInvoiceItem {
     pub id: Uuid,
     pub invoice_id: Uuid,
     pub item_id: Uuid,
+    pub code: String,
     pub name: String,
     pub description: String,
     pub quantity: Decimal,
