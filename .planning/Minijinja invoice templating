@@ -1,0 +1,263 @@
+I think this is a good separation of concerns:
+
+* **Rust** loads the `SalesInvoice` and passes it to MiniJinja.
+* **MiniJinja** is responsible only for presentation logic (loops, conditionals, formatting).
+* **Typst** is responsible for page layout, tables, fonts, headers/footers and PDF generation.
+
+The generated output is simply a `.typ` file.
+
+A typical project might look like:
+
+```text
+templates/
+    invoice.typ.j2
+    company.typ.j2
+    styles.typ
+
+output/
+    invoice-123.typ
+    invoice-123.pdf
+```
+
+## Main template
+
+```jinja
+#import "styles.typ": *
+
+#set document(
+    title: "Tax Invoice",
+)
+
+= Tax Invoice
+
+#invoice_header(
+    number: "{{ invoice.invoice_number }}",
+    issue_date: "{{ invoice.issue_date }}",
+    due_date: "{{ invoice.due_date }}"
+)
+
+#customer(
+    id: "{{ invoice.partner_id }}"
+)
+
+#table(
+    columns: (1fr, 6fr, 1fr, 2fr, 2fr),
+    align: left,
+
+    [Qty],
+    [Description],
+    [Tax],
+    [Unit],
+    [Amount],
+
+{% for line in invoice.lines %}
+    [
+        {{ line.quantity }}
+    ],
+    [
+        {{ line.description }}
+    ],
+    [
+        {% if line.tax_category_id %}
+        GST
+        {% else %}
+        -
+        {% endif %}
+    ],
+    [
+        {{ line.unit_price }}
+    ],
+    [
+        {{ line.line_total }}
+    ],
+{% endfor %}
+)
+
+#v(1em)
+
+#align(right)[
+    #grid(
+        columns: (3cm,2.5cm),
+
+        [Subtotal],
+        [{{ invoice.subtotal }}],
+
+        [Tax],
+        [{{ invoice.tax_total }}],
+
+        [*Total*],
+        [*{{ invoice.total_amount }}*],
+    )
+]
+```
+
+Notice that almost everything is Typst. MiniJinja is only used for inserting values and iterating over the invoice lines.
+
+---
+
+## Better: break the template into components
+
+Invoices tend to grow. I'd split them up.
+
+```
+invoice.typ.j2
+partials/
+    header.typ.j2
+    customer.typ.j2
+    lines.typ.j2
+    totals.typ.j2
+    footer.typ.j2
+```
+
+The main template becomes
+
+```jinja
+#import "styles.typ": *
+
+{% include "partials/header.typ.j2" %}
+
+{% include "partials/customer.typ.j2" %}
+
+{% include "partials/lines.typ.j2" %}
+
+{% include "partials/totals.typ.j2" %}
+
+{% include "partials/footer.typ.j2" %}
+```
+
+Each partial remains mostly Typst.
+
+---
+
+## Line table
+
+```jinja
+#table(
+    columns: (1fr, 5fr, 2fr, 2fr, 2fr),
+
+    [Qty],
+    [Description],
+    [Price],
+    [Tax],
+    [Total],
+
+{% for line in invoice.lines %}
+    [
+        {{ line.quantity }}
+    ],
+    [
+        {{ line.description }}
+    ],
+    [
+        {{ "%.2f"|format(line.unit_price) }}
+    ],
+    [
+        {{ "%.2f"|format(line.tax_amount) }}
+    ],
+    [
+        {{ "%.2f"|format(line.line_total) }}
+    ],
+{% endfor %}
+)
+```
+
+---
+
+## Conditional sections
+
+MiniJinja works nicely for optional fields.
+
+```jinja
+{% if invoice.status == "Paid" %}
+
+#box(
+    fill: green.lighten(80%),
+    inset: 8pt,
+)[
+    *PAID*
+]
+
+{% endif %}
+```
+
+or
+
+```jinja
+{% if line.tax_category_id %}
+    [GST]
+{% else %}
+    [-]
+{% endif %}
+```
+
+---
+
+## Totals
+
+```jinja
+#align(right)[
+
+#grid(
+    columns: (3cm,2.5cm),
+
+    [Subtotal], [{{ invoice.subtotal }}],
+    [GST],      [{{ invoice.tax_total }}],
+    [*Amount Due*], [*{{ invoice.total_amount }}*],
+)
+
+]
+```
+
+---
+
+## Custom filters
+
+Rather than littering the template with formatting logic, I'd define filters in Rust and keep the template clean:
+
+```jinja
+{{ invoice.issue_date | date }}
+{{ line.unit_price | money }}
+{{ invoice.total_amount | money }}
+{{ line.quantity | qty }}
+```
+
+That makes the template much more readable.
+
+---
+
+## A realistic invoice layout
+
+A commercial invoice template typically follows this structure:
+
+```text
+Page
+
+┌────────────────────────────────────┐
+│ Company Logo      TAX INVOICE      │
+│ Company Details                    │
+│                                    │
+│ Invoice Number                     │
+│ Issue Date                         │
+│ Due Date                           │
+├────────────────────────────────────┤
+│ Bill To                            │
+│ Customer Name                      │
+│ Address                            │
+├────────────────────────────────────┤
+│ Qty Description Unit Tax Amount    │
+│                                    │
+│ ...                                │
+│ ...                                │
+│ ...                                │
+├────────────────────────────────────┤
+│                    Subtotal         │
+│                    GST              │
+│                    Total            │
+├────────────────────────────────────┤
+│ Payment Terms                      │
+│ Bank Details                       │
+│ Notes                              │
+└────────────────────────────────────┘
+```
+
+For a project like KelpieBooks, I'd aim to keep **Typst in charge of layout** and **MiniJinja in charge of data insertion**. That means very little logic in the template beyond loops and simple conditionals, with formatting (dates, currency, quantities, tax labels) handled by MiniJinja filters supplied from Rust. This separation tends to produce templates that are easy for designers to modify without touching application code.

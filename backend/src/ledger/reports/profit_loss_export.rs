@@ -10,20 +10,29 @@ use std::collections::HashMap;
 
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use shared_core::ledger::{
-    dtos::account_with_balance::AccountWithBalance,
-    models::account_category::AccountCategory,
+use rust_decimal::{
+    dec,
+    Decimal,
 };
-use uuid::Uuid;
-use shared_core::core::models::organization::Organization;
-use crate::util::{
-    locale_context::LocaleContext,
-    reports::{
-        build_table_header,
-        wrap_report_layout,
+use shared_core::{
+    core::models::organization::Organization,
+    ledger::{
+        dtos::account_with_balance::AccountWithBalance,
+        models::account_category::AccountCategory,
     },
 };
-use crate::core::routes::security::AuthenticatedUser;
+use uuid::Uuid;
+
+use crate::{
+    core::routes::security::AuthenticatedUser,
+    util::{
+        locale_context::LocaleContext,
+        reports::{
+            build_table_header,
+            wrap_report_layout,
+        },
+    },
+};
 
 #[derive(Clone, Debug)]
 pub(crate) struct AccountNode {
@@ -33,9 +42,9 @@ pub(crate) struct AccountNode {
 
 fn build_account_nodes(
     accounts: &[AccountWithBalance],
-) -> (Vec<AccountNode>, Vec<AccountNode>, i64) {
-    let mut revenue_total = 0;
-    let mut expense_total = 0;
+) -> (Vec<AccountNode>, Vec<AccountNode>, Decimal) {
+    let mut revenue_total = dec!(0.00);
+    let mut expense_total = dec!(0.00);
 
     let mut acc_map: HashMap<Uuid, AccountWithBalance> = HashMap::new();
     let mut pc_map: HashMap<Uuid, Vec<Uuid>> = HashMap::new();

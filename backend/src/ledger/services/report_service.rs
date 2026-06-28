@@ -16,6 +16,10 @@ use rocket_db_pools::sqlx::{
     PgConnection,
     Row,
 };
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use shared_core::ledger::{
     dtos::{
         account_with_balance::AccountWithBalance,
@@ -54,11 +58,13 @@ pub(crate) async fn get_profit_loss(
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
 
-    let mut balances: HashMap<Uuid, i64> = HashMap::new();
+    let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
 
     for entry in &entries {
-        *balances.entry(entry.get("account_id")).or_insert(0) +=
-            entry.get::<i64, _>("debit") - entry.get::<i64, _>("credit");
+        *balances
+            .entry(entry.get("account_id"))
+            .or_insert(dec!(0.00)) +=
+            entry.get::<Decimal, _>("debit") - entry.get::<Decimal, _>("credit");
     }
 
     let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
@@ -80,8 +86,8 @@ pub(crate) async fn get_profit_loss(
 
     while let Some(account_id) = queue.pop_front() {
         if let Some(&parent_id) = parent_map.get(&account_id) {
-            let balance = *balances.get(&account_id).unwrap_or(&0);
-            *balances.entry(parent_id).or_insert(0) += balance;
+            let balance = *balances.get(&account_id).unwrap_or(&dec!(0.00));
+            *balances.entry(parent_id).or_insert(dec!(0.00)) += balance;
 
             if let Some(count) = child_count.get_mut(&parent_id) {
                 *count -= 1;
@@ -98,7 +104,7 @@ pub(crate) async fn get_profit_loss(
             acc.category == AccountCategory::Revenue || acc.category == AccountCategory::Expense
         })
         .map(|acc| AccountWithBalance {
-            balance: *balances.get(&acc.id).unwrap_or(&0),
+            balance: *balances.get(&acc.id).unwrap_or(&dec!(0.00)),
             id: acc.id,
             organization_id: acc.organization_id,
             parent_id: acc.parent_id,
@@ -138,11 +144,13 @@ pub(crate) async fn get_expense_breakdown(
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
 
-    let mut balances: HashMap<Uuid, i64> = HashMap::new();
+    let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
 
     for entry in &entries {
-        *balances.entry(entry.get("account_id")).or_insert(0) +=
-            entry.get::<i64, _>("debit") - entry.get::<i64, _>("credit");
+        *balances
+            .entry(entry.get("account_id"))
+            .or_insert(dec!(0.00)) +=
+            entry.get::<Decimal, _>("debit") - entry.get::<Decimal, _>("credit");
     }
 
     let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
@@ -164,8 +172,8 @@ pub(crate) async fn get_expense_breakdown(
 
     while let Some(account_id) = queue.pop_front() {
         if let Some(&parent_id) = parent_map.get(&account_id) {
-            let balance = *balances.get(&account_id).unwrap_or(&0);
-            *balances.entry(parent_id).or_insert(0) += balance;
+            let balance = *balances.get(&account_id).unwrap_or(&dec!(0.00));
+            *balances.entry(parent_id).or_insert(dec!(0.00)) += balance;
 
             if let Some(count) = child_count.get_mut(&parent_id) {
                 *count -= 1;
@@ -180,7 +188,7 @@ pub(crate) async fn get_expense_breakdown(
         .into_iter()
         .filter(|acc| acc.category == AccountCategory::Expense && acc.parent_id.is_none())
         .map(|acc| AccountWithBalance {
-            balance: *balances.get(&acc.id).unwrap_or(&0),
+            balance: *balances.get(&acc.id).unwrap_or(&dec!(0.00)),
             id: acc.id,
             organization_id: acc.organization_id,
             parent_id: acc.parent_id,
@@ -218,12 +226,14 @@ pub(crate) async fn get_balance_sheet(
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
 
-    let mut balances: HashMap<Uuid, i64> = HashMap::new();
+    let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
 
     for entry in &entries {
-        let debit: i64 = entry.get("debit");
-        let credit: i64 = entry.get("credit");
-        *balances.entry(entry.get("account_id")).or_insert(0) += debit - credit;
+        let debit: Decimal = entry.get("debit");
+        let credit: Decimal = entry.get("credit");
+        *balances
+            .entry(entry.get("account_id"))
+            .or_insert(dec!(0.00)) += debit - credit;
     }
 
     let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
@@ -245,8 +255,8 @@ pub(crate) async fn get_balance_sheet(
 
     while let Some(account_id) = queue.pop_front() {
         if let Some(&parent_id) = parent_map.get(&account_id) {
-            let balance = *balances.get(&account_id).unwrap_or(&0);
-            *balances.entry(parent_id).or_insert(0) += balance;
+            let balance = *balances.get(&account_id).unwrap_or(&dec!(0.00));
+            *balances.entry(parent_id).or_insert(dec!(0.00)) += balance;
 
             if let Some(count) = child_count.get_mut(&parent_id) {
                 *count -= 1;
@@ -260,13 +270,13 @@ pub(crate) async fn get_balance_sheet(
     let mut assets = Vec::new();
     let mut liabilities = Vec::new();
     let mut equity = Vec::new();
-    let mut total_assets = 0;
-    let mut total_liabilities = 0;
-    let mut total_equity = 0;
-    let mut net_income = 0;
+    let mut total_assets = dec!(0.00);
+    let mut total_liabilities = dec!(0.00);
+    let mut total_equity = dec!(0.00);
+    let mut net_income = dec!(0.00);
 
     for acc in &accounts {
-        let balance = *balances.get(&acc.id).unwrap_or(&0);
+        let balance = *balances.get(&acc.id).unwrap_or(&dec!(0.00));
 
         if acc.parent_id.is_none() {
             match acc.category {
@@ -280,7 +290,7 @@ pub(crate) async fn get_balance_sheet(
     }
 
     for acc in accounts {
-        let balance = *balances.get(&acc.id).unwrap_or(&0);
+        let balance = *balances.get(&acc.id).unwrap_or(&dec!(0.00));
         let account_with_balance = AccountWithBalance {
             balance,
             id: acc.id,
@@ -337,17 +347,19 @@ pub(crate) async fn get_trial_balance(
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
 
-    let mut balances: HashMap<Uuid, i64> = HashMap::new();
+    let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
 
     for entry in &entries {
-        *balances.entry(entry.get("account_id")).or_insert(0) +=
-            entry.get::<i64, _>("debit") - entry.get::<i64, _>("credit");
+        *balances
+            .entry(entry.get("account_id"))
+            .or_insert(dec!(0.00)) +=
+            entry.get::<Decimal, _>("debit") - entry.get::<Decimal, _>("credit");
     }
 
     let result = accounts
         .into_iter()
         .map(|acc| AccountWithBalance {
-            balance: *balances.get(&acc.id).unwrap_or(&0),
+            balance: *balances.get(&acc.id).unwrap_or(&dec!(0.00)),
             id: acc.id,
             organization_id: acc.organization_id,
             parent_id: acc.parent_id,
@@ -370,10 +382,10 @@ pub(crate) async fn get_general_ledger(
     start_date: NaiveDate,
     end_date: NaiveDate,
     account_ids: Option<Vec<Uuid>>,
-    min_amount: Option<i64>,
+    min_amount: Option<Decimal>,
 ) -> Result<Vec<GeneralLedgerLine>, ApiError> {
     let account_ids = account_ids.unwrap_or_default();
-    let min_amount = min_amount.unwrap_or(0);
+    let min_amount = min_amount.unwrap_or(dec!(0.00));
 
     let rows = sqlx::query(
         r#"
@@ -383,6 +395,7 @@ pub(crate) async fn get_general_ledger(
             t.date,
             a.id as account_id,
             a.name as account_name,
+            a.code,
             je.description,
             je.debit,
             je.credit
@@ -392,7 +405,7 @@ pub(crate) async fn get_general_ledger(
         WHERE t.organization_id = $1
           AND t.date >= $2
           AND t.date <= $3
-          AND a.category IN ('Revenue', 'Expense')
+          AND (a.category = $6 OR a.category = $7)
           AND (CARDINALITY($4::uuid[]) = 0 OR a.id = ANY($4))
           AND (je.debit >= $5 OR je.credit >= $5)
         ORDER BY a.code ASC, t.date ASC
@@ -403,16 +416,18 @@ pub(crate) async fn get_general_ledger(
     .bind(end_date)
     .bind(&account_ids)
     .bind(min_amount)
+    .bind(AccountCategory::Revenue)
+    .bind(AccountCategory::Expense)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
 
     let mut result = Vec::new();
-    let mut balances: HashMap<Uuid, i64> = HashMap::new();
+    let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
 
     for row in rows {
-        let balance = balances.entry(row.get("account_id")).or_insert(0);
-        *balance += row.get::<i64, _>("debit") - row.get::<i64, _>("credit");
+        let balance = balances.entry(row.get("account_id")).or_insert(dec!(0.00));
+        *balance += row.get::<Decimal, _>("debit") - row.get::<Decimal, _>("credit");
 
         result.push(GeneralLedgerLine {
             transaction_id: row.get("transaction_id"),
@@ -420,6 +435,7 @@ pub(crate) async fn get_general_ledger(
             date: row.get("date"),
             account_id: row.get("account_id"),
             account_name: row.get("account_name"),
+            code: row.get("code"),
             description: row.get("description"),
             debit: row.get("debit"),
             credit: row.get("credit"),

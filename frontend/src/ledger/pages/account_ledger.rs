@@ -12,15 +12,19 @@ use std::{
 };
 
 use fluent::fluent_args;
-use shared_core::ledger::{
-    dtos::journal_entry_with_balance::JournalEntryWithBalance,
-    models::account::Account,
-    requests::transaction::ReverseTransactionRequest,
+use rust_decimal::dec;
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    ledger::{
+        dtos::journal_entry_with_balance::JournalEntryWithBalance,
+        models::account::Account,
+        requests::transaction::ReverseTransactionRequest,
+    },
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::core::models::auth::SystemPrivilege;
+
 use crate::{
     api::Api,
     contexts::{
@@ -74,7 +78,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         let account_id = props.account_id;
         let user_ctx = user_ctx.clone();
         use_effect_with((report_ctx.date_range.clone(),), move |_| {
-            if user_ctx.has_privilege(&SystemPrivilege::use_transactions) {
+            if user_ctx.has_privilege(&SystemPrivilege::UseTransactions) {
                 let start_date = report_ctx.date_range.start_date;
                 let end_date = report_ctx.date_range.end_date;
                 report_ctx.dispatch(ReportAction::SetOnExportCsv(Some(Callback::from(
@@ -342,7 +346,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                 <ReportOptions show_start_date={true} show_end_date={true} />
             </div>
             <div class="table-actions">
-                { if user_ctx.has_privilege(&SystemPrivilege::manage_transactions) {
+                { if user_ctx.has_privilege(&SystemPrivilege::ManageTransactions) {
                     html! {
                         <Link<Route, NewTransactionQuery> to={Route::NewTransaction} query={query} classes="button">
                             { i18n.t("ledger-add-transaction-button") }
@@ -377,8 +381,8 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                             <tr>
                                 <td>{ i18n.format_date(entry.date) }</td>
                                 <td>{ i18n.t("ledger-opening-balance") }</td>
-                                <td class="table__value-col">{ if entry.debit > 0 { i18n.format_currency(entry.debit) } else { "".to_string() } }</td>
-                                <td class="table__value-col">{ if entry.credit > 0 { i18n.format_currency(entry.credit) } else { "".to_string() } }</td>
+                                <td class="table__value-col">{ if entry.debit > dec!(0.00) { i18n.format_currency(entry.debit) } else { "".to_string() } }</td>
+                                <td class="table__value-col">{ if entry.credit > dec!(0.00) { i18n.format_currency(entry.credit) } else { "".to_string() } }</td>
                                 <td class="table__value-col">{ i18n.format_currency(entry.running_balance) }</td>
                                 <td></td>
                             </tr>

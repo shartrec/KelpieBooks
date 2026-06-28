@@ -7,6 +7,7 @@
  */
 
 use chrono::NaiveDate;
+use rust_decimal::Decimal;
 use serde::{
     Deserialize,
     Serialize,
@@ -20,7 +21,7 @@ pub struct CreateVendorPaymentRequest {
     pub partner_id: Uuid,
     pub payment_date: NaiveDate,
     pub bank_account_id: Uuid,
-    pub amount: i64,
+    pub amount: Decimal,
     pub reference: Option<String>,
     pub allocations: Vec<VendorPaymentAllocation>,
 }

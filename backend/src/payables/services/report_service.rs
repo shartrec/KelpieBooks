@@ -8,6 +8,7 @@
 use std::collections::HashMap;
 
 use chrono::NaiveDate;
+use rust_decimal::dec;
 use shared_core::payables::{
     dtos::aged_payable_summary::AgedPayableSummary,
     models::invoice_status::InvoiceStatus,
@@ -32,11 +33,7 @@ pub(crate) async fn get_aged_payables(
         None,
         None,
         None,
-        Some(format!(
-            "{},{}",
-            InvoiceStatus::Open.as_str(),
-            InvoiceStatus::PartiallyPaid.as_str()
-        )),
+        vec![&InvoiceStatus::Open, &InvoiceStatus::PartiallyPaid],
     )
     .await?;
 
@@ -48,12 +45,12 @@ pub(crate) async fn get_aged_payables(
             .or_insert_with(|| AgedPayableSummary {
                 partner_id: invoice.partner_id,
                 partner_name: invoice.partner_name.clone(),
-                current: 0,
-                days_30: 0,
-                days_60: 0,
-                days_90: 0,
-                days_90_plus: 0,
-                total: 0,
+                current: dec!(0.00),
+                days_30: dec!(0.00),
+                days_60: dec!(0.00),
+                days_90: dec!(0.00),
+                days_90_plus: dec!(0.00),
+                total: dec!(0.00),
                 invoices: Vec::new(),
             });
 

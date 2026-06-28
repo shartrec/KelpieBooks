@@ -7,6 +7,7 @@
  */
 
 use fluent::fluent_args;
+use rust_decimal::dec;
 use shared_core::{
     ledger::models::{
         account::Account,
@@ -23,11 +24,11 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    core::components::generic_delete_confirmation_modal::GenericDeleteConfirmationModal,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
+    core::components::delete_confirmation_modal::DeleteConfirmationModal,
     payables::components::vendor_invoice_drawer::item_edit_card::ItemEditCard,
 };
 
@@ -157,9 +158,9 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                 vendor_invoice_id: invoice_id,
                 account_id: Uuid::nil(),
                 description: String::new(),
-                net_amount: 0,
-                tax_amount: 0,
-                total_amount: 0,
+                net_amount: dec!(0.00),
+                tax_amount: dec!(0.00),
+                total_amount: dec!(0.00),
             }));
         })
     };
@@ -287,7 +288,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                 </form>
 
             if let Some(item) = &*item_to_delete {
-                <GenericDeleteConfirmationModal
+                <DeleteConfirmationModal
                     title={i18n.t("items-view-delete-item-title")}
                     message={i18n.t_args("items-view-delete-item-message", &fluent_args!["description" => item.description.clone()])}
                     on_confirm={on_delete_confirm}

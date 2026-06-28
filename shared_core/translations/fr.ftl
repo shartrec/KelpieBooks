@@ -9,14 +9,14 @@
 sys-privilege-security_admin-name = Administrateur de l'organisation
 sys-privilege-security_admin-description = Rôle d'administration racine avec un accès complet et non restreint à la configuration et à la modification des données de tout l'espace de l'entreprise.
 
-# Module Comptes
+# Accounts Module
 sys-privilege-use_accounts-name = Consulter les comptes
 sys-privilege-use_accounts-description = Permet de consulter le plan de comptes, de suivre l'historique des comptes opérationnels, les synthèses du grand livre et les soldes en temps réel.
 
 sys-privilege-manage_accounts-name = Gérer les comptes
 sys-privilege-manage_accounts-description = Permet de créer, de modifier les paramètres, de restructurer ou de désactiver des entrées dans le plan de comptes général.
 
-# Module Partenaires
+# Partners Module
 sys-privilege-use_partners-name = Consulter les partenaires
 sys-privilege-use_partners-description = Permet de consulter les profils, les coordonnées et l'historique des transactions des fournisseurs, clients et contreparties.
 
@@ -30,6 +30,13 @@ sys-privilege-use_vendor_invoices-description = Permet de consulter les factures
 sys-privilege-manage_vendor_invoices-name = Gérer les factures fournisseurs
 sys-privilege-manage_vendor_invoices-description = Permet de saisir, de mettre à jour et de payer les factures fournisseurs.
 
+# Sales Module
+sys-privilege-use_sales-name = Consulter les articles et les factures de vente
+sys-privilege-use_sales-description = Permet de consulter les factures de vente et les détails des articles.
+
+sys-privilege-manage_sales-name = Gérer les articles et les factures de vente
+sys-privilege-manage_sales-description = Permet la maintenance des articles ainsi que la saisie et la mise à jour des factures de vente.
+
 # Module Transactions
 sys-privilege-use_transactions-name = Saisir les écritures
 sys-privilege-use_transactions-description = Permet de saisir les écritures de journal général, de préparer des brouillons de transaction et de structurer les données avant validation.
@@ -37,7 +44,7 @@ sys-privilege-use_transactions-description = Permet de saisir les écritures de 
 sys-privilege-manage_transactions-name = Valider et modifier les écritures
 sys-privilege-manage_transactions-description = Permet de finaliser les écritures de journal, de les valider dans le grand livre et de générer des extournes structurelles (sous réserve du mode d'audit strict).
 
-# Outils Administratifs
+# Administrative Tools
 sys-privilege-manage_users-name = Gérer les utilisateurs et rôles
 sys-privilege-manage_users-description = Permet d'inviter des collaborateurs, d'ajuster les niveaux d'accès individuels, de configurer des rôles dynamiques ou de désactiver des comptes.
 
@@ -64,7 +71,6 @@ common-date = Date
 common-description = Description
 common-amount = Montant
 common-vendor = Fournisseur
-
 common-due-date = Date d’échéance
 common-loading = Chargement...
 common-toggle = Basculer
@@ -90,6 +96,7 @@ common-list = Liste
 common-aged = Ancienneté
 common-net = Net
 common-tax = Taxe
+common-tax-rate = Taux de taxe
 common-gross = Brut
 common-pay = Payer
 common-view = Voir
@@ -102,9 +109,14 @@ common-contacts = Contacts
 common-primary = Principal
 common-saved = Enregistré !
 common-items = Articles
+common-item = Article
 common-payments = Paiements
 common-save = Enregistrer
 common-toggle-password-visibility = Basculer la visibilité du mot de passe
+common-more = Plus+
+common-present = Présent
+common-quantity = Quantité
+common-price = Prix
 
 # Login Page
 login-help-text = Besoin d’aide ? Contactez votre administrateur.
@@ -136,12 +148,10 @@ reset-password-error-server = Erreur lors de la réinitialisation du mot de pass
 
 # Email
 email-reset-subject = KelpieBooks - Demande de réinitialisation de mot de passe sécurisée
-
 email-reset-body-plain =
     Bonjour,
         Une demande de réinitialisation de mot de passe a été effectuée pour votre compte KelpieBooks. Veuillez visiter le lien suivant dans les 20 minutes pour initialiser un nouveau mot de passe:
         { $reset_link }
-
 email-reset-body-html =
     <h3>Authentification de sécurité KelpieBooks</h3>
     <p>Une demande de réinitialisation de mot de passe a été initiée pour l'accès à votre profil.</p>
@@ -167,6 +177,10 @@ sidebar-configuration = Configuration
 sidebar-admin = Administration
 sidebar-users = Utilisateurs
 sidebar-roles = Rôles
+sidebar-sales = Ventes
+
+# Liste des factures de vente (Entrée barre latérale)
+sales-invoice-list = Factures de vente
 
 # Header
 header-toggle-menu-alt = Basculer le menu
@@ -209,8 +223,8 @@ account-category-revenue = Produits
 account-category-expense = Charges
 
 # Delete Confirmation Modal
-delete-confirm-message = Êtes-vous sûr de vouloir supprimer le compte : { $name } ?
-delete-confirm-warning = Cette action est irréversible. Vous ne pouvez supprimer que les comptes sans transactions.
+account-delete-confirm-message = Êtes-vous sûr de vouloir supprimer le compte : { $name } ?
+account-delete-confirm-warning = Cette action est irréversible. Vous ne pouvez supprimer que les comptes sans transactions.
 
 # Account Ledger
 ledger-title = Grand livre : { $name }
@@ -379,6 +393,10 @@ period-settings-current-lock = Verrouillage actuel :
 payables-ledger-title = Grand livre fournisseurs
 payables-ledger-new-invoice-button = + Nouvelle facture
 
+# Sales Ledger Page
+sales-ledger-title = Grand livre des ventes
+sales-ledger-new-invoice-button = + Nouvelle facture
+
 # Aged Trial Balance Matrix
 aged-trial-balance-current = Courant
 aged-trial-balance-1-30-days = 1-30 jours
@@ -400,10 +418,25 @@ vendor-invoice-filter-vendor-label = Fournisseur :
 vendor-invoice-filter-all-vendors = Tous les fournisseurs
 vendor-invoice-filter-min-amount-label = Montant minimum :
 
+# Sales Invoice Filter
+sales-invoice-filter-draft = Provisoire
+sales-invoice-filter-outstanding = Impayées
+sales-invoice-filter-fully-paid = Entièrement payées
+sales-invoice-filter-all-invoices = Toutes les factures
+sales-invoice-filter-from-label = De :
+sales-invoice-filter-to-label = À :
+sales-invoice-filter-customer-label = Client :
+sales-invoice-filter-all-customers = Tous les clients
+sales-invoice-filter-min-amount-label = Montant minimum :
+
 # Vendor Invoice Table
 vendor-invoice-table-invoice-number = Facture n°
 vendor-invoice-table-invoice-date = Date de facture
 vendor-invoice-table-balance-due = Solde dû
+
+# Sales Invoice Table
+sales-invoice-table-invoice-number = Facture n°
+sales-invoice-table-invoice-date = Date de facture
 
 # Vendor Invoice Table Error Messages
 vendor-invoice-table-error-parse-invoices = Impossible d’analyser les factures : { $error }
@@ -412,6 +445,14 @@ vendor-invoice-table-error-parse-partner = Impossible d’analyser le partenaire
 vendor-invoice-table-error-fetch-partner = Impossible de récupérer le partenaire : { $status }
 vendor-invoice-table-error-parse-invoice = Impossible d’analyser la facture : { $error }
 vendor-invoice-table-error-fetch-invoice = Impossible de récupérer la facture : { $status }
+
+# Sales Invoice Table Error Messages
+sales-invoice-table-error-parse-invoices = Impossible d’analyser les factures : { $error }
+sales-invoice-table-error-fetch-invoices = Impossible de récupérer les factures : { $status }
+sales-invoice-table-error-parse-partner = Impossible d’analyser le partenaire : { $error }
+sales-invoice-table-error-fetch-partner = Impossible d’analyser la facture : { $status }
+sales-invoice-table-error-parse-invoice = Impossible d’analyser le partenaire : { $error }
+sales-invoice-table-error-fetch-invoice = Impossible d’analyser la facture : { $status }
 
 # New Vendor Invoice Page
 new-vendor-invoice-title = Nouvelle facture fournisseur
@@ -486,6 +527,7 @@ address-edit-card-edit-title = Modifier l’adresse
 address-edit-card-add-title = Ajouter une adresse
 address-edit-card-line1-label = Ligne d’adresse 1 :
 address-edit-card-line1-placeholder = Ligne d’adresse 1
+address-edit-card-line2-label = Ligne d’adresse 2 :
 address-edit-card-line2-placeholder = Ligne d’adresse 2 (optionnel)
 address-edit-card-city-label = Ville :
 address-edit-card-city-placeholder = Ville
@@ -495,6 +537,7 @@ address-edit-card-post-code-label = Code postal :
 address-edit-card-post-code-placeholder = Code postal
 address-edit-card-country-label = Pays :
 address-edit-card-country-placeholder = Pays
+address-edit-card-address-type-label = Type d’adresse:
 address-edit-card-save-button = Enregistrer l’adresse
 
 # Addresses View
@@ -530,6 +573,9 @@ delete-contact-confirm-message = Êtes-vous sûr de vouloir supprimer le contact
 vendor-invoice-drawer-inv-number = Facture n° : { $number }
 vendor-invoice-drawer-gross = Brut : { $amount }
 vendor-invoice-drawer-outstanding-balance = Solde impayé : { $amount }
+
+# Sales Invoice Drawer
+sales-invoice-drawer-inv-number = Facture n° : { $number }
 
 # Details View
 details-view-error-update = Impossible de mettre à jour la facture : { $status }
@@ -634,6 +680,116 @@ role-modal-add-button = Ajouter un rôle
 role-modal-save-button = Enregistrer les modifications
 delete-role-confirm-title = Supprimer le rôle
 delete-role-confirm-message = Êtes-vous sûr de vouloir supprimer le rôle : { $role } ?
+
+# Sales Invoice — Create/Edit
+new-sales-invoice-title = Nouvelle facture de vente
+new-sales-invoice-number-label = Numéro de facture
+new-sales-invoice-date-label = Date
+new-sales-invoice-due-date-label = Date d’échéance
+new-sales-invoice-select-customer = Sélectionner le client
+new-sales-invoice-select-item = Sélectionner un article
+new-sales-invoice-add-line-button = + Ajouter une ligne
+new-sales-invoice-error-parse-items = Erreur lors de l’analyse des articles
+new-sales-invoice-save-button = Enregistrer
+new-sales-invoice-success = La facture de vente { $number } a été créée avec succès.
+new-sales-invoice-error-parse-response = Échec de l’analyse de la facture créée : { $error }
+
+# Sales Invoice — Addresses
+new-sales-invoice-billing-address = Adresse de facturation
+new-sales-invoice-select-billing = Sélectionner l'adresse de facturation
+new-sales-invoice-billing-override = Remplacer l'adresse de facturation
+new-sales-invoice-shipping-address = Adresse de livraison
+new-sales-invoice-select-shipping = Sélectionner l'adresse de livraison
+new-sales-invoice-shipping-override = Remplacer l'adresse de livraison
+
+# Address field labels/placeholders
+address-name = Nom
+address-attention = À l'attention de
+address-line1 = Adresse ligne 1
+address-line2 = Adresse ligne 2
+address-city = Ville
+address-region = État/Province/Région
+address-postal-code = Code postal
+address-country = Pays
+
+# Sales items
+item-list-title = Articles
+item-list-description = Ceci est une liste de tous les articles de votre organisation.
+item-list-code = Code
+item-list-name = Nom
+item-list-type = Type
+item-list-price = Prix
+item-list-add-item-button = Ajouter un article
+item-list-error-parse-items = Impossible d'analyser les articles : { $error }
+item-list-error-fetch-items = Impossible de récupérer les articles : { $status }
+item-edit-title = Modifier l'article
+item-add-title = Ajouter un article
+item-code-label = Code :
+item-name-label = Nom :
+item-description-label = Description :
+item-type-label = Type :
+item-uom-label = Unité de mesure :
+item-select-uom = Sélectionner une unité de mesure
+item-price-label = Prix :
+item-tax-category-label = Catégorie fiscale :
+item-select-tax-category = Sélectionner un catégorie fiscale
+item-income-account-label = Compte de revenus :
+item-select-income-account = Sélectionner un compte de revenus
+item-is-active-label = Est actif:
+item-filter-search-placeholder = Rechercher par code ou nom
+item-filter-all-types = Tous les types
+item-type-service = Service
+item-type-stocked = Stocké
+item-type-non-stocked = Non stocké
+item-filter-include-inactive = Inclure les inactifs
+uom-list-title = Unités de mesure
+uom-list-description = Ceci est une liste de toutes les unités de mesure de votre organisation.
+uom-list-add-uom-button = Ajouter une unité de mesure
+uom-list-code = Code
+uom-list-name = Nom
+uom-list-is-active = Est actif
+uom-list-error-parse-uoms = Impossible d'analyser les unités de mesure : { $error }
+uom-list-error-fetch-uoms = Impossible de récupérer les unités de mesure : { $status }
+uom-add-title = Ajouter une unité de mesure
+uom-edit-title = Modifier l'unité de mesure
+uom-code-label = Code:
+uom-name-label = Nom:
+uom-is-active-label = Est actif:
+uom-delete-title = Supprimer l'unité de mesure
+uom-delete-confirm-message = Êtes-vous sûr de vouloir supprimer l'unité de mesure : { $name }?
+uom-delete-error = Impossible de supprimer l'unité de mesure. Elle est peut-être utilisée.
+tax-category-list-title = Catégories de taxes
+tax-category-list-description = Ceci est une liste de toutes les catégories de taxes de votre organisation.
+tax-category-list-add-tax-category-button = + Ajouter une catégorie de taxe
+tax-category-list-name = Nom
+tax-category-list-is-active = Est actif
+tax-category-list-error-parse-tax-categories = Impossible d'analyser les catégories de taxes : { $error }
+tax-category-list-error-fetch-tax-categories = Impossible de récupérer les catégories de taxes : { $status }
+tax-category-add-title = Ajouter une catégorie de taxe
+tax-category-edit-title = Modifier la catégorie de taxe
+tax-category-name-label = Nom :
+tax-category-description-label = Description :
+tax-category-is-active-label = Est actif :
+tax-category-delete-title = Supprimer la catégorie de taxe
+tax-category-delete-confirm-message = Êtes-vous sûr de vouloir supprimer la catégorie de taxe : { $name } ?
+tax-category-delete-error = Impossible de supprimer la catégorie de taxe. Elle est peut-être utilisée.
+tax-category-row-manage-rates = Gérer les taux
+
+# Tiroir des taux de taxe
+tax-rate-drawer-error-parse-rates = Impossible d'analyser les taux de taxe : { $error }
+tax-rate-drawer-error-fetch-rates = Impossible de récupérer les taux de taxe : { $status }
+tax-rate-drawer-error-update-rates = Impossible de mettre à jour les taux de taxe : { $status }
+tax-rate-drawer-add-rate-button = + Ajouter un taux
+tax-rate-drawer-validity = Valide du { $from } au { $to }
+tax-rate-drawer-delete-rate-title = Supprimer le taux
+tax-rate-drawer-delete-rate-message = Êtes-vous sûr de vouloir supprimer le taux : { $name } ?
+
+# Carte d'édition du taux de taxe
+tax-rate-edit-card-add-title = Ajouter un taux
+tax-rate-edit-card-edit-title = Modifier le taux
+tax-rate-edit-card-rate-label = Taux :
+tax-rate-edit-card-valid-from-label = Valide à partir du :
+tax-rate-edit-card-valid-to-label = Valide jusqu’au :
 
 # Security
 security-error-no-admin = Vous ne pouvez pas effectuer cette action. Au moins un administrateur de la sécurité doit rester.

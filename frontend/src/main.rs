@@ -8,6 +8,8 @@
 
 // Import pages conditionally based on features
 #[cfg(feature = "ledger")]
+use frontend::core::pages::configuration::ConfigurationPage;
+#[cfg(feature = "ledger")]
 use frontend::ledger::pages::account_ledger::AccountLedgerPage;
 #[cfg(feature = "ledger")]
 use frontend::ledger::pages::balance_sheet::BalanceSheetPage;
@@ -25,8 +27,6 @@ use frontend::ledger::pages::period_settings::PeriodSettings;
 use frontend::ledger::pages::profit_loss::ProfitLossPage;
 #[cfg(feature = "ledger")]
 use frontend::ledger::pages::trial_balance::TrialBalancePage;
-#[cfg(feature = "ledger")]
-use frontend::core::pages::configuration::ConfigurationPage;
 #[cfg(feature = "partners")]
 use frontend::partners::pages::partner_list_page::PartnerListPage;
 #[cfg(feature = "payables")]
@@ -51,23 +51,34 @@ use frontend::{
     },
     core::pages::{
         dashboard::DashboardPage,
+        forgot_password::ForgotPasswordPage,
         login::LoginPage,
         forgot_password::ForgotPasswordPage,
         reset_password::ResetPasswordPage,
         profile::ProfilePage,
         register::RegisterPage,
+        reset_password::ResetPasswordPage,
         roles::RolesPage,
         style_guide::StyleGuide,
         users::UsersPage,
     },
     router::Route,
+    sales::pages::{
+        item_list::ItemListPage,
+        new_sales_invoice::NewSalesInvoicePage,
+        sales_ledger::SalesLedgerPage,
+        tax_category_list::TaxCategoryListPage,
+        uom_list::UomListPage,
+    },
 };
 use gloo_net::http::Request;
 use log::info;
-use shared_core::core::models::organization::Organization;
+use shared_core::core::{
+    dtos::user_detail::AuthUserDetail,
+    models::organization::Organization,
+};
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::core::dtos::user_detail::AuthUserDetail;
 
 /// The component that contains the router and switches between pages.
 #[function_component(AppRouter)]
@@ -183,6 +194,16 @@ fn switch(routes: Route) -> Html {
         Route::NewVendorInvoice => html! { <NewVendorInvoicePage /> },
         #[cfg(feature = "payables")]
         Route::AgedPayables => html! { <AgedPayablesPage /> },
+        #[cfg(feature = "sales")]
+        Route::SalesLedger => html! { <SalesLedgerPage /> },
+        #[cfg(feature = "sales")]
+        Route::ItemList => html! { <ItemListPage /> },
+        #[cfg(feature = "sales")]
+        Route::UomList => html! { <UomListPage /> },
+        #[cfg(feature = "sales")]
+        Route::NewSalesInvoice => html! { <NewSalesInvoicePage /> },
+        #[cfg(feature = "sales")]
+        Route::TaxCategoryList => html! { <TaxCategoryListPage /> },
 
         Route::StyleGuide => html! {<StyleGuide />},
     }

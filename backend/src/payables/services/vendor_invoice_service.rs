@@ -13,6 +13,10 @@ use rocket_db_pools::sqlx::{
     self,
     PgConnection,
 };
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use shared_core::{
     ledger::{
         models::system_tag::SystemTag,
@@ -24,6 +28,7 @@ use shared_core::{
     payables::{
         dtos::vendor_invoice_list_item::VendorInvoiceListItem,
         models::{
+            invoice_status::InvoiceStatus,
             vendor_invoice::VendorInvoice,
             vendor_invoice_item::VendorInvoiceItem,
         },
@@ -51,8 +56,8 @@ pub(crate) async fn get_vendor_invoices(
     start_date: Option<NaiveDate>,
     end_date: Option<NaiveDate>,
     partner_id: Option<Uuid>,
-    min_amount: Option<i64>,
-    status: Option<String>,
+    min_amount: Option<Decimal>,
+    status: Option<InvoiceStatus>,
 ) -> Result<Vec<VendorInvoiceListItem>, ApiError> {
     let invoices = vendor_invoice_db::get_by_org(
         pool,
@@ -61,7 +66,11 @@ pub(crate) async fn get_vendor_invoices(
         end_date,
         partner_id,
         min_amount,
-        status,
+        if let Some(status) = &status {
+            vec![status]
+        } else {
+            vec![]
+        },
     )
     .await?;
     Ok(invoices)
@@ -99,46 +108,40 @@ pub(crate) async fn create_vendor_invoice(
 
     let mut tx = pool.begin().await?;
 
-    let total_net: i64 = req.items.iter().map(|item| item.net_amount).sum();
-    let total_tax: i64 = req.items.iter().map(|item| item.tax_amount).sum();
+    let total_net: Decimal = req.items.iter().map(|item| item.net_amount).sum();
+    let total_tax: Decimal = req.items.iter().map(|item| item.tax_amount).sum();
     let gross_amount = total_net + total_tax;
 
-    let ap_account = account_db::get_by_system_tag(
-        &mut tx,
-        organization_id,
-        SystemTag::AccountsPayable.to_string().as_str(),
-    )
-    .await?
-    .ok_or_else(|| ApiError::NotFound("Accounts Payable account not found.".to_string()))?;
-    let tax_account = account_db::get_by_system_tag(
-        &mut tx,
-        organization_id,
-        SystemTag::SalesTaxClearing.to_string().as_str(),
-    )
-    .await?
-    .ok_or_else(|| ApiError::NotFound("Tax account not found.".to_string()))?;
+    let ap_account =
+        account_db::get_by_system_tag(&mut tx, organization_id, &SystemTag::AccountsPayable)
+            .await?
+            .ok_or_else(|| ApiError::NotFound("Accounts Payable account not found.".to_string()))?;
+    let tax_account =
+        account_db::get_by_system_tag(&mut tx, organization_id, &SystemTag::SalesTaxClearing)
+            .await?
+            .ok_or_else(|| ApiError::NotFound("Tax account not found.".to_string()))?;
 
     let mut jels = vec![];
     for item in &req.items {
-        if item.net_amount > 0 {
+        if item.net_amount > dec!(0.00) {
             // Will only be 0 if the item is a tax line
             let jel = JournalEntryLine {
                 line_id: Uuid::new_v4(),
                 account_id: item.account_id,
                 debit: item.net_amount,
-                credit: 0,
+                credit: dec!(0.00),
                 description: Some(item.description.clone()),
             };
             jels.push(jel);
         }
     }
 
-    if total_tax > 0 {
+    if total_tax > dec!(0.00) {
         let jel = JournalEntryLine {
             line_id: Uuid::new_v4(),
             account_id: tax_account.id,
             debit: total_tax,
-            credit: 0,
+            credit: dec!(0.00),
             description: Some("Tax on vendor invoice".to_string()),
         };
         jels.push(jel);
@@ -146,7 +149,7 @@ pub(crate) async fn create_vendor_invoice(
     let jel = JournalEntryLine {
         line_id: Uuid::new_v4(),
         account_id: ap_account.id,
-        debit: 0,
+        debit: dec!(0.00),
         credit: gross_amount,
         description: Some("Vendor invoice".to_string()),
     };
@@ -215,8 +218,8 @@ pub(crate) async fn update_vendor_invoice_items(
         vendor_invoice_db::insert_item(&mut tx, id, item).await?;
     }
 
-    let total_net: i64 = items.iter().map(|item| item.net_amount).sum();
-    let total_tax: i64 = items.iter().map(|item| item.tax_amount).sum();
+    let total_net: Decimal = items.iter().map(|item| item.net_amount).sum();
+    let total_tax: Decimal = items.iter().map(|item| item.tax_amount).sum();
     let gross_amount = total_net + total_tax;
 
     vendor_invoice_db::update_totals(&mut tx, id, total_net, total_tax, gross_amount).await?;

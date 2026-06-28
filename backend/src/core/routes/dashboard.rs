@@ -20,6 +20,10 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 #[cfg(feature = "ledger")]
 use shared_core::ledger::{
     dtos::dashboard::FinancialHealth,
@@ -88,26 +92,26 @@ async fn get_financial_health(
         get_account_with_balance(&mut db, id, user.organization_id)
             .await
             .map(|a| a.balance)
-            .unwrap_or(-999)
+            .unwrap_or(dec!(-999.00))
     } else {
-        0
+        dec!(0.00)
     };
     let accounts_payable_balance = if let Some(id) = ap_account_id {
         get_account_with_balance(&mut db, id, user.organization_id)
             .await
             .map(|a| a.balance)
-            .unwrap_or(-999)
+            .unwrap_or(dec!(-999.00))
     } else {
-        0
+        dec!(0.00)
     };
 
     let bank_balance = if let Some(id) = bank_account_id {
         get_account_with_balance(&mut db, id, user.organization_id)
             .await
             .map(|a| a.balance)
-            .unwrap_or(-999)
+            .unwrap_or(dec!(-999.00))
     } else {
-        0
+        dec!(0.00)
     };
 
     let profit_loss_accounts = get_profit_loss(&mut db, org_id, year_start, today)
@@ -118,13 +122,13 @@ async fn get_financial_health(
         .iter()
         .filter(|a| a.category == AccountCategory::Revenue)
         .map(|a| a.balance)
-        .sum::<i64>();
+        .sum::<Decimal>();
 
     let expense_total = profit_loss_accounts
         .iter()
         .filter(|a| a.category == AccountCategory::Expense)
         .map(|a| a.balance)
-        .sum::<i64>();
+        .sum::<Decimal>();
 
     let net_profit_ytd = (-revenue_total) - expense_total;
 
@@ -154,7 +158,7 @@ async fn get_recent_transactions(
         let journal_entries = get_all_by_transaction(&mut db, tx.id)
             .await
             .unwrap_or_default();
-        let amount = journal_entries.iter().map(|je| je.debit).sum::<i64>();
+        let amount = journal_entries.iter().map(|je| je.debit).sum::<Decimal>();
         let account_id = journal_entries.first().map(|je| je.account_id);
 
         recent_transactions.push(RecentTransaction {

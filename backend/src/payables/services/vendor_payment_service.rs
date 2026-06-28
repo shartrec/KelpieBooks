@@ -10,6 +10,7 @@ use rocket_db_pools::sqlx::{
     self,
     PgConnection,
 };
+use rust_decimal::dec;
 use shared_core::{
     ledger::{
         models::system_tag::SystemTag,
@@ -63,26 +64,23 @@ pub(crate) async fn create_vendor_payment(
 ) -> Result<VendorPayment, ApiError> {
     let mut tx = pool.begin().await?;
 
-    let ap_account = account_db::get_by_system_tag(
-        &mut tx,
-        organization_id,
-        SystemTag::AccountsPayable.to_string().as_str(),
-    )
-    .await?
-    .ok_or_else(|| ApiError::NotFound("Accounts Payable account not found.".to_string()))?;
+    let ap_account =
+        account_db::get_by_system_tag(&mut tx, organization_id, &SystemTag::AccountsPayable)
+            .await?
+            .ok_or_else(|| ApiError::NotFound("Accounts Payable account not found.".to_string()))?;
 
     let jels = vec![
         JournalEntryLine {
             line_id: Uuid::new_v4(),
             account_id: ap_account.id,
             debit: req.amount,
-            credit: 0,
+            credit: dec!(0.00),
             description: Some(format!("Payment to vendor {}", req.partner_id)),
         },
         JournalEntryLine {
             line_id: Uuid::new_v4(),
             account_id: req.bank_account_id,
-            debit: 0,
+            debit: dec!(0.00),
             credit: req.amount,
             description: Some(format!("Payment to vendor {}", req.partner_id)),
         },

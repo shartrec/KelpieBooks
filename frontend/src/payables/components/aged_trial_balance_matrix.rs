@@ -8,6 +8,7 @@
 
 use chrono::Local;
 use fluent::fluent_args;
+use rust_decimal::dec;
 use shared_core::payables::dtos::aged_payable_summary::AgedPayableSummary;
 use uuid::Uuid;
 use yew::prelude::*;
@@ -131,9 +132,9 @@ pub fn aged_trial_balance_matrix() -> Html {
                                 <td>{ &summary.partner_name }</td>
                                 <td class="table__value-col">{ i18n.format_currency(summary.current) }</td>
                                 <td class="table__value-col">{ i18n.format_currency(summary.days_30) }</td>
-                                <td class={classes!("table__value-col", if summary.days_60 > 0 { "col-severe" } else { "" })}>{ i18n.format_currency(summary.days_60) }</td>
-                                <td class={classes!("table__value-col", if summary.days_90 > 0 { "col-severe" } else { "" })}>{ i18n.format_currency(summary.days_90) }</td>
-                                <td class={classes!("table__value-col", if summary.days_90_plus > 0 { "col-severe" } else { "" })}>{ i18n.format_currency(summary.days_90_plus) }</td>
+                                <td class={classes!("table__value-col", if summary.days_60 > dec!(0.00) { "col-severe" } else { "" })}>{ i18n.format_currency(summary.days_60) }</td>
+                                <td class={classes!("table__value-col", if summary.days_90 > dec!(0.00) { "col-severe" } else { "" })}>{ i18n.format_currency(summary.days_90) }</td>
+                                <td class={classes!("table__value-col", if summary.days_90_plus > dec!(0.00) { "col-severe" } else { "" })}>{ i18n.format_currency(summary.days_90_plus) }</td>
                                 <td class="table__value-col">{ i18n.format_currency(summary.total) }</td>
                             </tr>
                             if is_expanded {

@@ -13,17 +13,20 @@ use std::collections::{
 
 use fluent::fluent_args;
 use log::info;
-use shared_core::ledger::{
-    dtos::account_with_balance::AccountWithBalance,
-    requests::account::{
-        CreateAccountRequest,
-        UpdateAccountRequest,
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    ledger::{
+        dtos::account_with_balance::AccountWithBalance,
+        requests::account::{
+            CreateAccountRequest,
+            UpdateAccountRequest,
+        },
     },
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::core::models::auth::SystemPrivilege;
+
 use crate::{
     api::Api,
     contexts::{
@@ -319,7 +322,7 @@ pub fn chart_of_accounts_table() -> Html {
     html! {
         <>
             <div class="table-actions">
-                { if user_ctx.has_privilege(&SystemPrivilege::manage_accounts) {
+                { if user_ctx.has_privilege(&SystemPrivilege::ManageAccounts) {
                     html! {
                         <button onclick={on_add_click}>{ i18n.t("coa-add-account-button") }</button>
                     }
@@ -330,7 +333,15 @@ pub fn chart_of_accounts_table() -> Html {
 
             if *show_add_modal { <AddAccountModal on_close={on_modal_close.clone()} on_submit={on_add_submit} parent_accounts={parent_accounts} /> }
             if let Some(account) = &*account_to_edit { <EditAccountModal account={account.clone()} on_close={on_modal_close.clone()} on_submit={on_edit_submit} /> }
-            if let Some(account) = &*account_to_delete { <DeleteConfirmationModal account={account.clone()} on_close={on_modal_close.clone()} on_confirm={on_delete_confirm} /> }
+            if let Some(account) = &*account_to_delete {
+                <DeleteConfirmationModal
+                    title={i18n.t("common-confirm-deletion")}
+                    message={i18n.t_args("account-delete-confirm-message", &fluent_args!["name" => account.name.clone()])}
+                    warning={ i18n.t("account-delete-confirm-warning")  }
+                    on_cancel={on_modal_close.clone()}
+                    on_confirm={on_delete_confirm}
+
+            /> }
 
             <table class="table coa-table">
                 <thead>

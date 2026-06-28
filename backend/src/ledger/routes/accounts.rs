@@ -20,6 +20,7 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
+use rust_decimal::dec;
 use shared_core::ledger::{
     dtos::{
         account_with_balance::AccountWithBalance,
@@ -184,7 +185,7 @@ async fn create_account(
         is_bank_account: new_account.is_bank_account,
         system_tag: new_account.system_tag,
         created_at: new_account.created_at,
-        balance: 0,
+        balance: dec!(0.00),
     }))
 }
 
@@ -209,7 +210,7 @@ async fn update_account(
         is_bank_account: updated_account.is_bank_account,
         system_tag: updated_account.system_tag,
         created_at: updated_account.created_at,
-        balance: 0,
+        balance: dec!(0.00),
     }))
 }
 

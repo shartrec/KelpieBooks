@@ -10,6 +10,10 @@ use chrono::{
     NaiveDate,
     Utc,
 };
+use rust_decimal::{
+    dec,
+    Decimal
+};
 use serde::{
     Deserialize,
     Serialize,
@@ -21,8 +25,8 @@ pub struct JournalEntryLine {
     #[serde(default = "Uuid::new_v4")]
     pub line_id: Uuid, // A unique ID for the frontend to use as a key
     pub account_id: Uuid,
-    pub debit: i64,
-    pub credit: i64,
+    pub debit: Decimal,
+    pub credit: Decimal,
     pub description: Option<String>,
 }
 
@@ -32,8 +36,8 @@ impl Default for JournalEntryLine {
         Self {
             line_id: Uuid::new_v4(),
             account_id: Uuid::nil(),
-            debit: 0,
-            credit: 0,
+            debit: dec!(0.00),
+            credit: dec!(0.00),
             description: None,
         }
     }

@@ -6,12 +6,12 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-
 use chrono::{
     Datelike,
     NaiveDate,
 };
 use fluent::FluentArgs;
+use rust_decimal::Decimal;
 use shared_core::i18n::format_date_icu;
 
 /// A lightweight, stateless context helper to match frontend ergonomics on the backend.
@@ -41,13 +41,24 @@ impl<'a> LocaleContext<'a> {
     }
 
     /// Standard currency formatting ("1,234.56")
-    pub(crate) fn format_money(&self, amount_cents: i64) -> String {
-        shared_core::i18n::format_currency_icu(amount_cents, Some(self.locale)) //
+    pub(crate) fn format_money(&self, amount: Decimal) -> String {
+        shared_core::i18n::format_currency_icu(amount, Some(self.locale)) //
     }
 
     /// Typst-safe currency formatting ("−1,234.56")
-    pub(crate) fn format_money_typ(&self, amount_cents: i64) -> String {
-        shared_core::i18n::format_currency_icu_typ(amount_cents, Some(self.locale))
+    pub(crate) fn format_money_typ(&self, amount: Decimal) -> String {
+        shared_core::i18n::format_currency_icu_typ(amount, Some(self.locale))
+        //
+    }
+
+    // Standard decimal format
+    pub(crate) fn format_decimal(&self, amount: Decimal) -> String {
+        shared_core::i18n::format_decimal_icu(amount, Some(self.locale)) //
+    }
+
+    /// Typst-safe decimal formatting ("−1,234.56")
+    pub(crate) fn format_decimal_typ(&self, amount: Decimal) -> String {
+        shared_core::i18n::format_decimal_icu_typ(amount, Some(self.locale))
         //
     }
 

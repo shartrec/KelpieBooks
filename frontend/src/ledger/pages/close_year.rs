@@ -17,11 +17,11 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    core::components::layout::Layout,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
+    core::components::layout::Layout,
 };
 
 #[function_component(CloseYearPage)]

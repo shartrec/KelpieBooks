@@ -6,8 +6,6 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use std::str::FromStr;
-
 use rocket_db_pools::sqlx::{
     self,
     PgConnection,
@@ -16,7 +14,6 @@ use rocket_db_pools::sqlx::{
 use shared_core::partners::{
     dtos::partner_list_item::PartnerListItem,
     models::{
-        address_type::AddressType,
         partner::Partner,
         partner_address::PartnerAddress,
         partner_contact::PartnerContact,
@@ -45,13 +42,11 @@ fn from_row_to_partner(row: &sqlx::postgres::PgRow) -> Partner {
 }
 
 fn from_row_to_partner_address(row: &sqlx::postgres::PgRow) -> PartnerAddress {
-    let address_type_str: String = row.get("address_type");
-    let address_type = AddressType::from_str(&address_type_str).unwrap();
     PartnerAddress {
         id: row.get("id"),
         organization_id: row.get("organization_id"),
         partner_id: row.get("partner_id"),
-        address_type,
+        address_type: row.get("address_type"),
         is_primary: row.get("is_primary"),
         address_line1: row.get("address_line1"),
         address_line2: row.get("address_line2"),
@@ -105,13 +100,51 @@ pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<Part
     .map(|row| row.map(|r| from_row_to_partner(&r)))
 }
 
+pub(crate) async fn search(
+    pool: &mut PgConnection,
+    organization_id: Uuid,
+    term: &str,
+) -> Result<Vec<PartnerListItem>, sqlx::Error> {
+    sqlx::query(
+        r#"
+        SELECT
+            p.id,
+            p.legal_name,
+            p.trade_name,
+            p.is_vendor,
+            p.is_customer,
+            CASE
+                WHEN COUNT(vi.id) > 0 THEN FALSE
+                ELSE TRUE
+            END AS can_delete
+        FROM
+            partners p
+        LEFT JOIN
+            vendor_invoices vi ON p.id = vi.partner_id
+        WHERE
+            p.organization_id = $1
+            AND (p.legal_name ILIKE $2 OR p.trade_name ILIKE $2)
+        GROUP BY
+            p.id, p.legal_name
+        ORDER BY
+            p.legal_name
+        LIMIT 10
+        "#,
+    )
+    .bind(organization_id)
+    .bind(format!("%{}%", term))
+    .fetch_all(pool)
+    .await
+    .map(|rows| rows.iter().map(from_row_to_partner_list_item).collect())
+}
+
 pub(crate) async fn get_addresses(
     pool: &mut PgConnection,
     partner_id: Uuid,
 ) -> Result<Vec<PartnerAddress>, sqlx::Error> {
     sqlx::query(
         r#"
-        SELECT id, organization_id, partner_id, address_type::TEXT, is_primary, address_line1, address_line2, city, state_province, postal_code, country, created_at, updated_at
+        SELECT id, organization_id, partner_id, address_type, is_primary, address_line1, address_line2, city, state_province, postal_code, country, created_at, updated_at
         FROM partner_addresses
         WHERE partner_id = $1
         "#,
@@ -120,6 +153,24 @@ pub(crate) async fn get_addresses(
     .fetch_all(pool)
     .await
     .map(|rows| rows.iter().map(from_row_to_partner_address).collect())
+}
+pub(crate) async fn get_address(
+    pool: &mut PgConnection,
+    partner_id: Uuid,
+    address_id: Uuid,
+) -> Result<Option<PartnerAddress>, sqlx::Error> {
+    sqlx::query(
+        r#"
+        SELECT id, organization_id, partner_id, address_type, is_primary, address_line1, address_line2, city, state_province, postal_code, country, created_at, updated_at
+        FROM partner_addresses
+        WHERE partner_id = $1
+          AND id = $1
+        "#,
+    )
+    .bind(partner_id)
+    .fetch_optional(pool)
+    .await
+    .map(|row| row.map(|row| from_row_to_partner_address(&row)))
 }
 
 pub(crate) async fn get_contacts(
@@ -239,17 +290,6 @@ pub(crate) async fn delete(
     Ok(result.rows_affected())
 }
 
-pub(crate) async fn delete_addresses(
-    pool: &mut PgConnection,
-    partner_id: Uuid,
-) -> Result<(), sqlx::Error> {
-    sqlx::query("DELETE FROM partner_addresses WHERE partner_id = $1")
-        .bind(partner_id)
-        .execute(pool)
-        .await?;
-    Ok(())
-}
-
 pub(crate) async fn insert_address(
     pool: &mut PgConnection,
     organization_id: Uuid,
@@ -260,12 +300,12 @@ pub(crate) async fn insert_address(
         r#"
         INSERT INTO partner_addresses (organization_id, partner_id, address_type, is_primary, address_line1, address_line2, city, state_province, postal_code, country)
         VALUES ($1, $2, $3::address_type, $4, $5, $6, $7, $8, $9, $10)
-        RETURNING id, organization_id, partner_id, address_type::TEXT, is_primary, address_line1, address_line2, city, state_province, postal_code, country, created_at, updated_at
+        RETURNING id, organization_id, partner_id, address_type, is_primary, address_line1, address_line2, city, state_province, postal_code, country, created_at, updated_at
         "#,
     )
     .bind(organization_id)
     .bind(partner_id)
-    .bind(address.address_type.to_string())
+    .bind(address.address_type)
     .bind(address.is_primary)
     .bind(&address.address_line1)
     .bind(&address.address_line2)
@@ -289,10 +329,10 @@ pub(crate) async fn update_address(
         UPDATE partner_addresses
         SET address_type = $1::address_type, is_primary = $2, address_line1 = $3, address_line2 = $4, city = $5, state_province = $6, postal_code = $7, country = $8
         WHERE id = $9 AND organization_id = $10
-        RETURNING id, organization_id, partner_id, address_type::TEXT, is_primary, address_line1, address_line2, city, state_province, postal_code, country, created_at, updated_at
+        RETURNING id, organization_id, partner_id, address_type, is_primary, address_line1, address_line2, city, state_province, postal_code, country, created_at, updated_at
         "#,
     )
-    .bind(address.address_type.to_string())
+    .bind(address.address_type)
     .bind(address.is_primary)
     .bind(&address.address_line1)
     .bind(&address.address_line2)
@@ -319,17 +359,6 @@ pub(crate) async fn delete_address(
             .execute(pool)
             .await?;
     Ok(result.rows_affected())
-}
-
-pub(crate) async fn delete_contacts(
-    pool: &mut PgConnection,
-    partner_id: Uuid,
-) -> Result<(), sqlx::Error> {
-    sqlx::query("DELETE FROM partner_contacts WHERE partner_id = $1")
-        .bind(partner_id)
-        .execute(pool)
-        .await?;
-    Ok(())
 }
 
 pub(crate) async fn insert_contact(

@@ -8,14 +8,20 @@
 
 use fluent::fluent_args;
 use gloo_net::http::Request;
-use shared_core::core::requests::auth::LoginRequest;
+use shared_core::core::{
+    dtos::user_detail::AuthUserDetail,
+    requests::auth::LoginRequest,
+};
 use yew::{
     function_component,
     html,
     prelude::*,
 };
-use yew_router::{hooks::use_navigator, prelude::Link};
-use shared_core::core::dtos::user_detail::AuthUserDetail;
+use yew_router::{
+    hooks::use_navigator,
+    prelude::Link,
+};
+
 use crate::{
     contexts::{
         auth_context::UserContextHandle,

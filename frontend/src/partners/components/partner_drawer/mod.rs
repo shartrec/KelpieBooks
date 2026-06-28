@@ -10,8 +10,6 @@ pub mod address_edit_card;
 pub mod addresses_view;
 pub mod contact_edit_card;
 pub mod contacts_view;
-pub mod delete_address_confirmation_modal;
-pub mod delete_contact_confirmation_modal;
 pub mod general_view;
 
 use fluent::fluent_args;

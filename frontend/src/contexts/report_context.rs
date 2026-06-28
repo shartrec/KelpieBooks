@@ -12,6 +12,7 @@ use chrono::{
     Datelike,
     NaiveDate,
 };
+use rust_decimal::Decimal;
 use serde::{
     Deserialize,
     Serialize,
@@ -40,7 +41,7 @@ impl Default for DateRange {
 pub enum ReportAction {
     SetDateRange(DateRange),
     SetSelectedAccounts(HashSet<Uuid>),
-    SetMinAmount(Option<i64>),
+    SetMinAmount(Option<Decimal>),
     SetOnExportCsv(Option<Callback<()>>),
     SetOnExportTypst(Option<Callback<()>>),
     ToggleAccount(Uuid),
@@ -52,7 +53,7 @@ pub type ReportState = ReportContextData;
 pub struct ReportContextData {
     pub date_range: DateRange,
     pub selected_accounts: HashSet<Uuid>,
-    pub min_amount: Option<i64>,
+    pub min_amount: Option<Decimal>,
     pub on_export_csv: Option<Callback<()>>,
     pub on_export_pdf: Option<Callback<()>>,
 }

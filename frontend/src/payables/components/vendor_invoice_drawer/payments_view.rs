@@ -12,6 +12,7 @@ use chrono::{
     Utc,
 };
 use fluent::fluent_args;
+use rust_decimal::Decimal;
 use shared_core::{
     ledger::models::account::Account,
     payables::{
@@ -33,11 +34,11 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    core::components::currency_input::CurrencyInput,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
+    core::components::currency_input::DecimalInput,
 };
 
 #[derive(Properties, PartialEq, Clone)]
@@ -193,7 +194,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
 
     let on_amount_change = {
         let request = request.clone();
-        Callback::from(move |value: i64| {
+        Callback::from(move |value: Decimal| {
             let mut new_request = (*request).clone();
             new_request.amount = value;
             new_request.allocations[0].allocated_amount = value;
@@ -256,7 +257,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
                     </select>
 
                     <label>{i18n.t("common-amount")}</label>
-                    <CurrencyInput value={request.amount} on_change={on_amount_change} />
+                    <DecimalInput value={request.amount} on_change={on_amount_change} />
 
                     <label>{i18n.t("payments-view-reference-label")}</label>
                     <input type="text" value={request.reference.as_deref().unwrap_or("").to_string()} oninput={on_input(|r, v| r.reference = Some(v))} />

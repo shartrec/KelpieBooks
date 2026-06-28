@@ -23,7 +23,8 @@ use yew_router::{
 use crate::{
     contexts::locale_context::use_locale,
     router::Route,
-}; // Ensure Link helper is imported
+};
+// Ensure Link helper is imported
 
 #[function_component(RegisterPage)]
 pub fn register_page() -> Html {

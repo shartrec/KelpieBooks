@@ -8,6 +8,7 @@
 
 #![allow(non_camel_case_types)]
 
+use heck::ToSnakeCase;
 use serde::{
     Deserialize,
     Serialize,
@@ -18,7 +19,6 @@ use strum::{
     EnumString,
     IntoEnumIterator,
 };
-
 #[derive(Debug, Clone, Copy, EnumString, EnumIter, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(
@@ -27,17 +27,19 @@ use strum::{
 )]
 #[derive(AsRefStr)]
 pub enum SystemPrivilege {
-    security_admin,
-    use_accounts,
-    manage_accounts,
-    use_partners,
-    manage_partners,
-    use_vendor_invoices,
-    manage_vendor_invoices,
-    use_transactions,
-    manage_transactions,
-    manage_users,
-    manage_organization,
+    SecurityAdmin,
+    UseAccounts,
+    ManageAccounts,
+    UsePartners,
+    ManagePartners,
+    UseVendorInvoices,
+    ManageVendorInvoices,
+    UseTransactions,
+    ManageTransactions,
+    ManageUsers,
+    ManageOrganization,
+    UseSales,
+    ManageSales,
 }
 
 impl SystemPrivilege {
@@ -47,12 +49,12 @@ impl SystemPrivilege {
     }
 
     pub fn name_key(&self) -> String {
-        format!("sys-privilege-{}-name", self.as_ref())
+        format!("sys-privilege-{}-name", self.as_ref().to_snake_case())
     }
 
     /// Returns the description identifier key for verbose tooltips or help panels
     pub fn description_key(&self) -> String {
-        format!("sys-privilege-{}-description", self.as_ref())
+        format!("sys-privilege-{}-description", self.as_ref().to_snake_case())
     }
 
     /// Converts variant to its snake_case database value string representation for JWT payloads

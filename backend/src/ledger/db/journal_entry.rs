@@ -16,6 +16,7 @@ use rocket_db_pools::sqlx::{
     PgConnection,
     Row,
 };
+use rust_decimal::Decimal;
 use shared_core::ledger::{
     dtos::journal_entry_detail::JournalEntryDetail,
     models::journal_entry::JournalEntry,
@@ -26,8 +27,8 @@ pub(crate) struct JournalEntryWithDate {
     pub(crate) id: Uuid,
     pub(crate) transaction_id: Uuid,
     pub(crate) account_id: Uuid,
-    pub(crate) debit: i64,
-    pub(crate) credit: i64,
+    pub(crate) debit: Decimal,
+    pub(crate) credit: Decimal,
     pub(crate) description: Option<String>,
     pub(crate) date: NaiveDate,
     pub(crate) created_at: DateTime<Utc>,
@@ -89,37 +90,6 @@ pub(crate) async fn get_all_by_org(
     .map(|rows| rows.iter().map(from_row_to_journal_entry).collect())
 }
 
-pub(crate) async fn get_all_by_account_with_date(
-    pool: &mut PgConnection,
-    account_id: Uuid,
-) -> Result<Vec<JournalEntryWithDate>, sqlx::Error> {
-    sqlx::query(
-        r#"
-        SELECT
-            je.id,
-            je.transaction_id,
-            je.account_id,
-            je.debit,
-            je.credit,
-            je.description,
-            je.created_at,
-            t.date
-        FROM journal_entries je
-        JOIN transactions t ON je.transaction_id = t.id
-        WHERE je.account_id = $1
-        ORDER BY t.date, je.created_at
-        "#,
-    )
-    .bind(account_id)
-    .fetch_all(pool)
-    .await
-    .map(|rows| {
-        rows.iter()
-            .map(from_row_to_journal_entry_with_date)
-            .collect()
-    })
-}
-
 pub(crate) async fn get_all_by_transaction(
     pool: &mut PgConnection,
     transaction_id: Uuid,
@@ -151,8 +121,8 @@ pub(crate) async fn insert(
     pool: &mut PgConnection,
     transaction_id: Uuid,
     account_id: Uuid,
-    debit: i64,
-    credit: i64,
+    debit: Decimal,
+    credit: Decimal,
     description: Option<&str>,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
@@ -173,10 +143,10 @@ pub(crate) async fn get_balance_before_date(
     account_id: Uuid,
     org_id: Uuid,
     date: NaiveDate,
-) -> Result<i64, sqlx::Error> {
+) -> Result<Decimal, sqlx::Error> {
     let result = sqlx::query(
         r#"
-        SELECT COALESCE(SUM(debit - credit), 0)::BIGINT as balance
+        SELECT COALESCE(SUM(debit - credit), 0)::NUMERIC(15,4) as balance
         FROM journal_entries je
         JOIN transactions t ON je.transaction_id = t.id
         JOIN accounts a ON je.account_id = a.id
@@ -235,10 +205,10 @@ pub(crate) async fn get_balance_up_to_date(
     account_id: Uuid,
     org_id: Uuid,
     date: NaiveDate,
-) -> Result<i64, sqlx::Error> {
+) -> Result<Decimal, sqlx::Error> {
     let result = sqlx::query(
         r#"
-        SELECT COALESCE(SUM(debit - credit), 0)::BIGINT as balance
+        SELECT COALESCE(SUM(debit - credit), 0)::NUMERIC(15,4) as balance
         FROM journal_entries je
         JOIN transactions t ON je.transaction_id = t.id
         JOIN accounts a ON je.account_id = a.id

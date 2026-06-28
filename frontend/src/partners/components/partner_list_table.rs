@@ -8,6 +8,7 @@
 
 use fluent::fluent_args;
 use shared_core::{
+    core::models::auth::SystemPrivilege,
     ledger::models::{
         account::Account,
         account_category::AccountCategory,
@@ -25,16 +26,16 @@ use shared_core::{
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::core::models::auth::SystemPrivilege;
+
 use crate::{
     api::Api,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
+    core::components::delete_confirmation_modal::DeleteConfirmationModal,
     partners::components::{
         add_partner_modal::AddPartnerModal,
-        delete_partner_confirmation_modal::DeletePartnerConfirmationModal,
         partner_drawer::PartnerDrawer,
         partner_row::PartnerRow,
     },
@@ -344,7 +345,7 @@ pub fn partner_list_table() -> Html {
     html! {
         <>
             <div class="table-actions">
-                { if user_ctx.has_privilege(&SystemPrivilege::manage_partners) {
+                { if user_ctx.has_privilege(&SystemPrivilege::ManagePartners) {
                     html! {
                         <button onclick={on_add_click}>{ i18n.t("partner-list-add-partner-button") }</button>
                     }
@@ -373,9 +374,11 @@ pub fn partner_list_table() -> Html {
                 />
             }
             if let Some(partner) = &*partner_to_delete {
-                <DeletePartnerConfirmationModal
-                    partner={partner.clone()}
-                    on_close={on_modal_close.clone()}
+                <DeleteConfirmationModal
+                    title={i18n.t("common-confirm-deletion")}
+                    message={i18n.t_args("delete-partner-confirm-message", &fluent_args!["name" => partner.legal_name.clone()])}
+                    warning = {i18n.t("common-deletion-confirm-warning")}
+                    on_cancel={on_modal_close.clone()}
                     on_confirm={on_delete_confirm}
                 />
             }

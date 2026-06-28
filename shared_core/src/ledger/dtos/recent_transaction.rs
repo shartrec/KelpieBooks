@@ -7,6 +7,7 @@
  */
 
 use chrono::NaiveDate;
+use rust_decimal::Decimal;
 use serde::{
     Deserialize,
     Serialize,
@@ -19,5 +20,5 @@ pub struct RecentTransaction {
     pub account_id: Uuid,
     pub date: NaiveDate,
     pub description: String,
-    pub amount: i64,
+    pub amount: Decimal,
 }

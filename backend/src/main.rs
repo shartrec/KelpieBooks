@@ -7,14 +7,6 @@
  */
 #![forbid(unsafe_code)]
 
-use std::env;
-use std::path::PathBuf;
-use rocket::{fairing::AdHoc, fs::{
-    relative,
-    FileServer,
-    NamedFile,
-}, get, routes, Build, Rocket};
-use rocket_db_pools::Database;
 use core::routes::{
     configurations,
     dashboard,
@@ -26,6 +18,26 @@ use core::routes::{
     security as security_routes,
     users,
 };
+use std::{
+    env,
+    path::PathBuf,
+};
+
+use log::error;
+use rocket::{
+    fairing::AdHoc,
+    fs::{
+        relative,
+        FileServer,
+        NamedFile,
+    },
+    get,
+    routes,
+    Build,
+    Rocket,
+};
+use rocket_db_pools::Database;
+
 use crate::util::logging::setup_logging;
 
 #[cfg(feature = "ledger")]
@@ -34,11 +46,13 @@ pub(crate) mod ledger;
 pub(crate) mod partners;
 #[cfg(feature = "payables")]
 pub(crate) mod payables;
+#[cfg(feature = "sales")]
+pub mod sales;
 
+pub mod config;
+pub mod core;
 pub(crate) mod security;
 mod util;
-pub mod core;
-pub mod config;
 
 #[derive(Database)]
 #[database("kelpie_db")]
@@ -76,7 +90,9 @@ fn run_migrations() -> AdHoc {
         sqlx::migrate!("./migrations")
             .run(&**db)
             .await
-            .expect("Failed to run migrations");
+            .unwrap_or_else(|e| {
+                error!("Failed to run migrations. err: {}", e);
+            });
 
         Ok(rocket)
     })
@@ -112,6 +128,13 @@ fn rocket() -> _ {
         .mount("/", payables::routes::reports::routes())
         .mount("/", payables::routes::vendor_invoices::routes())
         .mount("/", payables::routes::vendor_payments::routes());
+    #[cfg(feature = "sales")]
+    let rocket = rocket
+        .mount("/", sales::routes::items::routes())
+        .mount("/", sales::routes::uoms::routes())
+        .mount("/", sales::routes::tax_categories::routes())
+        .mount("/", sales::routes::sales_invoices::routes())
+        .mount("/", sales::routes::customer_payments::routes());
 
     // Determine the environment directory pathway
     let assets_dir = get_static_assets_dir(&rocket);

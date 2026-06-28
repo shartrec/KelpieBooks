@@ -10,6 +10,10 @@ use chrono::{
     NaiveDate,
 };
 use fluent::fluent_args;
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use serde::{
     Deserialize,
     Serialize,
@@ -29,12 +33,12 @@ use yew_router::prelude::*;
 
 use crate::{
     api::Api,
-    core::components::layout::Layout,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
         org_context::OrgContextHandle,
     },
+    core::components::layout::Layout,
     ledger::components::journal_entry_row::JournalEntryRow,
     router::Route,
 };
@@ -183,9 +187,9 @@ pub fn new_transaction_page() -> Html {
         })
     };
 
-    let total_debits: i64 = request.entries.iter().map(|e| e.debit).sum();
-    let total_credits: i64 = request.entries.iter().map(|e| e.credit).sum();
-    let is_balanced = total_debits > 0 && total_debits == total_credits;
+    let total_debits: Decimal = request.entries.iter().map(|e| e.debit).sum();
+    let total_credits: Decimal = request.entries.iter().map(|e| e.credit).sum();
+    let is_balanced = total_debits > dec!(0.00) && total_debits == total_credits;
     let earliest_date = org_ctx.locked_until.unwrap_or(NaiveDate::default()) + Duration::days(1);
 
     let is_period_locked = org_ctx
@@ -203,7 +207,8 @@ pub fn new_transaction_page() -> Html {
             if is_balanced {
                 let mut req = (*request).clone();
                 req.entries.retain(|entry| {
-                    !entry.account_id.is_nil() && (entry.debit != 0 || entry.credit != 0)
+                    !entry.account_id.is_nil()
+                        && (entry.debit != dec!(0.00) || entry.credit != dec!(0.00))
                 });
                 let navigator = navigator.clone();
                 let user_ctx = user_ctx.clone();
@@ -328,8 +333,8 @@ pub fn new_transaction_page() -> Html {
                    <button type="button" onclick={add_line} class="button-add-row">{ i18n.t("new-transaction-add-line-button") }</button>
                </div>
                <div class="transaction__form__totals">
-                   <div>{ i18n.t_args("new-transaction-debits-total", &fluent_args!["amount" => (total_debits as f64 / 100.0).to_string()]) }</div>
-                   <div>{ i18n.t_args("new-transaction-credits-total", &fluent_args!["amount" => (total_credits as f64 / 100.0).to_string()]) }</div>
+                   <div>{ i18n.t_args("new-transaction-debits-total", &fluent_args!["amount" => i18n.format_currency(total_debits)]) }</div>
+                   <div>{ i18n.t_args("new-transaction-credits-total", &fluent_args!["amount" => i18n.format_currency(total_credits)]) }</div>
                    <div class={if is_balanced { "transaction__form__balanced" } else { "transaction__form__unbalanced" }}>
                        { if is_balanced { i18n.t("new-transaction-balanced") } else { i18n.t("new-transaction-unbalanced") } }
                    </div>

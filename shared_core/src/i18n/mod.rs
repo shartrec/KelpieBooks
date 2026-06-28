@@ -24,10 +24,7 @@ use icu_datetime::{
     fieldsets::YMD,
     DateTimeFormatter,
 };
-use icu_decimal::{
-    input::Decimal,
-    DecimalFormatter,
-};
+use icu_decimal::DecimalFormatter;
 use icu_provider::prelude::icu_locale_core::{
     locale,
     Locale,
@@ -36,6 +33,7 @@ use include_dir::{
     include_dir,
     Dir,
 };
+use rust_decimal::Decimal;
 use unic_langid::{
     langid,
     LanguageIdentifier,
@@ -46,6 +44,8 @@ static TRANSLATIONS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/translations");
 
 thread_local! {
     static DECIMAL_FORMATTER_CACHE: RefCell<HashMap<Locale, DecimalFormatter>> =
+        RefCell::new(HashMap::new());
+    static PERCENT_FORMATTER_CACHE: RefCell<HashMap<Locale, DecimalFormatter>> =
         RefCell::new(HashMap::new());
     static DATE_FORMATTER_CACHE: RefCell<HashMap<Locale, DateTimeFormatter<YMD>>> =
         RefCell::new(HashMap::new());
@@ -271,9 +271,17 @@ impl I18n for I18nManager {
     }
 }
 
-/// Formats standard cents integers (i64) into localized decimals.
+/// Formats standard decimal into localized decimal strings.
 /// e.g., 123456 -> "1,234.56" (en-AU) or "1 234,56" (fr-FR)
-pub fn format_currency_icu(amount_cents: i64, target_locale: Option<&str>) -> String {
+pub fn format_currency_icu(amount: Decimal, target_locale: Option<&str>) -> String {
+    let mut currency = amount.round_dp(2);
+    currency.rescale(2);
+    format_decimal_icu(currency, target_locale)
+}
+
+/// Formats standard decimal into localized decimal strings.
+/// e.g., 123456 -> "1,234.56" (en-AU) or "1 234,56" (fr-FR)
+pub fn format_decimal_icu(amount: Decimal, target_locale: Option<&str>) -> String {
     let locale: Locale = target_locale
         .and_then(|l| l.parse().ok())
         .unwrap_or_else(|| I18N.default_locale.clone());
@@ -291,16 +299,36 @@ pub fn format_currency_icu(amount_cents: i64, target_locale: Option<&str>) -> St
                 .expect("Failed to initialize ICU4X Decimal Formatter")
         });
 
-        let mut decimal = Decimal::from(amount_cents);
-        decimal.multiply_pow10(-2);
+        let mut icu_decimal = icu_decimal::input::Decimal::from(amount.mantissa() as i64);
+        icu_decimal.multiply_pow10(-(amount.scale() as i16));
+        // icu_decimal.pad_end(-2);
 
-        formatter.format_to_string(&decimal)
+        formatter.format_to_string(&icu_decimal)
     })
 }
 
+pub fn format_percentage_icu(amount: Decimal, target_locale: Option<&str>) -> String {
+
+    // Todo Use ICU formatting when Notation formatting is no longer experimental
+    let s = format_decimal_icu(amount, target_locale);
+    format!("{}%", s)
+
+}
+
 /// Specialized wrapper for Typst reporting layouts
-pub fn format_currency_icu_typ(amount_cents: i64, target_locale: Option<&str>) -> String {
-    let formatted = format_currency_icu(amount_cents, target_locale);
+pub fn format_currency_icu_typ(amount: Decimal, target_locale: Option<&str>) -> String {
+    let formatted = format_currency_icu(amount, target_locale);
+
+    // Safety check: In Typst, a leading standard hyphen can interpret as an unintended
+    // structural markdown list element. Map seamlessly to the clean minus sign (U+2212).
+    if formatted.starts_with('-') {
+        format!("−{}", &formatted[1..])
+    } else {
+        formatted
+    }
+}
+pub fn format_decimal_icu_typ(amount: Decimal, target_locale: Option<&str>) -> String {
+    let formatted = format_decimal_icu(amount, target_locale);
 
     // Safety check: In Typst, a leading standard hyphen can interpret as an unintended
     // structural markdown list element. Map seamlessly to the clean minus sign (U+2212).
@@ -340,9 +368,9 @@ pub fn format_date_icu(year: i32, month: u32, day: u32, target_locale: Option<&s
 
 #[cfg(test)]
 mod tests {
-    use fluent::fluent_args;
-
     use super::*;
+    use fluent::fluent_args;
+    use rust_decimal::dec;
     // Define a clear, readable alias for the Narrow No-Break Space character
     const NNBSP: &str = "\u{202f}";
 
@@ -376,17 +404,20 @@ mod tests {
 
     #[test]
     fn test_format_currency_icu() {
-        assert_eq!(format_currency_icu(123456, Some("en-AU")), "1,234.56");
+
+        assert_eq!(format_currency_icu(dec!(-1234), Some("en-AU")), "-1,234.00");
+        assert_eq!(format_currency_icu(dec!(1234), Some("en-AU")), "1,234.00");
+        assert_eq!(format_currency_icu(dec!(1234.56), Some("en-AU")), "1,234.56");
         // Define a clear, readable alias for the Narrow No-Break Space character
         let expected = format!("1{}234,56", NNBSP);
-        assert_eq!(format_currency_icu(123456, Some("fr-FR")), expected);
-        assert_eq!(format_currency_icu(123456, None), "1,234.56");
-        assert_eq!(format_currency_icu(-123456, Some("en-AU")), "-1,234.56");
+        assert_eq!(format_currency_icu(dec!(1234.56), Some("fr-FR")), expected);
+        assert_eq!(format_currency_icu(dec!(1234.56), None), "1,234.56");
+        assert_eq!(format_currency_icu(dec!(-1234.56), Some("en-AU")), "-1,234.56");
     }
 
     #[test]
     fn test_format_currency_icu_typ() {
-        assert_eq!(format_currency_icu_typ(-123456, Some("en-AU")), "−1,234.56");
+        assert_eq!(format_currency_icu_typ(dec!(-1234.56), Some("en-AU")), "−1,234.56");
     }
 
     #[test]

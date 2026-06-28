@@ -10,8 +10,8 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 
 use crate::{
-    core::components::layout::Layout,
     contexts::locale_context::use_locale,
+    core::components::layout::Layout,
     payables::{
         components::{
             vendor_invoice_filter::VendorInvoiceFilter,
@@ -37,7 +37,7 @@ pub fn payables_ledger_page() -> Html {
         <Layout>
             <VendorInvoiceFilterProvider>
                 <div class="report-header">
-                    <h3>{ i18n.t("payables-ledger-title") }</h3>
+                    <h1>{ i18n.t("payables-ledger-title") }</h1>
                     <VendorInvoiceFilter />
                 </div>
                 <div class="table-actions">

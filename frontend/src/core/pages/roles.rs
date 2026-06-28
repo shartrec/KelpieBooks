@@ -9,27 +9,32 @@
 use std::rc::Rc;
 
 use fluent::fluent_args;
-use shared_core::core::requests::role::{
-    CreateRoleRequest,
-    UpdateRoleRequest,
+use shared_core::core::{
+    models::role::Role,
+    requests::role::{
+        CreateRoleRequest,
+        UpdateRoleRequest,
+    },
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::core::models::role::Role;
+
 use crate::{
     api::Api,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
-    core::components::{
-        add_role_modal::AddRoleModal,
-        edit_role_modal::EditRoleModal,
-        generic_delete_confirmation_modal::GenericDeleteConfirmationModal,
-        layout::Layout,
+    core::{
+        components::{
+            add_role_modal::AddRoleModal,
+            delete_confirmation_modal::DeleteConfirmationModal,
+            edit_role_modal::EditRoleModal,
+            layout::Layout,
+        },
+        pages,
     },
-    core::pages,
 };
 
 #[function_component(RolesPage)]
@@ -288,7 +293,7 @@ pub fn roles_page() -> Html {
                 <EditRoleModal role={role.clone()} on_close={on_edit_modal_close} on_submit={on_edit_modal_submit.clone()} />
             }
             if let Some(role) = &*role_to_delete {
-                <GenericDeleteConfirmationModal
+                <DeleteConfirmationModal
                     title={i18n.t("delete-role-confirm-title")}
                     message={i18n.t_args("delete-role-confirm-message", &fluent_args!["role" => role.name.clone()])}
                     on_confirm={on_delete_confirm_click}

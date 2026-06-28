@@ -1,0 +1,184 @@
+/*
+ * Copyright (c) 2026.
+ *
+ * This file is part of KelpieBooks. For terms of use, please see the file
+ * called LICENSE at the top level of the KelpieBooks source tree
+ *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
+ */
+
+ALTER TYPE system_privilege ADD VALUE 'use_sales' ;
+ALTER TYPE system_privilege ADD VALUE 'manage_sales';
+
+CREATE TYPE item_type AS ENUM ('stocked', 'non_stocked', 'service');
+
+CREATE TABLE tax_categories (
+                                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                                organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+                                name VARCHAR(50) NOT NULL UNIQUE,       -- e.g., "Standard Rate", "Zero Rated", "Exempt"
+                                description VARCHAR(255),
+                                is_active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE tax_rates (
+                           id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                           organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+                           tax_category_id UUID NOT NULL REFERENCES tax_categories(id) ON DELETE CASCADE,
+                           name VARCHAR(50) NOT NULL,              -- e.g., "VAT 20%", "State Tax 6%"
+                           rate NUMERIC(6, 4) NOT NULL,            -- e.g., 0.2000 for 20%, 0.0625 for 6.25%
+
+    -- Ledger Mapping
+                           liability_account_id UUID NOT NULL,      -- Chart of Accounts link (e.g., "Sales Tax Payable")
+
+    -- Date Range Validations
+                           valid_from DATE NOT NULL DEFAULT CURRENT_DATE,
+                           valid_to DATE,                          -- Nullable means it's currently active indefinitely
+
+                           created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE units_of_measure (
+                                  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                                  organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+                                  code VARCHAR(10) NOT NULL UNIQUE,       -- e.g., "EA", "HR", "M", "KG"
+                                  name VARCHAR(50) NOT NULL,              -- e.g., "Each", "Hour", "Meter", "Kilogram"
+                                  is_active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+-- Indexing for fast historical date lookups
+CREATE INDEX idx_tax_rates_lookup ON tax_rates(tax_category_id, valid_from, valid_to);
+
+CREATE TABLE items (
+                       id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                       organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+                       code VARCHAR(50) NOT NULL UNIQUE,       -- SKU or Item ID (e.g., "CONS-01", "WIDGET-X")
+                       name VARCHAR(150) NOT NULL,
+                       description TEXT,
+                       item_type item_type NOT NULL DEFAULT 'non_stocked',
+                       uom_id UUID NOT NULL REFERENCES units_of_measure(id),
+                       tax_category_id UUID REFERENCES tax_categories(id) ON DELETE SET NULL,
+    -- Financial Mapping
+                       unit_price NUMERIC(15,4) NOT NULL DEFAULT 0, -- Base sales price
+                       income_account_id UUID NOT NULL,         -- Links to Chart of Accounts (e.g., "Revenue")
+
+                       is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE organization_sequences (
+                                        org_id UUID NOT NULL,
+                                        document_type VARCHAR(50) NOT NULL, -- e.g., 'sales_invoice'
+                                        prefix VARCHAR(20) DEFAULT '',      -- e.g., 'INV-'
+                                        next_value INT NOT NULL DEFAULT 1000,
+                                        PRIMARY KEY (org_id, document_type)
+);
+
+CREATE TABLE sales_invoices (
+                                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                                organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+                                invoice_number VARCHAR(50) NOT NULL UNIQUE, -- User-facing sequence ID (e.g., "INV-2026-001")
+                                partner_id UUID NOT NULL REFERENCES partners(id),                  -- Links to your Customers/Contacts table
+                                status invoice_status NOT NULL DEFAULT 'open',
+
+    -- Key Accounting Dates
+                                issue_date DATE NOT NULL DEFAULT CURRENT_DATE,
+                                due_date DATE NOT NULL,
+
+    -- Addresses: selected saved IDs (optional) + immutable snapshots stored on the invoice
+                                billing_address_id UUID REFERENCES partner_addresses(id) ON DELETE SET NULL,
+                                shipping_address_id UUID REFERENCES partner_addresses(id) ON DELETE SET NULL,
+
+    -- Bill To snapshot
+                                bill_to_name TEXT,
+                                bill_to_attention TEXT,
+                                bill_to_line1 TEXT,
+                                bill_to_line2 TEXT,
+                                bill_to_city TEXT,
+                                bill_to_region TEXT,
+                                bill_to_postal_code TEXT,
+                                bill_to_country TEXT,
+
+    -- Ship To snapshot
+                                ship_to_name TEXT,
+                                ship_to_attention TEXT,
+                                ship_to_line1 TEXT,
+                                ship_to_line2 TEXT,
+                                ship_to_city TEXT,
+                                ship_to_region TEXT,
+                                ship_to_postal_code TEXT,
+                                ship_to_country TEXT,
+
+    -- Financial Summary Fields (Denormalized slightly for fast reading)
+                                subtotal NUMERIC(15,4) NOT NULL DEFAULT 0,
+                                tax_total NUMERIC(15,4) NOT NULL DEFAULT 0,
+                                total_amount NUMERIC(15,4) NOT NULL DEFAULT 0,
+                                amount_due NUMERIC(15,4) NOT NULL DEFAULT 0, -- Track remaining A/R balance
+
+                                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexing for standard A/R Aging reports ("Show me who is past due")
+CREATE INDEX idx_invoices_due_date_status ON sales_invoices(due_date, status);
+CREATE INDEX idx_invoices_partner ON sales_invoices(partner_id);
+-- Helpful when filtering by chosen address IDs
+CREATE INDEX idx_invoices_billing_address ON sales_invoices(billing_address_id);
+CREATE INDEX idx_invoices_shipping_address ON sales_invoices(shipping_address_id);
+
+CREATE TABLE sales_invoice_lines (
+                                     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                                     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+                                     invoice_id UUID NOT NULL REFERENCES sales_invoices(id) ON DELETE CASCADE,
+                                     item_id UUID REFERENCES items(id) ON DELETE SET NULL, -- Nullable if allowing free-text custom lines
+
+                                     description TEXT NOT NULL,         -- Copy from item, but editable by user per invoice
+                                     quantity BIGINT NOT NULL DEFAULT 1.0000,
+                                     unit_price NUMERIC(15,4) NOT NULL DEFAULT 0,
+                                     tax_category_id UUID REFERENCES tax_categories(id) ON DELETE SET NULL,
+                                     tax_amount NUMERIC(15,4) NOT NULL DEFAULT 0,
+    -- Subtotals calculated automatically per line
+                                     net_amount NUMERIC(15,4) NOT NULL DEFAULT 0,
+
+    -- Track sorting sequence for rendering PDFs correctly
+                                     sort_order INT NOT NULL DEFAULT 0
+);
+
+-- =============================================================================
+-- 1. Customer Payments
+-- =============================================================================
+CREATE TABLE customer_payments
+(
+    id                 UUID PRIMARY KEY         DEFAULT gen_random_uuid(),
+    organization_id    UUID            NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
+    partner_id        UUID            NOT NULL REFERENCES partners (id) ON DELETE RESTRICT,
+
+    -- The transaction clearing the asset (Debit Bank, Credit AR)
+    transaction_id     UUID                     REFERENCES transactions (id) ON DELETE SET NULL,
+
+    payment_date       DATE            NOT NULL,
+    deposited_to_account UUID          NOT NULL, -- Ledger Account (e.g., Operating Bank Account)
+    amount             NUMERIC(15,4)   NOT NULL, -- Total payment amount received
+    reference          TEXT,                     -- Check number, Stripe transfer ID, or EFT reference
+
+    created_at         TIMESTAMPTZ     NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_customer_payments_org ON customer_payments (organization_id);
+CREATE INDEX idx_customer_payments_customer ON customer_payments (partner_id);
+
+-- =============================================================================
+-- 2. Customer Payment Allocations
+-- =============================================================================
+CREATE TABLE customer_payment_allocations
+(
+    id                 UUID PRIMARY KEY         DEFAULT gen_random_uuid(),
+    organization_id    UUID            NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
+    sales_invoice_id   UUID            NOT NULL REFERENCES sales_invoices (id) ON DELETE CASCADE,
+    customer_payment_id UUID           NOT NULL REFERENCES customer_payments (id) ON DELETE CASCADE,
+
+    allocated_amount   NUMERIC(15,4)   NOT NULL, -- Amount applied to this specific invoice
+    created_at         TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT check_customer_alloc_positive CHECK (allocated_amount > 0)
+);
+
+CREATE INDEX idx_cust_allocations_invoice ON customer_payment_allocations (sales_invoice_id);
+CREATE INDEX idx_cust_allocations_payment ON customer_payment_allocations (customer_payment_id);

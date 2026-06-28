@@ -20,7 +20,11 @@ use strum::{
 #[derive(
     Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy, Hash,
 )]
-#[strum(serialize_all = "PascalCase")]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(
+    feature = "backend",
+    sqlx(type_name = "system_tag", rename_all = "snake_case")
+)]
 pub enum SystemTag {
     CashAtBank,
     AccountsReceivable,

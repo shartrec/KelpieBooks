@@ -9,8 +9,8 @@
 use yew::prelude::*;
 
 use crate::{
-    core::components::layout::Layout,
     contexts::locale_context::use_locale,
+    core::components::layout::Layout,
     ledger::components::chart_of_accounts_table::ChartOfAccountsTable,
 };
 

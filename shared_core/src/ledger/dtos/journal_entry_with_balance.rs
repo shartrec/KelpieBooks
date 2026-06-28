@@ -7,6 +7,7 @@
  */
 
 use chrono::NaiveDate;
+use rust_decimal::Decimal;
 use serde::{
     Deserialize,
     Serialize,
@@ -21,7 +22,7 @@ pub struct JournalEntryWithBalance {
     pub account_id: Uuid,
     pub date: NaiveDate,
     pub description: Option<String>,
-    pub debit: i64,
-    pub credit: i64,
-    pub running_balance: i64,
+    pub debit: Decimal,
+    pub credit: Decimal,
+    pub running_balance: Decimal,
 }

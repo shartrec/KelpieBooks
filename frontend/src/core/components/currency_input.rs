@@ -5,35 +5,50 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
+use crate::contexts::locale_context::{
+    use_locale,
+    LocaleContext,
+};
+
 #[derive(Properties, PartialEq)]
-pub struct CurrencyProps {
-    pub value: i64, // Cents
-    pub on_change: Callback<i64>,
+pub struct DecimalInputProps {
+    pub on_change: Callback<Decimal>,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
     pub placeholder: String,
+    #[prop_or_else(|| 2)]
+    pub decimal_places: u32,
+    pub value: Decimal, // amount
+    #[prop_or_else(|| false)]
+    pub readonly: bool,
 }
 
-#[function_component(CurrencyInput)]
-pub fn currency_input(props: &CurrencyProps) -> Html {
+#[function_component(DecimalInput)]
+pub fn decimal_input(props: &DecimalInputProps) -> Html {
+    let i18n = use_locale();
+
     // Local string buffer to handle mid-typing states (like "22.")
-    // that don't parse cleanly to i64 yet.
-    let display_value = use_state(|| format_cents(props.value));
+    // that don't parse cleanly to Decimal yet.
+    let display_value = use_state(|| format_value(&i18n, props.value, props.decimal_places));
 
     // Sync local state if parent value changes externally (e.g. form reset)
     {
         let display_value = display_value.clone();
         let props_value = props.value;
+        let props_decimal_places = props.decimal_places;
         use_effect_with(props_value, move |&val| {
             // Only update if the parsed version of current display differs
             // from the new prop value to avoid overwriting the user's cursor.
-            if parse_to_cents(&display_value) != Some(val) {
-                display_value.set(format_cents(val));
+            if parse_to_amount(&display_value, props_decimal_places) != Some(val) {
+                display_value.set(format_value(&i18n, val, props_decimal_places));
             }
             || ()
         });
@@ -42,6 +57,7 @@ pub fn currency_input(props: &CurrencyProps) -> Html {
     let oninput = {
         let display_value = display_value.clone();
         let on_change = props.on_change.clone();
+        let props_decimal_places = props.decimal_places;
         Callback::from(move |e: InputEvent| {
             let input: HtmlInputElement = e.target_unchecked_into();
             let val = input.value();
@@ -49,13 +65,13 @@ pub fn currency_input(props: &CurrencyProps) -> Html {
             // Allow only digits and a single decimal point
             let filtered: String = val
                 .chars()
-                .filter(|c| c.is_ascii_digit() || *c == '.')
+                .filter(|c| c.is_ascii_digit() || *c == '.' || *c == '-')
                 .collect();
 
             display_value.set(filtered.clone());
 
-            if let Some(cents) = parse_to_cents(&filtered) {
-                on_change.emit(cents);
+            if let Some(amount) = parse_to_amount(&filtered, props_decimal_places) {
+                on_change.emit(amount);
             }
         })
     };
@@ -66,32 +82,20 @@ pub fn currency_input(props: &CurrencyProps) -> Html {
             class={classes!(props.class.clone(), "currency-input")}
             placeholder={props.placeholder.clone()}
             value={(*display_value).clone()}
+            readonly={props.readonly}
             {oninput}
         />
     }
 }
 
 // Logic helpers
-fn format_cents(cents: i64) -> String {
-    let dollars = cents / 100;
-    let fractional = (cents % 100).abs();
-    format!("{}.{:02}", dollars, fractional)
+fn format_value(i18n: &LocaleContext, amount: Decimal, dp: u32) -> String {
+    i18n.format_decimal(amount.round_dp(dp))
 }
 
-fn parse_to_cents(s: &str) -> Option<i64> {
-    if s.is_empty() {
-        return Some(0);
-    }
-    let parts: Vec<&str> = s.split('.').collect();
-    match parts.as_slice() {
-        [d] => d.parse::<i64>().ok().map(|v| v * 100),
-        [d, c] => {
-            let d_val = d.parse::<i64>().unwrap_or(0);
-            let mut c_str = c.to_string();
-            c_str.push_str("00");
-            let c_val = c_str[..2].parse::<i64>().unwrap_or(0);
-            Some(d_val * 100 + c_val)
-        }
-        _ => None,
+fn parse_to_amount(s: &str, dp: u32) -> Option<Decimal> {
+    match Decimal::from_str_exact(s) {
+        Ok(dec) => Some(dec.round_dp(dp)),
+        Err(_) => Some(dec!(0.00)),
     }
 }

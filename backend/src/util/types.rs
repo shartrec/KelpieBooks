@@ -6,7 +6,10 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use std::ops::Deref;
+use std::{
+    ops::Deref,
+    str::FromStr,
+};
 
 use chrono::NaiveDate;
 use rocket::{
@@ -16,6 +19,13 @@ use rocket::{
         ValueField,
     },
     request::FromParam,
+};
+use shared_core::{
+    payables::models::invoice_status::InvoiceStatus,
+    sales::models::{
+        invoice_status::InvoiceStatus as SalesInvoiceStatus,
+        item::ItemType,
+    },
 };
 use uuid::Uuid;
 
@@ -47,6 +57,73 @@ impl<'r> FromFormField<'r> for PathUuid {
         match Uuid::parse_str(field.value) {
             Ok(uuid) => Ok(PathUuid(uuid)),
             Err(e) => Err(form::Error::validation(format!("{}", e)).into()),
+        }
+    }
+}
+
+/// A newtype wrapper for `InvoiceStatus` to implement `FromFormField` and satisfy the orphan rule.
+#[derive(Clone, Copy)]
+pub(crate) struct FormInvoiceStatus(pub(crate) InvoiceStatus);
+
+/// Allows `FormInvoiceStatus` to be used as a `InvoiceStatus` via dereferencing.
+impl Deref for FormInvoiceStatus {
+    type Target = InvoiceStatus;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromFormField<'r> for FormInvoiceStatus {
+    fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
+        // The `from_str` comes from `strum::EnumString` on the InvoiceStatus enum
+        match InvoiceStatus::from_str(field.value) {
+            Ok(status) => Ok(FormInvoiceStatus(status)),
+            Err(_) => Err(form::Error::validation("Invalid invoice status.").into()),
+        }
+    }
+}
+
+/// A newtype wrapper for Sales `InvoiceStatus` to implement `FromFormField` and satisfy the orphan rule.
+#[derive(Clone, Copy)]
+pub(crate) struct FormSalesInvoiceStatus(pub(crate) SalesInvoiceStatus);
+
+/// Allows `FormSalesInvoiceStatus` to be used as a `InvoiceStatus` via dereferencing.
+impl Deref for FormSalesInvoiceStatus {
+    type Target = SalesInvoiceStatus;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromFormField<'r> for FormSalesInvoiceStatus {
+    fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
+        // The `from_str` comes from `strum::EnumString` on the InvoiceStatus enum
+        match SalesInvoiceStatus::from_str(field.value) {
+            Ok(status) => Ok(FormSalesInvoiceStatus(status)),
+            Err(_) => Err(form::Error::validation("Invalid invoice status.").into()),
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub(crate) struct FormItemType(pub(crate) ItemType);
+/// Allows `FormItemType` to be used as a `ItemType` via dereferencing.
+impl Deref for FormItemType {
+    type Target = ItemType;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromFormField<'r> for FormItemType {
+    fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
+        // The `from_str` comes from `strum::EnumString` on the ItemType enum
+        match ItemType::from_str(field.value) {
+            Ok(status) => Ok(FormItemType(status)),
+            Err(_) => Err(form::Error::validation("Invalid invoice status.").into()),
         }
     }
 }

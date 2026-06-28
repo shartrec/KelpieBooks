@@ -8,6 +8,10 @@
 
 use chrono::NaiveDate;
 use gloo_console::info;
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use shared_core::partners::dtos::partner_list_item::PartnerListItem;
 use uuid::Uuid;
 use yew::prelude::*;
@@ -15,11 +19,11 @@ use yew_router::prelude::use_navigator;
 
 use crate::{
     api::Api,
-    core::components::currency_input::CurrencyInput,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
+    core::components::currency_input::DecimalInput,
     payables::vendor_invoice_filter_context::{
         use_vendor_invoice_filter,
         PaymentStatusFilter,
@@ -90,11 +94,11 @@ pub fn vendor_invoice_filter() -> Html {
 
     let on_min_amount_change = {
         let filter_ctx = filter_ctx.clone();
-        Callback::from(move |cents: i64| {
-            if cents == 0 {
+        Callback::from(move |amount: Decimal| {
+            if amount == dec!(0.00) {
                 filter_ctx.dispatch(VendorInvoiceFilterAction::SetMinAmount(None));
             } else {
-                filter_ctx.dispatch(VendorInvoiceFilterAction::SetMinAmount(Some(cents)));
+                filter_ctx.dispatch(VendorInvoiceFilterAction::SetMinAmount(Some(amount)));
             }
         })
     };
@@ -153,8 +157,8 @@ pub fn vendor_invoice_filter() -> Html {
                 </div>
                 <div class="report__filter-group">
                     <label>{ i18n.t("vendor-invoice-filter-min-amount-label") }</label>
-                    <CurrencyInput
-                        value={filter_ctx.min_amount.unwrap_or(0)}
+                    <DecimalInput
+                        value={filter_ctx.min_amount.unwrap_or(dec!(0.00))}
                         on_change={on_min_amount_change}
                         placeholder={i18n.t("journal-entry-currency-placeholder")}
                     />

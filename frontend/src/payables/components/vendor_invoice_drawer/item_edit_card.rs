@@ -5,7 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
+use rust_decimal::Decimal;
 use shared_core::{
     ledger::models::account::Account,
     payables::models::vendor_invoice_item::VendorInvoiceItem,
@@ -18,8 +18,8 @@ use web_sys::{
 use yew::prelude::*;
 
 use crate::{
-    core::components::currency_input::CurrencyInput,
     contexts::locale_context::use_locale,
+    core::components::currency_input::DecimalInput,
 };
 
 #[derive(Properties, PartialEq, Clone)]
@@ -56,7 +56,7 @@ pub fn item_edit_card(props: &ItemEditCardProps) -> Html {
 
     let on_net_amount_change = {
         let item = item.clone();
-        Callback::from(move |value: i64| {
+        Callback::from(move |value: Decimal| {
             let mut new_item = (*item).clone();
             new_item.net_amount = value;
             new_item.total_amount = new_item.net_amount + new_item.tax_amount;
@@ -66,7 +66,7 @@ pub fn item_edit_card(props: &ItemEditCardProps) -> Html {
 
     let on_tax_amount_change = {
         let item = item.clone();
-        Callback::from(move |value: i64| {
+        Callback::from(move |value: Decimal| {
             let mut new_item = (*item).clone();
             new_item.tax_amount = value;
             new_item.total_amount = new_item.net_amount + new_item.tax_amount;
@@ -114,10 +114,10 @@ pub fn item_edit_card(props: &ItemEditCardProps) -> Html {
                     </select>
 
                     <label>{i18n.t("item-edit-card-net-amount-label")}</label>
-                    <CurrencyInput value={item.net_amount} on_change={on_net_amount_change} />
+                    <DecimalInput value={item.net_amount} on_change={on_net_amount_change} />
 
                     <label>{i18n.t("item-edit-card-tax-amount-label")}</label>
-                    <CurrencyInput value={item.tax_amount} on_change={on_tax_amount_change} />
+                    <DecimalInput value={item.tax_amount} on_change={on_tax_amount_change} />
 
                     <label>{i18n.t("common-total")}</label>
                     <div class="total-amount">

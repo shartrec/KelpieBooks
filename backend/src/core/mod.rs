@@ -6,5 +6,5 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 pub mod db;
-pub mod services;
 pub mod routes;
+pub mod services;

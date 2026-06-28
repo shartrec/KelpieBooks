@@ -5,7 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
+use rust_decimal::Decimal;
 use serde::{
     Deserialize,
     Serialize,
@@ -14,5 +14,5 @@ use serde::{
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExpenseBreakdown {
     pub category: String,
-    pub amount: i64,
+    pub amount: Decimal,
 }
