@@ -53,6 +53,8 @@ use frontend::{
         dashboard::DashboardPage,
         forgot_password::ForgotPasswordPage,
         login::LoginPage,
+        forgot_password::ForgotPasswordPage,
+        reset_password::ResetPasswordPage,
         profile::ProfilePage,
         register::RegisterPage,
         reset_password::ResetPasswordPage,

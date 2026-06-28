@@ -12,3 +12,5 @@ pub(crate) mod password_reset;
 pub(crate) mod roles;
 pub mod sequences;
 pub(crate) mod user;
+#[cfg(feature = "password-reset")]
+pub(crate) mod password_reset;
