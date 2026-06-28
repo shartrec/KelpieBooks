@@ -321,6 +321,7 @@ fn from_row_to_sales_invoice_list_item(row: &sqlx::postgres::PgRow) -> SalesInvo
         net_amount: row.get("subtotal"),
         tax_amount: row.get("tax_total"),
         gross_amount: row.get("total_amount"),
+        amount_remaining: row.get("amount_due"),
     }
 }
 

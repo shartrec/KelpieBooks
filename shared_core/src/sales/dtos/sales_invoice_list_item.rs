@@ -12,7 +12,7 @@ use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SalesInvoiceListItem {
     pub id: Uuid,
     pub partner_id: Uuid,
@@ -24,4 +24,5 @@ pub struct SalesInvoiceListItem {
     pub net_amount: Decimal,
     pub tax_amount: Decimal,
     pub gross_amount: Decimal,
+    pub amount_remaining: Decimal,
 }

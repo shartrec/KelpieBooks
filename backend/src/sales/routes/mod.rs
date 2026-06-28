@@ -11,3 +11,4 @@ pub(crate) mod items;
 pub(crate) mod sales_invoices;
 pub(crate) mod tax_categories;
 pub(crate) mod uoms;
+pub(crate) mod reports;

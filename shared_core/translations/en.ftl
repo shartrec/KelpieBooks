@@ -171,6 +171,7 @@ sidebar-profit-loss = Profit & Loss
 sidebar-balance-sheet = Balance Sheet
 sidebar-general-ledger = General Ledger
 sidebar-aged-payables = Aged Payables
+sidebar-aged-receivables = Aged Receivables
 sidebar-tasks = Tasks
 sidebar-close-year = Close Year
 sidebar-period-settings = Period Settings
@@ -710,7 +711,6 @@ address-postal-code = Postal code
 address-country = Country
 
 # Sales items
-item-search-placeholder = Item search
 item-list-title = Items
 item-list-description = This is a list of all the items in your organization.
 item-list-code = Code

@@ -31,6 +31,8 @@ use frontend::ledger::pages::trial_balance::TrialBalancePage;
 use frontend::partners::pages::partner_list_page::PartnerListPage;
 #[cfg(feature = "payables")]
 use frontend::payables::pages::aged_payables::AgedPayablesPage;
+#[cfg(feature = "sales")]
+use frontend::sales::pages::aged_receivables::AgedReceivablesPage;
 #[cfg(feature = "payables")]
 use frontend::payables::pages::new_vendor_invoice::NewVendorInvoicePage;
 #[cfg(feature = "payables")]
@@ -202,6 +204,8 @@ fn switch(routes: Route) -> Html {
         Route::NewSalesInvoice => html! { <NewSalesInvoicePage /> },
         #[cfg(feature = "sales")]
         Route::TaxCategoryList => html! { <TaxCategoryListPage /> },
+        #[cfg(feature = "sales")]
+        Route::AgedReceivables => html! { <AgedReceivablesPage /> },
 
         Route::StyleGuide => html! {<StyleGuide />},
     }

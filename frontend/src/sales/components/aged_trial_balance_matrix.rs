@@ -9,7 +9,7 @@
 use chrono::Local;
 use fluent::fluent_args;
 use rust_decimal::dec;
-use shared_core::payables::dtos::aged_payable_summary::AgedPayableSummary;
+use shared_core::sales::dtos::aged_receivable_summary::AgedReceivableSummary;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
@@ -39,7 +39,6 @@ pub fn aged_trial_balance_matrix() -> Html {
         let user_ctx = user_ctx.clone();
         let i18n = i18n.clone();
         let navigator = navigator.clone();
-        let i18n = i18n.clone();
         Callback::from(move |_: ()| {
             let summary = summary.clone();
             let error = error.clone();
@@ -50,12 +49,12 @@ pub fn aged_trial_balance_matrix() -> Html {
             loading.set(true);
             wasm_bindgen_futures::spawn_local(async move {
                 let date = Local::now().date_naive();
-                let url = format!("/api/reports/aged-payables?date={}", date);
+                let url = format!("/api/reports/aged-receivables?date={}", date);
                 let fetched_summary = Api::get(&url, user_ctx, navigator).await;
                 loading.set(false);
                 match fetched_summary {
                     Ok(response) if response.ok() => {
-                        match response.json::<Vec<AgedPayableSummary>>().await {
+                        match response.json::<Vec<AgedReceivableSummary>>().await {
                             Ok(data) => {
                                 summary.set(data);
                             }
@@ -107,7 +106,7 @@ pub fn aged_trial_balance_matrix() -> Html {
         <table class="table">
             <thead>
                 <tr>
-                    <th>{ i18n.t("common-vendor") }</th>
+                    <th>{ i18n.t("common-customer") }</th>
                     <th class="table__value-col">{ i18n.t("aged-trial-balance-current") }</th>
                     <th class="table__value-col">{ i18n.t("aged-trial-balance-1-30-days") }</th>
                     <th class="table__value-col">{ i18n.t("aged-trial-balance-31-60-days") }</th>
@@ -128,7 +127,7 @@ pub fn aged_trial_balance_matrix() -> Html {
                     };
                     html! {
                         <>
-                            <tr onclick={on_toggle}>
+                            <tr onclick={on_toggle.clone()}>
                                 <td>
                                     <button class="collapse-toggle">
                                         if !is_expanded {

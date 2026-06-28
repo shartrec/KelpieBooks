@@ -92,6 +92,9 @@ pub enum Route {
     #[cfg(feature = "sales")]
     #[at("/sales/new")]
     NewSalesInvoice,
+    #[cfg(feature = "sales")]
+    #[at("/sales/reports/aged-receivables")]
+    AgedReceivables,
 
     // Not really a page, but it's a good example of a page that doesn't have a route
     #[at("/style-guide")]

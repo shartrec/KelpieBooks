@@ -23,6 +23,7 @@ pub mod tax_category_list_table;
 pub mod tax_category_row;
 pub mod uom_list_table;
 pub mod uom_row;
+pub mod aged_trial_balance_matrix;
 
 use shared_core::core::models::auth::SystemPrivilege;
 
@@ -79,7 +80,13 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "sidebar-reports",
                 privilege: Some(SystemPrivilege::UseSales),
                 target_route: None,
-                children: vec![],
+                children: vec![SidebarModuleContribution {
+                    id: "sidebar-aged-receivables",
+                    label_key: "sidebar-aged-receivables",
+                    privilege: Some(SystemPrivilege::UseSales),
+                    target_route: Some(Route::AgedReceivables),
+                    children: vec![],
+                }],
             },
         ],
     })
