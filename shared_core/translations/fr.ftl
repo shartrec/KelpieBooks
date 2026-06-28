@@ -86,6 +86,7 @@ common-expand = Développer
 common-collapse = Réduire
 common-confirm-deletion = Confirmer la suppression
 common-confirm-delete-button = Confirmer la suppression
+common-deletion-confirm-warning = Cette action est irréversible.
 common-debit = Débit
 common-credit = Crédit
 common-account = Compte
@@ -255,10 +256,6 @@ reversal-confirm-original-description = Description d’origine :
 reversal-confirm-reversal-description = Description de contrepassation
 reversal-confirm-warning = Cette action est irréversible.
 reversal-confirm-button = Confirmer la contrepassation
-
-# Deletion Confirmation Modal
-deletion-confirm-title = Confirmer la suppression de la transaction
-deletion-confirm-warning = Cette action est irréversible. La suppression de cette transaction l’effacera définitivement de vos registres.
 
 # Transaction Error Messages
 transaction-error-parse = Impossible d’analyser la transaction : { $error }

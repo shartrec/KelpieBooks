@@ -257,10 +257,6 @@ reversal-confirm-reversal-description = Reversal Description
 reversal-confirm-warning = This action cannot be undone.
 reversal-confirm-button = Confirm Reversal
 
-# Deletion Confirmation Modal
-transaction-deletion-confirm-title = Confirm Transaction Deletion
-transaction-deletion-confirm-warning = This action cannot be undone. Deleting this transaction will permanently remove it from your records.
-
 # Transaction Error Messages
 transaction-error-parse = Failed to parse transaction: { $error }
 transaction-error-fetch = Failed to fetch transaction: { $status }
