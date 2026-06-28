@@ -1,6 +1,13 @@
 // Import the data supplied as dictionary
 #import sys: inputs
 
+// Some style elements
+#set text(font: "Liberation Sans", size: 10pt, fill: rgb("#2c3e50"))
+#let brand_color = rgb("#6b0000")
+#let line_color = rgb("#bdc3c7")
+#let shadow_color = rgb("#e5f5f5")
+
+// Extract basic invoice data into variables, for simplicity
 #let company-name = inputs.at("company-name")
 #let invoice-num = inputs.at("invoice-number")
 #let invoice-date = inputs.at("invoice-date")
@@ -16,14 +23,14 @@
   header: align(right)[
 #grid(  columns: (auto,  1fr),
   align(left)[
-    #text(size: 20pt, weight: "bold", fill: rgb("#3b0000"))[#company-name]
+    #text(size: 20pt, weight: "bold", fill: brand_color)[#company-name]
   ],
   align(right)[
-    #text(size: 14pt, weight: "bold", fill: rgb("#3b0000"))[Tax Invoice]
+    #text(size: 14pt, weight: "bold", fill: brand_color)[Tax Invoice]
   ],
 )],
   footer: context [
-     #text(size: 8pt, fill: gray)[
+     #text(size: 8pt, fill: gray.darken(50%))[
      #grid(
       columns: (1fr, auto, 1fr),
       gutter: 8pt,
@@ -40,7 +47,6 @@
     )
   ]]
 )
-#set text(font: "Liberation Sans", size: 10pt, fill: rgb("#2c3e50"))
 
 // --- Header Section ---
 #grid(
@@ -48,14 +54,14 @@
   align(left)[
 
     #v(2pt)
-    #text(size: 9pt, fill: gray.darken(30%))[
+    #text(size: 9pt, fill: brand_color.lighten(30%))[
       123 Accounting Lane \
       Berrima, NSW 2577 \
       Australia
     ]
   ],
   align(right)[
-    #text(size: 16pt, weight: "medium", fill: rgb("#2c3e50"))[]
+    #text(size: 16pt, weight: "medium")[]
     #v(5pt)
     #grid(
       columns: (auto, auto),
@@ -69,7 +75,7 @@
 )
 
 #v(30pt)
-#line(length: 100%, stroke: 0.5pt + rgb("#bdc3c7"))
+#line(length: 100%, stroke: 0.5pt + line_color)
 #v(15pt)
 
 // --- Bill To / Ship To Section ---
@@ -81,7 +87,7 @@
   columns: (1fr, 30%, 1fr),
   gutter: 20pt,
   [
-    #text(weight: "bold", size: 11pt, fill: rgb("#3b0000"))[Bill To:] \
+    #text(weight: "bold", size: 11pt, fill: brand_color)[Bill To:] \
     #v(3pt)
     #let attn = bill_to.at("attn")
     #if attn != "" [
@@ -97,7 +103,7 @@
   ],
   [],
   [
-    #text(weight: "bold", size: 11pt, fill: rgb("#3b0000"))[Ship To:] \
+    #text(weight: "bold", size: 11pt, fill: brand_color)[Ship To:] \
     #v(3pt)
     #let attn = ship_to.at("attn")
     #if attn != "" [
@@ -121,8 +127,8 @@
 #table(
   columns: (1fr, auto, auto, auto, auto, auto),
   align: (left, right, right, right, right, right),
-  stroke: (x, y) => if y == 0 { (bottom: 2pt + rgb("#3b0000")) } else { (bottom: 0.5pt + rgb("#ecf0f1")) },
-  fill: (x, y) => if y == 0 { rgb("#b3efe2").lighten(60%) } else if calc.even(y) { rgb("#f8fafc") } else { none },
+  stroke: (x, y) => if y == 0 { (bottom: 2pt + brand_color) } else { none },
+  fill: (x, y) => if y == 0 { shadow_color } else if calc.even(y) { shadow_color.lighten(60%) } else { none },
   inset: 10pt,
 
   // Header definition
@@ -130,7 +136,7 @@
 
   ..lines.map(line => (
     // Row lines (Description, Qty, Unit Price, Extension)
-    [#line.at("name")], [#line.at("qty")], [\$#line.at("unit_price")], [\$#line.at("net")], [\$#line.at("tax")], [\$#line.at("gross")],
+    [#line.at("code") - #line.at("name")], [#line.at("qty")], [\$#line.at("unit_price")], [\$#line.at("net")], [\$#line.at("tax")], [\$#line.at("gross")],
   )).flatten()
 )
 
@@ -145,9 +151,9 @@
       align: (left, right),
       [Subtotal:], [\$#invoice-net],
       [Tax (GST 10%):], [\$#invoice-tax],
-      grid.hline(stroke: 1pt + rgb("#bdc3c7")),
+      grid.hline(stroke: 1pt + line_color),
       [],[],
-      text(weight: "bold")[Total Amount Due:], text(weight: "bold", fill: rgb("#3b0000"))[\$#invoice-gross]
+      text(weight: "bold")[Total Amount Due:], text(weight: "bold", fill: brand_color)[\$#invoice-gross]
     )
   ]
 ]
@@ -157,14 +163,14 @@
 // --- Remittance Advice / Payment Information ---
 #block(
   breakable: false,
-  fill: rgb("#ecf0f1").lighten(50%),
+  fill: shadow_color.lighten(60%),
   inset: 12pt,
   radius: 5%,
-  stroke: 1pt + rgb("#bdc3c7").lighten(50%),
+  stroke: 1pt + line_color,
   width: 100%,
   above: 1fr
 )[
-  #text(weight: "bold", fill: rgb("#3b0000"))[How to Pay:] \
+  #text(weight: "bold", fill: brand_color)[How to Pay:] \
   #v(2pt)
   Please remit bank transfer payments directly to the account details below, citing your invoice number as the reference descriptor:
   #v(4pt)
