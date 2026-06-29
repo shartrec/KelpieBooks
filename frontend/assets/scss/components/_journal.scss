@@ -12,7 +12,7 @@
 .journal-entry {
   &__header {
     @include journal-grid-layout;
-    font-weight: 600;
+    font-weight: 700;
     border-bottom: 2px solid $border-color;
     padding-bottom: $space-sm;
     color: #576574;
@@ -36,7 +36,7 @@
   gap: 1.5rem;
   padding: $space-md;
   background-color: $bg-main;
-  font-weight: bold;
+  font-weight: 700;
 
   .is-balanced { color: $color-success; }
   .is-unbalanced { color: $color-error; }

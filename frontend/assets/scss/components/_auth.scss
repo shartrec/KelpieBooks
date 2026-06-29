@@ -85,7 +85,7 @@
 
       label {
         font-size: 0.85rem;
-        font-weight: 600;
+        font-weight: 700;
         color: lighten($text-main, 15%);
       }
 
@@ -142,7 +142,7 @@
       margin-top: 0.5rem;
       padding: 0.75rem;
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: 700;
       border-radius: 6px;
       cursor: pointer;
       width: 100%;
@@ -152,7 +152,7 @@
       margin-top: 0.5rem;
       padding: 0.75rem;
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: 700;
       border-radius: 6px;
       cursor: pointer;
       width: 100%;
@@ -192,7 +192,7 @@
     a {
       color: $color-success;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 700;
 
       &:hover {
         text-decoration: underline;

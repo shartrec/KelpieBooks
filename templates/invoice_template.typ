@@ -2,7 +2,7 @@
 #import sys: inputs
 
 // Some style elements
-#set text(font: "Liberation Sans", size: 10pt, fill: rgb("#2c3e50"))
+#set text(font: "Noto Sans", size: 10pt, fill: rgb("#2c3e50"))
 #let brand_color = rgb("#6b0000")
 #let line_color = rgb("#bdc3c7")
 #let shadow_color = rgb("#e5f5f5")

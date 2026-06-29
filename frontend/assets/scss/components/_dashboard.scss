@@ -14,7 +14,7 @@ $font-mono: 'Courier New', Courier, monospace;
 @mixin accounting-font($size: 1.8rem) {
   font-family: $font-mono;
   font-size: $size;
-  font-weight: bold;
+  font-weight: 700;
   text-align: right;
 }
 
@@ -33,7 +33,7 @@ $font-mono: 'Courier New', Courier, monospace;
       padding: 6px 16px;
       border-radius: 20px;
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 700;
       background: rgba($kelpie-teal, 0.15);
       color: darken($kelpie-teal, 30%);
       border: 1px solid rgba($kelpie-teal, 0.3);

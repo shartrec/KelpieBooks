@@ -127,7 +127,7 @@ fn get_template() -> String {
             )
         ]}
     )
-    set text(font: ("New Computer Modern", "DejaVu Sans", "sans-serif"), size: 10pt)
+    set text(font: "Noto Sans", size: 10pt)
 
     set table(
       fill: (x, y) => {
