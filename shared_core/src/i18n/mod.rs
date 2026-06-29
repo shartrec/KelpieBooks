@@ -427,8 +427,7 @@ mod tests {
         assert_eq!(format_date_icu(2026, 5, 25, None), "25 May 2026");
     }
 
-    #[test]
-    fn audit_missing_translations() {
+    fn audit_missing_translations(language: &str) {
         use std::{
             collections::HashSet,
             fs,
@@ -444,28 +443,30 @@ mod tests {
             .map(|line| line.split('=').next().unwrap().trim())
             .collect();
 
-        // Iterate through other target files
-        let target_locales = vec!["translations/fr.ftl"];
-        for locale_path in target_locales {
-            let content = fs::read_to_string(locale_path).unwrap();
-            let current_keys: HashSet<&str> = content
-                .lines()
-                .filter(|line| line.contains('=') && !line.starts_with('#'))
-                .map(|line| line.split('=').next().unwrap().trim())
-                .collect();
+        let locale_path = format!("translations/{}.ftl", language);
+        let content = fs::read_to_string(&locale_path).unwrap();
+        let current_keys: HashSet<&str> = content
+            .lines()
+            .filter(|line| line.contains('=') && !line.starts_with('#'))
+            .map(|line| line.split('=').next().unwrap().trim())
+            .collect();
 
-            let missing_keys: Vec<&&str> = base_keys.difference(&current_keys).collect();
+        let missing_keys: Vec<&&str> = base_keys.difference(&current_keys).collect();
 
-            if !missing_keys.is_empty() {
-                let mut error_message = format!(
-                    "🚨 Localization Leak: The following keys are missing from target file '{}':\n",
-                    locale_path
-                );
-                for key in missing_keys {
-                    error_message.push_str(&format!("- {}\n", key));
-                }
-                panic!("{}", error_message);
+        if !missing_keys.is_empty() {
+            let mut error_message = format!(
+                "🚨 Localization Leak: The following keys are missing from target file '{}':\n",
+                &locale_path
+            );
+            for key in missing_keys {
+                error_message.push_str(&format!("- {}\n", key));
             }
+            panic!("{}", error_message);
         }
+    }
+
+    #[test]
+    fn test_fr () {
+        audit_missing_translations("fr")
     }
 }
