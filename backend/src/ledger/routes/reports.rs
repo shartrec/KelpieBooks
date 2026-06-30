@@ -7,13 +7,8 @@
  */
 
 use chrono::NaiveDate;
-use rocket::{
-    get,
-    http::ContentType,
-    routes,
-    serde::json::Json,
-    Route,
-};
+use fluent::fluent_args;
+use rocket::{get, http::ContentType, routes, serde::json::Json, Route, State};
 use rocket_db_pools::Connection;
 use rust_decimal::Decimal;
 use shared_core::ledger::dtos::{
@@ -23,43 +18,38 @@ use shared_core::ledger::dtos::{
 };
 use uuid::Uuid;
 
-use crate::{
-    ledger::{
-        db::account,
-        reports::{
-            balance_sheet_export::{
-                generate_balance_sheet_csv,
-                generate_balance_sheet_typst,
-            },
-            general_ledger_export::{
-                generate_general_ledger_csv,
-                generate_general_ledger_typst,
-            },
-            profit_loss_export::{
-                generate_profit_loss_csv,
-                generate_profit_loss_typst,
-            },
-            trial_balance_export::{
-                generate_trial_balance_csv,
-                generate_trial_balance_typst,
-            },
+use crate::{ledger::{
+    db::account,
+    reports::{
+        balance_sheet_export::{
+            generate_balance_sheet_csv,
+            generate_balance_sheet_typst,
         },
-        services::report_service,
-    },
-    security::{
-        RequirePrivilege,
-        UseTransactions,
-    },
-    util::{
-        locale_context::LocaleContext,
-        reports::{
-            compile_typst_to_pdf,
-            DownloadFile,
+        general_ledger_export::{
+            generate_general_ledger_csv,
+            generate_general_ledger_typst,
         },
-        ApiError,
+        profit_loss_export::{
+            generate_profit_loss_csv,
+            generate_profit_loss_typst,
+        },
+        trial_balance_export::{
+            generate_trial_balance_csv,
+            generate_trial_balance_typst,
+        },
     },
-    DbKelpie,
-};
+    services::report_service,
+}, security::{
+    RequirePrivilege,
+    UseTransactions,
+}, util::{
+    locale_context::LocaleContext,
+    reports::{
+        compile_typst_to_pdf,
+        DownloadFile,
+    },
+    ApiError,
+}, DbKelpie, TemplateConfig};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -160,10 +150,14 @@ async fn get_general_ledger(
 async fn export_trial_balance(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseTransactions>,
+    config: &State<TemplateConfig>,
     format: &str,
     date: &str,
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
+    let i18n = LocaleContext::new(&user.locale);
+    let template_dir = config.root_directory.to_string_lossy();
+
     let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
         .map_err(|_| ApiError::BadRequest("Invalid date".to_string()))?;
 
@@ -181,9 +175,20 @@ async fn export_trial_balance(
             )
         }
         "pdf" => {
-            let typst_data = generate_trial_balance_typst(&user, &accounts, &report_date, &org);
+            let typst_data = generate_trial_balance_typst(&user, &accounts);
 
-            match compile_typst_to_pdf(typst_data) {
+            let report_date_str = i18n.format_date(report_date);
+            let report_qual = i18n.t_args(
+                "balance-sheet-export-as-at",
+                &fluent_args!["date" => report_date_str],
+            );
+            match compile_typst_to_pdf(
+                typst_data,
+                &i18n.t("trial-balance-title"),
+                &report_qual,
+                &org.map(|o| o.name).unwrap_or("".to_string()),
+                &template_dir
+            ) {
                 Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
                 Err(e) => return Err(ApiError::Internal(e)),
             }
@@ -198,11 +203,15 @@ async fn export_trial_balance(
 async fn export_profit_loss(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseTransactions>,
+    config: &State<TemplateConfig>,
     format: &str,
     start: &str,
     end: &str,
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
+    let i18n = LocaleContext::new(&user.locale);
+    let template_dir = config.root_directory.to_string_lossy();
+
     let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
         .map_err(|_| ApiError::BadRequest("Invalid start date".to_string()))?;
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
@@ -224,8 +233,20 @@ async fn export_profit_loss(
         }
         "pdf" => {
             let typst_data =
-                generate_profit_loss_typst(&user, &accounts, &start_date, &end_date, &org);
-            match compile_typst_to_pdf(typst_data) {
+                generate_profit_loss_typst(&user, &accounts);
+            let start_date_str = i18n.format_date(start_date);
+            let end_date_str = i18n.format_date(end_date);
+            let report_qual = i18n.t_args(
+                "general-ledger-export-period",
+                &fluent_args!["start_date" => start_date_str, "end_date" => end_date_str],
+            );
+            match compile_typst_to_pdf(
+                typst_data,
+                &i18n.t("profit-loss-title"),
+                &report_qual,
+                &org.map(|o| o.name).unwrap_or("".to_string()),
+                &template_dir
+            ) {
                 Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
                 Err(e) => return Err(ApiError::Internal(e)),
             }
@@ -240,10 +261,14 @@ async fn export_profit_loss(
 async fn export_balance_sheet(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseTransactions>,
+    config: &State<TemplateConfig>,
     format: &str,
     date: &str,
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
+    let i18n = LocaleContext::new(&user.locale);
+    let template_dir = config.root_directory.to_string_lossy();
+
     let report_date = NaiveDate::parse_from_str(&date, "%Y-%m-%d")
         .map_err(|_| ApiError::BadRequest("Invalid date".to_string()))?;
 
@@ -262,8 +287,19 @@ async fn export_balance_sheet(
         }
         "pdf" => {
             let typst_data =
-                generate_balance_sheet_typst(&user, &balance_sheet, &report_date, &org);
-            match compile_typst_to_pdf(typst_data) {
+                generate_balance_sheet_typst(&user, &balance_sheet);
+            let date_str = i18n.format_date(report_date);
+            let report_qual = i18n.t_args(
+                "balance-sheet-export-as-at",
+                &fluent_args!["date" => date_str],
+            );
+            match compile_typst_to_pdf(
+                typst_data,
+                &i18n.t("balance-sheet-title"),
+                &report_qual,
+                &org.map(|o| o.name).unwrap_or("".to_string()),
+                &template_dir
+            ) {
                 Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
                 Err(e) => return Err(ApiError::Internal(e)),
             }
@@ -278,6 +314,7 @@ async fn export_balance_sheet(
 async fn export_general_ledger(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseTransactions>,
+    config: &State<TemplateConfig>,
     format: &str,
     start: &str,
     end: &str,
@@ -286,6 +323,7 @@ async fn export_general_ledger(
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
     let i18n = LocaleContext::new(&user.locale);
+    let template_dir = config.root_directory.to_string_lossy();
 
     let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
         .map_err(|_| ApiError::BadRequest("Invalid start date".to_string()))?;
@@ -332,8 +370,22 @@ async fn export_general_ledger(
         }
         "pdf" => {
             let typst_data =
-                generate_general_ledger_typst(&user, &lines, &start_date, &end_date, &org);
-            match compile_typst_to_pdf(typst_data) {
+                generate_general_ledger_typst(&user, &lines);
+
+            let start_date_str = i18n.format_date(start_date);
+            let end_date_str = i18n.format_date(end_date);
+            let report_qual = i18n.t_args(
+                "general-ledger-export-period",
+                &fluent_args!["start_date" => start_date_str, "end_date" => end_date_str],
+            );
+
+            match compile_typst_to_pdf(
+                typst_data,
+                &i18n.t("account-ledger-export-title"),
+                &report_qual,
+                &org.map(|o| o.name).unwrap_or("".to_string()),
+                &template_dir
+            ) {
                 Ok(pdf_bytes) => (
                     pdf_bytes,
                     ContentType::PDF,

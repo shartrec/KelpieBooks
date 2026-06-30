@@ -17,10 +17,7 @@ use crate::{
     core::routes::security::AuthenticatedUser,
     util::{
         locale_context::LocaleContext,
-        reports::{
-            build_table_header,
-            wrap_report_layout,
-        },
+        reports::build_table_header,
     },
 };
 
@@ -109,16 +106,6 @@ pub(crate) fn generate_ledger_typst(
         ));
     }
     typst_content.push_str(")\n");
-    let name = org.as_ref().map(|o| o.name.as_str());
 
-    let report_qual = i18n.t_args(
-        "account-ledger-export-report-qualifier",
-        &fluent_args!["account_name" => account_name, "start_date" => start_date.format("%d %b %Y").to_string(), "end_date" => end_date.format("%d %b %Y").to_string()],
-    );
-    wrap_report_layout(
-        name,
-        &i18n.t("account-ledger-export-title"),
-        &*report_qual,
-        typst_content.as_str(),
-    )
+    typst_content
 }

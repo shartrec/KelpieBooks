@@ -9,16 +9,8 @@
 use std::str::FromStr;
 
 use chrono::NaiveDate;
-use rocket::{
-    delete,
-    get,
-    http::ContentType,
-    post,
-    put,
-    routes,
-    serde::json::Json,
-    Route,
-};
+use fluent::fluent_args;
+use rocket::{delete, get, http::ContentType, post, put, routes, serde::json::Json, Route, State};
 use rocket_db_pools::Connection;
 use rust_decimal::dec;
 use shared_core::ledger::{
@@ -36,30 +28,26 @@ use shared_core::ledger::{
     },
 };
 
-use crate::{
-    ledger::{
-        db::account as account_db,
-        reports::account_ledger_export::{
-            generate_ledger_csv,
-            generate_ledger_typst,
-        },
-        services::account_service,
+use crate::{ledger::{
+    db::account as account_db,
+    reports::account_ledger_export::{
+        generate_ledger_csv,
+        generate_ledger_typst,
     },
-    security::{
-        ManageAccounts,
-        RequirePrivilege,
-        UseAccounts,
+    services::account_service,
+}, security::{
+    ManageAccounts,
+    RequirePrivilege,
+    UseAccounts,
+}, util::{
+    reports::{
+        compile_typst_to_pdf,
+        DownloadFile,
     },
-    util::{
-        reports::{
-            compile_typst_to_pdf,
-            DownloadFile,
-        },
-        types::PathUuid,
-        ApiError,
-    },
-    DbKelpie,
-};
+    types::PathUuid,
+    ApiError,
+}, DbKelpie, TemplateConfig};
+use crate::util::locale_context::LocaleContext;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -240,12 +228,16 @@ async fn delete_account(
 async fn export_account_ledger(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseAccounts>,
+    config: &State<TemplateConfig>,
     id: PathUuid,
     format: String,
     start: String,
     end: String,
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
+    let i18n = LocaleContext::new(&user.locale);
+    let template_dir = config.root_directory.to_string_lossy();
+
     let start_date = NaiveDate::parse_from_str(&start, "%Y-%m-%d")
         .map_err(|_| ApiError::BadRequest("Invalid start date".to_string()))?;
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
@@ -281,7 +273,18 @@ async fn export_account_ledger(
                     &end_date,
                     &org,
                 );
-                match compile_typst_to_pdf(typst_data) {
+                let report_qual = i18n.t_args(
+                    "account-ledger-export-report-qualifier",
+                    &fluent_args!["account_name" => &account.name, "start_date" => start_date.format("%d %b %Y").to_string(), "end_date" => end_date.format("%d %b %Y").to_string()],
+                );
+
+                match compile_typst_to_pdf(
+                    typst_data,
+                    &i18n.t("account-ledger-export-title"),
+                    &report_qual,
+                    &org.map(|o| o.name).unwrap_or("".to_string()),
+                    &template_dir
+                ) {
                     Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
                     Err(e) => return Err(ApiError::Internal(e)),
                 }

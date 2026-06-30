@@ -24,10 +24,7 @@ use crate::{
     core::routes::security::AuthenticatedUser,
     util::{
         locale_context::LocaleContext,
-        reports::{
-            build_table_header,
-            wrap_report_layout,
-        },
+        reports::build_table_header,
     },
 };
 
@@ -151,8 +148,6 @@ pub(crate) fn generate_trial_balance_csv(
 pub(crate) fn generate_trial_balance_typst(
     user: &AuthenticatedUser,
     accounts: &[AccountWithBalance],
-    report_date: &NaiveDate,
-    org: &Option<Organization>,
 ) -> String {
     let i18n = LocaleContext::new(&user.locale);
 
@@ -160,6 +155,7 @@ pub(crate) fn generate_trial_balance_typst(
     let (total_debit, total_credit) = AccountWithBalance::calculate_totals(accounts);
 
     let mut typst_content = String::new();
+
     typst_content.push_str(&*build_table_header(
         &[
             i18n.t("common-account"),
@@ -218,16 +214,5 @@ pub(crate) fn generate_trial_balance_typst(
     ));
     typst_content.push_str(")\n");
 
-    let name = org.as_ref().map(|o| o.name.as_str());
-    let report_date_str = i18n.format_date(*report_date);
-    let report_qual = i18n.t_args(
-        "balance-sheet-export-as-at",
-        &fluent_args!["date" => report_date_str],
-    );
-    wrap_report_layout(
-        name,
-        &i18n.t("trial-balance-title"),
-        &*report_qual,
-        typst_content.as_str(),
-    )
+    typst_content
 }

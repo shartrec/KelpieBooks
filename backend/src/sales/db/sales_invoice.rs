@@ -230,7 +230,7 @@ pub(crate) async fn get(
     .await?;
 
     if let Some(invoice_row) = invoice_row {
-        let mut sales_invoice = from_row_to_sales_invoice(&invoice_row);
+        let sales_invoice = from_row_to_sales_invoice(&invoice_row);
         Ok(Some(sales_invoice))
     } else {
         Ok(None)

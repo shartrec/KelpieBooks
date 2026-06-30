@@ -23,10 +23,7 @@ use crate::{
     core::routes::security::AuthenticatedUser,
     util::{
         locale_context::LocaleContext,
-        reports::{
-            build_table_header,
-            wrap_report_layout,
-        },
+        reports::build_table_header,
     },
 };
 
@@ -157,8 +154,6 @@ pub(crate) fn generate_balance_sheet_csv(
 pub(crate) fn generate_balance_sheet_typst(
     user: &AuthenticatedUser,
     balance_sheet: &BalanceSheet,
-    report_date: &NaiveDate,
-    org: &Option<Organization>,
 ) -> String {
     let i18n = LocaleContext::new(&user.locale);
 
@@ -244,16 +239,5 @@ pub(crate) fn generate_balance_sheet_typst(
 
     typst_content.push_str(")\n");
 
-    let name = org.as_ref().map(|o| o.name.as_str());
-    let date_str = i18n.format_date(*report_date);
-    let report_qual = i18n.t_args(
-        "balance-sheet-export-as-at",
-        &fluent_args!["date" => date_str],
-    );
-    wrap_report_layout(
-        name,
-        &i18n.t("balance-sheet-title"),
-        &*report_qual,
-        typst_content.as_str(),
-    )
+    typst_content
 }

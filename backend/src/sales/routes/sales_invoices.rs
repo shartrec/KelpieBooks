@@ -6,14 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket::{
-    get,
-    post,
-    put,
-    routes,
-    serde::json::Json,
-    Route,
-};
+use rocket::{get, post, put, routes, serde::json::Json, Route, State};
 use rocket::http::ContentType;
 use rocket_db_pools::Connection;
 use rust_decimal::Decimal;
@@ -31,23 +24,18 @@ use shared_core::sales::{
     },
 };
 use shared_core::sales::models::customer_payment::CustomerPayment;
-use crate::{
-    sales::services::sales_invoice_service,
-    security::{
-        ManageSales,
-        RequirePrivilege,
-        UseSales,
+use crate::{sales::services::sales_invoice_service, security::{
+    ManageSales,
+    RequirePrivilege,
+    UseSales,
+}, util::{
+    types::{
+        FormSalesInvoiceStatus,
+        PathDate,
+        PathUuid,
     },
-    util::{
-        types::{
-            FormSalesInvoiceStatus,
-            PathDate,
-            PathUuid,
-        },
-        ApiError,
-    },
-    DbKelpie,
-};
+    ApiError,
+}, DbKelpie, TemplateConfig};
 use crate::sales::reports;
 use crate::sales::services::customer_payment_service;
 use crate::util::reports::DownloadFile;
@@ -79,11 +67,12 @@ async fn get_sales_invoice(
 async fn print_sales_invoice(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseSales>,
+    config: &State<TemplateConfig>,
     id: PathUuid,
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
     let invoice =
-        reports::invoice::generate_invoice(&mut pool, user, *id).await?;
+        reports::invoice::generate_invoice(&mut pool, user, config, *id).await?;
     Ok(DownloadFile::new(invoice, "Invoice.pdf".to_string(), ContentType::PDF))
 }
 

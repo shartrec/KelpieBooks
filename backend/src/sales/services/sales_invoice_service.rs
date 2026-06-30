@@ -280,7 +280,7 @@ pub(crate) async fn create_invoice(
         entries: jels,
     };
 
-    let transaction_id =
+    let _transaction_id =
         account_service::create_transaction(&mut tx, org_id, &ct_req).await?;
 
 

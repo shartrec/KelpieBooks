@@ -21,6 +21,8 @@ use typst_as_lib::{
     TypstEngine,
 };
 use typst_assets::fonts;
+use typst_library::foundations::{Dict, Value};
+use crate::util::{get_static_dir, get_template_dir};
 
 pub(crate) struct DownloadFile {
     content: Vec<u8>,
@@ -78,11 +80,6 @@ pub(crate) fn build_table_header(headings: &[String], align_right: &[bool]) -> S
     format!(
         r###"#table(
     columns: ({col_layout}),
-    fill: (x, y) => {{
-        if y == 0 {{ rgb("#f4f7f6") }}
-        else if calc.even(y) {{ rgb("#f4fbff") }}
-        else {{ white }}
-    }},
     table.header(
         repeat: true,
         {col_headings},
@@ -93,106 +90,41 @@ pub(crate) fn build_table_header(headings: &[String], align_right: &[bool]) -> S
     )
 }
 
-fn get_template() -> String {
-    let template = r###"
+pub(crate) fn compile_typst_to_pdf(
+    source: String,
+    title: &str,
+    qualifier: &str,
+    org_name: &str,
+    template_path: &str,
+) -> Result<Vec<u8>, String> {
 
-#let tab_h_color = "#f4f7f6"
-#let tab_odd_color = "#f4fbff"
-
-#let report_layout(
-    title: "",
-    org_name: "",
-    report_qualifier: "",
-    body
-) = {
-    set page(
-        paper: "a4",
-        margin: (top: 2.5cm, bottom: 2cm, x: 1.5cm),
-        header: [
-            #set text(8pt, fill: gray)
-            #grid(
-                columns: (1fr, 1fr),
-                align(left)[Kelpie Books],
-                align(right)[#datetime.today().display()]
-            )
-            #line(length: 100%, stroke: 0.5pt + gray)
-        ],
-        footer: context { [
-            #set text(8pt, fill: gray)
-            #line(length: 100%, stroke: 0.5pt + gray)
-            #grid(
-                columns: (1fr, 1fr),
-                align(left)[#title],
-                align(right)[Page #counter(page).display()]
-            )
-        ]}
+    // Wrap the report content in a call to load and show the template
+    let rep = format!(r###"
+    #import "report_template.typ" as t
+    // Activate the layout
+    #show: t.report_layout.with(
+        title: t.report_title,
+        org_name: t.org_name,
+        report_qualifier: t.report_qualifier
     )
-    set text(font: "Noto Sans", size: 10pt)
+    {}
+    "###, source);
 
-    set table(
-      fill: (x, y) => {
-          if y == 0 { rgb(tab_h_color) }
-          else if calc.even(y) { rgb(tab_odd_color) }
-          else { white }
-      },
-      stroke: (x, y) => {
-        none
-      }
-    )
-
-    // Header section inside the layout
-    grid(
-        columns: (1fr, auto),
-        text(size: 18pt, weight: "bold")[#title - #org_name],
-        align(right + bottom)[#text(size: 10pt, style: "italic")[#report_qualifier]]
-    )
-
-    body
-}
-"###;
-
-    template.to_string()
-}
-
-pub(crate) fn wrap_report_layout(
-    org_name: Option<&str>,
-    report_title: &str,
-    report_qualifier: &str,
-    body: &str,
-) -> String {
-    format!(
-        r#"
-        {template}
-        // Definitions at the top
-        #let org_name = "{org_name}"
-        #let report_title = "{report_title}"
-        #let report_qualifier = "{report_qualifier}"
-
-        // Activate the layout
-        #show: report_layout.with(
-            title: report_title,
-            org_name: org_name,
-            report_qualifier: report_qualifier,
-        )
-        {body}
-        "#,
-        template = get_template(),
-        org_name = org_name.unwrap_or(""),
-        report_title = report_title,
-        report_qualifier = report_qualifier,
-        body = body
-    )
-}
-
-pub(crate) fn compile_typst_to_pdf(source: String) -> Result<Vec<u8>, String> {
     let template = TypstEngine::builder()
-        .main_file(source)
+        .main_file(rep)
+        .with_file_system_resolver(template_path)
         .fonts(fonts())
         .search_fonts_with(TypstKitFontOptions::default())
         .build();
 
+    // Build the inputs
+    let mut dict = Dict::new();
+    dict.insert("org-name".into(), Value::Str(org_name.into()));
+    dict.insert("title".into(), Value::Str(title.into()));
+    dict.insert("qualifier".into(), Value::Str(qualifier.into()));
+
     // Run it
-    let doc = template.compile().output;
+    let doc = template.compile_with_input(dict).output;
     match doc {
         Ok(doc) => {
             let options = Default::default();

@@ -64,23 +64,8 @@ async fn spa_index() -> Option<NamedFile> {
     NamedFile::open(relative!("./static/index.html")).await.ok()
 }
 
-fn get_static_assets_dir(rocket: &Rocket<Build>) -> PathBuf {
-    let profile = rocket.figment().profile().as_ref();
-
-    match profile {
-        "debug" => {
-            // Development Mode: Point directly to the source tree folder
-            // This allows local asset changes to show up immediately
-            println!("🚀 Running in DEVELOPMENT mode. Using source assets tree.");
-            rocket::fs::relative!("static").into()
-        }
-        _ => {
-            // Production / Release Mode: Look next to the running executable binary
-            println!("⚙️ Running in PRODUCTION mode. Using neighboring standalone assets folder.");
-            let current_dir = env::current_dir().expect("Failed to read runtime directory");
-            current_dir.join("static")
-        }
-    }
+pub struct TemplateConfig {
+    pub root_directory: PathBuf,
 }
 
 fn run_migrations() -> AdHoc {
@@ -138,11 +123,14 @@ fn rocket() -> _ {
         .mount("/", sales::routes::reports::routes());
 
     // Determine the environment directory pathway
-    let assets_dir = get_static_assets_dir(&rocket);
+    let assets_dir = util::get_static_dir(&rocket);
     let rocket = rocket
         .mount("/", FileServer::from(assets_dir))
         // 3. Mount the fallback route with a lower priority (rank 2)
         .mount("/", routes![spa_index]);
+
+    let template_dir = util::get_template_dir(&rocket);
+    let rocket = rocket.manage(TemplateConfig { root_directory: template_dir });
 
     rocket
 }

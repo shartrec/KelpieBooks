@@ -8,6 +8,7 @@
 use std::fs;
 use std::fs::File;
 use std::io::Write;
+use rocket::State;
 use rocket_db_pools::Connection;
 use typst_as_lib::typst_kit_options::TypstKitFontOptions;
 use typst_as_lib::TypstEngine;
@@ -16,7 +17,7 @@ use typst_library::foundations::{Array, Dict, Value};
 use uuid::Uuid;
 use crate::core::db::organization as db_org;
 use crate::core::routes::security::AuthenticatedUser;
-use crate::DbKelpie;
+use crate::{DbKelpie, TemplateConfig};
 use crate::sales::db::sales_invoice::get_sales_invoice_with_lines;
 use crate::util::ApiError;
 use crate::util::locale_context::LocaleContext;
@@ -25,9 +26,12 @@ use crate::util::reports::DownloadFile;
 pub(crate) async fn generate_invoice(
     conn: &mut Connection<DbKelpie>,
     user: AuthenticatedUser,
+    config: &State<TemplateConfig>,
     invoice_id: Uuid) -> Result<Vec<u8>, ApiError>
 {
     let i18n = LocaleContext::new(&user.locale);
+    let template_dir = config.root_directory.to_string_lossy();
+
     // Gather the audit details and generate a structure to pass to the Typst template.
     let mut dict = Dict::new();
 
@@ -95,13 +99,12 @@ pub(crate) async fn generate_invoice(
         }
         dict.insert("lines".into(), Value::Array(lines));
     }
-    build_invoice_pdf(dict)
+    build_invoice_pdf(dict, &*template_dir)
 }
 
 
-fn build_invoice_pdf (invoice: Dict) -> Result<Vec<u8>, ApiError>
+fn build_invoice_pdf (invoice: Dict, template_path: &str) -> Result<Vec<u8>, ApiError>
 {
-    let template_path = "/home/trevor/RustroverProjects/KelpieBooks/templates/invoice_template.typ";
     let template_source = fs::read_to_string(template_path)
         .map_err(|e| ApiError::Internal(format!("Failed to read template file: {}", e)))?;
 

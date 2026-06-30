@@ -13,7 +13,7 @@ use std::{
     collections::HashMap,
     sync::LazyLock,
 };
-
+use std::ffi::OsStr;
 use fluent::{
     concurrent::FluentBundle,
     FluentArgs,
@@ -29,10 +29,7 @@ use icu_provider::prelude::icu_locale_core::{
     locale,
     Locale,
 };
-use include_dir::{
-    include_dir,
-    Dir,
-};
+use include_dir::{include_dir, Dir, File};
 use rust_decimal::Decimal;
 use unic_langid::{
     langid,
@@ -70,7 +67,11 @@ impl I18nManager {
 
         // 1. First pass: Load all base language files (e.g., "en", "fr", "es")
         // and initialize their concurrent bundles
-        for file in TRANSLATIONS_DIR.files() {
+        fn is_ftl(file: &File) -> bool {
+            file.path().extension() == Some(OsStr::new("ftl"))
+        }
+
+        for file in TRANSLATIONS_DIR.files().filter(|f| is_ftl(f)) {
             let path = file.path();
             let err_msg = format!("Translation dir {:?}",path);
             if let Some(lang_str) = path.file_stem().and_then(|s| s.to_str()) {
@@ -95,8 +96,9 @@ impl I18nManager {
 
         // 2. Second pass: Load regional overrides (e.g., "en-AU", "fr-CA")
         // and layer them into a dedicated regional bundle that inherits the base file!
-        for file in TRANSLATIONS_DIR.files() {
-            let path = file.path();
+        for file in TRANSLATIONS_DIR.files().filter(|f| is_ftl(f)) {
+
+        let path = file.path();
             if let Some(lang_str) = path.file_stem().and_then(|s| s.to_str()) {
                 if let Ok(lang_id) = lang_str.parse::<LanguageIdentifier>() {
                     if lang_id.region.is_some() {

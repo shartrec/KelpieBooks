@@ -45,7 +45,7 @@ pub(crate) async fn get_customer_invoice_payments(
     organization_id: Uuid,
     invoice_id: Uuid,
 ) -> Result<Vec<CustomerPayment>, ApiError> {
-    let invoice = sales_invoice_db::get(pool, invoice_id, organization_id)
+    let _invoice = sales_invoice_db::get(pool, invoice_id, organization_id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Invoice not found.".to_string()))?;
     let payments = customer_payment_db::get_all_by_invoice(pool, invoice_id).await?;

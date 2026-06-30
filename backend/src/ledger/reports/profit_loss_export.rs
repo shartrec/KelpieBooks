@@ -27,10 +27,7 @@ use crate::{
     core::routes::security::AuthenticatedUser,
     util::{
         locale_context::LocaleContext,
-        reports::{
-            build_table_header,
-            wrap_report_layout,
-        },
+        reports::build_table_header,
     },
 };
 
@@ -154,14 +151,13 @@ pub(crate) fn generate_profit_loss_csv(
 pub(crate) fn generate_profit_loss_typst(
     user: &AuthenticatedUser,
     accounts: &[AccountWithBalance],
-    start_date: &NaiveDate,
-    end_date: &NaiveDate,
-    org: &Option<Organization>,
 ) -> String {
     let i18n = LocaleContext::new(&user.locale);
 
     let (revenue_nodes, expense_nodes, net_income) = build_account_nodes(accounts);
+
     let mut typst_content = String::new();
+
     typst_content.push_str(&*build_table_header(
         &[i18n.t("common-account"), "".to_string(), "".to_string()],
         &vec![false, true, true],
@@ -220,17 +216,5 @@ pub(crate) fn generate_profit_loss_typst(
     ));
     typst_content.push_str(")\n");
 
-    let name = org.as_ref().map(|o| o.name.as_str());
-    let start_date_str = i18n.format_date(*start_date);
-    let end_date_str = i18n.format_date(*end_date);
-    let report_qual = i18n.t_args(
-        "general-ledger-export-period",
-        &fluent_args!["start_date" => start_date_str, "end_date" => end_date_str],
-    );
-    wrap_report_layout(
-        name,
-        &i18n.t("profit-loss-title"),
-        &*report_qual,
-        typst_content.as_str(),
-    )
+    typst_content
 }
