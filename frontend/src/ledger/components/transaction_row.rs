@@ -197,7 +197,7 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
             </tr>
             if *expanded {
                 <tr class="transaction-detail__row">
-                    <td colspan="6">
+                    <td colspan="4">
                         <div class="transaction-detail__content">
                             if *loading_details {
                                 <p>{ i18n.t("transaction-row-loading-details") }</p>
@@ -227,6 +227,12 @@ pub fn transaction_row(props: &TransactionRowProps) -> Html {
                                 <p class="message__error">{ i18n.t("transaction-row-error-load-details") }</p>
                             }
                         </div>
+                    </td>
+                    <td>
+                        <span class="table__text-col"></span>
+                    </td>
+                    <td>
+                        <span class="table__text-col"></span>
                     </td>
                 </tr>
             }
