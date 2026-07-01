@@ -16,7 +16,6 @@ use sqlx::PgConnection;
 use uuid::Uuid;
 use shared_core::sales::dtos::aged_receivable_summary::AgedReceivableSummary;
 use crate::{
-    sales::db::sales_invoice::get,
     util::ApiError,
 };
 use crate::sales::db::sales_invoice::list_sales_invoices;

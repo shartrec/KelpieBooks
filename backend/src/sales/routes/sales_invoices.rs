@@ -16,7 +16,6 @@ use shared_core::sales::{
         sales_invoice_item::SalesInvoiceItem,
     },
     requests::{
-        sales_invoice,
         sales_invoice::{
             CreateSalesInvoiceRequest,
             UpdateSalesInvoiceRequest,

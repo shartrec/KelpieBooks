@@ -6,11 +6,8 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use chrono::NaiveDate;
-use fluent::fluent_args;
 use rust_decimal::dec;
 use shared_core::{
-    core::models::organization::Organization,
     i18n::format_currency_icu_typ,
     ledger::dtos::general_ledger_line::GeneralLedgerLine,
 };

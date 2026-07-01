@@ -14,7 +14,6 @@ use fluent::fluent_args;
 use rust_decimal::dec;
 use shared_core::{
     ledger::models::{
-        account::Account,
         account_category::AccountCategory,
     },
     partners::dtos::partner_list_item::PartnerListItem,
@@ -38,6 +37,7 @@ use crate::{
     payables::components::vendor_invoice_item_row::VendorInvoiceItemRow,
     router::Route,
 };
+use crate::ledger::util::get_accounts_by_category;
 
 #[function_component(NewVendorInvoicePage)]
 pub fn new_vendor_invoice_page() -> Html {
@@ -104,27 +104,18 @@ pub fn new_vendor_invoice_page() -> Html {
                     ))),
                 }
 
-                let url = format!(
-                    "/api/accounts_by_category/{}",
-                    AccountCategory::Expense.to_string()
-                );
-                let fetched_accounts = Api::get(&url, user_ctx, navigator).await;
+                let fetched_accounts = get_accounts_by_category(
+                    AccountCategory::Expense,
+                    user_ctx,
+                    navigator,
+                    &i18n,
+                    false,
+                ).await;
                 match fetched_accounts {
-                    Ok(response) if response.ok() => match response.json::<Vec<Account>>().await {
-                        Ok(data) => accounts.set(data),
-                        Err(e) => error.set(Some(i18n.t_args(
-                            "new-vendor-invoice-error-parse-accounts",
-                            &fluent_args!["error" => e.to_string()],
-                        ))),
-                    },
-                    Ok(response) => error.set(Some(i18n.t_args(
-                        "new-vendor-invoice-error-fetch-accounts",
-                        &fluent_args!["status" => response.status()],
-                    ))),
-                    Err(e) => error.set(Some(i18n.t_args(
-                        "common-network-error",
-                        &fluent_args!["error" => e.to_string()],
-                    ))),
+                    Ok(postable_accounts) => {
+                        accounts.set(postable_accounts);
+                    }
+                    Err(e) => error.set(Some(e)),
                 }
             });
         })

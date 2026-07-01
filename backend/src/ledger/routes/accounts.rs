@@ -268,10 +268,6 @@ async fn export_account_ledger(
                 let typst_data = generate_ledger_typst(
                     &user,
                     &entries,
-                    account.name.as_str(),
-                    &start_date,
-                    &end_date,
-                    &org,
                 );
                 let report_qual = i18n.t_args(
                     "account-ledger-export-report-qualifier",

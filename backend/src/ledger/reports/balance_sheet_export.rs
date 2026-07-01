@@ -8,10 +8,7 @@
 
 use std::collections::HashMap;
 
-use chrono::NaiveDate;
-use fluent::fluent_args;
 use shared_core::{
-    core::models::organization::Organization,
     ledger::dtos::{
         account_with_balance::AccountWithBalance,
         balance_sheet::BalanceSheet,

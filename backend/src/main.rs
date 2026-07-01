@@ -33,8 +33,6 @@ use rocket::{
     },
     get,
     routes,
-    Build,
-    Rocket,
 };
 use rocket_db_pools::Database;
 

@@ -8,7 +8,6 @@
 use rust_decimal::Decimal;
 use shared_core::{
     ledger::models::{
-        account::Account,
         account_category::AccountCategory,
     },
     sales::models::item::{
@@ -29,6 +28,7 @@ use crate::{
     },
     core::components::currency_input::DecimalInput,
 };
+use crate::ledger::util::get_accounts_by_category;
 
 #[derive(Properties, PartialEq)]
 pub struct EditItemModalProps {
@@ -53,11 +53,15 @@ pub fn edit_item_modal(props: &EditItemModalProps) -> Html {
         let income_accounts = income_accounts.clone();
         let user_ctx = user_ctx.clone();
         let navigator = navigator.clone();
+        let error = error.clone();
+        let i18n = i18n.clone();
         use_effect_with((), move |_| {
             let uoms = uoms.clone();
             let income_accounts = income_accounts.clone();
             let user_ctx = user_ctx.clone();
             let navigator = navigator.clone();
+            let error = error.clone();
+            let i18n = i18n.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 if let Ok(response) =
                     Api::get("/api/sales/uoms", user_ctx.clone(), navigator.clone()).await
@@ -66,14 +70,18 @@ pub fn edit_item_modal(props: &EditItemModalProps) -> Html {
                         uoms.set(data);
                     }
                 }
-                let url = format!(
-                    "/api/accounts_by_category/{}",
-                    AccountCategory::Revenue.to_string()
-                );
-                if let Ok(response) = Api::get(&url, user_ctx, navigator).await {
-                    if let Ok(data) = response.json::<Vec<Account>>().await {
-                        income_accounts.set(data);
+                let fetched_accounts = get_accounts_by_category(
+                    AccountCategory::Revenue,
+                    user_ctx,
+                    navigator,
+                    &i18n,
+                    false,
+                ).await;
+                match fetched_accounts {
+                    Ok(postable_accounts) => {
+                        income_accounts.set(postable_accounts);
                     }
+                    Err(e) => error.set(Some(e)),
                 }
             });
             || ()

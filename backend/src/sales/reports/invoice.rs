@@ -6,8 +6,6 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use std::fs;
-use std::fs::File;
-use std::io::Write;
 use rocket::State;
 use rocket_db_pools::Connection;
 use typst_as_lib::typst_kit_options::TypstKitFontOptions;
@@ -21,7 +19,6 @@ use crate::{DbKelpie, TemplateConfig};
 use crate::sales::db::sales_invoice::get_sales_invoice_with_lines;
 use crate::util::ApiError;
 use crate::util::locale_context::LocaleContext;
-use crate::util::reports::DownloadFile;
 
 pub(crate) async fn generate_invoice(
     conn: &mut Connection<DbKelpie>,

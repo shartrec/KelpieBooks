@@ -31,14 +31,18 @@ use jsonwebtoken::{
     TokenData,
     Validation,
 };
+#[cfg(feature = "email")]
 use log::{
     error,
     log,
 };
 use rand::{
     rngs::OsRng,
-    thread_rng,
     RngCore,
+};
+#[cfg(feature = "email")]
+use rand::{
+    thread_rng,
 };
 use rocket::{
     get,
@@ -66,11 +70,15 @@ use shared_core::core::{
     dtos::user_detail::AuthUserDetail,
     models::role::Role,
     requests::auth::{
-        ForgotPasswordRequest,
         LoginRequest,
-        ResetPasswordSubmit,
     },
 };
+#[cfg(feature = "password-reset")]
+use shared_core::core::requests::auth::{
+    ForgotPasswordRequest,
+    ResetPasswordSubmit,
+};
+
 use uuid::Uuid;
 
 #[cfg(feature = "password-reset")]
@@ -78,14 +86,20 @@ use crate::core::db::password_reset;
 #[cfg(feature = "email")]
 use crate::core::services::email_service;
 use crate::{
-    config::load_config,
     core::db::user,
     util::ApiError,
     DbKelpie,
 };
 
+#[cfg(feature = "email")]
+use crate::{
+    config::load_config,
+};
+
 pub(crate) fn routes() -> Vec<Route> {
-    let mut routes = routes![login, me, logout];
+    let mut routes = vec!();
+    let mut base_routes = routes![login, me, logout];
+    routes.append(&mut base_routes);
     #[cfg(feature = "password-reset")]
     {
         let mut pwd_routes = routes![forgot_password, reset_password];

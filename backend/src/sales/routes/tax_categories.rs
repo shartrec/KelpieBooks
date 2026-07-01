@@ -6,7 +6,6 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use chrono::NaiveDate;
 use rocket::{
     delete,
     get,

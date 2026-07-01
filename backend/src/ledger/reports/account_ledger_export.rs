@@ -5,11 +5,8 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use chrono::NaiveDate;
-use fluent::fluent_args;
 use rust_decimal::dec;
 use shared_core::{
-    core::models::organization::Organization,
     ledger::dtos::journal_entry_with_balance::JournalEntryWithBalance,
 };
 
@@ -64,10 +61,6 @@ pub(crate) fn generate_ledger_csv(
 pub(crate) fn generate_ledger_typst(
     user: &AuthenticatedUser,
     entries: &[JournalEntryWithBalance],
-    account_name: &str,
-    start_date: &NaiveDate,
-    end_date: &NaiveDate,
-    org: &Option<Organization>,
 ) -> String {
     let i18n = LocaleContext::new(&user.locale);
 

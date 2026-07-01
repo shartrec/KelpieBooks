@@ -22,7 +22,6 @@ use typst_as_lib::{
 };
 use typst_assets::fonts;
 use typst_library::foundations::{Dict, Value};
-use crate::util::{get_static_dir, get_template_dir};
 
 pub(crate) struct DownloadFile {
     content: Vec<u8>,
