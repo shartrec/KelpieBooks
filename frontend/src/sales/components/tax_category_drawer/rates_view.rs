@@ -8,7 +8,6 @@
 use fluent::fluent_args;
 use shared_core::{
     ledger::models::{
-        account::Account,
         account_category::AccountCategory,
     },
     sales::models::tax::{
@@ -29,6 +28,7 @@ use crate::{
     core::components::delete_confirmation_modal::DeleteConfirmationModal,
     sales::components::tax_category_drawer::tax_rate_edit_card::TaxRateEditCard,
 };
+use crate::ledger::util::get_accounts_by_category;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct RatesViewProps {
@@ -61,7 +61,7 @@ pub fn rates_view(props: &RatesViewProps) -> Html {
             let i18n = i18n.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let url = format!("/api/tax-categories/{}/rates", category_id);
+                let url = format!("/api/sales/tax-categories/{}/rates", category_id);
                 let fetched_rates = Api::get(&url, user_ctx, navigator).await;
                 match fetched_rates {
                     Ok(response) if response.ok() => match response.json::<Vec<TaxRate>>().await {
@@ -97,27 +97,18 @@ pub fn rates_view(props: &RatesViewProps) -> Html {
             let i18n = i18n.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let url = format!(
-                    "/api/accounts_by_category/{}",
-                    AccountCategory::Liability.to_string()
-                );
-                let fetched_accounts = Api::get(&url, user_ctx, navigator).await;
+                let fetched_accounts = get_accounts_by_category(
+                    AccountCategory::Liability,
+                    user_ctx,
+                    navigator,
+                    &i18n,
+                    false,
+                ).await;
                 match fetched_accounts {
-                    Ok(response) if response.ok() => match response.json::<Vec<Account>>().await {
-                        Ok(data) => accounts.set(data),
-                        Err(e) => error.set(Some(i18n.t_args(
-                            "new-vendor-invoice-error-parse-accounts",
-                            &fluent_args!["error" => e.to_string()],
-                        ))),
-                    },
-                    Ok(response) => error.set(Some(i18n.t_args(
-                        "new-vendor-invoice-error-fetch-accounts",
-                        &fluent_args!["status" => response.status()],
-                    ))),
-                    Err(e) => error.set(Some(i18n.t_args(
-                        "common-network-error",
-                        &fluent_args!["error" => e.to_string()],
-                    ))),
+                    Ok(postable_accounts) => {
+                        accounts.set(postable_accounts);
+                    }
+                    Err(e) => error.set(Some(e)),
                 }
             });
         })
@@ -213,7 +204,7 @@ pub fn rates_view(props: &RatesViewProps) -> Html {
             let error = error.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 let resp = Api::put(
-                    &format!("/api/tax-categories/{}/rates", category_id),
+                    &format!("/api/sales/tax-categories/{}/rates", category_id),
                     &*rates,
                     user_ctx,
                     navigator,
