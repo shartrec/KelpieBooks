@@ -76,7 +76,7 @@ pub fn period_settings() -> Html {
             wasm_bindgen_futures::spawn_local(async move {
                 // Construct the update request
                 let res = Api::put(
-                    "/api/organization/lock",
+                    &format!("/api/organizations/{}/lock", (*org_ctx).id),
                     &json!({ "locked_until": local_date }),
                     user_ctx,
                     navigator.clone(),
