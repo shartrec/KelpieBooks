@@ -16,14 +16,10 @@ use crate::ledger;
 use crate::partners;
 #[cfg(feature = "payables")]
 use crate::payables;
-use crate::{
-    contexts::{
-        auth_context::use_user_context,
-        locale_context::use_locale,
-    },
-    router::Route,
-    sales,
-};
+use crate::{contexts::{
+    auth_context::use_user_context,
+    locale_context::use_locale,
+}, inventory, router::Route, sales};
 
 #[function_component(Sidebar)]
 pub fn sidebar() -> Html {
@@ -40,6 +36,27 @@ pub fn sidebar() -> Html {
         }
     }
 
+    #[cfg(feature = "partners")]
+    if user_ctx.has_privilege(&SystemPrivilege::UseAccounts) {
+        if let Some(contrib) = partners::components::get_sidebar_contribution() {
+            registry.push(contrib);
+        }
+    }
+
+    #[cfg(feature = "inventory")]
+    if user_ctx.has_privilege(&SystemPrivilege::UseInventory) {
+        if let Some(contrib) = inventory::components::get_sidebar_contribution() {
+            registry.push(contrib);
+        }
+    }
+
+    #[cfg(all(feature = "sales", not(feature = "inventory")))]
+    if user_ctx.has_privilege(&SystemPrivilege::UseSales) {
+        if let Some(contrib) = sales::components::get_sidebar_item_contribution() {
+            registry.push(contrib);
+        }
+    }
+
     #[cfg(feature = "payables")]
     if user_ctx.has_privilege(&SystemPrivilege::UseVendorInvoices) {
         if let Some(contrib) = payables::components::get_sidebar_contribution() {
@@ -50,13 +67,6 @@ pub fn sidebar() -> Html {
     #[cfg(feature = "sales")]
     if user_ctx.has_privilege(&SystemPrivilege::UseVendorInvoices) {
         if let Some(contrib) = sales::components::get_sidebar_contribution() {
-            registry.push(contrib);
-        }
-    }
-
-    #[cfg(feature = "partners")]
-    if user_ctx.has_privilege(&SystemPrivilege::UseAccounts) {
-        if let Some(contrib) = partners::components::get_sidebar_contribution() {
             registry.push(contrib);
         }
     }

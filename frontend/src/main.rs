@@ -79,6 +79,7 @@ use shared_core::core::{
 };
 use yew::prelude::*;
 use yew_router::prelude::*;
+use frontend::inventory::pages::warehouse_list::WarehouseListPage;
 
 /// The component that contains the router and switches between pages.
 #[function_component(AppRouter)]
@@ -196,9 +197,9 @@ fn switch(routes: Route) -> Html {
         Route::AgedPayables => html! { <AgedPayablesPage /> },
         #[cfg(feature = "sales")]
         Route::SalesLedger => html! { <SalesLedgerPage /> },
-        #[cfg(feature = "sales")]
+        #[cfg(any(feature = "sales", feature = "inventory"))]
         Route::ItemList => html! { <ItemListPage /> },
-        #[cfg(feature = "sales")]
+        #[cfg(any(feature = "sales", feature = "inventory"))]
         Route::UomList => html! { <UomListPage /> },
         #[cfg(feature = "sales")]
         Route::NewSalesInvoice => html! { <NewSalesInvoicePage /> },
@@ -206,6 +207,9 @@ fn switch(routes: Route) -> Html {
         Route::TaxCategoryList => html! { <TaxCategoryListPage /> },
         #[cfg(feature = "sales")]
         Route::AgedReceivables => html! { <AgedReceivablesPage /> },
+
+        #[cfg(any(feature = "inventory"))]
+        Route::WarehouseList => html! { <WarehouseListPage /> },
 
         Route::StyleGuide => html! {<StyleGuide />},
     }

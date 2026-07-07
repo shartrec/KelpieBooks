@@ -40,6 +40,8 @@ pub enum SystemPrivilege {
     ManageOrganization,
     UseSales,
     ManageSales,
+    UseInventory,
+    ManageInventory,
 }
 
 impl SystemPrivilege {

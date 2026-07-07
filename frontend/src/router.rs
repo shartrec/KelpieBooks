@@ -77,10 +77,10 @@ pub enum Route {
     #[at("/payables/reports/aged-payables")]
     AgedPayables,
 
-    #[cfg(feature = "sales")]
+    #[cfg(any(feature = "sales", feature = "inventory"))]
     #[at("/items")]
     ItemList,
-    #[cfg(feature = "sales")]
+    #[cfg(any(feature = "sales", feature = "inventory"))]
     #[at("/uoms")]
     UomList,
     #[cfg(feature = "sales")]
@@ -95,6 +95,11 @@ pub enum Route {
     #[cfg(feature = "sales")]
     #[at("/sales/reports/aged-receivables")]
     AgedReceivables,
+
+    #[cfg(feature = "inventory")]
+    #[at("/warehouses")]
+    WarehouseList,
+
 
     // Not really a page, but it's a good example of a page that doesn't have a route
     #[at("/style-guide")]

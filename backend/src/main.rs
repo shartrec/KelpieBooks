@@ -38,6 +38,8 @@ use rocket_db_pools::Database;
 
 use crate::util::logging::setup_logging;
 
+#[cfg(feature = "inventory")]
+pub mod inventory;
 #[cfg(feature = "ledger")]
 pub(crate) mod ledger;
 #[cfg(feature = "partners")]
@@ -113,12 +115,19 @@ fn rocket() -> _ {
         .mount("/", payables::routes::vendor_payments::routes());
     #[cfg(feature = "sales")]
     let rocket = rocket
-        .mount("/", sales::routes::items::routes())
-        .mount("/", sales::routes::uoms::routes())
         .mount("/", sales::routes::tax_categories::routes())
         .mount("/", sales::routes::sales_invoices::routes())
         .mount("/", sales::routes::customer_payments::routes())
         .mount("/", sales::routes::reports::routes());
+
+    #[cfg(any(feature = "sales", feature = "inventory"))]
+    let rocket = rocket
+        .mount("/", sales::routes::items::routes())
+        .mount("/", sales::routes::uoms::routes());
+
+    #[cfg(feature = "inventory")]
+    let rocket = rocket
+        .mount("/", inventory::routes::warehouse::routes());
 
     // Determine the environment directory pathway
     let assets_dir = util::get_static_dir(&rocket);

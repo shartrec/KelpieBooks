@@ -37,6 +37,13 @@ sys-privilege-use_sales-description = Permet de consulter les factures de vente 
 sys-privilege-manage_sales-name = Gérer les articles et les factures de vente
 sys-privilege-manage_sales-description = Permet la maintenance des articles ainsi que la saisie et la mise à jour des factures de vente.
 
+# Inventory Module
+sys-privilege-use_inventory-name = Consulter les stocks d'articles et les emplacements
+sys-privilege-use_inventory-description = Permet de consulter les stocks d'articles et les détails des emplacements.
+
+sys-privilege-manage_inventory-name = Gérer les stocks d'articles et les emplacements
+sys-privilege-manage_inventory-description = Permet la maintenance des stocks d'articles, des entrepôts et des emplacements.
+
 # Module Transactions
 sys-privilege-use_transactions-name = Saisir les écritures
 sys-privilege-use_transactions-description = Permet de saisir les écritures de journal général, de préparer des brouillons de transaction et de structurer les données avant validation.
@@ -789,6 +796,36 @@ tax-rate-edit-card-edit-title = Modifier le taux
 tax-rate-edit-card-rate-label = Taux :
 tax-rate-edit-card-valid-from-label = Valide à partir du :
 tax-rate-edit-card-valid-to-label = Valide jusqu’au :
+
+# Products
+
+sidebar-products = Inventaire
+inventory-warehouse-title = Entrepôts
+warehouse-location-title = Emplacements
+
+warehouse-list-title = Entrepôts
+warehouse-list-description = Gérez vos nœuds de distribution physique, vos centres de traitement des commandes et vos emplacements de stockage.
+warehouse-list-add-button = Ajouter un entrepôt
+warehouse-list-code = Code
+warehouse-list-name = Nom
+warehouse-list-is-active = Actif
+
+warehouse-add-title = Ajouter un nouvel entrepôt
+warehouse-edit-title = Modifier les détails de l'entrepôt
+warehouse-code-label = Code de l'entrepôt (ex. WH-SYD)
+warehouse-name-label = Nom de l'entrepôt
+warehouse-is-active-label = Activer le suivi pour cet entrepôt
+
+# Error Handlers
+warehouse-list-error-fetch = Failed to retrieve warehouse directory (Server Status: { $status }).
+warehouse-list-error-parse = Failed to compile warehouse data payload: { $error }
+
+warehouse-delete-title = Supprimer l'entrepôt
+warehouse-delete-confirm-message = Êtes-vous sûr de vouloir supprimer définitivement l'entrepôt "{ $name }" ? Cette action est irréversible.
+
+# Business Guard Error Messages
+warehouse-delete-error = Failed to delete warehouse. Please ensure you have sufficient permissions.
+warehouse-delete-error-conflict = Cannot delete warehouse. It still contains nested storage locations or active tracking balances.
 
 # Security
 security-error-no-admin = Vous ne pouvez pas effectuer cette action. Au moins un administrateur de la sécurité doit rester.

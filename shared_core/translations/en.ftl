@@ -32,10 +32,17 @@ sys-privilege-manage_vendor_invoices-description = Permits entering, updating an
 
 # Sales Module
 sys-privilege-use_sales-name = View item and sales invoices
-sys-privilege-use_sales-description = Permites view sales invoices and item details.
+sys-privilege-use_sales-description = Permits view sales invoices and item details.
 
 sys-privilege-manage_sales-name = Mangage items and sales invoices
 sys-privilege-manage_sales-description = Permits maintenance of items and entering, updating sales invoices.
+
+# Inventory Module
+sys-privilege-use_inventory-name = View item inventories and locations
+sys-privilege-use_inventory-description = Permits view of item inventories and location details.
+
+sys-privilege-manage_inventory-name = Mangage item inventories and locations
+sys-privilege-manage_inventory-description = Permits maintenance of item inventories, warehouses and locations.
 
 # Transactions Module
 sys-privilege-use_transactions-name = Record Transactions
@@ -789,6 +796,36 @@ tax-rate-edit-card-edit-title = Edit Rate
 tax-rate-edit-card-rate-label = Rate:
 tax-rate-edit-card-valid-from-label = Valid From:
 tax-rate-edit-card-valid-to-label = Valid To:
+
+# Products
+
+sidebar-products = Inventory
+inventory-warehouse-title = Warehouses
+warehouse-location-title = Warehouse Locations
+
+warehouse-list-title = Warehouses
+warehouse-list-description = Manage your physical inventory distribution nodes, fulfillment hubs, and stock locations.
+warehouse-list-add-button = Add Warehouse
+warehouse-list-code = Code
+warehouse-list-name = Name
+warehouse-list-is-active = Active
+
+warehouse-add-title = Add New Warehouse
+warehouse-edit-title = Edit Warehouse Details
+warehouse-code-label = Warehouse Code (e.g., WH-SYD)
+warehouse-name-label = Warehouse Name
+warehouse-is-active-label = Enable active tracking for this warehouse
+
+# Error Handlers
+warehouse-list-error-fetch = Failed to retrieve warehouse directory (Server Status: { $status }).
+warehouse-list-error-parse = Failed to compile warehouse data payload: { $error }
+
+warehouse-delete-title = Delete Warehouse
+warehouse-delete-confirm-message = Are you sure you want to permanently remove warehouse "{ $name }"? This action cannot be undone.
+
+# Business Guard Error Messages
+warehouse-delete-error = Failed to delete warehouse. Please ensure you have sufficient permissions.
+warehouse-delete-error-conflict = Cannot delete warehouse. It still contains nested storage locations or active tracking balances.
 
 # Security
 security-error-no-admin = You cannot perform this action. At least one security administrator must remain.
