@@ -3,7 +3,7 @@
  *
  * This file is part of KelpieBooks. For terms of use, please see the file
  * called LICENSE at the top level of the KelpieBooks source tree
- *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
+ * (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
 use shared_core::sales::models::item::UnitOfMeasure;
@@ -19,18 +19,24 @@ use crate::{
 };
 
 #[derive(Properties, PartialEq)]
-pub struct EditUomModalProps {
-    pub uom: UnitOfMeasure,
+pub struct UomModalProps {
+    /// If Some(uom), the modal initializes in Edit Mode. If None, it initializes in Add Mode.
+    pub uom: Option<UnitOfMeasure>,
     pub on_close: Callback<()>,
     pub on_submit: Callback<()>,
 }
 
-#[function_component(EditUomModal)]
-pub fn edit_uom_modal(props: &EditUomModalProps) -> Html {
+#[function_component(UomModal)]
+pub fn uom_modal(props: &UomModalProps) -> Html {
     let user_ctx = use_user_context();
     let i18n = use_locale();
     let navigator = use_navigator().unwrap();
-    let request = use_state(|| props.uom.clone());
+
+    // Determine edit mode status
+    let is_edit_mode = props.uom.is_some();
+
+    // Initialize state with the provided UOM or default for an addition
+    let request = use_state(|| props.uom.clone().unwrap_or_default());
     let error = use_state(|| None::<String>);
 
     let on_input = |field_updater: fn(&mut UnitOfMeasure, String)| {
@@ -67,16 +73,31 @@ pub fn edit_uom_modal(props: &EditUomModalProps) -> Html {
             let request = request.clone();
             let user_ctx = user_ctx.clone();
             let navigator = navigator.clone();
+
             wasm_bindgen_futures::spawn_local(async move {
-                let resp = Api::put(
-                    &format!("/api/sales/uoms/{}", request.id),
-                    &*request,
-                    user_ctx,
-                    navigator,
-                )
-                .await;
+                // Dynamically route and select HTTP method based on mode
+                let resp = if is_edit_mode {
+                    Api::put(
+                        &format!("/api/sales/uoms/{}", request.id),
+                        &*request,
+                        user_ctx,
+                        navigator,
+                    )
+                        .await
+                } else {
+                    Api::post(
+                        "/api/sales/uoms",
+                        &*request,
+                        user_ctx,
+                        navigator,
+                    )
+                        .await
+                };
+
                 if resp.is_ok() {
                     on_submit.emit(());
+                } else {
+                    // Handle API failures gracefully if needed later
                 }
             });
         })
@@ -89,10 +110,13 @@ pub fn edit_uom_modal(props: &EditUomModalProps) -> Html {
         })
     };
 
+    // Determine localized header text dynamically
+    let title_key = if is_edit_mode { "uom-edit-title" } else { "uom-add-title" };
+
     html! {
         <div class="modal-overlay" onclick={on_cancel.clone()}>
             <div class="modal-content" onclick={|e: MouseEvent| e.stop_propagation()}>
-                <h2>{ i18n.t("uom-edit-title") }</h2>
+                <h2>{ i18n.t(title_key) }</h2>
                 <form onsubmit={on_form_submit} class="modal__form">
                     <label>{i18n.t("uom-code-label")}</label>
                     <input type="text" value={request.code.clone()} oninput={on_input(|r, v| r.code = v)} required=true />
