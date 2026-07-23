@@ -8,6 +8,9 @@
 pub mod warehouse_modal;
 pub mod warehouse_row;
 pub mod warehouse_list_table;
+pub mod location_tree;
+pub mod location_grid;
+pub mod bulk_generator_modal;
 
 use shared_core::core::models::auth::SystemPrivilege;
 use crate::core::components::sidebar::SidebarModuleContribution;
@@ -26,13 +29,6 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "inventory-warehouse-title",
                 privilege: Some(SystemPrivilege::UseInventory),
                 target_route: Some(Route::WarehouseList),
-                children: vec![],
-            },
-            SidebarModuleContribution {
-                id: "warehouse-location-list",
-                label_key: "warehouse-location-title",
-                privilege: Some(SystemPrivilege::UseInventory),
-                target_route: Some(Route::ItemList),
                 children: vec![],
             },
             SidebarModuleContribution {

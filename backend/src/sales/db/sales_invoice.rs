@@ -7,14 +7,22 @@
  */
 
 use chrono::NaiveDate;
-use rocket_db_pools::sqlx::{self, PgConnection, Row};
-use rust_decimal::prelude::Zero;
-use rust_decimal::Decimal;
+use rocket_db_pools::sqlx::{
+    self,
+    PgConnection,
+    Row,
+};
+use rust_decimal::{
+    prelude::Zero,
+    Decimal,
+};
 use shared_core::sales::{
     dtos::sales_invoice_list_item::SalesInvoiceListItem,
     models::{
-        invoice_address::InvoiceAddress, invoice_status::InvoiceStatus,
-        sales_invoice::SalesInvoice, sales_invoice_item::SalesInvoiceItem,
+        invoice_address::InvoiceAddress,
+        invoice_status::InvoiceStatus,
+        sales_invoice::SalesInvoice,
+        sales_invoice_item::SalesInvoiceItem,
     },
 };
 use uuid::Uuid;

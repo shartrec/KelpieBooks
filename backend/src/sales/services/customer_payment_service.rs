@@ -33,9 +33,9 @@ use crate::{
         services::account_service,
     },
     sales::db::{
-        sales_invoice as sales_invoice_db,
         customer_payment as customer_payment_db,
         customer_payment_allocation as customer_payment_allocation_db,
+        sales_invoice as sales_invoice_db,
     },
     util::ApiError,
 };
@@ -62,7 +62,9 @@ pub(crate) async fn create_customer_payment(
     let ap_account =
         account_db::get_by_system_tag(&mut tx, organization_id, &SystemTag::AccountsReceivable)
             .await?
-            .ok_or_else(|| ApiError::NotFound("Accounts Receivable account not found.".to_string()))?;
+            .ok_or_else(|| {
+                ApiError::NotFound("Accounts Receivable account not found.".to_string())
+            })?;
 
     let jels = vec![
         JournalEntryLine {

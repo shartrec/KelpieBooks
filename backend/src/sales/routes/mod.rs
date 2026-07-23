@@ -8,7 +8,7 @@
 
 pub(crate) mod customer_payments;
 pub(crate) mod items;
+pub(crate) mod reports;
 pub(crate) mod sales_invoices;
 pub(crate) mod tax_categories;
 pub(crate) mod uoms;
-pub(crate) mod reports;

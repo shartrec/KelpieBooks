@@ -14,7 +14,9 @@ use rocket_db_pools::sqlx::{
 use shared_core::sales::models::customer_payment_allocation::CustomerPaymentAllocation;
 use uuid::Uuid;
 
-fn from_row_to_customer_payment_allocation(row: &sqlx::postgres::PgRow) -> CustomerPaymentAllocation {
+fn from_row_to_customer_payment_allocation(
+    row: &sqlx::postgres::PgRow,
+) -> CustomerPaymentAllocation {
     CustomerPaymentAllocation {
         id: row.get("id"),
         organization_id: row.get("organization_id"),

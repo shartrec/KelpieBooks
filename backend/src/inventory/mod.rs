@@ -5,7 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-pub mod db;
-pub mod routes;
-pub mod reports;
-pub mod services;
+pub(crate) mod db;
+pub(crate) mod reports;
+pub(crate) mod routes;
+pub(crate) mod services;

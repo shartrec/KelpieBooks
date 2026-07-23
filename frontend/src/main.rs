@@ -80,6 +80,7 @@ use shared_core::core::{
 use yew::prelude::*;
 use yew_router::prelude::*;
 use frontend::inventory::pages::warehouse_list::WarehouseListPage;
+use frontend::inventory::pages::warehouse_locations::WarehouseLocationsPage;
 
 /// The component that contains the router and switches between pages.
 #[function_component(AppRouter)]
@@ -207,9 +208,10 @@ fn switch(routes: Route) -> Html {
         Route::TaxCategoryList => html! { <TaxCategoryListPage /> },
         #[cfg(feature = "sales")]
         Route::AgedReceivables => html! { <AgedReceivablesPage /> },
-
         #[cfg(any(feature = "inventory"))]
         Route::WarehouseList => html! { <WarehouseListPage /> },
+        #[cfg(any(feature = "inventory"))]
+        Route::WarehouseLocations {id} => html! { <WarehouseLocationsPage warehouse_id = {id}/> },
 
         Route::StyleGuide => html! {<StyleGuide />},
     }

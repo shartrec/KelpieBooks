@@ -801,7 +801,6 @@ tax-rate-edit-card-valid-to-label = Valide jusqu’au :
 
 sidebar-products = Inventaire
 inventory-warehouse-title = Entrepôts
-warehouse-location-title = Emplacements
 
 warehouse-list-title = Entrepôts
 warehouse-list-description = Gérez vos nœuds de distribution physique, vos centres de traitement des commandes et vos emplacements de stockage.
@@ -826,6 +825,34 @@ warehouse-delete-confirm-message = Êtes-vous sûr de vouloir supprimer définit
 # Business Guard Error Messages
 warehouse-delete-error = Failed to delete warehouse. Please ensure you have sufficient permissions.
 warehouse-delete-error-conflict = Cannot delete warehouse. It still contains nested storage locations or active tracking balances.
+
+warehouse-action-view-locations = Consulter la structure cartographique des emplacements
+
+# Warehouse Locations Dashboard
+warehouse-locations-title = Emplacements — { $name }
+location-btn-bulk-generate = Générer des emplacements en masse
+
+# Location Topography Tree Navigation
+location-tree-header = Structure de l'entrepôt
+location-tree-all-view = Tous les emplacements de stockage
+location-tree-aisle-prefix = Allée
+
+# Location Grid Table Columns
+location-grid-label = Étiquette d'emplacement
+location-grid-zone = Zone
+location-grid-aisle = Allée
+location-grid-shelf = Étagère / Niveau
+location-grid-bin = Bac / Alvéole
+location-grid-picking = Zone de picking
+
+# Bulk Sequence Generator Modal
+bulk-gen-title = Générateur de matrice en masse
+bulk-gen-zone-label = Nom de la zone cible
+bulk-gen-aisles = Plage séquentielle des allées
+bulk-gen-shelves = Plage séquentielle des étagères (Alpha)
+bulk-gen-bins = Plage séquentielle des bacs/alvéoles
+bulk-gen-picking-label = Désigner les lignes générées comme emplacements de picking
+bulk-gen-btn-execute = Exécuter la génération en masse
 
 # Security
 security-error-no-admin = Vous ne pouvez pas effectuer cette action. Au moins un administrateur de la sécurité doit rester.

@@ -36,13 +36,11 @@ use log::{
     error,
     log,
 };
+#[cfg(feature = "email")]
+use rand::thread_rng;
 use rand::{
     rngs::OsRng,
     RngCore,
-};
-#[cfg(feature = "email")]
-use rand::{
-    thread_rng,
 };
 use rocket::{
     get,
@@ -66,21 +64,20 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::core::{
-    dtos::user_detail::AuthUserDetail,
-    models::role::Role,
-    requests::auth::{
-        LoginRequest,
-    },
-};
 #[cfg(feature = "password-reset")]
 use shared_core::core::requests::auth::{
     ForgotPasswordRequest,
     ResetPasswordSubmit,
 };
-
+use shared_core::core::{
+    dtos::user_detail::AuthUserDetail,
+    models::role::Role,
+    requests::auth::LoginRequest,
+};
 use uuid::Uuid;
 
+#[cfg(feature = "email")]
+use crate::config::load_config;
 #[cfg(feature = "password-reset")]
 use crate::core::db::password_reset;
 #[cfg(feature = "email")]
@@ -91,13 +88,8 @@ use crate::{
     DbKelpie,
 };
 
-#[cfg(feature = "email")]
-use crate::{
-    config::load_config,
-};
-
 pub(crate) fn routes() -> Vec<Route> {
-    let mut routes = vec!();
+    let mut routes = vec![];
     let mut base_routes = routes![login, me, logout];
     routes.append(&mut base_routes);
     #[cfg(feature = "password-reset")]

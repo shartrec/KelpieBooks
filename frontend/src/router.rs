@@ -99,7 +99,9 @@ pub enum Route {
     #[cfg(feature = "inventory")]
     #[at("/warehouses")]
     WarehouseList,
-
+    #[cfg(feature = "inventory")]
+    #[at("/warehouse-locations/:id")]
+    WarehouseLocations{ id: Uuid },
 
     // Not really a page, but it's a good example of a page that doesn't have a route
     #[at("/style-guide")]

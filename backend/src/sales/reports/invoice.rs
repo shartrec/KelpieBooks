@@ -6,26 +6,41 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use std::fs;
+
 use rocket::State;
 use rocket_db_pools::Connection;
-use typst_as_lib::typst_kit_options::TypstKitFontOptions;
-use typst_as_lib::TypstEngine;
+use typst_as_lib::{
+    typst_kit_options::TypstKitFontOptions,
+    TypstEngine,
+};
 use typst_assets::fonts;
-use typst_library::foundations::{Array, Dict, Value};
+use typst_library::foundations::{
+    Array,
+    Dict,
+    Value,
+};
 use uuid::Uuid;
-use crate::core::db::organization as db_org;
-use crate::core::routes::security::AuthenticatedUser;
-use crate::{DbKelpie, TemplateConfig};
-use crate::sales::db::sales_invoice::get_sales_invoice_with_lines;
-use crate::util::ApiError;
-use crate::util::locale_context::LocaleContext;
+
+use crate::{
+    core::{
+        db::organization as db_org,
+        routes::security::AuthenticatedUser,
+    },
+    sales::db::sales_invoice::get_sales_invoice_with_lines,
+    util::{
+        locale_context::LocaleContext,
+        ApiError,
+    },
+    DbKelpie,
+    TemplateConfig,
+};
 
 pub(crate) async fn generate_invoice(
     conn: &mut Connection<DbKelpie>,
     user: AuthenticatedUser,
     config: &State<TemplateConfig>,
-    invoice_id: Uuid) -> Result<Vec<u8>, ApiError>
-{
+    invoice_id: Uuid,
+) -> Result<Vec<u8>, ApiError> {
     let i18n = LocaleContext::new(&user.locale);
     let template_dir = config.root_directory.to_string_lossy();
 
@@ -41,8 +56,10 @@ pub(crate) async fn generate_invoice(
     let invoice = get_sales_invoice_with_lines(conn, invoice_id, user.organization_id).await?;
 
     if let Some(invoice) = invoice {
-
-        dict.insert("invoice-number".into(), Value::Str(invoice.invoice_number.into()));
+        dict.insert(
+            "invoice-number".into(),
+            Value::Str(invoice.invoice_number.into()),
+        );
         let inv_due = i18n.format_date(invoice.due_date);
         dict.insert("due-date".into(), Value::Str(inv_due.into()));
         let invoice_date = i18n.format_date(invoice.issue_date);
@@ -56,23 +73,65 @@ pub(crate) async fn generate_invoice(
         dict.insert("invoice-gross".into(), Value::Str(inv_gross.into()));
 
         let mut bill_to = Dict::new();
-        bill_to.insert("name".into(), Value::Str(invoice.bill_to.name.unwrap_or_default().into()));
-        bill_to.insert("attn".into(), Value::Str(invoice.bill_to.attention.unwrap_or_default().into()));
-        bill_to.insert("addr_line1".into(), Value::Str(invoice.bill_to.address_line1.unwrap_or_default().into()));
-        bill_to.insert("addr_line2".into(), Value::Str(invoice.bill_to.address_line2.unwrap_or_default().into()));
-        bill_to.insert("city".into(), Value::Str(invoice.bill_to.city.unwrap_or_default().into()));
-        bill_to.insert("state".into(), Value::Str(invoice.bill_to.state_province.unwrap_or_default().into()));
-        bill_to.insert("post_code".into(), Value::Str(invoice.bill_to.postal_code.unwrap_or_default().into()));
+        bill_to.insert(
+            "name".into(),
+            Value::Str(invoice.bill_to.name.unwrap_or_default().into()),
+        );
+        bill_to.insert(
+            "attn".into(),
+            Value::Str(invoice.bill_to.attention.unwrap_or_default().into()),
+        );
+        bill_to.insert(
+            "addr_line1".into(),
+            Value::Str(invoice.bill_to.address_line1.unwrap_or_default().into()),
+        );
+        bill_to.insert(
+            "addr_line2".into(),
+            Value::Str(invoice.bill_to.address_line2.unwrap_or_default().into()),
+        );
+        bill_to.insert(
+            "city".into(),
+            Value::Str(invoice.bill_to.city.unwrap_or_default().into()),
+        );
+        bill_to.insert(
+            "state".into(),
+            Value::Str(invoice.bill_to.state_province.unwrap_or_default().into()),
+        );
+        bill_to.insert(
+            "post_code".into(),
+            Value::Str(invoice.bill_to.postal_code.unwrap_or_default().into()),
+        );
         dict.insert("bill_to".into(), Value::Dict(bill_to));
 
         let mut ship_to = Dict::new();
-        ship_to.insert("name".into(), Value::Str(invoice.ship_to.name.unwrap_or_default().into()));
-        ship_to.insert("attn".into(), Value::Str(invoice.ship_to.attention.unwrap_or_default().into()));
-        ship_to.insert("addr_line1".into(), Value::Str(invoice.ship_to.address_line1.unwrap_or_default().into()));
-        ship_to.insert("addr_line2".into(), Value::Str(invoice.ship_to.address_line2.unwrap_or_default().into()));
-        ship_to.insert("city".into(), Value::Str(invoice.ship_to.city.unwrap_or_default().into()));
-        ship_to.insert("state".into(), Value::Str(invoice.ship_to.state_province.unwrap_or_default().into()));
-        ship_to.insert("post_code".into(), Value::Str(invoice.ship_to.postal_code.unwrap_or_default().into()));
+        ship_to.insert(
+            "name".into(),
+            Value::Str(invoice.ship_to.name.unwrap_or_default().into()),
+        );
+        ship_to.insert(
+            "attn".into(),
+            Value::Str(invoice.ship_to.attention.unwrap_or_default().into()),
+        );
+        ship_to.insert(
+            "addr_line1".into(),
+            Value::Str(invoice.ship_to.address_line1.unwrap_or_default().into()),
+        );
+        ship_to.insert(
+            "addr_line2".into(),
+            Value::Str(invoice.ship_to.address_line2.unwrap_or_default().into()),
+        );
+        ship_to.insert(
+            "city".into(),
+            Value::Str(invoice.ship_to.city.unwrap_or_default().into()),
+        );
+        ship_to.insert(
+            "state".into(),
+            Value::Str(invoice.ship_to.state_province.unwrap_or_default().into()),
+        );
+        ship_to.insert(
+            "post_code".into(),
+            Value::Str(invoice.ship_to.postal_code.unwrap_or_default().into()),
+        );
         dict.insert("ship_to".into(), Value::Dict(ship_to));
 
         // Now we add the lines to an array each as a Dict
@@ -99,9 +158,7 @@ pub(crate) async fn generate_invoice(
     build_invoice_pdf(dict, &*template_dir)
 }
 
-
-fn build_invoice_pdf (invoice: Dict, template_path: &str) -> Result<Vec<u8>, ApiError>
-{
+fn build_invoice_pdf(invoice: Dict, template_path: &str) -> Result<Vec<u8>, ApiError> {
     let template_source = fs::read_to_string(template_path)
         .map_err(|e| ApiError::Internal(format!("Failed to read template file: {}", e)))?;
 
@@ -119,13 +176,9 @@ fn build_invoice_pdf (invoice: Dict, template_path: &str) -> Result<Vec<u8>, Api
             let pdf = typst_pdf::pdf(&doc, &options).expect("Could not generate pdf.");
             Ok(pdf)
         }
-        Err(e) => Err(ApiError::Internal(format!("typst::compile() returned an error!: {}", e)))
+        Err(e) => Err(ApiError::Internal(format!(
+            "typst::compile() returned an error!: {}",
+            e
+        ))),
     }
-
 }
-
-
-
-
-
-

@@ -22,6 +22,7 @@ pub struct WarehouseRowProps {
     pub warehouse: Warehouse,
     pub on_edit: Callback<Warehouse>,
     pub on_delete: Callback<Warehouse>,
+    pub on_view_locations: Callback<Warehouse>,
 }
 
 #[function_component(WarehouseRow)]
@@ -45,6 +46,14 @@ pub fn warehouse_row(props: &WarehouseRowProps) -> Html {
         })
     };
 
+    let on_view_locations = {
+        let on_view_locations = props.on_view_locations.clone();
+        let wh = props.warehouse.clone();
+        Callback::from(move |_| {
+            on_view_locations.emit(wh.clone());
+        })
+    };
+
     html! {
         <tr>
             <td class="table__text-col">{ &props.warehouse.code }</td>
@@ -55,7 +64,18 @@ pub fn warehouse_row(props: &WarehouseRowProps) -> Html {
                     { if user_ctx.has_privilege(&SystemPrivilege::ManageInventory) {
                         html! {
                             <>
-                                <button class="icon-button btn-action" onclick={on_edit}>
+                            // Read-Only / View Locations Access Gate
+                            { if user_ctx.has_privilege(&SystemPrivilege::UseInventory) || user_ctx.has_privilege(&SystemPrivilege::ManageInventory) {
+                                html! {
+                                    <button class="icon-button btn-action" onclick={on_view_locations} title={i18n.t("warehouse-action-view-locations")}>
+                                        <img src="/images/view.svg" alt={i18n.t("warehouse-action-view-locations")} />
+                                    </button>
+                                }
+                              } else {
+                                    html! {}
+                                }
+                            }
+                            <button class="icon-button btn-action" onclick={on_edit}>
                                     <img src="/images/edit.svg" alt={i18n.t("common-edit")} />
                                 </button>
                                 <button class="icon-button btn-action" onclick={on_delete}>

@@ -14,26 +14,26 @@ use uuid::Uuid;
 // 1. Bulk Location Generator DTOs (Request)
 // =============================================================================
 
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SequenceType {
     Numeric,
     Alphabetic,
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct NumericRange {
     pub start: i32,
     pub end: i32,
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AlphaRange {
     pub start: String, // e.g., "A"
     pub end: String,   // e.g., "C"
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BulkLocationGenerateRequest {
     pub zone: String,
     pub is_picking_location: bool,

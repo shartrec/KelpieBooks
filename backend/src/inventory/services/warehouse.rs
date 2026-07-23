@@ -6,18 +6,20 @@
  * (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::inventory::db::warehouse_location::locations_by_warehouse;
+use rocket_db_pools::Connection;
+use shared_core::inventory::models::warehouse::{
+    Warehouse,
+};
+use uuid::Uuid;
+
 use crate::{
     inventory::db::{
         warehouse as warehouse_db,
-        warehouse_location as locations_db
+        location as locations_db,
     },
     util::ApiError,
     DbKelpie,
 };
-use rocket_db_pools::Connection;
-use shared_core::inventory::models::warehouse::{Warehouse, WarehouseLocation};
-use uuid::Uuid;
 // =============================================================================
 // Warehouse Service Operations
 // =============================================================================
@@ -60,7 +62,7 @@ pub async fn delete_warehouse(
     org_id: Uuid,
 ) -> Result<u64, ApiError> {
     // 💡 Business Guard: Prevent removing a warehouse if locations are nested under it
-    let locations = locations_by_warehouse(pool, id, org_id).await?;
+    let locations = locations_db::all_by_warehouse(pool, id, org_id).await?;
     if !locations.is_empty() {
         return Err(ApiError::Conflict(
             "Warehouse contains active storage locations and cannot be deleted.".to_string(),
@@ -69,41 +71,4 @@ pub async fn delete_warehouse(
 
     let result = warehouse_db::delete_warehouse(pool, id, org_id).await?;
     Ok(result.rows_affected())
-}
-
-// =============================================================================
-// Warehouse Location Service Operations
-// =============================================================================
-
-pub async fn get_locations_by_warehouse(
-    pool: &mut Connection<DbKelpie>,
-    warehouse_id: Uuid,
-    org_id: Uuid,
-) -> Result<Vec<WarehouseLocation>, sqlx::Error> {
-    locations_by_warehouse(pool, warehouse_id, org_id).await
-}
-
-pub async fn get_location(
-    pool: &mut Connection<DbKelpie>,
-    id: Uuid,
-    org_id: Uuid,
-) -> Result<Option<WarehouseLocation>, sqlx::Error> {
-    locations_db::get_location(pool, id, org_id).await
-}
-
-pub async fn create_location(
-    pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
-    loc: &WarehouseLocation,
-) -> Result<WarehouseLocation, sqlx::Error> {
-    locations_db::create_location(pool, org_id, loc).await
-}
-
-pub async fn update_location(
-    pool: &mut Connection<DbKelpie>,
-    id: Uuid,
-    org_id: Uuid,
-    loc: &WarehouseLocation,
-) -> Result<WarehouseLocation, sqlx::Error> {
-    locations_db::update_location(pool, id, org_id, loc).await
 }

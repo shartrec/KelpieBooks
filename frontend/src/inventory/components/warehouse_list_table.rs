@@ -26,6 +26,7 @@ use crate::{
         warehouse_row::WarehouseRow,
     },
 };
+use crate::router::Route;
 
 #[function_component(WarehouseListTable)]
 pub fn warehouse_list_table() -> Html {
@@ -95,6 +96,15 @@ pub fn warehouse_list_table() -> Html {
         let wh_to_edit = wh_to_edit.clone();
         Callback::from(move |wh: Warehouse| {
             wh_to_edit.set(Some(wh));
+        })
+    };
+
+    // New navigation logic driving the sub-page drill down
+    let on_view_locations_click = {
+        let navigator = navigator.clone();
+        Callback::from(move |wh: Warehouse| {
+            // Adjust this variant path instance to match your actual Route enum definition
+            navigator.push(&Route::WarehouseLocations { id: wh.id });
         })
     };
 
@@ -208,6 +218,7 @@ pub fn warehouse_list_table() -> Html {
                             warehouse={wh.clone()}
                             on_edit={on_edit_click.clone()}
                             on_delete={on_delete_click.clone()}
+                            on_view_locations={on_view_locations_click.clone()}
                         />
                     })}
                 </tbody>

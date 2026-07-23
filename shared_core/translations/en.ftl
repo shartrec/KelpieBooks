@@ -801,7 +801,6 @@ tax-rate-edit-card-valid-to-label = Valid To:
 
 sidebar-products = Inventory
 inventory-warehouse-title = Warehouses
-warehouse-location-title = Warehouse Locations
 
 warehouse-list-title = Warehouses
 warehouse-list-description = Manage your physical inventory distribution nodes, fulfillment hubs, and stock locations.
@@ -814,7 +813,7 @@ warehouse-add-title = Add New Warehouse
 warehouse-edit-title = Edit Warehouse Details
 warehouse-code-label = Warehouse Code (e.g., WH-SYD)
 warehouse-name-label = Warehouse Name
-warehouse-is-active-label = Enable active tracking for this warehouse
+warehouse-is-active-label = Active tracking.
 
 # Error Handlers
 warehouse-list-error-fetch = Failed to retrieve warehouse directory (Server Status: { $status }).
@@ -826,6 +825,35 @@ warehouse-delete-confirm-message = Are you sure you want to permanently remove w
 # Business Guard Error Messages
 warehouse-delete-error = Failed to delete warehouse. Please ensure you have sufficient permissions.
 warehouse-delete-error-conflict = Cannot delete warehouse. It still contains nested storage locations or active tracking balances.
+
+warehouse-action-view-locations = View Location Mapping Structure
+
+# Warehouse Locations Dashboard
+warehouse-locations-title = Locations — { $name }
+location-btn-bulk-generate = Bulk Generate Locations
+
+# Location Topography Tree Navigation
+location-tree-header = Warehouse Structure
+location-tree-all-view = All Storage Locations
+location-tree-aisle-prefix = Aisle
+
+# Location Grid Table Columns
+location-grid-label = Location Tag
+location-grid-zone = Zone
+location-grid-aisle = Aisle
+location-grid-shelf = Shelf / Tier
+location-grid-bin = Bin / Slot
+location-grid-picking = Picking Loc
+
+# Bulk Sequence Generator Modal
+bulk-gen-title = Bulk Matrix Generator
+bulk-gen-zone-label = Target Zone Name
+bulk-gen-aisles = Aisle Sequence Range
+bulk-gen-shelves = Shelf/Tier Sequence Range (Alpha)
+bulk-gen-bins = Bin/Slot Sequence Range
+bulk-gen-picking-label = Designate generated rows as Picking Locations
+bulk-gen-btn-execute = Execute Bulk Generation
+
 
 # Security
 security-error-no-admin = You cannot perform this action. At least one security administrator must remain.

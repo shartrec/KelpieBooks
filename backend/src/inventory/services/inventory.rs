@@ -8,8 +8,12 @@
 
 use rocket_db_pools::Connection;
 use rust_decimal::Decimal;
+use shared_core::inventory::models::warehouse_profile::{
+    ItemWarehouseProfile,
+    WarehouseInventoryBalance,
+};
 use uuid::Uuid;
-use shared_core::inventory::models::warehouse_profile::{ItemWarehouseProfile, WarehouseInventoryBalance};
+
 use crate::{
     inventory::db::inventory as inventory_db,
     util::ApiError,
@@ -71,13 +75,9 @@ pub async fn update_stock_levels(
         ));
     }
 
-    let balance = inventory_db::update_inventory_quantities(
-        pool,
-        id,
-        org_id,
-        qty_on_hand,
-        qty_allocated
-    ).await?;
+    let balance =
+        inventory_db::update_inventory_quantities(pool, id, org_id, qty_on_hand, qty_allocated)
+            .await?;
 
     Ok(balance)
 }

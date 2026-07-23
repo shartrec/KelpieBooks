@@ -6,9 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use rust_decimal::dec;
-use shared_core::{
-    ledger::dtos::journal_entry_with_balance::JournalEntryWithBalance,
-};
+use shared_core::ledger::dtos::journal_entry_with_balance::JournalEntryWithBalance;
 
 use crate::{
     core::routes::security::AuthenticatedUser,

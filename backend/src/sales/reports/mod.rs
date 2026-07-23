@@ -6,4 +6,3 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 pub(crate) mod invoice;
-

@@ -21,7 +21,10 @@ use typst_as_lib::{
     TypstEngine,
 };
 use typst_assets::fonts;
-use typst_library::foundations::{Dict, Value};
+use typst_library::foundations::{
+    Dict,
+    Value,
+};
 
 pub(crate) struct DownloadFile {
     content: Vec<u8>,
@@ -96,9 +99,9 @@ pub(crate) fn compile_typst_to_pdf(
     org_name: &str,
     template_path: &str,
 ) -> Result<Vec<u8>, String> {
-
     // Wrap the report content in a call to load and show the template
-    let rep = format!(r###"
+    let rep = format!(
+        r###"
     #import "report_template.typ" as t
     // Activate the layout
     #show: t.report_layout.with(
@@ -107,7 +110,9 @@ pub(crate) fn compile_typst_to_pdf(
         report_qualifier: t.report_qualifier
     )
     {}
-    "###, source);
+    "###,
+        source
+    );
 
     let template = TypstEngine::builder()
         .main_file(rep)

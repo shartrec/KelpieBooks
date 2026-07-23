@@ -29,22 +29,24 @@ use shared_core::{
             sales_invoice_item::SalesInvoiceItem,
         },
         requests::sales_invoice::CreateSalesInvoiceRequest,
-    }
+    },
 };
 use sqlx::Acquire;
 use uuid::Uuid;
 
 use crate::{
-    ledger::{
-        db::account as account_db,
-        services::account_service,
-    },
     core::db::sequences::{
         get_next_invoice_number,
         SeqType,
     },
-    sales::db::sales_invoice as sales_invoice_db,
-    sales::db::item as item_db,
+    ledger::{
+        db::account as account_db,
+        services::account_service,
+    },
+    sales::db::{
+        item as item_db,
+        sales_invoice as sales_invoice_db,
+    },
     util::ApiError,
 };
 
@@ -219,14 +221,12 @@ pub(crate) async fn create_invoice(
     )
     .await?;
     // 1. Fetch Accounts Receivable (Asset) and Tax Clearing accounts
-    let ar_account =
-        account_db::get_by_system_tag(&mut tx, org_id, &SystemTag::AccountsReceivable)
-            .await?
-            .ok_or_else(|| ApiError::NotFound("Accounts Receivable account not found.".to_string()))?;
-    let tax_account =
-        account_db::get_by_system_tag(&mut tx, org_id, &SystemTag::SalesTaxClearing)
-            .await?
-            .ok_or_else(|| ApiError::NotFound("Tax account not found.".to_string()))?;
+    let ar_account = account_db::get_by_system_tag(&mut tx, org_id, &SystemTag::AccountsReceivable)
+        .await?
+        .ok_or_else(|| ApiError::NotFound("Accounts Receivable account not found.".to_string()))?;
+    let tax_account = account_db::get_by_system_tag(&mut tx, org_id, &SystemTag::SalesTaxClearing)
+        .await?
+        .ok_or_else(|| ApiError::NotFound("Tax account not found.".to_string()))?;
 
     let mut jels = vec![];
 
@@ -257,7 +257,10 @@ pub(crate) async fn create_invoice(
             account_id: tax_account.id,
             debit: dec!(0.00),
             credit: invoice.tax_total,
-            description: Some(format!("Tax collected on invoice {}", invoice.invoice_number)),
+            description: Some(format!(
+                "Tax collected on invoice {}",
+                invoice.invoice_number
+            )),
         };
         jels.push(jel);
     }
@@ -280,9 +283,7 @@ pub(crate) async fn create_invoice(
         entries: jels,
     };
 
-    let _transaction_id =
-        account_service::create_transaction(&mut tx, org_id, &ct_req).await?;
-
+    let _transaction_id = account_service::create_transaction(&mut tx, org_id, &ct_req).await?;
 
     tx.commit().await?;
 

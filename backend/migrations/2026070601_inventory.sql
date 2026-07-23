@@ -56,7 +56,7 @@ CREATE TABLE warehouse_locations (
                                      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_wh_locations_lookup ON warehouse_locations(warehouse_id, display_label);
+CREATE UNIQUE INDEX idx_wh_locations_lookup ON warehouse_locations(warehouse_id, display_label);
 
 CREATE TABLE warehouse_inventory_balances (
                                               id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

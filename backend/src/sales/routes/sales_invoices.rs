@@ -6,38 +6,55 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket::{get, post, put, routes, serde::json::Json, Route, State};
-use rocket::http::ContentType;
+use rocket::{
+    get,
+    http::ContentType,
+    post,
+    put,
+    routes,
+    serde::json::Json,
+    Route,
+    State,
+};
 use rocket_db_pools::Connection;
 use rust_decimal::Decimal;
 use shared_core::sales::{
     models::{
+        customer_payment::CustomerPayment,
         sales_invoice::SalesInvoice,
         sales_invoice_item::SalesInvoiceItem,
     },
-    requests::{
-        sales_invoice::{
-            CreateSalesInvoiceRequest,
-            UpdateSalesInvoiceRequest,
-        },
+    requests::sales_invoice::{
+        CreateSalesInvoiceRequest,
+        UpdateSalesInvoiceRequest,
     },
 };
-use shared_core::sales::models::customer_payment::CustomerPayment;
-use crate::{sales::services::sales_invoice_service, security::{
-    ManageSales,
-    RequirePrivilege,
-    UseSales,
-}, util::{
-    types::{
-        FormSalesInvoiceStatus,
-        PathDate,
-        PathUuid,
+
+use crate::{
+    sales::{
+        reports,
+        services::{
+            customer_payment_service,
+            sales_invoice_service,
+        },
     },
-    ApiError,
-}, DbKelpie, TemplateConfig};
-use crate::sales::reports;
-use crate::sales::services::customer_payment_service;
-use crate::util::reports::DownloadFile;
+    security::{
+        ManageSales,
+        RequirePrivilege,
+        UseSales,
+    },
+    util::{
+        reports::DownloadFile,
+        types::{
+            FormSalesInvoiceStatus,
+            PathDate,
+            PathUuid,
+        },
+        ApiError,
+    },
+    DbKelpie,
+    TemplateConfig,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -70,9 +87,12 @@ async fn print_sales_invoice(
     id: PathUuid,
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
-    let invoice =
-        reports::invoice::generate_invoice(&mut pool, user, config, *id).await?;
-    Ok(DownloadFile::new(invoice, "Invoice.pdf".to_string(), ContentType::PDF))
+    let invoice = reports::invoice::generate_invoice(&mut pool, user, config, *id).await?;
+    Ok(DownloadFile::new(
+        invoice,
+        "Invoice.pdf".to_string(),
+        ContentType::PDF,
+    ))
 }
 
 #[post("/api/sales-invoices", data = "<req>")]
@@ -153,6 +173,6 @@ async fn get_sales_invoice_payments(
         user.organization_id,
         *invoice_id,
     )
-        .await?;
+    .await?;
     Ok(Json(payments))
 }
