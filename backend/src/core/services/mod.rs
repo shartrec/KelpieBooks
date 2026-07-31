@@ -8,6 +8,4 @@
 
 #[cfg(feature = "email")]
 pub(crate) mod email_service;
-#[cfg(feature = "email")]
-pub(crate) mod email_service;
 pub(crate) mod onboarding;

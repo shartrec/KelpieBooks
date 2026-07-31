@@ -5,11 +5,21 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+use chrono::{
+    DateTime,
+    NaiveDate,
+    Utc,
+};
 use rust_decimal::Decimal;
-use chrono::{DateTime, NaiveDate, Utc};
-use strum::{Display, EnumString};
+use serde::{
+    Deserialize,
+    Serialize,
+};
+use strum::{
+    Display,
+    EnumString,
+};
+use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, EnumString, Display, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]

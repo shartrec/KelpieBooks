@@ -21,6 +21,10 @@ use crate::contexts::{
 pub struct ItemRowProps {
     pub item: Item,
     pub on_edit: Callback<Item>,
+    #[cfg(feature = "inventory")]
+    pub on_receive: Option<Callback<Item>>,
+    #[cfg(feature = "inventory")]
+    pub on_adjust: Option<Callback<Item>>,
 }
 
 #[function_component(ItemRow)]
@@ -35,6 +39,46 @@ pub fn item_row(props: &ItemRowProps) -> Html {
             on_edit.emit(item.clone());
         })
     };
+    let inventory_actions = {
+        #[cfg(feature = "inventory")]
+        if user_ctx.has_privilege(&SystemPrivilege::ManageInventory) {
+            let on_receive = {
+                let on_receive = props.on_receive.clone();
+                let item = props.item.clone();
+                Callback::from(move |_| {
+                    if let Some(cb) = &on_receive {
+                        cb.emit(item.clone());
+                    }
+                })
+            };
+
+            let on_adjust = {
+                let on_adjust = props.on_adjust.clone();
+                let item = props.item.clone();
+                Callback::from(move |_| {
+                    if let Some(cb) = &on_adjust {
+                        cb.emit(item.clone());
+                    }
+                })
+            };
+
+            html! {
+                <>
+                    <button class="icon-button btn-action" onclick={on_receive} title={i18n.t("inventory-receive-stock")}>
+                        <img src="/images/receive.svg" alt={i18n.t("inventory-receive-stock")} />
+                    </button>
+                    <button class="icon-button btn-action" onclick={on_adjust} title={i18n.t("inventory-adjust-stock")}>
+                        <img src="/images/adjust.svg" alt={i18n.t("inventory-adjust-stock")} />
+                    </button>
+                </>
+            }
+        } else {
+            html! {}
+        }
+
+        #[cfg(not(feature = "inventory"))]
+        html! {}
+    };
 
     html! {
         <tr>
@@ -46,13 +90,14 @@ pub fn item_row(props: &ItemRowProps) -> Html {
                 <div class="actions-wrapper">
                     { if user_ctx.has_privilege(&SystemPrivilege::ManageSales) {
                         html! {
-                            <button class="icon-button btn-action" onclick={on_edit}>
+                            <button class="icon-button btn-action" onclick={on_edit} title={i18n.t("common-edit")}>
                                 <img src="/images/edit.svg" alt={i18n.t("common-edit")} />
                             </button>
                         }
                     } else {
                         html!{}
                     }}
+                    { inventory_actions }
                 </div>
             </td>
         </tr>

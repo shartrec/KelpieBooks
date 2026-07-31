@@ -17,9 +17,9 @@ use shared_core::{
     ledger::models::account::Account,
     sales::{
         models::{
-            sales_invoice::SalesInvoice,
             customer_payment::CustomerPayment,
             customer_payment_allocation::CustomerPaymentAllocation,
+            sales_invoice::SalesInvoice,
         },
         requests::customer_payment::CreateCustomerPaymentRequest,
     },
@@ -31,6 +31,7 @@ use web_sys::{
 };
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
+
 use crate::{
     api::Api,
     contexts::{
@@ -219,7 +220,8 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
             let error = error.clone();
             let fetch_payments = fetch_payments.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let resp = Api::post("/api/customer-payments", &*request, user_ctx, navigator).await;
+                let resp =
+                    Api::post("/api/customer-payments", &*request, user_ctx, navigator).await;
                 match resp {
                     Ok(r) if r.ok() => {
                         on_change.emit(());

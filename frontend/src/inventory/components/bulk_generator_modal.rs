@@ -5,12 +5,20 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  * (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use shared_core::inventory::dtos::inventory::{
+    AlphaRange,
+    BulkLocationGenerateRequest,
+    NumericRange,
+};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::inventory::dtos::inventory::{AlphaRange, BulkLocationGenerateRequest, NumericRange};
+
 use crate::{
     api::Api,
-    contexts::{auth_context::use_user_context, locale_context::use_locale},
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
 };
 
 #[derive(Properties, PartialEq, Clone)]
@@ -44,9 +52,12 @@ pub fn bulk_generator_modal(props: &GeneratorProps) -> Html {
 
         let zone = zone.clone();
         let is_picking = is_picking.clone();
-        let a_s = aisle_start.clone(); let a_e = aisle_end.clone();
-        let s_s = shelf_start.clone(); let s_e = shelf_end.clone();
-        let b_s = bin_start.clone(); let b_e = bin_end.clone();
+        let a_s = aisle_start.clone();
+        let a_e = aisle_end.clone();
+        let s_s = shelf_start.clone();
+        let s_e = shelf_end.clone();
+        let b_s = bin_start.clone();
+        let b_e = bin_end.clone();
 
         Callback::from(move |e: SubmitEvent| {
             e.prevent_default();
@@ -56,16 +67,31 @@ pub fn bulk_generator_modal(props: &GeneratorProps) -> Html {
                 zone: (*zone).clone(),
                 is_picking_location: *is_picking,
                 naming_format: "{zone}-{aisle}-{shelf}-{bin}".to_string(),
-                aisles: Some(NumericRange { start: *a_s, end: *a_e }),
-                shelves: Some(AlphaRange { start: (*s_s).clone(), end: (*s_e).clone() }),
-                bins: Some(NumericRange { start: *b_s, end: *b_e }),
+                aisles: Some(NumericRange {
+                    start: *a_s,
+                    end: *a_e,
+                }),
+                shelves: Some(AlphaRange {
+                    start: (*s_s).clone(),
+                    end: (*s_e).clone(),
+                }),
+                bins: Some(NumericRange {
+                    start: *b_s,
+                    end: *b_e,
+                }),
             };
 
             let user_ctx = user_ctx.clone();
             let navigator = navigator.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let route = format!("/api/inventory/warehouses/{}/locations/generate", warehouse_id);
-                if Api::post(&route, &payload, user_ctx, navigator).await.is_ok() {
+                let route = format!(
+                    "/api/inventory/warehouses/{}/locations/generate",
+                    warehouse_id
+                );
+                if Api::post(&route, &payload, user_ctx, navigator)
+                    .await
+                    .is_ok()
+                {
                     on_submit.emit(());
                 }
             });

@@ -7,4 +7,5 @@
  */
 pub(crate) mod inventory;
 pub(crate) mod location;
+pub mod stock_transaction;
 pub(crate) mod warehouse;

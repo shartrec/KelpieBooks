@@ -13,9 +13,15 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  * (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use chrono::{DateTime, Utc};
+use chrono::{
+    DateTime,
+    Utc,
+};
 use rust_decimal::Decimal;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
 
 // =============================================================================
@@ -54,4 +60,3 @@ pub struct WarehouseInventoryBalance {
     pub quantity_allocated: Decimal,
     pub updated_at: Option<DateTime<Utc>>,
 }
-

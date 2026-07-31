@@ -7,9 +7,7 @@
  */
 use rust_decimal::Decimal;
 use shared_core::{
-    ledger::models::{
-        account_category::AccountCategory,
-    },
+    ledger::models::account_category::AccountCategory,
     sales::{
         models::{
             item::{
@@ -32,8 +30,8 @@ use crate::{
         locale_context::use_locale,
     },
     core::components::currency_input::DecimalInput,
+    ledger::util::get_accounts_by_category,
 };
-use crate::ledger::util::get_accounts_by_category;
 
 #[derive(Properties, PartialEq)]
 pub struct AddItemModalProps {
@@ -80,7 +78,8 @@ pub fn add_item_modal(props: &AddItemModalProps) -> Html {
                     navigator.clone(),
                     &i18n,
                     false,
-                ).await;
+                )
+                .await;
                 match fetched_accounts {
                     Ok(postable_accounts) => {
                         income_accounts.set(postable_accounts);

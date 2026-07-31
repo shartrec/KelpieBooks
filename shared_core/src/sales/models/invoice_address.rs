@@ -6,7 +6,10 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use strum::Display;
 
 #[derive(Clone, Debug, Display, PartialEq)]

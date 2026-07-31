@@ -74,19 +74,13 @@ pub fn warehouse_modal(props: &WarehouseModalProps) -> Html {
                 let resp = if is_edit_mode {
                     Api::put(
                         &format!("/api/inventory/warehouses/{}", request.id),
-                        & *request,
+                        &*request,
                         user_ctx,
                         navigator,
                     )
-                        .await
+                    .await
                 } else {
-                    Api::post(
-                        "/api/inventory/warehouses",
-                        & *request,
-                        user_ctx,
-                        navigator,
-                    )
-                        .await
+                    Api::post("/api/inventory/warehouses", &*request, user_ctx, navigator).await
                 };
 
                 if resp.is_ok() {
@@ -103,7 +97,11 @@ pub fn warehouse_modal(props: &WarehouseModalProps) -> Html {
         })
     };
 
-    let title_key = if is_edit_mode { "warehouse-edit-title" } else { "warehouse-add-title" };
+    let title_key = if is_edit_mode {
+        "warehouse-edit-title"
+    } else {
+        "warehouse-add-title"
+    };
 
     html! {
         <div class="modal-overlay" onclick={on_cancel.clone()}>

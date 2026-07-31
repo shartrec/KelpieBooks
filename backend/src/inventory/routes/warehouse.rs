@@ -16,9 +16,7 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::inventory::models::warehouse::{
-    Warehouse,
-};
+use shared_core::inventory::models::warehouse::Warehouse;
 
 use crate::{
     core::routes::security::AuthenticatedUser,

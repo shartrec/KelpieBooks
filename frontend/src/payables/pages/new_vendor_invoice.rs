@@ -13,9 +13,7 @@ use chrono::{
 use fluent::fluent_args;
 use rust_decimal::dec;
 use shared_core::{
-    ledger::models::{
-        account_category::AccountCategory,
-    },
+    ledger::models::account_category::AccountCategory,
     partners::dtos::partner_list_item::PartnerListItem,
     payables::{
         models::vendor_invoice_item::VendorInvoiceItem,
@@ -34,10 +32,10 @@ use crate::{
         locale_context::use_locale,
     },
     core::components::layout::Layout,
+    ledger::util::get_accounts_by_category,
     payables::components::vendor_invoice_item_row::VendorInvoiceItemRow,
     router::Route,
 };
-use crate::ledger::util::get_accounts_by_category;
 
 #[function_component(NewVendorInvoicePage)]
 pub fn new_vendor_invoice_page() -> Html {
@@ -110,7 +108,8 @@ pub fn new_vendor_invoice_page() -> Html {
                     navigator,
                     &i18n,
                     false,
-                ).await;
+                )
+                .await;
                 match fetched_accounts {
                     Ok(postable_accounts) => {
                         accounts.set(postable_accounts);

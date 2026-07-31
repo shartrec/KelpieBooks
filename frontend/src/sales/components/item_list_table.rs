@@ -14,6 +14,11 @@ use shared_core::{
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
+#[cfg(feature = "inventory")]
+use crate::inventory::components::{
+    receiving_modal::ReceivingModal,
+    stock_adjustment_modal::StockAdjustmentModal,
+};
 use crate::{
     api::Api,
     contexts::{
@@ -41,6 +46,11 @@ pub fn item_list_table() -> Html {
     let loading = use_state(|| true);
     let show_add_modal = use_state(|| false);
     let item_to_edit = use_state(|| None::<Item>);
+
+    #[cfg(feature = "inventory")]
+    let item_to_receive = use_state(|| None::<Item>);
+    #[cfg(feature = "inventory")]
+    let item_to_adjust = use_state(|| None::<Item>);
 
     let fetch_items = {
         let items = items.clone();
@@ -120,12 +130,40 @@ pub fn item_list_table() -> Html {
         })
     };
 
+    #[cfg(feature = "inventory")]
+    let on_receive_click = {
+        let item_to_receive = item_to_receive.clone();
+        Callback::from(move |item: Item| {
+            item_to_receive.set(Some(item));
+        })
+    };
+
+    #[cfg(feature = "inventory")]
+    let on_adjust_click = {
+        let item_to_adjust = item_to_adjust.clone();
+        Callback::from(move |item: Item| {
+            item_to_adjust.set(Some(item));
+        })
+    };
+
     let on_modal_close = {
         let show_add_modal = show_add_modal.clone();
         let item_to_edit = item_to_edit.clone();
+
+        #[cfg(feature = "inventory")]
+        let item_to_receive = item_to_receive.clone();
+        #[cfg(feature = "inventory")]
+        let item_to_adjust = item_to_adjust.clone();
+
         Callback::from(move |_: ()| {
             show_add_modal.set(false);
             item_to_edit.set(None);
+
+            #[cfg(feature = "inventory")]
+            {
+                item_to_receive.set(None);
+                item_to_adjust.set(None);
+            }
         })
     };
 
@@ -144,6 +182,32 @@ pub fn item_list_table() -> Html {
     if let Some(err) = &*error {
         return html! { <div class="error">{ err }</div> };
     }
+
+    // Pre-render inventory modals outside html! macro
+    let inventory_modals = {
+        #[cfg(feature = "inventory")]
+        if true {
+            html! {
+                <>
+                    { if let Some(item) = &*item_to_receive {
+                        html! { <ReceivingModal item={item.clone()} on_close={on_modal_close.clone()} on_submit={on_submit.clone()} /> }
+                    } else {
+                        html! {}
+                    }}
+                    { if let Some(item) = &*item_to_adjust {
+                        html! { <StockAdjustmentModal item={item.clone()} on_close={on_modal_close.clone()} on_submit={on_submit.clone()} /> }
+                    } else {
+                        html! {}
+                    }}
+                </>
+            }
+        } else {
+            html! {}
+        }
+
+        #[cfg(not(feature = "inventory"))]
+        html! {}
+    };
 
     html! {
         <>
@@ -164,6 +228,8 @@ pub fn item_list_table() -> Html {
                 <EditItemModal item={item.clone()} on_close={on_modal_close.clone()} on_submit={on_submit.clone()} />
             }
 
+            { inventory_modals }
+
             <table class="table">
                 <thead>
                     <tr>
@@ -175,11 +241,27 @@ pub fn item_list_table() -> Html {
                     </tr>
                 </thead>
                 <tbody>
-                    { for (*items).iter().map(|item| html! {
-                        <ItemRow
-                            item={item.clone()}
-                            on_edit={on_edit_click.clone()}
-                        />
+                    { for (*items).iter().map(|item| {
+                        #[cfg(feature = "inventory")]
+                        {
+                            html! {
+                                <ItemRow
+                                    item={item.clone()}
+                                    on_edit={on_edit_click.clone()}
+                                    on_receive={Some(on_receive_click.clone())}
+                                    on_adjust={Some(on_adjust_click.clone())}
+                                />
+                            }
+                        }
+                        #[cfg(not(feature = "inventory"))]
+                        {
+                            html! {
+                                <ItemRow
+                                    item={item.clone()}
+                                    on_edit={on_edit_click.clone()}
+                                />
+                            }
+                        }
                     })}
                 </tbody>
             </table>

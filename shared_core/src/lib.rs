@@ -17,6 +17,6 @@ pub mod payables;
 #[cfg(feature = "sales")]
 pub mod sales;
 
+pub mod core;
 pub mod i18n;
 pub mod util;
-pub mod core;

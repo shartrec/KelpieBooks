@@ -168,7 +168,6 @@ pub fn sales_invoice_item_row(props: &SalesInvoiceItemRowProps) -> Html {
                     on_change.emit(new_item);
                     items.set(vec![]);
                 }
-
             });
         })
     };

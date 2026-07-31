@@ -7,12 +7,19 @@
  */
 
 use fluent::fluent_args;
+use shared_core::inventory::models::warehouse::{
+    Warehouse,
+    WarehouseLocation,
+};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::inventory::models::warehouse::{Warehouse, WarehouseLocation};
+
 use crate::{
     api::Api,
-    contexts::{auth_context::use_user_context, locale_context::use_locale},
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
     core::components::layout::Layout,
     inventory::components::{
         location_grid::LocationGrid,
@@ -45,7 +52,13 @@ pub fn warehouse_locations_page(props: &Props) -> Html {
         let warehouse_id = props.warehouse_id;
         use_effect_with(warehouse_id, move |_| {
             wasm_bindgen_futures::spawn_local(async move {
-                if let Ok(resp) = Api::get(&format!("/api/inventory/warehouses/{}", warehouse_id), user_ctx, navigator).await {
+                if let Ok(resp) = Api::get(
+                    &format!("/api/inventory/warehouses/{}", warehouse_id),
+                    user_ctx,
+                    navigator,
+                )
+                .await
+                {
                     if let Ok(data) = resp.json::<Warehouse>().await {
                         warehouse.set(Some(data));
                     }
@@ -64,7 +77,13 @@ pub fn warehouse_locations_page(props: &Props) -> Html {
         let refresh = *refresh_trigger;
         use_effect_with((warehouse_id, refresh), move |_| {
             wasm_bindgen_futures::spawn_local(async move {
-                if let Ok(resp) = Api::get(&format!("/api/inventory/warehouses/{}/locations", warehouse_id), user_ctx, navigator).await {
+                if let Ok(resp) = Api::get(
+                    &format!("/api/inventory/warehouses/{}/locations", warehouse_id),
+                    user_ctx,
+                    navigator,
+                )
+                .await
+                {
                     if let Ok(data) = resp.json::<Vec<WarehouseLocation>>().await {
                         locations.set(data);
                     }
@@ -90,32 +109,34 @@ pub fn warehouse_locations_page(props: &Props) -> Html {
         })
     };
 
-    let wh_name = warehouse.as_ref().map(|w| w.name.clone()).unwrap_or_default();
+    let wh_name = warehouse
+        .as_ref()
+        .map(|w| w.name.clone())
+        .unwrap_or_default();
 
     html! {
-    <Layout>
-        <div class="locations-page-container">
-            <h1>{ i18n.t_args("warehouse-locations-title", &fluent_args!["name" => wh_name]) }</h1>
+      <Layout>
+          <div class="locations-page-container">
+              <h1>{ i18n.t_args("warehouse-locations-title", &fluent_args!["name" => wh_name]) }</h1>
 
-            <div class="locations-workspace">
-                <aside class="locations-sidebar">
-                        <LocationTree
-                            locations={(*locations).clone()}
-                            on_select={on_tree_select}
-                        />
-                </aside>
-                <main class="locations-main-content">
-                        <LocationGrid
-                            warehouse_id={props.warehouse_id}
-                            locations={(*locations).clone()}
-                            zone={(*selected_zone).clone()}
-                            aisle={(*selected_aisle).clone()}
-                            on_refresh={on_action_complete}
-                        />
-                </main>
-            </div>
-        </div>
-    </Layout>
-  }
+              <div class="locations-workspace">
+                  <aside class="locations-sidebar">
+                          <LocationTree
+                              locations={(*locations).clone()}
+                              on_select={on_tree_select}
+                          />
+                  </aside>
+                  <main class="locations-main-content">
+                          <LocationGrid
+                              warehouse_id={props.warehouse_id}
+                              locations={(*locations).clone()}
+                              zone={(*selected_zone).clone()}
+                              aisle={(*selected_aisle).clone()}
+                              on_refresh={on_action_complete}
+                          />
+                  </main>
+              </div>
+          </div>
+      </Layout>
+    }
 }
-

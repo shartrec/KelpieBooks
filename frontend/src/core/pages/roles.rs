@@ -49,45 +49,45 @@ pub fn roles_page() -> Html {
     let show_edit_modal = use_state(|| None::<Role>);
     let role_to_delete = use_state(|| None::<Role>);
 
-    let fetch_roles = {
-        let roles = roles.clone();
-        let error = error.clone();
-        let loading = loading.clone();
-        let user_ctx = user_ctx.clone();
-        let i18n = i18n.clone();
-        let navigator = navigator.clone();
-        Callback::from(move |()| {
+    let fetch_roles =
+        {
             let roles = roles.clone();
             let error = error.clone();
             let loading = loading.clone();
             let user_ctx = user_ctx.clone();
             let i18n = i18n.clone();
             let navigator = navigator.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                loading.set(true);
-                let fetched_roles = Api::get("/api/roles", user_ctx, navigator).await;
-                loading.set(false);
-                match fetched_roles {
-                    Ok(response) if response.ok() => {
-                        match response.json::<Vec<Role>>().await {
+            Callback::from(move |()| {
+                let roles = roles.clone();
+                let error = error.clone();
+                let loading = loading.clone();
+                let user_ctx = user_ctx.clone();
+                let i18n = i18n.clone();
+                let navigator = navigator.clone();
+                wasm_bindgen_futures::spawn_local(async move {
+                    loading.set(true);
+                    let fetched_roles = Api::get("/api/roles", user_ctx, navigator).await;
+                    loading.set(false);
+                    match fetched_roles {
+                        Ok(response) if response.ok() => match response.json::<Vec<Role>>().await {
                             Ok(data) => roles.set(Rc::new(data)),
                             Err(e) => error.set(Some(i18n.t_args(
                                 "roles-error-parse",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
-                        }
+                        },
+                        Ok(response) => error.set(Some(i18n.t_args(
+                            "roles-error-fetch",
+                            &fluent_args!["status" => response.status()],
+                        ))),
+                        Err(e) => error.set(Some(i18n.t_args(
+                            "common-network-error",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     }
-                    Ok(response) => error.set(Some(i18n.t_args(
-                        "roles-error-fetch",
-                        &fluent_args!["status" => response.status()],
-                    ))),
-                    Err(e) => error.set(Some(
-                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
-                    )),
-                }
-            });
-        })
-    };
+                });
+            })
+        };
 
     {
         let fetch_roles = fetch_roles.clone();
@@ -131,9 +131,10 @@ pub fn roles_page() -> Html {
                     Ok(r) => {
                         pages::set_error(error, i18n, r, "roles-error-add");
                     }
-                    Err(e) => error.set(Some(
-                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
-                    )),
+                    Err(e) => error.set(Some(i18n.t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -174,9 +175,10 @@ pub fn roles_page() -> Html {
                     Ok(r) => {
                         pages::set_error(error, i18n, r, "roles-error-update");
                     }
-                    Err(e) => error.set(Some(
-                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
-                    )),
+                    Err(e) => error.set(Some(i18n.t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -214,9 +216,10 @@ pub fn roles_page() -> Html {
                     Ok(r) => {
                         pages::set_error(error, i18n, r, "roles-error-delete");
                     }
-                    Err(e) => error.set(Some(
-                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
-                    )),
+                    Err(e) => error.set(Some(i18n.t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })

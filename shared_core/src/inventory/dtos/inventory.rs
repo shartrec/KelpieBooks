@@ -7,11 +7,12 @@
  */
 
 use rust_decimal::Decimal;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
 
-// =============================================================================
-// 1. Bulk Location Generator DTOs (Request)
 // =============================================================================
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -33,6 +34,19 @@ pub struct AlphaRange {
     pub end: String,   // e.g., "C"
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum AdjustmentReason {
+    CycleCount,
+    Damage,
+    Scrap,
+    AuditCorrection,
+    FoundStock,
+    Other,
+}
+
+// =============================================================================
+// 1. Bulk Location Generator DTOs (Request)
+// =============================================================================
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BulkLocationGenerateRequest {
     pub zone: String,
@@ -48,7 +62,6 @@ pub struct BulkLocationGenerateRequest {
 // =============================================================================
 // 2. Location-Centric Contents DTOs (Response)
 // =============================================================================
-
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct LocationContentItem {
     pub item_id: Uuid,
@@ -70,8 +83,6 @@ pub struct LocationContentsResponse {
 }
 
 // =============================================================================
-// 3. Inter-Location Stock Transfer DTOs (Request)
-// =============================================================================
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct TransferItemLine {
@@ -84,4 +95,36 @@ pub struct InterLocationTransferRequest {
     pub source_location_id: Uuid,
     pub destination_location_id: Uuid,
     pub items_to_move: Vec<TransferItemLine>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ReceiveItemLine {
+    pub item_id: Uuid,
+    pub location_id: Uuid,
+    pub quantity: Decimal,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ReceiveStockRequest {
+    pub warehouse_id: Uuid,
+    pub vendor_id: Option<Uuid>,
+    pub po_number: Option<String>,
+    pub notes: Option<String>,
+    pub items: Vec<ReceiveItemLine>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AdjustStockItemLine {
+    pub location_id: Uuid,
+    pub item_id: Uuid,
+    /// Can be positive (increase stock) or negative (decrease stock)
+    pub quantity_delta: Decimal,
+    pub reason: AdjustmentReason,
+    pub notes: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StockAdjustmentRequest {
+    pub warehouse_id: Uuid,
+    pub items: Vec<AdjustStockItemLine>,
 }

@@ -854,6 +854,36 @@ bulk-gen-bins = Bin/Slot Sequence Range
 bulk-gen-picking-label = Designate generated rows as Picking Locations
 bulk-gen-btn-execute = Execute Bulk Generation
 
+# Inventory - Common Labels
+inventory-item-label = { common-item }
+inventory-location-label = Location / Bin
+inventory-quantity-label = { common-quantity }
+inventory-po-number-label = PO Number
+inventory-notes-label = Notes
+inventory-delta-label = Delta (+/-)
+inventory-reason-label = Adjustment Reason
+
+# Inventory - Item List Row Action Tooltips
+inventory-receive-stock = Receive Stock
+inventory-adjust-stock = Adjust Stock
+
+# Inventory - Receiving View / Modal
+inventory-receiving-title = Receive Vendor Inventory
+inventory-receive-stock-title = Receive Stock
+inventory-post-receipt = Post Stock Receipt
+
+# Inventory - Stock Adjustment View / Modal
+inventory-adjustment-title = Inventory Stock Adjustments
+inventory-adjust-stock-title = Adjust Stock Level
+inventory-commit-adjustment = Commit Adjustments
+
+# Inventory - Adjustment Reasons
+inventory-reason-cycle-count = Cycle Count
+inventory-reason-damage = Damage / Scrap
+inventory-reason-scrap = Scrap
+inventory-reason-audit = Audit Correction
+inventory-reason-found = Found Stock
+inventory-reason-other = Other
 
 # Security
 security-error-no-admin = You cannot perform this action. At least one security administrator must remain.

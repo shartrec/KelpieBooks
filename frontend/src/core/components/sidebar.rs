@@ -16,10 +16,15 @@ use crate::ledger;
 use crate::partners;
 #[cfg(feature = "payables")]
 use crate::payables;
-use crate::{contexts::{
-    auth_context::use_user_context,
-    locale_context::use_locale,
-}, inventory, router::Route, sales};
+use crate::{
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    inventory,
+    router::Route,
+    sales,
+};
 
 #[function_component(Sidebar)]
 pub fn sidebar() -> Html {

@@ -83,49 +83,50 @@ pub fn users_page() -> Html {
                         "users-error-fetch",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(
-                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
-                    )),
+                    Err(e) => error.set(Some(i18n.t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
     };
 
-    let fetch_roles = {
-        let roles = roles.clone();
-        let error = error.clone();
-        let user_ctx = user_ctx.clone();
-        let i18n = i18n.clone();
-        let navigator = navigator.clone();
-        Callback::from(move |()| {
+    let fetch_roles =
+        {
             let roles = roles.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();
             let i18n = i18n.clone();
             let navigator = navigator.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                let fetched_roles = Api::get("/api/roles", user_ctx, navigator).await;
-                match fetched_roles {
-                    Ok(response) if response.ok() => {
-                        match response.json::<Vec<Role>>().await {
+            Callback::from(move |()| {
+                let roles = roles.clone();
+                let error = error.clone();
+                let user_ctx = user_ctx.clone();
+                let i18n = i18n.clone();
+                let navigator = navigator.clone();
+                wasm_bindgen_futures::spawn_local(async move {
+                    let fetched_roles = Api::get("/api/roles", user_ctx, navigator).await;
+                    match fetched_roles {
+                        Ok(response) if response.ok() => match response.json::<Vec<Role>>().await {
                             Ok(data) => roles.set(data),
                             Err(e) => error.set(Some(i18n.t_args(
                                 "roles-error-parse",
                                 &fluent_args!["error" => e.to_string()],
                             ))),
-                        }
+                        },
+                        Ok(response) => error.set(Some(i18n.t_args(
+                            "roles-error-fetch",
+                            &fluent_args!["status" => response.status()],
+                        ))),
+                        Err(e) => error.set(Some(i18n.t_args(
+                            "common-network-error",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     }
-                    Ok(response) => error.set(Some(i18n.t_args(
-                        "roles-error-fetch",
-                        &fluent_args!["status" => response.status()],
-                    ))),
-                    Err(e) => error.set(Some(
-                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
-                    )),
-                }
-            });
-        })
-    };
+                });
+            })
+        };
 
     {
         let fetch_users = fetch_users.clone();

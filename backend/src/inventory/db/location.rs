@@ -7,7 +7,11 @@
  */
 
 use shared_core::inventory::models::warehouse::WarehouseLocation;
-use sqlx::{PgConnection, Postgres, QueryBuilder};
+use sqlx::{
+    PgConnection,
+    Postgres,
+    QueryBuilder,
+};
 use uuid::Uuid;
 
 pub async fn all_by_warehouse(

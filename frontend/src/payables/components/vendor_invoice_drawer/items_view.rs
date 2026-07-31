@@ -9,9 +9,7 @@
 use fluent::fluent_args;
 use rust_decimal::dec;
 use shared_core::{
-    ledger::models::{
-        account_category::AccountCategory,
-    },
+    ledger::models::account_category::AccountCategory,
     payables::models::{
         vendor_invoice::VendorInvoice,
         vendor_invoice_item::VendorInvoiceItem,
@@ -28,9 +26,9 @@ use crate::{
         locale_context::use_locale,
     },
     core::components::delete_confirmation_modal::DeleteConfirmationModal,
+    ledger::util::get_accounts_by_category,
     payables::components::vendor_invoice_drawer::item_edit_card::ItemEditCard,
 };
-use crate::ledger::util::get_accounts_by_category;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct ItemsViewProps {
@@ -69,7 +67,8 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                     navigator,
                     &i18n,
                     false,
-                    ).await;
+                )
+                .await;
                 match fetched_accounts {
                     Ok(postable_accounts) => {
                         accounts.set(postable_accounts);

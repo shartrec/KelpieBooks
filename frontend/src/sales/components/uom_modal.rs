@@ -83,15 +83,9 @@ pub fn uom_modal(props: &UomModalProps) -> Html {
                         user_ctx,
                         navigator,
                     )
-                        .await
+                    .await
                 } else {
-                    Api::post(
-                        "/api/sales/uoms",
-                        &*request,
-                        user_ctx,
-                        navigator,
-                    )
-                        .await
+                    Api::post("/api/sales/uoms", &*request, user_ctx, navigator).await
                 };
 
                 if resp.is_ok() {
@@ -111,7 +105,11 @@ pub fn uom_modal(props: &UomModalProps) -> Html {
     };
 
     // Determine localized header text dynamically
-    let title_key = if is_edit_mode { "uom-edit-title" } else { "uom-add-title" };
+    let title_key = if is_edit_mode {
+        "uom-edit-title"
+    } else {
+        "uom-add-title"
+    };
 
     html! {
         <div class="modal-overlay" onclick={on_cancel.clone()}>

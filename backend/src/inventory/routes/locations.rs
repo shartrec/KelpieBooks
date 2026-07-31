@@ -6,7 +6,14 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket::{get, post, put, routes, serde::json::Json, Route};
+use rocket::{
+    get,
+    post,
+    put,
+    routes,
+    serde::json::Json,
+    Route,
+};
 use rocket_db_pools::Connection;
 use shared_core::inventory::{
     dtos::inventory::BulkLocationGenerateRequest,
@@ -77,9 +84,10 @@ async fn get_location(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseInventory>,
 ) -> Result<Json<WarehouseLocation>, ApiError> {
-    let location = crate::inventory::services::locations::get_location(&mut pool, *id, user.organization_id)
-        .await?
-        .ok_or_else(|| ApiError::NotFound("Warehouse location not found".to_string()))?;
+    let location =
+        crate::inventory::services::locations::get_location(&mut pool, *id, user.organization_id)
+            .await?
+            .ok_or_else(|| ApiError::NotFound("Warehouse location not found".to_string()))?;
     Ok(Json(location))
 }
 
@@ -90,7 +98,12 @@ async fn create_location(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageInventory>,
 ) -> Result<Json<WarehouseLocation>, ApiError> {
-    let new_loc = crate::inventory::services::locations::create_location(&mut pool, user.organization_id, &loc).await?;
+    let new_loc = crate::inventory::services::locations::create_location(
+        &mut pool,
+        user.organization_id,
+        &loc,
+    )
+    .await?;
     Ok(Json(new_loc))
 }
 
@@ -102,7 +115,12 @@ async fn update_location(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageInventory>,
 ) -> Result<Json<WarehouseLocation>, ApiError> {
-    let updated_loc =
-        crate::inventory::services::locations::update_location(&mut pool, *id, user.organization_id, &loc).await?;
+    let updated_loc = crate::inventory::services::locations::update_location(
+        &mut pool,
+        *id,
+        user.organization_id,
+        &loc,
+    )
+    .await?;
     Ok(Json(updated_loc))
 }

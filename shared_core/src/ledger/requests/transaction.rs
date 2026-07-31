@@ -12,7 +12,7 @@ use chrono::{
 };
 use rust_decimal::{
     dec,
-    Decimal
+    Decimal,
 };
 use serde::{
     Deserialize,

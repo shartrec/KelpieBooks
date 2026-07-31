@@ -6,12 +6,17 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-
-use crate::sales::models::invoice_address::InvoiceAddress;
-use crate::sales::models::sales_invoice_item::SalesInvoiceItem;
 use chrono::NaiveDate;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
+
+use crate::sales::models::{
+    invoice_address::InvoiceAddress,
+    sales_invoice_item::SalesInvoiceItem,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateSalesInvoiceRequest {

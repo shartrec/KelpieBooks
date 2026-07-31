@@ -5,6 +5,6 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+pub mod dtos;
 pub mod models;
 pub mod requests;
-pub mod dtos;

@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
+default = ["ledger", "partners", "payables", "sales", "receivables", "inventory"]
 
 backend = ["dep:sqlx"]
 
@@ -13,7 +14,7 @@ partners = ["ledger"]
 payables = ["ledger"]
 sales = ["ledger", "partners"]
 receivables = ["sales"]
-inventory = ["ledger"]
+inventory = ["ledger", "sales"]
 
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }

@@ -5,6 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-pub mod warehouse_profile;
-pub mod warehouse;
 pub mod purchase_order;
+pub mod stock_balance;
+pub mod warehouse;
+pub mod warehouse_profile;

@@ -8,20 +8,33 @@
 
 use rocket::{
     get,
+    post,
     put,
     routes,
     serde::json::Json,
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::inventory::models::warehouse_profile::{
-    ItemWarehouseProfile,
-    WarehouseInventoryBalance,
+use shared_core::inventory::{
+    dtos::inventory::{
+        ReceiveStockRequest,
+        StockAdjustmentRequest,
+    },
+    models::warehouse_profile::{
+        ItemWarehouseProfile,
+        WarehouseInventoryBalance,
+    },
 };
 
 use crate::{
     core::routes::security::AuthenticatedUser,
-    inventory::services::inventory as inventory_service,
+    inventory::services::{
+        inventory as inventory_service,
+        inventory::{
+            adjust_stock,
+            receive_vendor_stock,
+        },
+    },
     security::{
         ManageInventory,
         RequirePrivilege,
@@ -35,7 +48,13 @@ use crate::{
 };
 
 pub(crate) fn routes() -> Vec<Route> {
-    routes![get_item_profile, save_item_profile, get_item_balances,]
+    routes![
+        get_item_profile,
+        save_item_profile,
+        get_item_balances,
+        receive_stock,
+        post_stock_adjustment,
+    ]
 }
 
 // =============================================================================
@@ -85,4 +104,30 @@ async fn get_item_balances(
     let balances =
         inventory_service::get_balances_by_item(&mut pool, *item_id, user.organization_id).await?;
     Ok(Json(balances))
+}
+
+#[post("/api/inventory/receiving", data = "<req>")]
+async fn receive_stock(
+    mut pool: Connection<DbKelpie>,
+    req: Json<ReceiveStockRequest>,
+    user: AuthenticatedUser,
+    _guard: RequirePrivilege<ManageInventory>,
+) -> Result<Json<Vec<WarehouseInventoryBalance>>, ApiError> {
+    let updated_balances =
+        receive_vendor_stock(&mut pool, user.organization_id, user.user_id, &req).await?;
+
+    Ok(Json(updated_balances))
+}
+
+#[post("/api/inventory/adjustments", data = "<req>")]
+async fn post_stock_adjustment(
+    mut pool: Connection<DbKelpie>,
+    req: Json<StockAdjustmentRequest>,
+    user: AuthenticatedUser,
+    _guard: RequirePrivilege<ManageInventory>,
+) -> Result<Json<Vec<WarehouseInventoryBalance>>, ApiError> {
+    let updated_balances =
+        adjust_stock(&mut pool, user.organization_id, user.user_id, &req).await?;
+
+    Ok(Json(updated_balances))
 }

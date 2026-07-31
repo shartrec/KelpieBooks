@@ -7,6 +7,7 @@
  */
 pub mod add_item_modal;
 pub mod add_tax_category_modal;
+pub mod aged_trial_balance_matrix;
 pub mod edit_item_modal;
 pub mod edit_tax_category_modal;
 pub mod item_filter;
@@ -20,9 +21,8 @@ pub mod tax_category_drawer;
 pub mod tax_category_list_table;
 pub mod tax_category_row;
 pub mod uom_list_table;
-pub mod uom_row;
-pub mod aged_trial_balance_matrix;
 pub mod uom_modal;
+pub mod uom_row;
 
 use shared_core::core::models::auth::SystemPrivilege;
 

@@ -25,8 +25,8 @@ use crate::{
         warehouse_modal::WarehouseModal,
         warehouse_row::WarehouseRow,
     },
+    router::Route,
 };
-use crate::router::Route;
 
 #[function_component(WarehouseListTable)]
 pub fn warehouse_list_table() -> Html {
@@ -156,9 +156,12 @@ pub fn warehouse_list_table() -> Html {
             if let Some(wh) = &*wh_to_delete {
                 let wh_id = wh.id;
                 wasm_bindgen_futures::spawn_local(async move {
-                    let resp =
-                        Api::delete(&format!("/api/inventory/warehouses/{}", wh_id), user_ctx, navigator)
-                            .await;
+                    let resp = Api::delete(
+                        &format!("/api/inventory/warehouses/{}", wh_id),
+                        user_ctx,
+                        navigator,
+                    )
+                    .await;
                     match resp {
                         Ok(r) if r.ok() => {
                             on_submit.emit(());

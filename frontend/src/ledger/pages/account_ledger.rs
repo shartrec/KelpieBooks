@@ -155,9 +155,10 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
                         "ledger-error-fetch-entries",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(
-                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
-                    )),
+                    Err(e) => error.set(Some(i18n.t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -204,85 +205,83 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
         );
     }
 
-    let on_reverse_confirm =
-        {
-            let on_modal_close = on_reverse_modal_close.clone();
-            let fetch_entries = fetch_entries.clone();
-            let error = error.clone();
-            let transaction_id = transaction_to_reverse.as_ref().map(|t| t.transaction_id);
-            let user_ctx = user_ctx.clone();
-            let i18n = i18n.clone();
-            let navigator = navigator.clone();
-            Callback::from(move |description: String| {
-                if let Some(id) = transaction_id {
-                    let on_modal_close = on_modal_close.clone();
-                    let fetch_entries = fetch_entries.clone();
-                    let error = error.clone();
-                    let user_ctx = user_ctx.clone();
-                    let i18n = i18n.clone();
-                    let navigator = navigator.clone();
-                    wasm_bindgen_futures::spawn_local(async move {
-                        let url = format!("/api/transactions/{}/reverse", id);
-                        let req_body = ReverseTransactionRequest { description };
-                        let resp = Api::post(&url, &req_body, user_ctx, navigator).await;
+    let on_reverse_confirm = {
+        let on_modal_close = on_reverse_modal_close.clone();
+        let fetch_entries = fetch_entries.clone();
+        let error = error.clone();
+        let transaction_id = transaction_to_reverse.as_ref().map(|t| t.transaction_id);
+        let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
+        let navigator = navigator.clone();
+        Callback::from(move |description: String| {
+            if let Some(id) = transaction_id {
+                let on_modal_close = on_modal_close.clone();
+                let fetch_entries = fetch_entries.clone();
+                let error = error.clone();
+                let user_ctx = user_ctx.clone();
+                let i18n = i18n.clone();
+                let navigator = navigator.clone();
+                wasm_bindgen_futures::spawn_local(async move {
+                    let url = format!("/api/transactions/{}/reverse", id);
+                    let req_body = ReverseTransactionRequest { description };
+                    let resp = Api::post(&url, &req_body, user_ctx, navigator).await;
 
-                        match resp {
-                            Ok(r) if r.ok() => {
-                                on_modal_close.emit(());
-                                fetch_entries.emit(());
-                            }
-                            Ok(r) => error.set(Some(i18n.t_args(
-                                "ledger-error-reverse-transaction",
-                                &fluent_args!["status" => r.status()],
-                            ))),
-                            Err(e) => error.set(Some(i18n.t_args(
-                                "common-network-error",
-                                &fluent_args!["error" => e.to_string()],
-                            ))),
+                    match resp {
+                        Ok(r) if r.ok() => {
+                            on_modal_close.emit(());
+                            fetch_entries.emit(());
                         }
-                    });
-                }
-            })
-        };
+                        Ok(r) => error.set(Some(i18n.t_args(
+                            "ledger-error-reverse-transaction",
+                            &fluent_args!["status" => r.status()],
+                        ))),
+                        Err(e) => error.set(Some(i18n.t_args(
+                            "common-network-error",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
+                    }
+                });
+            }
+        })
+    };
 
-    let on_delete_confirm =
-        {
-            let on_modal_close = on_delete_modal_close.clone();
-            let fetch_entries = fetch_entries.clone();
-            let error = error.clone();
-            let transaction_id = transaction_to_delete.as_ref().map(|t| t.transaction_id);
-            let user_ctx = user_ctx.clone();
-            let i18n = i18n.clone();
-            let navigator = navigator.clone();
-            Callback::from(move |()| {
-                if let Some(id) = transaction_id {
-                    let on_modal_close = on_modal_close.clone();
-                    let fetch_entries = fetch_entries.clone();
-                    let error = error.clone();
-                    let user_ctx = user_ctx.clone();
-                    let i18n = i18n.clone();
-                    let navigator = navigator.clone();
-                    wasm_bindgen_futures::spawn_local(async move {
-                        let url = format!("/api/transactions/{}", id);
-                        let resp = Api::delete(&url, user_ctx, navigator).await;
-                        match resp {
-                            Ok(r) if r.ok() => {
-                                on_modal_close.emit(());
-                                fetch_entries.emit(());
-                            }
-                            Ok(r) => error.set(Some(i18n.t_args(
-                                "ledger-error-delete-transaction",
-                                &fluent_args!["status" => r.status()],
-                            ))),
-                            Err(e) => error.set(Some(i18n.t_args(
-                                "common-network-error",
-                                &fluent_args!["error" => e.to_string()],
-                            ))),
+    let on_delete_confirm = {
+        let on_modal_close = on_delete_modal_close.clone();
+        let fetch_entries = fetch_entries.clone();
+        let error = error.clone();
+        let transaction_id = transaction_to_delete.as_ref().map(|t| t.transaction_id);
+        let user_ctx = user_ctx.clone();
+        let i18n = i18n.clone();
+        let navigator = navigator.clone();
+        Callback::from(move |()| {
+            if let Some(id) = transaction_id {
+                let on_modal_close = on_modal_close.clone();
+                let fetch_entries = fetch_entries.clone();
+                let error = error.clone();
+                let user_ctx = user_ctx.clone();
+                let i18n = i18n.clone();
+                let navigator = navigator.clone();
+                wasm_bindgen_futures::spawn_local(async move {
+                    let url = format!("/api/transactions/{}", id);
+                    let resp = Api::delete(&url, user_ctx, navigator).await;
+                    match resp {
+                        Ok(r) if r.ok() => {
+                            on_modal_close.emit(());
+                            fetch_entries.emit(());
                         }
-                    });
-                }
-            })
-        };
+                        Ok(r) => error.set(Some(i18n.t_args(
+                            "ledger-error-delete-transaction",
+                            &fluent_args!["status" => r.status()],
+                        ))),
+                        Err(e) => error.set(Some(i18n.t_args(
+                            "common-network-error",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
+                    }
+                });
+            }
+        })
+    };
 
     let on_reverse_click = {
         let transaction_to_reverse = transaction_to_reverse.clone();

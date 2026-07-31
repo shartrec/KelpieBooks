@@ -6,6 +6,6 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+pub mod customer_payment;
 pub mod item;
 pub mod sales_invoice;
-pub mod customer_payment;

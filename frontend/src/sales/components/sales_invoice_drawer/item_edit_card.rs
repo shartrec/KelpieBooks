@@ -11,14 +11,18 @@ use rust_decimal::Decimal;
 use shared_core::sales::models::{
     item::Item,
     sales_invoice_item::SalesInvoiceItem,
+    tax::TaxRate,
 };
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yew_router::hooks::use_navigator;
-use shared_core::sales::models::tax::TaxRate;
+
 use crate::{
     api::Api,
-    contexts::{auth_context::use_user_context, locale_context::use_locale},
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
     core::components::{
         currency_input::DecimalInput,
         progressive_search::ProgressiveSearch,
@@ -56,7 +60,7 @@ pub fn item_edit_card(props: &ItemEditCardProps) -> Html {
         let navigator = navigator.clone();
         let error = error.clone();
         let i18n = i18n.clone();
-        Callback::from(move | q: String| {
+        Callback::from(move |q: String| {
             item_search.set(q.clone());
             if q.is_empty() {
                 items.set(vec![]);
@@ -73,7 +77,7 @@ pub fn item_edit_card(props: &ItemEditCardProps) -> Html {
                     user_ctx,
                     navigator,
                 )
-                    .await;
+                .await;
                 match fetched_items {
                     Ok(response) if response.ok() => match response.json::<Vec<Item>>().await {
                         Ok(data) => items.set(data),
@@ -127,7 +131,8 @@ pub fn item_edit_card(props: &ItemEditCardProps) -> Html {
                         &format!("/api/sales/tax-categories/{}/current-rate", tax_category_id),
                         user_ctx,
                         navigator,
-                    ).await;
+                    )
+                    .await;
 
                     match fetched_tax_rate {
                         Ok(response) if response.ok() => {
@@ -157,12 +162,12 @@ pub fn item_edit_card(props: &ItemEditCardProps) -> Html {
                         ))),
                     }
                     // Compute updated monetary fields cleanly
-                    updated.tax_amount = updated.net_amount * (updated.tax_rate / Decimal::new(100, 0));
+                    updated.tax_amount =
+                        updated.net_amount * (updated.tax_rate / Decimal::new(100, 0));
                 }
                 item_state.set(updated);
                 items.set(vec![]); // Close suggestions dropdown
             });
-
         })
     };
 

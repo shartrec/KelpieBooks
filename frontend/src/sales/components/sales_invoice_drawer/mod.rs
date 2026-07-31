@@ -9,8 +9,8 @@
 pub(crate) mod address_edit_card;
 pub(crate) mod addresses_view;
 pub(crate) mod details_view;
-pub(crate) mod items_view;
 pub(crate) mod item_edit_card;
+pub(crate) mod items_view;
 pub(crate) mod payments_view;
 
 use fluent::fluent_args;
@@ -28,10 +28,10 @@ use crate::{
     sales::components::sales_invoice_drawer::{
         addresses_view::AddressesView,
         details_view::DetailsView,
+        items_view::ItemsView,
+        payments_view::PaymentsView,
     },
 };
-use crate::sales::components::sales_invoice_drawer::items_view::ItemsView;
-use crate::sales::components::sales_invoice_drawer::payments_view::PaymentsView;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum SalesInvoiceDrawerTab {
@@ -79,15 +79,14 @@ pub(crate) fn sales_invoice_drawer(props: &SalesInvoiceDrawerProps) -> Html {
     ];
 
     let pdf_url = format!("/api/sales-invoices/{}/print", props.invoice.id);
-    let on_print = Callback::from(
-        move |_| {
-            web_sys::window()
-                .unwrap().open_with_url_and_target(&pdf_url, "_blank")
-                // .location()
-                // .set_href(&pdf_url)
-                .unwrap();
-        },
-    );
+    let on_print = Callback::from(move |_| {
+        web_sys::window()
+            .unwrap()
+            .open_with_url_and_target(&pdf_url, "_blank")
+            // .location()
+            // .set_href(&pdf_url)
+            .unwrap();
+    });
 
     html! {
         <div class="drawer-overlay" onclick={on_close.clone()}>

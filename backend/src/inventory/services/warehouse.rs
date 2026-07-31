@@ -7,15 +7,13 @@
  */
 
 use rocket_db_pools::Connection;
-use shared_core::inventory::models::warehouse::{
-    Warehouse,
-};
+use shared_core::inventory::models::warehouse::Warehouse;
 use uuid::Uuid;
 
 use crate::{
     inventory::db::{
-        warehouse as warehouse_db,
         location as locations_db,
+        warehouse as warehouse_db,
     },
     util::ApiError,
     DbKelpie,

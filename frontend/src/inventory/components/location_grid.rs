@@ -6,11 +6,17 @@
  * (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::{core::models::auth::SystemPrivilege};
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    inventory::models::warehouse::WarehouseLocation,
+};
 use yew::prelude::*;
-use shared_core::inventory::models::warehouse::WarehouseLocation;
+
 use crate::{
-    contexts::{auth_context::use_user_context, locale_context::use_locale},
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
     inventory::components::bulk_generator_modal::BulkGeneratorModal,
 };
 
@@ -30,7 +36,9 @@ pub fn location_grid(props: &GridProps) -> Html {
     let show_bulk_modal = use_state(|| false);
 
     // Apply tree drilldown state boundaries
-    let filtered_locations: Vec<&WarehouseLocation> = props.locations.iter()
+    let filtered_locations: Vec<&WarehouseLocation> = props
+        .locations
+        .iter()
         .filter(|loc| props.zone.as_ref().map_or(true, |z| &loc.zone == z))
         .filter(|loc| props.aisle.as_ref().map_or(true, |a| &loc.aisle == a))
         .collect();

@@ -854,6 +854,37 @@ bulk-gen-bins = Plage séquentielle des bacs/alvéoles
 bulk-gen-picking-label = Désigner les lignes générées comme emplacements de picking
 bulk-gen-btn-execute = Exécuter la génération en masse
 
+# Inventory - Common Labels
+inventory-item-label = { common-item }
+inventory-location-label = Emplacement / Bac
+inventory-quantity-label = { common-quantity }
+inventory-po-number-label = N° de bon de commande
+inventory-notes-label = Remarques
+inventory-delta-label = Écart (+/-)
+inventory-reason-label = Motif de l'ajustement
+
+# Inventory - Item List Row Action Tooltips
+inventory-receive-stock = Recevoir du stock
+inventory-adjust-stock = Ajuster le stock
+
+# Inventory - Receiving View / Modal
+inventory-receiving-title = Réception du stock fournisseur
+inventory-receive-stock-title = Réceptionner le stock
+inventory-post-receipt = Valider la réception
+
+# Inventory - Stock Adjustment View / Modal
+inventory-adjustment-title = Ajustements de stock
+inventory-adjust-stock-title = Ajuster le niveau de stock
+inventory-commit-adjustment = Valider les ajustements
+
+# Inventory - Adjustment Reasons
+inventory-reason-cycle-count = Inventaire tournant
+inventory-reason-damage = Dommage / Rebut
+inventory-reason-scrap = Rebut
+inventory-reason-audit = Correction d'audit
+inventory-reason-found = Stock retrouvé
+inventory-reason-other = Autre
+
 # Security
 security-error-no-admin = Vous ne pouvez pas effectuer cette action. Au moins un administrateur de la sécurité doit rester.
 

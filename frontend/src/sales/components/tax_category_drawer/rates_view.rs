@@ -7,9 +7,7 @@
  */
 use fluent::fluent_args;
 use shared_core::{
-    ledger::models::{
-        account_category::AccountCategory,
-    },
+    ledger::models::account_category::AccountCategory,
     sales::models::tax::{
         TaxCategory,
         TaxRate,
@@ -26,9 +24,9 @@ use crate::{
         locale_context::use_locale,
     },
     core::components::delete_confirmation_modal::DeleteConfirmationModal,
+    ledger::util::get_accounts_by_category,
     sales::components::tax_category_drawer::tax_rate_edit_card::TaxRateEditCard,
 };
-use crate::ledger::util::get_accounts_by_category;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct RatesViewProps {
@@ -103,7 +101,8 @@ pub fn rates_view(props: &RatesViewProps) -> Html {
                     navigator,
                     &i18n,
                     false,
-                ).await;
+                )
+                .await;
                 match fetched_accounts {
                     Ok(postable_accounts) => {
                         accounts.set(postable_accounts);

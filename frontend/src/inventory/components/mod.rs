@@ -5,16 +5,21 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+pub mod bulk_generator_modal;
+pub mod location_grid;
+pub mod location_tree;
+pub mod receiving_modal;
+pub mod stock_adjustment_modal;
+pub mod warehouse_list_table;
 pub mod warehouse_modal;
 pub mod warehouse_row;
-pub mod warehouse_list_table;
-pub mod location_tree;
-pub mod location_grid;
-pub mod bulk_generator_modal;
 
 use shared_core::core::models::auth::SystemPrivilege;
-use crate::core::components::sidebar::SidebarModuleContribution;
-use crate::router::Route;
+
+use crate::{
+    core::components::sidebar::SidebarModuleContribution,
+    router::Route,
+};
 
 #[cfg(feature = "inventory")]
 pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {

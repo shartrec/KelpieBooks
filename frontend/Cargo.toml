@@ -12,7 +12,7 @@ partners = ["ledger", "shared_core/partners"]
 payables = ["ledger", "partners", "shared_core/payables"]
 sales = ["ledger", "partners", "shared_core/sales"]
 receivables = ["sales", "shared_core/receivables"]
-inventory = ["ledger", "shared_core/inventory"]
+inventory = ["ledger", "sales", "shared_core/inventory"]
 # Should be configured in line with backend feature.
 password-reset = []
 

@@ -27,9 +27,7 @@ use crate::{
         locale_context::use_locale,
     },
     sales::{
-        components::sales_invoice_drawer::{
-            SalesInvoiceDrawer,
-        },
+        components::sales_invoice_drawer::SalesInvoiceDrawer,
         contexts::sales_invoice_filter_context::{
             use_sales_invoice_filter,
             PaymentStatusFilter,

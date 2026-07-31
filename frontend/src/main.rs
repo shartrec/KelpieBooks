@@ -31,12 +31,12 @@ use frontend::ledger::pages::trial_balance::TrialBalancePage;
 use frontend::partners::pages::partner_list_page::PartnerListPage;
 #[cfg(feature = "payables")]
 use frontend::payables::pages::aged_payables::AgedPayablesPage;
-#[cfg(feature = "sales")]
-use frontend::sales::pages::aged_receivables::AgedReceivablesPage;
 #[cfg(feature = "payables")]
 use frontend::payables::pages::new_vendor_invoice::NewVendorInvoicePage;
 #[cfg(feature = "payables")]
 use frontend::payables::pages::payables_ledger::PayablesLedgerPage;
+#[cfg(feature = "sales")]
+use frontend::sales::pages::aged_receivables::AgedReceivablesPage;
 use frontend::{
     contexts::{
         auth_context::{
@@ -53,14 +53,18 @@ use frontend::{
     },
     core::pages::{
         dashboard::DashboardPage,
-        login::LoginPage,
         forgot_password::ForgotPasswordPage,
+        login::LoginPage,
         profile::ProfilePage,
         register::RegisterPage,
         reset_password::ResetPasswordPage,
         roles::RolesPage,
         style_guide::StyleGuide,
         users::UsersPage,
+    },
+    inventory::pages::{
+        warehouse_list::WarehouseListPage,
+        warehouse_locations::WarehouseLocationsPage,
     },
     router::Route,
     sales::pages::{
@@ -79,8 +83,6 @@ use shared_core::core::{
 };
 use yew::prelude::*;
 use yew_router::prelude::*;
-use frontend::inventory::pages::warehouse_list::WarehouseListPage;
-use frontend::inventory::pages::warehouse_locations::WarehouseLocationsPage;
 
 /// The component that contains the router and switches between pages.
 #[function_component(AppRouter)]
@@ -211,7 +213,7 @@ fn switch(routes: Route) -> Html {
         #[cfg(any(feature = "inventory"))]
         Route::WarehouseList => html! { <WarehouseListPage /> },
         #[cfg(any(feature = "inventory"))]
-        Route::WarehouseLocations {id} => html! { <WarehouseLocationsPage warehouse_id = {id}/> },
+        Route::WarehouseLocations { id } => html! { <WarehouseLocationsPage warehouse_id = {id}/> },
 
         Route::StyleGuide => html! {<StyleGuide />},
     }

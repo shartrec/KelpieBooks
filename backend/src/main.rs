@@ -18,22 +18,22 @@ use core::routes::{
     security as security_routes,
     users,
 };
-use std::{
-    env,
-    path::PathBuf,
-};
-use std::path::Path;
-use std::sync::LazyLock;
+use std::path::PathBuf;
+
 use log::error;
-use rocket::{fairing::AdHoc, fs::{
-    relative,
-    FileServer,
-    NamedFile,
-}, get, routes, State};
-use rocket::http::ContentType;
+use rocket::{
+    fairing::AdHoc,
+    fs::{
+        FileServer,
+        NamedFile,
+    },
+    get,
+    http::ContentType,
+    routes,
+    State,
+};
 use rocket_db_pools::Database;
-use shared_core::i18n::I18nManager;
-use crate::util::get_static_dir;
+
 use crate::util::logging::setup_logging;
 
 #[cfg(feature = "inventory")]
@@ -58,14 +58,15 @@ pub(crate) struct DbKelpie(sqlx::PgPool);
 
 // In your main setup or utility module
 pub struct AssetsDir {
-    pub path: std::path::PathBuf
+    pub path: std::path::PathBuf,
 }
-
 
 #[get("/<_..>", rank = 20)]
 async fn spa_index(assets_state: &State<AssetsDir>) -> Option<NamedFile> {
     // This tells Rocket: "If nothing else matched, just send them the index.html"
-    NamedFile::open(assets_state.path.join("index.html")).await.ok()
+    NamedFile::open(assets_state.path.join("index.html"))
+        .await
+        .ok()
 }
 
 #[get("/fonts/<file..>", rank = 10)]
@@ -150,13 +151,16 @@ fn rocket() -> _ {
     #[cfg(feature = "inventory")]
     let rocket = rocket
         .mount("/", inventory::routes::locations::routes())
+        .mount("/", inventory::routes::balances::routes())
         .mount("/", inventory::routes::warehouse::routes());
 
     // Determine the environment directory pathway
     let assets_dir = util::get_static_dir(&rocket);
     let rocket = rocket
         // 1. Store the asset directory pathway in managed state
-        .manage(AssetsDir{path:assets_dir.clone()})
+        .manage(AssetsDir {
+            path: assets_dir.clone(),
+        })
         .mount("/", routes![serve_fonts])
         .mount("/", FileServer::from(assets_dir).rank(15))
         .mount("/", routes![spa_index]);

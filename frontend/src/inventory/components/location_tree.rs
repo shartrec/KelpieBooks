@@ -6,9 +6,14 @@
  * (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use std::collections::{BTreeMap, BTreeSet};
-use yew::prelude::*;
+use std::collections::{
+    BTreeMap,
+    BTreeSet,
+};
+
 use shared_core::inventory::models::warehouse::WarehouseLocation;
+use yew::prelude::*;
+
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq, Clone)]
@@ -57,7 +62,11 @@ pub fn location_tree(props: &TreeProps) -> Html {
     };
 
     let is_node_active = |z: &Option<String>, a: &Option<String>| {
-        if *active_node == (z.clone(), a.clone()) { "tree-node--active" } else { "" }
+        if *active_node == (z.clone(), a.clone()) {
+            "tree-node--active"
+        } else {
+            ""
+        }
     };
 
     html! {

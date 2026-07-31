@@ -9,6 +9,21 @@
 ALTER TYPE system_privilege ADD VALUE 'use_inventory';
 ALTER TYPE system_privilege ADD VALUE 'manage_inventory';
 
+CREATE TYPE stock_transaction_type AS ENUM (
+    'receipt',
+    'adjustment',
+    'allocation',
+    'pick',
+    'shipment'
+    );
+
+CREATE TYPE reference_type AS ENUM (
+    'purchase_order',
+    'sales_order',
+    'manual_adjustment',
+    'cycle_count'
+    );
+
 CREATE TABLE item_warehouse_profiles (
                                          item_id UUID PRIMARY KEY REFERENCES items(id) ON DELETE CASCADE,
                                          organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
@@ -125,3 +140,19 @@ CREATE TABLE inventory_receipt_logs (
 );
 
 CREATE INDEX idx_receipt_logs_po_line ON inventory_receipt_logs(purchase_order_line_id);
+
+
+CREATE TABLE stock_transactions (
+                                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                                    organization_id UUID NOT NULL,
+                                    warehouse_id UUID NOT NULL,
+                                    location_id UUID NOT NULL REFERENCES warehouse_locations(id),
+                                    item_id UUID NOT NULL REFERENCES items(id),
+                                    transaction_type stock_transaction_type NOT NULL,
+                                    quantity_change NUMERIC(12, 4) NOT NULL,
+                                    reference_type reference_type,
+                                    reference_id UUID,          -- Links to po_id or sales_order_id
+                                    notes TEXT,
+                                    created_by UUID NOT NULL,
+                                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

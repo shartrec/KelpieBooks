@@ -5,7 +5,10 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use rust_decimal::{dec, Decimal};
+use rust_decimal::{
+    dec,
+    Decimal,
+};
 use serde::{
     Deserialize,
     Serialize,

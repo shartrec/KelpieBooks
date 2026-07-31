@@ -13,7 +13,7 @@ partners = ["ledger", "shared_core/partners"]
 payables = ["ledger", "partners", "shared_core/payables"]
 sales = ["ledger", "partners", "shared_core/sales"]
 receivables = ["sales", "shared_core/receivables"]
-inventory = ["ledger", "shared_core/inventory"]
+inventory = ["ledger", "sales", "shared_core/inventory"]
 # Email needs significant external configuration of SMPT server connection
 email = []
 password-reset = ["email"]
