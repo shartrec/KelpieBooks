@@ -82,6 +82,29 @@ pub struct LocationContentsResponse {
     pub contents: Vec<LocationContentItem>,
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
+pub struct ItemLocationBalanceDto {
+    pub warehouse_id: Uuid,
+    pub warehouse_code: String,
+    pub warehouse_name: String,
+    pub location_id: Uuid,
+    pub location_display_label: String,
+    pub is_picking_location: bool,
+    pub quantity_on_hand: Decimal,
+    pub quantity_allocated: Decimal,
+    pub quantity_available: Decimal, // Calculated: on_hand - allocated
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ItemStockBalancesResponse {
+    pub item_id: Uuid,
+    pub total_on_hand: Decimal,
+    pub total_allocated: Decimal,
+    pub total_available: Decimal,
+    pub location_balances: Vec<ItemLocationBalanceDto>,
+}
+
 // =============================================================================
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]

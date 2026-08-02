@@ -862,6 +862,11 @@ inventory-po-number-label = N° de bon de commande
 inventory-notes-label = Remarques
 inventory-delta-label = Écart (+/-)
 inventory-reason-label = Motif de l'ajustement
+inventory-warehouse-label = Entrepôt
+inventory-on-hand-label = En stock
+inventory-allocated-label = Réservé
+inventory-available-label = Disponible
+inventory-no-stock-found = Aucun stock trouvé
 
 # Inventory - Item List Row Action Tooltips
 inventory-receive-stock = Recevoir du stock

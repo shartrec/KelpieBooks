@@ -7,6 +7,7 @@
  */
 
 use fluent::fluent_args;
+use uuid::Uuid;
 use shared_core::{
     core::models::auth::SystemPrivilege,
     sales::models::item::Item,
@@ -48,9 +49,9 @@ pub fn item_list_table() -> Html {
     let item_to_edit = use_state(|| None::<Item>);
 
     #[cfg(feature = "inventory")]
-    let item_to_receive = use_state(|| None::<Item>);
+    let item_to_receive = use_state(|| None::<(Item, Option<Uuid>, Option<Uuid>)>);
     #[cfg(feature = "inventory")]
-    let item_to_adjust = use_state(|| None::<Item>);
+    let item_to_adjust = use_state(|| None::<(Item, Option<Uuid>, Option<Uuid>)>);
 
     let fetch_items = {
         let items = items.clone();
@@ -133,7 +134,7 @@ pub fn item_list_table() -> Html {
     #[cfg(feature = "inventory")]
     let on_receive_click = {
         let item_to_receive = item_to_receive.clone();
-        Callback::from(move |item: Item| {
+        Callback::from(move |item: (Item, Option<Uuid>, Option<Uuid>)| {
             item_to_receive.set(Some(item));
         })
     };
@@ -141,7 +142,7 @@ pub fn item_list_table() -> Html {
     #[cfg(feature = "inventory")]
     let on_adjust_click = {
         let item_to_adjust = item_to_adjust.clone();
-        Callback::from(move |item: Item| {
+        Callback::from(move |item: (Item, Option<Uuid>, Option<Uuid>)| {
             item_to_adjust.set(Some(item));
         })
     };
@@ -190,12 +191,12 @@ pub fn item_list_table() -> Html {
             html! {
                 <>
                     { if let Some(item) = &*item_to_receive {
-                        html! { <ReceivingModal item={item.clone()} on_close={on_modal_close.clone()} on_submit={on_submit.clone()} /> }
+                        html! { <ReceivingModal item={item.0.clone()} target_warehouse_id={item.1.clone()} target_location_id={item.2.clone()}  on_close={on_modal_close.clone()} on_submit={on_submit.clone()} /> }
                     } else {
                         html! {}
                     }}
                     { if let Some(item) = &*item_to_adjust {
-                        html! { <StockAdjustmentModal item={item.clone()} on_close={on_modal_close.clone()} on_submit={on_submit.clone()} /> }
+                        html! { <StockAdjustmentModal item={item.0.clone()} target_warehouse_id={item.1.clone()} target_location_id={item.2.clone()} on_close={on_modal_close.clone()} on_submit={on_submit.clone()} /> }
                     } else {
                         html! {}
                     }}

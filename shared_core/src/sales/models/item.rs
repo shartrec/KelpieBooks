@@ -67,3 +67,10 @@ pub struct Item {
     pub is_active: bool,
     pub created_at: Option<DateTime<Utc>>,
 }
+
+impl Item {
+    pub fn is_stocked(&self) -> bool {
+        self.item_type == ItemType::Stocked
+    }
+
+}

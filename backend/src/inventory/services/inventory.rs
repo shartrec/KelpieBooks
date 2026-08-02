@@ -25,9 +25,9 @@ use shared_core::inventory::{
         },
     },
 };
-use sqlx::Acquire;
+use sqlx::{Acquire, Error};
 use uuid::Uuid;
-
+use shared_core::inventory::dtos::inventory::ItemStockBalancesResponse;
 use crate::{
     inventory::db::{
         inventory as inventory_db,
@@ -69,8 +69,8 @@ pub async fn get_balances_by_item(
     pool: &mut Connection<DbKelpie>,
     item_id: Uuid,
     org_id: Uuid,
-) -> Result<Vec<WarehouseInventoryBalance>, sqlx::Error> {
-    inventory_db::balances_by_item(pool, item_id, org_id).await
+) -> Result<ItemStockBalancesResponse, Error> {
+    inventory_db::get_item_stock_balances(pool, item_id, org_id).await
 }
 
 pub async fn get_balance_at_location(

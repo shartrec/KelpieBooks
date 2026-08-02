@@ -15,6 +15,7 @@ use shared_core::inventory::models::warehouse_profile::{
     WarehouseInventoryBalance,
 };
 use uuid::Uuid;
+use shared_core::inventory::dtos::inventory::{ItemLocationBalanceDto, ItemStockBalancesResponse};
 // =============================================================================
 // Item Warehouse Profile Operations (Physical Attributes Extension)
 // =============================================================================
@@ -67,19 +68,45 @@ pub async fn upsert_warehouse_profile(
 // =============================================================================
 // Warehouse Inventory Balance Ledger Operations
 // =============================================================================
-
-pub async fn balances_by_item(
+pub async fn get_item_stock_balances(
     conn: &mut PgConnection,
     item_id: Uuid,
     org_id: Uuid,
-) -> Result<Vec<WarehouseInventoryBalance>, sqlx::Error> {
-    sqlx::query_as(
-        "SELECT * FROM warehouse_inventory_balances WHERE item_id = $1 AND organization_id = $2",
-    )
-    .bind(item_id)
-    .bind(org_id)
-    .fetch_all(conn)
-    .await
+) -> Result<ItemStockBalancesResponse, sqlx::Error> {
+    let location_balances = sqlx::query_as(
+        r#"
+        SELECT
+            w.id AS warehouse_id,
+            w.code AS warehouse_code,
+            w.name AS warehouse_name,
+            loc.id AS location_id,
+            loc.display_label AS location_display_label,
+            loc.is_picking_location,
+            b.quantity_on_hand,
+            b.quantity_allocated,
+            (b.quantity_on_hand - b.quantity_allocated) AS quantity_available
+        FROM warehouse_inventory_balances b
+        INNER JOIN warehouses w ON w.id = b.warehouse_id
+        INNER JOIN warehouse_locations loc ON loc.id = b.location_id
+        WHERE b.organization_id = $1 AND b.item_id = $2
+        ORDER BY w.name ASC, loc.display_label ASC
+        "#)
+        .bind(org_id)
+        .bind(item_id)
+        .fetch_all(conn)
+        .await?;
+
+    let total_on_hand = location_balances.iter().map(|b: &ItemLocationBalanceDto | b.quantity_on_hand).sum();
+    let total_allocated = location_balances.iter().map(|b: &ItemLocationBalanceDto| b.quantity_allocated).sum();
+    let total_available = total_on_hand - total_allocated;
+
+    Ok(ItemStockBalancesResponse {
+        item_id,
+        total_on_hand,
+        total_allocated,
+        total_available,
+        location_balances,
+    })
 }
 
 pub async fn get_balance_for_location(

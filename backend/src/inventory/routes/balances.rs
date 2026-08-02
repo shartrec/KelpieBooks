@@ -25,7 +25,7 @@ use shared_core::inventory::{
         WarehouseInventoryBalance,
     },
 };
-
+use shared_core::inventory::dtos::inventory::ItemStockBalancesResponse;
 use crate::{
     core::routes::security::AuthenticatedUser,
     inventory::services::{
@@ -100,7 +100,7 @@ async fn get_item_balances(
     item_id: PathUuid,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseInventory>,
-) -> Result<Json<Vec<WarehouseInventoryBalance>>, ApiError> {
+) -> Result<Json<ItemStockBalancesResponse>, ApiError> {
     let balances =
         inventory_service::get_balances_by_item(&mut pool, *item_id, user.organization_id).await?;
     Ok(Json(balances))

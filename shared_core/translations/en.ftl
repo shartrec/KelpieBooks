@@ -862,6 +862,11 @@ inventory-po-number-label = PO Number
 inventory-notes-label = Notes
 inventory-delta-label = Delta (+/-)
 inventory-reason-label = Adjustment Reason
+inventory-warehouse-label = Warehouse
+inventory-on-hand-label = On hand
+inventory-allocated-label = Allocated
+inventory-available-label = Available
+inventory-no-stock-found = No stock found
 
 # Inventory - Item List Row Action Tooltips
 inventory-receive-stock = Receive Stock

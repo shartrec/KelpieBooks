@@ -35,6 +35,8 @@ use crate::{
 #[derive(Properties, PartialEq, Clone)]
 pub struct ReceivingModalProps {
     pub item: Item,
+    pub target_warehouse_id: Option<Uuid>,
+    pub target_location_id: Option<Uuid>,
     pub on_close: Callback<()>,
     pub on_submit: Callback<()>,
 }
@@ -62,6 +64,7 @@ pub fn receiving_modal(props: &ReceivingModalProps) -> Html {
 
     // 1. Fetch active warehouses on component mount
     {
+        let target_warehouse_id = props.target_warehouse_id;
         let warehouses = warehouses.clone();
         let request = request.clone();
         let user_ctx = user_ctx.clone();
@@ -74,9 +77,15 @@ pub fn receiving_modal(props: &ReceivingModalProps) -> Html {
                         if let Ok(list) = resp.json::<Vec<Warehouse>>().await {
                             let active_list: Vec<Warehouse> =
                                 list.into_iter().filter(|w| w.is_active).collect();
-                            if let Some(first) = active_list.first() {
+
+                            // Pick explicitly requested warehouse, or fall back to first active
+                            let selected_id = target_warehouse_id
+                                .filter(|id| active_list.iter().any(|w| w.id == *id))
+                                .or_else(|| active_list.first().map(|w| w.id));
+
+                            if let Some(id) = selected_id {
                                 let mut req = (*request).clone();
-                                req.warehouse_id = first.id;
+                                req.warehouse_id = id;
                                 request.set(req);
                             }
                             warehouses.set(active_list);
@@ -90,6 +99,7 @@ pub fn receiving_modal(props: &ReceivingModalProps) -> Html {
 
     // 2. Fetch locations for the selected warehouse and pick the first one by default
     {
+        let target_location_id = props.target_location_id;
         let locations = locations.clone();
         let request = request.clone();
         let user_ctx = user_ctx.clone();
@@ -104,10 +114,15 @@ pub fn receiving_modal(props: &ReceivingModalProps) -> Html {
                     if let Ok(resp) = Api::get(&url, user_ctx, navigator).await {
                         if resp.ok() {
                             if let Ok(loc_list) = resp.json::<Vec<WarehouseLocation>>().await {
-                                if let Some(first_loc) = loc_list.first() {
+                                // Pick target location if available in this warehouse, else pick first
+                                let selected_loc_id = target_location_id
+                                    .filter(|id| loc_list.iter().any(|l| l.id == *id))
+                                    .or_else(|| loc_list.first().map(|l| l.id));
+
+                                if let Some(loc_id) = selected_loc_id {
                                     let mut req = (*request).clone();
                                     if let Some(line) = req.items.get_mut(0) {
-                                        line.location_id = first_loc.id;
+                                        line.location_id = loc_id;
                                     }
                                     request.set(req);
                                 }

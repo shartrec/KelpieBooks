@@ -59,4 +59,19 @@
   tbody tr:nth-child(even) {
     background-color: #ebf5ff; // Alt row color
   }
+
+  &__sub-row {
+    tr {
+      background-color: #f8f9fa; /* Optional slight tint for hierarchy */
+    }
+
+    .stock-breakdown-row {
+      padding: 0;
+    }
+
+    /* Target the inner div container directly */
+    .stock-breakdown-container {
+      padding-left: 2.5rem; /* Indents the entire sub-table neatly under the chevron/code */
+    }
+  }
 }
