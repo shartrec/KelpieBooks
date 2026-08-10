@@ -7,10 +7,9 @@
  */
 pub mod add_item_modal;
 pub mod add_tax_category_modal;
-pub mod add_uom_modal;
+pub mod uom_modal;
 pub mod edit_item_modal;
 pub mod edit_tax_category_modal;
-pub mod edit_uom_modal;
 pub mod item_filter;
 pub mod item_list_table;
 pub mod item_row;
