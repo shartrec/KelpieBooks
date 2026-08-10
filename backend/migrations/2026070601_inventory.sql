@@ -6,8 +6,12 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-ALTER TYPE system_privilege ADD VALUE 'use_inventory';
-ALTER TYPE system_privilege ADD VALUE 'manage_inventory';
+ALTER TYPE system_privilege ADD VALUE IF NOT EXISTS 'use_inventory';
+ALTER TYPE system_privilege ADD VALUE IF NOT EXISTS 'manage_inventory';
+
+ALTER TYPE system_tag ADD VALUE IF NOT EXISTS 'inventory_asset';
+ALTER TYPE system_tag ADD VALUE IF NOT EXISTS 'received_not_invoiced';
+ALTER TYPE system_tag ADD VALUE IF NOT EXISTS 'inventory_adjustment';
 
 CREATE TYPE stock_transaction_type AS ENUM (
     'receipt',
@@ -23,6 +27,10 @@ CREATE TYPE reference_type AS ENUM (
     'manual_adjustment',
     'cycle_count'
     );
+
+-- 1. Add cost tracking fields to Item master
+ALTER TABLE items
+    ADD COLUMN purchase_unit_cost DECIMAL(12, 4) NOT NULL DEFAULT 0.0000;
 
 CREATE TABLE item_warehouse_profiles (
                                          item_id UUID PRIMARY KEY REFERENCES items(id) ON DELETE CASCADE,
@@ -59,7 +67,6 @@ CREATE TABLE warehouse_locations (
                                      organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
                                      warehouse_id UUID NOT NULL REFERENCES warehouses(id) ON DELETE CASCADE,
 
-    -- Structured coordinate paths for path finding/picking logic
                                      zone VARCHAR(20) DEFAULT '',         -- e.g., 'Bulk', 'Cold Storage'
                                      aisle VARCHAR(10) DEFAULT '',        -- e.g., 'A1', 'B5'
                                      shelf VARCHAR(10) DEFAULT '',        -- e.g., 'S3'
@@ -81,8 +88,9 @@ CREATE TABLE warehouse_inventory_balances (
                                               location_id UUID NOT NULL REFERENCES warehouse_locations(id) ON DELETE RESTRICT,
 
                                               quantity_on_hand NUMERIC(15,4) NOT NULL DEFAULT 0.0000,
-    -- Tracks items that are physically in the building but allocated to sales orders
                                               quantity_allocated NUMERIC(15,4) NOT NULL DEFAULT 0.0000,
+
+                                              unit_cost NUMERIC(12, 4) NOT NULL DEFAULT 0.0000,
 
                                               updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
@@ -152,6 +160,10 @@ CREATE TABLE stock_transactions (
                                     quantity_change NUMERIC(12, 4) NOT NULL,
                                     reference_type reference_type,
                                     reference_id UUID,          -- Links to po_id or sales_order_id
+
+                                    unit_cost NUMERIC(12, 4) NOT NULL DEFAULT 0.0000,
+                                    journal_entry_id UUID REFERENCES journal_entries(id),
+
                                     notes TEXT,
                                     created_by UUID NOT NULL,
                                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

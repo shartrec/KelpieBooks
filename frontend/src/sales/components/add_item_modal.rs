@@ -107,6 +107,15 @@ pub fn add_item_modal(props: &AddItemModalProps) -> Html {
         })
     };
 
+    let on_cost_change = {
+        let state = request.clone();
+        Callback::from(move |value: Decimal| {
+            let mut info = (*state).clone();
+            info.unit_cost = value;
+            state.set(info);
+        })
+    };
+
     let on_input = |field_updater: fn(&mut CreateItemRequest, String)| {
         let state = request.clone();
         Callback::from(move |e: InputEvent| {
@@ -211,6 +220,13 @@ pub fn add_item_modal(props: &AddItemModalProps) -> Html {
                         value={request.unit_price}
                         decimal_places = 4
                         on_change={on_price_change}
+                    />
+
+                    <label>{i18n.t("item-cost-label")}</label>
+                    <DecimalInput
+                        value={request.unit_cost}
+                        decimal_places = 4
+                        on_change={on_cost_change}
                     />
 
                     <label>{i18n.t("item-income-account-label")}</label>

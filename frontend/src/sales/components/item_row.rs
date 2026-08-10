@@ -134,6 +134,7 @@ pub fn item_row(props: &ItemRowProps) -> Html {
             <td class="table__text-col">{ &props.item.name }</td>
             <td class="table__text-col">{ format!("{:?}", props.item.item_type) }</td>
             <td class="table__value-col">{ i18n.format_currency(props.item.unit_price) }</td>
+            <td class="table__value-col">{ i18n.format_currency(props.item.unit_cost) }</td>
             <td class="table__col-actions">
                 <div class="actions-wrapper">
                     { if user_ctx.has_privilege(&SystemPrivilege::ManageSales) {
@@ -153,7 +154,7 @@ pub fn item_row(props: &ItemRowProps) -> Html {
         // Expandable Sub-Row (Only rendered when expanded and item is Stocked) -->
         if !(*is_collapsed) && props.item.is_stocked() {
             <tr class="table__sub-row">
-                <td class="stock-breakdown-row" colspan="5">
+                <td class="stock-breakdown-row" colspan="99">
                     <div class="stock-breakdown-container">
                         if let Some(response) = &*balances {
                             if response.location_balances.is_empty() {

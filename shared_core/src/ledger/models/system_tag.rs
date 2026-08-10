@@ -25,6 +25,7 @@ use strum::{
     feature = "backend",
     sqlx(type_name = "system_tag", rename_all = "snake_case")
 )]
+#[strum(serialize_all = "snake_case")]
 pub enum SystemTag {
     CashAtBank,
     AccountsReceivable,
@@ -35,6 +36,9 @@ pub enum SystemTag {
     Revenue,
     Expense,
     CostOfGoodsSold,
+    InventoryAsset,
+    ReceivedNotInvoiced,
+    InventoryAdjustment,
 }
 
 impl SystemTag {
@@ -42,17 +46,20 @@ impl SystemTag {
         Self::iter()
     }
 
-    pub fn display_name(&self) -> String {
-        match self {
-            SystemTag::CashAtBank => "Cash at Bank".to_string(),
-            SystemTag::AccountsReceivable => "Accounts Receivable".to_string(),
-            SystemTag::AccountsPayable => "Accounts Payable".to_string(),
-            SystemTag::RetainedEarnings => "Retained Earnings".to_string(),
-            SystemTag::SalesTaxPayable => "Sales Tax Payable".to_string(),
-            SystemTag::SalesTaxClearing => "Tax Clearing".to_string(),
-            SystemTag::Revenue => "Revenue".to_string(),
-            SystemTag::Expense => "Expense".to_string(),
-            SystemTag::CostOfGoodsSold => "Cost of Goods Sold".to_string(),
-        }
+    /// Returns the Fluent translation key corresponding to the system tag.
+    pub fn translation_key(&self) -> String {
+        format!("system-tag-{}", self.to_string())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_translation_key() {
+        let tag = SystemTag::CashAtBank;
+        assert_eq!(tag.translation_key(), "system-tag-cash_at_bank");
+    }
+}
+

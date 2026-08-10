@@ -19,6 +19,7 @@ pub struct ItemPayload {
     pub item_type: ItemType,
     pub uom_id: Uuid,
     pub unit_price: Decimal, // 💡 Scaled to 4 decimal places internally
+    pub unit_cost: Decimal, // 💡 Scaled to 4 decimal places internally
     pub income_account_id: Uuid,
     pub tax_category_id: Option<Uuid>,
     pub is_active: bool,

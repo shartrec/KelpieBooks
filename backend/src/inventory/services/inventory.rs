@@ -5,9 +5,11 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  * (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
+use std::collections::HashMap;
+use chrono::NaiveDate;
 use rocket_db_pools::Connection;
 use rust_decimal::Decimal;
+use rust_decimal::prelude::FromPrimitive;
 use shared_core::inventory::{
     dtos::inventory::{
         AdjustmentReason,
@@ -25,9 +27,11 @@ use shared_core::inventory::{
         },
     },
 };
-use sqlx::{Acquire, Error};
+use sqlx::{Acquire, Error, PgConnection};
 use uuid::Uuid;
 use shared_core::inventory::dtos::inventory::ItemStockBalancesResponse;
+use shared_core::ledger::models::system_tag::SystemTag;
+use shared_core::ledger::requests::transaction::{CreateTransactionRequest, JournalEntryLine};
 use crate::{
     inventory::db::{
         inventory as inventory_db,
@@ -41,6 +45,37 @@ use crate::{
     util::ApiError,
     DbKelpie,
 };
+use crate::ledger::services::account_service;
+use crate::ledger::services::account_service::get_system_accounts;
+
+
+pub struct InventorySystemAccounts {
+    pub inventory_asset_id: Uuid,
+    pub received_not_invoiced_id: Uuid,
+    pub inventory_adjustment_id: Uuid,
+    pub cogs_id: Uuid,
+}
+
+impl InventorySystemAccounts {
+    pub fn from_map(map: &HashMap<SystemTag, Uuid>) -> Result<Self, ApiError> {
+        let get_account = |tag: SystemTag| {
+            map.get(&tag).copied().ok_or_else(|| {
+                ApiError::NotFound(format!(
+                    "Missing system account mapping for tag: {:?}",
+                    tag
+                ))
+            })
+        };
+
+        Ok(Self {
+            inventory_asset_id: get_account(SystemTag::InventoryAsset)?,
+            received_not_invoiced_id: get_account(SystemTag::ReceivedNotInvoiced)?,
+            inventory_adjustment_id: get_account(SystemTag::InventoryAdjustment)?,
+            cogs_id: get_account(SystemTag::CostOfGoodsSold)?,
+        })
+    }
+}
+
 // =============================================================================
 // Item Warehouse Profile Service
 // =============================================================================
@@ -163,6 +198,10 @@ pub async fn receive_vendor_stock(
         )
         .await?;
 
+        //todo get total amount
+        let total_amount = Decimal::from_f32(1.0).unwrap();
+        let _tx_id = post_receive_journal_entry(&mut tx, org_id, user_id, total_amount, &*req.po_number.clone().unwrap_or("n/a".to_string())).await?;
+
         updated_balances.push(balance);
     }
 
@@ -255,10 +294,115 @@ pub async fn adjust_stock(
         )
         .await?;
 
+        //todo get total amount
+        let total_amount = Decimal::from_f32(1.0).unwrap();
+        let _tx_id = post_receive_journal_entry(&mut tx, org_id, user_id, total_amount, &audit_note).await?;
+
         updated_balances.push(balance);
     }
 
     tx.commit().await?;
 
     Ok(updated_balances)
+}
+
+pub async fn post_receive_journal_entry(
+    conn: &mut PgConnection,
+    org_id: Uuid,
+    user_id: Uuid,
+    total_value: Decimal, // quantity * unit_cost
+    reference: &str,      // e.g. "Receipt #REC-1002"
+) -> Result<Uuid, ApiError> {
+    if total_value <= Decimal::ZERO {
+        return Ok(Uuid::nil()); // Skip 0-value postings
+    }
+
+    // 1. Fetch system account mappings
+    let system_accounts_map = get_system_accounts(conn, org_id).await?;
+    let accounts = InventorySystemAccounts::from_map(&system_accounts_map)?;
+
+    // 2. Draft Journal Entry
+    // Debit: Inventory Asset (Increases Asset)
+    // Credit: Received Not Invoiced (Increases Liability)
+    let description = Some(format!("Inventory receipt {}", reference));
+    let jels = vec![
+            JournalEntryLine {
+                line_id: Uuid::new_v4(),
+                account_id: accounts.inventory_asset_id,
+                debit: total_value,
+                credit:  Decimal::ZERO,
+                description: description.clone(),
+            },
+            JournalEntryLine {
+                line_id: Uuid::new_v4(),
+                account_id: accounts.received_not_invoiced_id,
+                debit: Decimal::ZERO,
+                credit:  total_value,
+                description: description.clone(),
+            },
+        ];
+
+    let ct_req = CreateTransactionRequest {
+        date: NaiveDate::default(),
+        description,
+        reference: Some(reference.to_string()),
+        entries: jels,
+    };
+    let journal_id =
+        account_service::create_transaction(conn, org_id, &ct_req).await?;
+
+    Ok(journal_id)
+}
+
+pub async fn post_adjustment_journal_entry(
+    conn: &mut PgConnection,
+    org_id: Uuid,
+    user_id: Uuid,
+    adjustment_value: Decimal, // positive = stock gain, negative = stock loss
+    reference: &str,           // e.g. "Adjustment #ADJ-501"
+) -> Result<Uuid, ApiError> {
+    if adjustment_value.is_zero() {
+        return Ok(Uuid::nil());
+    }
+
+    let system_accounts_map = get_system_accounts(conn, org_id).await?;
+    let accounts = InventorySystemAccounts::from_map(&system_accounts_map)?;
+
+    let (debit_account, credit_account, amount) = if adjustment_value > Decimal::ZERO {
+        // Gain: Debit Asset, Credit Adjustment (P&L Gain)
+        (accounts.inventory_asset_id, accounts.inventory_adjustment_id, adjustment_value)
+    } else {
+        // Loss: Debit Adjustment (P&L Expense), Credit Asset
+        let abs_amount = adjustment_value.abs();
+        (accounts.inventory_adjustment_id, accounts.inventory_asset_id, abs_amount)
+    };
+
+    let description = Some(format!("Inventory receipt {}", reference));
+    let jels = vec![
+        JournalEntryLine {
+            line_id: Uuid::new_v4(),
+            account_id: debit_account,
+            debit: amount,
+            credit:  Decimal::ZERO,
+            description: description.clone(),
+        },
+        JournalEntryLine {
+            line_id: Uuid::new_v4(),
+            account_id: credit_account,
+            debit: Decimal::ZERO,
+            credit:  amount,
+            description: description.clone(),
+        },
+    ];
+
+    let ct_req = CreateTransactionRequest {
+        date: NaiveDate::default(),
+        description,
+        reference: Some(reference.to_string()),
+        entries: jels,
+    };
+    let journal_id =
+        account_service::create_transaction(conn, org_id, &ct_req).await?;
+
+    Ok(journal_id)
 }

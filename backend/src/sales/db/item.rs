@@ -58,6 +58,8 @@ pub async fn all(
         query.push_str(" AND is_active = true");
     }
 
+    query.push_str(" ORDER BY code");
+
     query.push_str(&format!(" LIMIT ${}", i));
 
     let mut query_builder = sqlx::query_as::<_, Item>(&query).bind(org_id);
@@ -94,8 +96,8 @@ pub async fn create(
 ) -> Result<Item, sqlx::Error> {
     sqlx::query_as::<_, Item>(
         r#"INSERT INTO items (
-               id, organization_id, code, name, description, item_type, uom_id, unit_price, income_account_id, tax_category_id, is_active)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *"#)
+               id, organization_id, code, name, description, item_type, uom_id, unit_price, purchase_unit_cost, income_account_id, tax_category_id, is_active)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *"#)
         .bind(Uuid::new_v4())
         .bind(&org_id)
         .bind(&item.code)
@@ -104,6 +106,7 @@ pub async fn create(
         .bind(&item.item_type)
         .bind(&item.uom_id)
         .bind(&item.unit_price)
+        .bind(&item.unit_cost)
         .bind(&item.income_account_id)
         .bind(&item.tax_category_id)
         .bind(true)
@@ -125,10 +128,11 @@ pub async fn update(
                  item_type = $4,
                  uom_id = $5,
                  unit_price = $6,
-                 income_account_id = $7,
-                 tax_category_id = $8,
-                 is_active = $9
-             WHERE id = $10 AND organization_id = $11 RETURNING *"#,
+                 purchase_unit_cost = $7,
+                 income_account_id = $8,
+                 tax_category_id = $9,
+                 is_active = $10
+             WHERE id = $11 AND organization_id = $12 RETURNING *"#,
     )
     .bind(&item.code)
     .bind(&item.name)
@@ -136,6 +140,7 @@ pub async fn update(
     .bind(&item.item_type)
     .bind(&item.uom_id)
     .bind(&item.unit_price)
+    .bind(&item.unit_cost)
     .bind(&item.income_account_id)
     .bind(&item.tax_category_id)
     .bind(&item.is_active)

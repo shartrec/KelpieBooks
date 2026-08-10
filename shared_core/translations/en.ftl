@@ -211,6 +211,20 @@ coa-error-update-account = Failed to update account: { $status }
 coa-error-not-found = Account not found
 coa-error-delete-account = Failed to delete account: { $status }
 
+# System account display names
+system-tag-cash_at_bank = Cash at Bank
+system-tag-accounts_receivable = Accounts Receivable
+system-tag-accounts_payable = Accounts Payable
+system-tag-retained_earnings = Retained Earnings
+system-tag-sales_tax_payable = Sales Tax Payable
+system-tag-sales_tax_clearing = Tax Clearing
+system-tag-revenue = Revenue
+system-tag-expense = Expense
+system-tag-cost_of_goods_sold = Cost of Goods Sold
+system-tag-inventory_asset = Inventory Asset
+system-tag-received_not_invoiced = Received Not Invoiced (RNI)
+system-tag-inventory_adjustment = Inventory Adjustment
+
 # Add/Edit Account Modal
 account-modal-add-title = Add New Account
 account-modal-edit-title = Edit Account
@@ -724,6 +738,7 @@ item-list-code = Code
 item-list-name = Name
 item-list-type = Type
 item-list-price = Price
+item-list-unit-cost = Unit Cost
 item-list-add-item-button = Add Item
 item-list-error-parse-items = Failed to parse items: { $error }
 item-list-error-fetch-items = Failed to fetch items: { $status }
@@ -736,6 +751,7 @@ item-type-label = Type:
 item-uom-label = Unit of Measure:
 item-select-uom = Select a unit of measure
 item-price-label = Price:
+item-cost-label = Unit Cost:
 item-tax-category-label = Tax Category:
 item-select-tax-category = Select a tax category
 item-income-account-label = Income Account:

@@ -211,6 +211,20 @@ coa-error-update-account = Impossible de mettre à jour le compte : { $status }
 coa-error-not-found = Compte non trouvé
 coa-error-delete-account = Impossible de supprimer le compte : { $status }
 
+# System account display names
+system-tag-cash_at_bank = Banque
+system-tag-accounts_receivable = Comptes clients
+system-tag-accounts_payable = Comptes fournisseurs
+system-tag-retained_earnings = Report à nouveau
+system-tag-sales_tax_payable = TVA à payer
+system-tag-sales_tax_clearing = Compte d'attente TVA
+system-tag-revenue = Produits / Ventes
+system-tag-expense = Charges / Dépenses
+system-tag-cost_of_goods_sold = Coût des marchandises vendues
+system-tag-inventory_asset = Actif de stock
+system-tag-received_not_invoiced = Factures non parvenues (FNP)
+system-tag-inventory_adjustment = Ajustement de stock
+
 # Add/Edit Account Modal
 account-modal-add-title = Ajouter un nouveau compte
 account-modal-edit-title = Modifier le compte
@@ -724,6 +738,7 @@ item-list-code = Code
 item-list-name = Nom
 item-list-type = Type
 item-list-price = Prix
+item-list-unit-cost = Coût unitaire
 item-list-add-item-button = Ajouter un article
 item-list-error-parse-items = Impossible d'analyser les articles : { $error }
 item-list-error-fetch-items = Impossible de récupérer les articles : { $status }
@@ -736,6 +751,7 @@ item-type-label = Type :
 item-uom-label = Unité de mesure :
 item-select-uom = Sélectionner une unité de mesure
 item-price-label = Prix :
+item-cost-label = Coût unitaire :
 item-tax-category-label = Catégorie fiscale :
 item-select-tax-category = Sélectionner un catégorie fiscale
 item-income-account-label = Compte de revenus :

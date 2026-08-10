@@ -62,6 +62,8 @@ pub struct Item {
     pub item_type: ItemType,
     pub uom_id: Uuid,        // 💡 Linked Unit of Measure ID
     pub unit_price: Decimal, // 💡 Scaled to 4 decimal places (e.g. 1245 = $0.1245)
+    #[cfg_attr(feature = "backend", sqlx(rename = "purchase_unit_cost"))]
+    pub unit_cost: Decimal, // 💡 Scaled to 4 decimal places (e.g. 1245 = $0.1245)
     pub income_account_id: Uuid,
     pub tax_category_id: Option<Uuid>,
     pub is_active: bool,
