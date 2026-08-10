@@ -1,0 +1,60 @@
+/*
+ * Copyright (c) 2026.
+ *
+ * This file is part of KelpieBooks. For terms of use, please see the file
+ * called LICENSE at the top level of the KelpieBooks source tree
+ *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
+ */
+
+use chrono::NaiveDate;
+use rust_decimal::Decimal;
+use serde::{
+    Deserialize,
+    Serialize,
+};
+use uuid::Uuid;
+
+use crate::sales::models::invoice_address::InvoiceAddress;
+pub use crate::sales::models::{
+    sales_order_item::SalesOrderItem,
+    sales_order_status::SalesOrderStatus,
+};
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct SalesOrder {
+    pub id: Uuid,
+    pub org_id: Uuid,
+    pub partner_id: Uuid,
+    pub warehouse_id: Uuid,
+    pub warehouse_name: String,
+    pub order_number: String,
+    pub order_date: NaiveDate,
+    pub status: SalesOrderStatus,
+    pub subtotal: Decimal,
+    pub tax_total: Decimal,
+    pub total_amount: Decimal,
+    // Optional references to saved partner addresses used to populate the snapshots
+    pub billing_address_id: Option<Uuid>,
+    pub shipping_address_id: Option<Uuid>,
+
+    // Snapshots stored on the order (overridable by user per-order)
+    pub bill_to: InvoiceAddress,
+    pub ship_to: InvoiceAddress,
+    pub lines: Vec<SalesOrderItem>,
+}
+
+impl SalesOrder {
+    pub fn calculate(&mut self) {
+        let mut net_amount = Decimal::ZERO;
+        let mut tax_amount = Decimal::ZERO;
+
+        for line in &mut self.lines {
+            net_amount += line.net_amount;
+            tax_amount += line.tax_amount;
+        }
+
+        self.subtotal = net_amount;
+        self.tax_total = tax_amount;
+        self.total_amount = net_amount + tax_amount;
+    }
+}
