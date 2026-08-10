@@ -189,6 +189,7 @@ sidebar-users = Utilisateurs
 sidebar-roles = Rôles
 sidebar-sales = Ventes
 sidebar-sales-orders = Commandes clients
+sidebar-help = Aide
 sidebar-about = À propos de KelpieBooks...
 
 # Boîte de dialogue À propos

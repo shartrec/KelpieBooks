@@ -93,6 +93,10 @@ pub fn sidebar() -> Html {
         Callback::from(move |()| show_about.set(false))
     };
 
+    if let Some(contrib) = get_help_contribution(on_about_open) {
+        registry.push(contrib);
+    }
+
     html! {
         <>
             if *show_about {
@@ -113,11 +117,6 @@ pub fn sidebar() -> Html {
                         })}
                     </ul>
                 </nav>
-                <footer class="sidebar__footer">
-                    <button class="sidebar__about-button" onclick={on_about_open}>
-                        { i18n.t("sidebar-about") }
-                    </button>
-                </footer>
             </aside>
         </>
     }
@@ -130,6 +129,7 @@ pub struct SidebarModuleContribution {
     pub label_key: &'static str, // The translation key for fluent i18n
     pub privilege: Option<SystemPrivilege>, // Mandatory clearance flag if applicable
     pub target_route: Option<Route>, // Target destination if it's a leaf node
+    pub on_click: Option<Callback<()>>, // Callback action, use route or callback not both
     pub children: Vec<SidebarModuleContribution>, // Submenu arrays (e.g., Reports)
 }
 
@@ -185,6 +185,21 @@ fn sidebar_group_node(props: &GroupNodeProps) -> Html {
         html! {
             <li><Link<Route> to={target_route.clone()}>{ i18n.t(item.label_key) }</Link<Route>></li>
         }
+    } else if let Some(on_click) = &item.on_click {
+        // 2. Action Button Node (Matches standard link styling)
+        let on_click = on_click.clone();
+        let handle_click = Callback::from(move |e: MouseEvent| {
+            e.prevent_default();
+            on_click.emit(());
+        });
+
+        html! {
+            <li>
+                <a href="#" class="sidebar__action-item" onclick={handle_click}>
+                    { i18n.t(item.label_key) }
+                </a>
+            </li>
+        }
     } else {
         // Group Dropdown Node with child nodes
         html! {
@@ -211,12 +226,14 @@ pub fn get_core_contribution() -> Option<SidebarModuleContribution> {
         label_key: "sidebar-admin",
         privilege: Some(SystemPrivilege::ManageUsers),
         target_route: None,
+        on_click: None,
         children: vec![
             SidebarModuleContribution {
                 id: "sidebar-users",
                 label_key: "sidebar-users",
                 privilege: Some(SystemPrivilege::ManageUsers),
                 target_route: Some(Route::Users),
+                on_click: None,
                 children: vec![],
             },
             SidebarModuleContribution {
@@ -224,6 +241,27 @@ pub fn get_core_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "sidebar-roles",
                 privilege: Some(SystemPrivilege::ManageUsers),
                 target_route: Some(Route::Roles),
+                on_click: None,
+                children: vec![],
+            },
+        ],
+    })
+}
+
+pub fn get_help_contribution(on_about_open: Callback<()>) -> Option<SidebarModuleContribution> {
+    Some(SidebarModuleContribution {
+        id: "sidebar-help",
+        label_key: "sidebar-help",
+        privilege: Some(SystemPrivilege::ManageUsers),
+        target_route: None,
+        on_click: None,
+        children: vec![
+            SidebarModuleContribution {
+                id: "sidebar-about",
+                label_key: "sidebar-about",
+                privilege: Some(SystemPrivilege::ManageUsers),
+                target_route: None,
+                on_click: Some(on_about_open),
                 children: vec![],
             },
         ],

@@ -27,7 +27,7 @@ pub fn about_modal(props: &AboutModalProps) -> Html {
 
     html! {
         <div class="drawer-overlay" onclick={on_close.clone()}>
-            <div class="modal modal--about" onclick={|e: MouseEvent| e.stop_propagation()}>
+            <div class="modal about-modal" onclick={|e: MouseEvent| e.stop_propagation()}>
                 <header class="drawer__header">
                     <h3>{ i18n.t("about-title") }</h3>
                     <button class="btn-close" type="button" onclick={on_close.clone()}>

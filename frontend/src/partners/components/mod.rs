@@ -24,11 +24,13 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
         label_key: "sidebar-partners",
         privilege: Some(SystemPrivilege::UsePartners),
         target_route: None,
+        on_click: None,
         children: vec![SidebarModuleContribution {
             id: "partner-list",
             label_key: "partner-list-title",
             privilege: Some(SystemPrivilege::UsePartners),
             target_route: Some(Route::PartnerList),
+            on_click: None,
             children: vec![],
         }],
     })

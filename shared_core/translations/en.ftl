@@ -189,6 +189,7 @@ sidebar-users = Users
 sidebar-roles = Roles
 sidebar-sales = Sales
 sidebar-sales-orders = Sales Orders
+sidebar-help = Help
 sidebar-about = About KelpieBooks...
 
 # About dialog

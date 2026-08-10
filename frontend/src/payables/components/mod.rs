@@ -25,12 +25,14 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
         label_key: "sidebar-payables",
         privilege: Some(SystemPrivilege::UseVendorInvoices),
         target_route: None,
+        on_click: None,
         children: vec![
             SidebarModuleContribution {
                 id: "payables-ledger",
                 label_key: "payables-ledger-title",
                 privilege: Some(SystemPrivilege::UseVendorInvoices),
                 target_route: Some(Route::Payables),
+                on_click: None,
                 children: vec![],
             },
             SidebarModuleContribution {
@@ -38,11 +40,13 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "sidebar-reports",
                 privilege: Some(SystemPrivilege::UseVendorInvoices),
                 target_route: None,
+                on_click: None,
                 children: vec![SidebarModuleContribution {
                     id: "sidebar-aged-payables",
                     label_key: "sidebar-aged-payables",
                     privilege: Some(SystemPrivilege::UseVendorInvoices),
                     target_route: Some(Route::AgedPayables),
+                    on_click: None,
                     children: vec![],
                 }],
             },

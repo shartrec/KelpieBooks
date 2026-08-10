@@ -40,12 +40,14 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
         label_key: "sidebar-sales",
         privilege: Some(SystemPrivilege::UseSales),
         target_route: None,
+        on_click: None,
         children: vec![
             SidebarModuleContribution {
                 id: "sales-invoice-list",
                 label_key: "sales-invoice-list",
                 privilege: Some(SystemPrivilege::ManageSales),
                 target_route: Some(Route::SalesLedger),
+                on_click: None,
                 children: vec![],
             },
             SidebarModuleContribution {
@@ -53,6 +55,7 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "new-sales-invoice-title",
                 privilege: Some(SystemPrivilege::ManageSales),
                 target_route: Some(Route::NewSalesInvoice),
+                on_click: None,
                 children: vec![],
             },
             SidebarModuleContribution {
@@ -67,6 +70,7 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "item-list-title",
                 privilege: Some(SystemPrivilege::UseSales),
                 target_route: Some(Route::ItemList),
+                on_click: None,
                 children: vec![],
             },
             SidebarModuleContribution {
@@ -74,6 +78,7 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "uom-list-title",
                 privilege: Some(SystemPrivilege::UseSales),
                 target_route: Some(Route::UomList),
+                on_click: None,
                 children: vec![],
             },
             SidebarModuleContribution {
@@ -81,6 +86,7 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "tax-category-list-title",
                 privilege: Some(SystemPrivilege::UseSales),
                 target_route: Some(Route::TaxCategoryList),
+                on_click: None,
                 children: vec![],
             },
             SidebarModuleContribution {
@@ -88,11 +94,13 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "sidebar-reports",
                 privilege: Some(SystemPrivilege::UseSales),
                 target_route: None,
+                on_click: None,
                 children: vec![SidebarModuleContribution {
                     id: "sidebar-aged-receivables",
                     label_key: "sidebar-aged-receivables",
                     privilege: Some(SystemPrivilege::UseSales),
                     target_route: Some(Route::AgedReceivables),
+                    on_click: None,
                     children: vec![],
                 }],
             },
