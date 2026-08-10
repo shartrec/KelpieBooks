@@ -86,6 +86,7 @@ common-name = Name
 common-category = Category
 common-balance = Balance
 common-actions = Actions
+common-status = Status
 common-cancel = Cancel
 common-edit = Edit
 common-delete = Delete
@@ -187,6 +188,7 @@ sidebar-admin = Admin
 sidebar-users = Users
 sidebar-roles = Roles
 sidebar-sales = Sales
+sidebar-sales-orders = Sales Orders
 
 # Sales invoice list
 sales-invoice-list = Sales Invoices
@@ -720,6 +722,51 @@ new-sales-invoice-billing-override = Billing address override
 new-sales-invoice-shipping-address = Shipping address
 new-sales-invoice-select-shipping = Select shipping address
 new-sales-invoice-shipping-override = Shipping address override
+
+# Sales Order — Create
+new-sales-order-title = New Sales Order
+new-sales-order-date-label = Order Date
+new-sales-order-warehouse-label = Warehouse
+new-sales-order-select-warehouse = — Select a warehouse —
+new-sales-order-save-button = Save Order
+new-sales-order-success = Sales order { $number } was created successfully.
+new-sales-order-error-parse-response = Failed to parse created order: { $error }
+new-sales-order-error-create = Failed to create order: { $status }
+new-sales-order-error-parse-warehouses = Failed to parse warehouses: { $error }
+new-sales-order-error-fetch-warehouses = Failed to fetch warehouses: { $status }
+
+# Sales Order — Status labels
+sales-order-status-open = Open
+sales-order-status-confirmed = Confirmed
+sales-order-status-cancelled = Cancelled
+
+# Sales Orders — List page
+sales-orders-list-title = Sales Orders
+sales-orders-list-new-button = + New Order
+sales-orders-list-filter-all = All
+sales-orders-list-col-number = Order #
+sales-orders-list-col-warehouse = Warehouse
+sales-orders-list-error-parse = Failed to parse orders: { $error }
+sales-orders-list-error-fetch = Failed to fetch orders: { $status }
+
+# Sales Orders — Drawer
+sales-orders-drawer-order-number = Order #{ $number }
+sales-orders-drawer-warehouse = Warehouse: { $warehouse }
+sales-order-drawer-address-edit-future = Address editing coming soon
+sales-orders-drawer-confirm-button = Confirm Order
+sales-orders-drawer-cancel-button = Cancel Order
+sales-orders-drawer-error-confirm = Failed to confirm order: { $status }
+sales-orders-drawer-error-confirm-parse = Failed to parse confirmed order: { $error }
+sales-orders-drawer-error-cancel = Failed to cancel order: { $status }
+sales-orders-drawer-error-parse = Failed to parse order: { $error }
+sales-orders-drawer-error-fetch = Failed to fetch order: { $status }
+
+# Sales Order — Item line columns
+sales-order-item-col-available = Available
+
+# Sales Order — Item availability badge
+sales-order-item-available = { $qty } available
+sales-order-item-insufficient-stock = Only { $qty } available
 
 # Address field labels/placeholders
 address-name = Name

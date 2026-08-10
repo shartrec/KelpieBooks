@@ -9,6 +9,7 @@ pub(crate) mod customer_payment;
 pub(crate) mod customer_payment_allocation;
 pub(crate) mod item;
 pub(crate) mod sales_invoice;
+pub(crate) mod sales_order;
 pub(crate) mod tax_category;
 pub(crate) mod tax_rate;
 pub(crate) mod uom;
