@@ -7,6 +7,7 @@
  */
 use uuid::Uuid;
 
+pub mod about_modal;
 pub mod add_role_modal;
 pub mod add_user_modal;
 pub mod currency_input;

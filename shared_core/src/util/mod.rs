@@ -6,4 +6,4 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-pub(crate) mod info;
+pub mod info;

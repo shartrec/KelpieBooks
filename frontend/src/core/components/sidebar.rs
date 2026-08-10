@@ -22,6 +22,7 @@ use crate::{
         locale_context::use_locale,
     },
     inventory,
+    core::components::about_modal::AboutModal,
     router::Route,
     sales,
 };
@@ -30,6 +31,7 @@ use crate::{
 pub fn sidebar() -> Html {
     let user_ctx = use_user_context();
     let i18n = use_locale();
+    let show_about = use_state(|| false);
 
     let mut registry: Vec<SidebarModuleContribution> = vec![];
 
@@ -82,23 +84,42 @@ pub fn sidebar() -> Html {
         }
     }
 
-    html! {
-        <aside class="sidebar">
-            <div class="sidebar__header">
-                <img src="/images/kelpiedog_120x120_transparent.png" alt={i18n.t("sidebar-logo-alt")} class="sidebar__logo" />
-                <h2>{ i18n.t("branding-app-name") }</h2>
-            </div>
-            <nav class="sidebar__nav">
-                <ul>
-                    <li><Link<Route> to={Route::Dashboard}>{ i18n.t("sidebar-dashboard") }</Link<Route>></li>
+    let on_about_open = {
+        let show_about = show_about.clone();
+        Callback::from(move |_| show_about.set(true))
+    };
+    let on_about_close = {
+        let show_about = show_about.clone();
+        Callback::from(move |()| show_about.set(false))
+    };
 
-                    // 💡 Iterate through the discovered structural modules dynamically
-                    { for registry.into_iter().map(|item| html! {
-                        <SidebarGroupNode item={item} depth={0}/>
-                    })}
-                </ul>
-            </nav>
-        </aside>
+    html! {
+        <>
+            if *show_about {
+                <AboutModal on_close={on_about_close} />
+            }
+            <aside class="sidebar">
+                <div class="sidebar__header">
+                    <img src="/images/kelpiedog_120x120_transparent.png" alt={i18n.t("sidebar-logo-alt")} class="sidebar__logo" />
+                    <h2>{ i18n.t("branding-app-name") }</h2>
+                </div>
+                <nav class="sidebar__nav">
+                    <ul>
+                        <li><Link<Route> to={Route::Dashboard}>{ i18n.t("sidebar-dashboard") }</Link<Route>></li>
+
+                        // 💡 Iterate through the discovered structural modules dynamically
+                        { for registry.into_iter().map(|item| html! {
+                            <SidebarGroupNode item={item} depth={0}/>
+                        })}
+                    </ul>
+                </nav>
+                <footer class="sidebar__footer">
+                    <button class="sidebar__about-button" onclick={on_about_open}>
+                        { i18n.t("sidebar-about") }
+                    </button>
+                </footer>
+            </aside>
+        </>
     }
 }
 

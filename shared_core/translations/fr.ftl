@@ -189,6 +189,16 @@ sidebar-users = Utilisateurs
 sidebar-roles = Rôles
 sidebar-sales = Ventes
 sidebar-sales-orders = Commandes clients
+sidebar-about = À propos de KelpieBooks...
+
+# Boîte de dialogue À propos
+about-title = À propos de KelpieBooks
+about-version = Version
+about-description = KelpieBooks est une application de comptabilité moderne et open source conçue pour les PME et les particuliers. Entièrement construite en Rust avec Rocket, Yew et PostgreSQL.
+about-author-label = Auteur
+about-license-label = Licence
+about-website-label = Code source
+about-docs-label = Documentation
 
 # Liste des factures de vente (Entrée barre latérale)
 sales-invoice-list = Factures de vente
