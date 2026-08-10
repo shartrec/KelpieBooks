@@ -28,12 +28,14 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
         label_key: "sidebar-accounts",
         privilege: Some(SystemPrivilege::UseAccounts),
         target_route: None,
+        on_click: None,
         children: vec![
             SidebarModuleContribution {
                 id: "coa-title",
                 label_key: "coa-title",
                 privilege: Some(SystemPrivilege::UseAccounts),
                 target_route: Some(Route::Ledger),
+                on_click: None,
                 children: vec![],
             },
             SidebarModuleContribution {
@@ -41,12 +43,14 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "sidebar-tasks",
                 privilege: Some(SystemPrivilege::ManageAccounts),
                 target_route: None,
+                on_click: None,
                 children: vec![
                     SidebarModuleContribution {
                         id: "sidebar-close-year",
                         label_key: "sidebar-close-year",
                         privilege: Some(SystemPrivilege::ManageAccounts),
                         target_route: Some(Route::CloseYear),
+                        on_click: None,
                         children: vec![],
                     },
                     SidebarModuleContribution {
@@ -54,6 +58,7 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                         label_key: "sidebar-period-settings",
                         privilege: Some(SystemPrivilege::ManageAccounts),
                         target_route: Some(Route::PeriodSettings),
+                        on_click: None,
                         children: vec![],
                     },
                     SidebarModuleContribution {
@@ -61,6 +66,7 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                         label_key: "sidebar-configuration",
                         privilege: Some(SystemPrivilege::ManageAccounts),
                         target_route: Some(Route::Configuration),
+                        on_click: None,
                         children: vec![],
                     },
                 ],
@@ -70,12 +76,14 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "sidebar-reports",
                 privilege: Some(SystemPrivilege::UseTransactions),
                 target_route: None,
+                on_click: None,
                 children: vec![
                     SidebarModuleContribution {
                         id: "sidebar-trial-balance",
                         label_key: "sidebar-trial-balance",
                         privilege: Some(SystemPrivilege::UseTransactions),
                         target_route: Some(Route::TrialBalance),
+                        on_click: None,
                         children: vec![],
                     },
                     SidebarModuleContribution {
@@ -83,6 +91,7 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                         label_key: "sidebar-profit-loss",
                         privilege: Some(SystemPrivilege::UseTransactions),
                         target_route: Some(Route::ProfitLoss),
+                        on_click: None,
                         children: vec![],
                     },
                     SidebarModuleContribution {
@@ -90,6 +99,7 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                         label_key: "sidebar-balance-sheet",
                         privilege: Some(SystemPrivilege::UseTransactions),
                         target_route: Some(Route::BalanceSheet),
+                        on_click: None,
                         children: vec![],
                     },
                     SidebarModuleContribution {
@@ -97,6 +107,7 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                         label_key: "sidebar-general-ledger",
                         privilege: Some(SystemPrivilege::UseTransactions),
                         target_route: Some(Route::GeneralLedger),
+                        on_click: None,
                         children: vec![],
                     },
                 ],

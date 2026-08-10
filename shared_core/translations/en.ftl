@@ -180,6 +180,7 @@ sidebar-admin = Admin
 sidebar-users = Users
 sidebar-roles = Roles
 sidebar-sales = Sales
+sidebar-help = Help
 sidebar-about = About KelpieBooks...
 
 # About dialog
