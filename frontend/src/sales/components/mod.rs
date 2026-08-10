@@ -17,6 +17,8 @@ pub mod item_row;
 pub mod sales_invoice_drawer;
 pub mod sales_invoice_filter;
 pub mod sales_invoice_item_row;
+pub mod sales_order_drawer;
+pub mod sales_order_item_row;
 pub mod sales_invoice_table;
 pub mod tax_category_drawer;
 pub mod tax_category_list_table;
@@ -52,6 +54,13 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "new-sales-invoice-title",
                 privilege: Some(SystemPrivilege::ManageSales),
                 target_route: Some(Route::NewSalesInvoice),
+                children: vec![],
+            },
+            SidebarModuleContribution {
+                id: "sales-orders",
+                label_key: "sidebar-sales-orders",
+                privilege: Some(SystemPrivilege::UseSales),
+                target_route: Some(Route::SalesOrders),
                 children: vec![],
             },
             SidebarModuleContribution {

@@ -7,7 +7,9 @@
  */
 pub mod item_list;
 pub mod new_sales_invoice;
+pub mod new_sales_order;
 pub mod sales_ledger;
+pub mod sales_orders;
 pub mod tax_category_list;
 pub mod uom_list;
 pub mod aged_receivables;

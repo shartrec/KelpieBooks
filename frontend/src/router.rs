@@ -93,6 +93,12 @@ pub enum Route {
     #[at("/sales/new")]
     NewSalesInvoice,
     #[cfg(feature = "sales")]
+    #[at("/sales/orders")]
+    SalesOrders,
+    #[cfg(feature = "sales")]
+    #[at("/sales/orders/new")]
+    NewSalesOrder,
+    #[cfg(feature = "sales")]
     #[at("/sales/reports/aged-receivables")]
     AgedReceivables,
 

@@ -79,6 +79,7 @@ common-name = Nom
 common-category = Catégorie
 common-balance = Solde
 common-actions = Actions
+common-status = Statut
 common-cancel = Annuler
 common-edit = Modifier
 common-delete = Supprimer
@@ -180,6 +181,7 @@ sidebar-admin = Administration
 sidebar-users = Utilisateurs
 sidebar-roles = Rôles
 sidebar-sales = Ventes
+sidebar-sales-orders = Commandes clients
 
 # Liste des factures de vente (Entrée barre latérale)
 sales-invoice-list = Factures de vente
@@ -699,6 +701,51 @@ new-sales-invoice-billing-override = Remplacer l'adresse de facturation
 new-sales-invoice-shipping-address = Adresse de livraison
 new-sales-invoice-select-shipping = Sélectionner l'adresse de livraison
 new-sales-invoice-shipping-override = Remplacer l'adresse de livraison
+
+# Sales Order — Create
+new-sales-order-title = Nouvelle commande de vente
+new-sales-order-date-label = Date de commande
+new-sales-order-warehouse-label = Entrepôt
+new-sales-order-select-warehouse = — Sélectionner un entrepôt —
+new-sales-order-save-button = Enregistrer la commande
+new-sales-order-success = La commande de vente { $number } a été créée avec succès.
+new-sales-order-error-parse-response = Échec de l'analyse de la commande créée : { $error }
+new-sales-order-error-create = Échec de la création de la commande : { $status }
+new-sales-order-error-parse-warehouses = Échec de l'analyse des entrepôts : { $error }
+new-sales-order-error-fetch-warehouses = Échec du chargement des entrepôts : { $status }
+
+# Sales Order — Status labels
+sales-order-status-open = Ouvert
+sales-order-status-confirmed = Confirmé
+sales-order-status-cancelled = Annulé
+
+# Sales Orders — List page
+sales-orders-list-title = Commandes clients
+sales-orders-list-new-button = + Nouvelle commande
+sales-orders-list-filter-all = Tous
+sales-orders-list-col-number = N° commande
+sales-orders-list-col-warehouse = Entrepôt
+sales-orders-list-error-parse = Échec de l'analyse des commandes : { $error }
+sales-orders-list-error-fetch = Échec du chargement des commandes : { $status }
+
+# Sales Orders — Drawer
+sales-orders-drawer-order-number = Commande n°{ $number }
+sales-orders-drawer-warehouse = Entrepôt : { $warehouse }
+sales-order-drawer-address-edit-future = Modification d'adresse bientôt disponible
+sales-orders-drawer-confirm-button = Confirmer la commande
+sales-orders-drawer-cancel-button = Annuler la commande
+sales-orders-drawer-error-confirm = Échec de la confirmation de la commande : { $status }
+sales-orders-drawer-error-confirm-parse = Échec de l'analyse de la commande confirmée : { $error }
+sales-orders-drawer-error-cancel = Échec de l'annulation de la commande : { $status }
+sales-orders-drawer-error-parse = Échec de l'analyse de la commande : { $error }
+sales-orders-drawer-error-fetch = Échec du chargement de la commande : { $status }
+
+# Sales Order — Item line columns
+sales-order-item-col-available = Disponible
+
+# Sales Order — Item availability badge
+sales-order-item-available = { $qty } disponible
+sales-order-item-insufficient-stock = Seulement { $qty } disponible
 
 # Address field labels/placeholders
 address-name = Nom

@@ -18,6 +18,7 @@ use crate::util::ApiError;
 #[strum(serialize_all = "snake_case")]
 pub enum SeqType {
     SalesInvoice,
+    SalesOrder,
 }
 
 /// Safely increments and formats the next sequential invoice number for an organization without gaps.

@@ -27,6 +27,7 @@ use shared_core::{
             invoice_status::InvoiceStatus,
             sales_invoice::SalesInvoice,
             sales_invoice_item::SalesInvoiceItem,
+            sales_order::SalesOrder,
         },
         requests::sales_invoice::CreateSalesInvoiceRequest,
     }
@@ -399,4 +400,159 @@ pub(crate) async fn get_sales_invoices(
     )
     .await?;
     Ok(items)
+}
+
+/// Creates a `SalesInvoice` (status `Open`) from a confirmed `SalesOrder`.
+///
+/// This function must be called within an already-open database transaction.  It does NOT
+/// begin or commit its own transaction — the caller is responsible for the outer transaction
+/// boundary.  This allows `confirm_order` to keep the stock allocation and invoice creation
+/// within a single ACID transaction.
+pub(crate) async fn create_invoice_from_order(
+    tx: &mut PgConnection,
+    org_id: Uuid,
+    order: &SalesOrder,
+) -> Result<SalesInvoice, ApiError> {
+    // Generate invoice number from the SalesInvoice sequence
+    let inv_number = get_next_invoice_number(tx, org_id, &SeqType::SalesInvoice).await?;
+
+    // Use today as issue/due date (no due date on order; can be adjusted later)
+    let today = chrono::Local::now().date_naive();
+
+    let mut invoice = sales_invoice_db::create_draft_invoice(
+        tx,
+        org_id,
+        order.partner_id,
+        &inv_number,
+        today,
+        today,
+        order.billing_address_id,
+        order.shipping_address_id,
+        order.bill_to.name.as_deref(),
+        order.bill_to.attention.as_deref(),
+        order.bill_to.address_line1.as_deref(),
+        order.bill_to.address_line2.as_deref(),
+        order.bill_to.city.as_deref(),
+        order.bill_to.state_province.as_deref(),
+        order.bill_to.postal_code.as_deref(),
+        order.bill_to.country.as_deref(),
+        order.ship_to.name.as_deref(),
+        order.ship_to.attention.as_deref(),
+        order.ship_to.address_line1.as_deref(),
+        order.ship_to.address_line2.as_deref(),
+        order.ship_to.city.as_deref(),
+        order.ship_to.state_province.as_deref(),
+        order.ship_to.postal_code.as_deref(),
+        order.ship_to.country.as_deref(),
+    )
+    .await?;
+
+    // Map order lines to invoice lines
+    for line in &order.lines {
+        if line.item_id == Uuid::nil() {
+            continue;
+        }
+        let invoice_line = SalesInvoiceItem {
+            id: Uuid::nil(),      // DB will assign
+            invoice_id: invoice.id,
+            item_id: line.item_id,
+            code: line.code.clone(),
+            name: line.name.clone(),
+            description: line.description.clone(),
+            quantity: line.quantity,
+            unit_price: line.unit_price,
+            tax_category_id: line.tax_category_id,
+            tax_rate: line.tax_rate,
+            tax_amount: line.tax_amount,
+            net_amount: line.net_amount,
+            sort_order: line.sort_order,
+        };
+        sales_invoice_db::insert_sales_invoice_line(tx, invoice.id, org_id, &invoice_line).await?;
+    }
+
+    invoice.lines = order
+        .lines
+        .iter()
+        .map(|l| SalesInvoiceItem {
+            id: Uuid::nil(),
+            invoice_id: invoice.id,
+            item_id: l.item_id,
+            code: l.code.clone(),
+            name: l.name.clone(),
+            description: l.description.clone(),
+            quantity: l.quantity,
+            unit_price: l.unit_price,
+            tax_category_id: l.tax_category_id,
+            tax_rate: l.tax_rate,
+            tax_amount: l.tax_amount,
+            net_amount: l.net_amount,
+            sort_order: l.sort_order,
+        })
+        .collect();
+    invoice.calculate();
+
+    sales_invoice_db::update_sales_invoice_totals(
+        tx,
+        invoice.id,
+        invoice.subtotal,
+        invoice.tax_total,
+        invoice.total_amount,
+        invoice.total_amount,
+    )
+    .await?;
+
+    // Post GL entries (AR debit, revenue credits, tax credit)
+    let ar_account = account_db::get_by_system_tag(tx, org_id, &SystemTag::AccountsReceivable)
+        .await?
+        .ok_or_else(|| ApiError::NotFound("Accounts Receivable account not found.".to_string()))?;
+    let tax_account = account_db::get_by_system_tag(tx, org_id, &SystemTag::SalesTaxClearing)
+        .await?
+        .ok_or_else(|| ApiError::NotFound("Tax account not found.".to_string()))?;
+
+    let mut jels = vec![];
+
+    for line in &order.lines {
+        if line.net_amount > dec!(0.00) {
+            let item_master = item_db::get(tx, org_id, line.item_id)
+                .await?
+                .ok_or_else(|| ApiError::NotFound("Item not found.".to_string()))?;
+
+            jels.push(JournalEntryLine {
+                line_id: Uuid::new_v4(),
+                account_id: item_master.income_account_id,
+                debit: dec!(0.00),
+                credit: line.net_amount,
+                description: Some(line.description.clone()),
+            });
+        }
+    }
+
+    if invoice.tax_total > dec!(0.00) {
+        jels.push(JournalEntryLine {
+            line_id: Uuid::new_v4(),
+            account_id: tax_account.id,
+            debit: dec!(0.00),
+            credit: invoice.tax_total,
+            description: Some(format!("Tax collected on invoice {}", invoice.invoice_number)),
+        });
+    }
+
+    jels.push(JournalEntryLine {
+        line_id: Uuid::new_v4(),
+        account_id: ar_account.id,
+        debit: invoice.total_amount,
+        credit: dec!(0.00),
+        description: Some("Customer sales invoice summary".to_string()),
+    });
+
+    let ct_req = CreateTransactionRequest {
+        date: invoice.issue_date,
+        description: Some(format!("Sales Invoice {}", invoice.invoice_number)),
+        reference: Some(invoice.invoice_number.clone()),
+        entries: jels,
+    };
+
+    account_service::create_transaction(tx, org_id, &ct_req).await?;
+
+    Ok(invoice)
 }

@@ -9,3 +9,4 @@
 pub mod item;
 pub mod sales_invoice;
 pub mod customer_payment;
+pub mod sales_order;

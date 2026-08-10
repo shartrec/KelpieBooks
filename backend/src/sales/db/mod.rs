@@ -7,6 +7,7 @@
  */
 pub(crate) mod item;
 pub(crate) mod sales_invoice;
+pub(crate) mod sales_order;
 pub(crate) mod tax_category;
 pub(crate) mod tax_rate;
 pub(crate) mod uom;
