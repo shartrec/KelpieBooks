@@ -28,12 +28,14 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
         label_key: "sidebar-products",
         privilege: Some(SystemPrivilege::UseInventory),
         target_route: None,
+        on_click: None,
         children: vec![
             SidebarModuleContribution {
                 id: "inventory-warehouse-list",
                 label_key: "inventory-warehouse-title",
                 privilege: Some(SystemPrivilege::UseInventory),
                 target_route: Some(Route::WarehouseList),
+                on_click: None,
                 children: vec![],
             },
             SidebarModuleContribution {
@@ -41,6 +43,7 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "item-list-title",
                 privilege: Some(SystemPrivilege::UseInventory),
                 target_route: Some(Route::ItemList),
+                on_click: None,
                 children: vec![],
             },
             SidebarModuleContribution {
@@ -48,6 +51,7 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "uom-list-title",
                 privilege: Some(SystemPrivilege::UseInventory),
                 target_route: Some(Route::UomList),
+                on_click: None,
                 children: vec![],
             },
         ],

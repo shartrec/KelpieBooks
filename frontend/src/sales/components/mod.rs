@@ -63,6 +63,7 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "sidebar-sales-orders",
                 privilege: Some(SystemPrivilege::UseSales),
                 target_route: Some(Route::SalesOrders),
+                on_click: None,
                 children: vec![],
             },
             SidebarModuleContribution {
