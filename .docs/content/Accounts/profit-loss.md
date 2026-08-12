@@ -8,9 +8,7 @@ weight = 81
 
 The Profit & Loss (P&L) statement, also known as the Income Statement, summarizes your company's revenues and expenses over a specific period of time to show its profitability.
 
-{% screenshot() %}
-![Profit & Loss Screenshot](../../screenshots/accounts/profit-and-loss.png)
-{% end %}
+{{< screenshot src="../../screenshots/accounts/profit-and-loss.png" alt="Profit & Loss Screenshot" />}}
 
 ## Generating the Report
 

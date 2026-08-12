@@ -9,9 +9,7 @@ weight = 2
 The Chart of Accounts (CoA) is the complete list of all financial accounts in your organization's general ledger. It
 serves as the foundational structure for all your accounting.
 
-{% screenshot() %}
-![Chart of Accounts Screenshot](../../screenshots/accounts/chart-of-accounts.png)
-{% end %}
+{{< screenshot src="../../screenshots/accounts/chart-of-accounts.png" alt="Chart of Accounts Screenshot" />}}
 
 The main CoA screen provides a hierarchical view of your accounts, where balances from child accounts are rolled up into
 their parent accounts.

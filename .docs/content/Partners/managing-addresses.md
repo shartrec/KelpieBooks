@@ -9,9 +9,7 @@ weight = 5
 You can manage a partner's addresses from the **Addresses** tab within the Partner Drawer. This allows you to keep track
 of multiple locations for a single customer or vendor, such as separate billing and shipping addresses.
 
-{% screenshot() %}
-![Managing Addresses Screenshot](../../screenshots/partners/manage-addresses.png)
-{% end %}
+{{< screenshot src="../../screenshots/partners/manage-addresses.png" alt="Managing Addresses Screenshot" />}}
 
 ## Adding an Address
 

@@ -10,9 +10,7 @@ To edit an existing partner, click the **Edit** button in the "Actions" column o
 main [Partner List](../partners/) page. This will open the "Partner Drawer," a side panel where you can manage all
 aspects of the partner.
 
-{% screenshot() %}
-![Edit Partner Screenshot](../../screenshots/partners/edit-partner.png)
-{% end %}
+{{< screenshot src="../../screenshots/partners/edit-partner.png" alt="Edit Partner Screenshot" />}}
 
 The Partner Drawer has three tabs:
 

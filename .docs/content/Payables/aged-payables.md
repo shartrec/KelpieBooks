@@ -9,9 +9,7 @@ weight = 4
 The Aged Payables report provides a snapshot of your outstanding vendor invoices, grouped by how long they have been
 outstanding. This report is an essential tool for managing cash flow and prioritizing payments.
 
-{% screenshot() %}
-![Aged Payables Report Screenshot](../../screenshots/payables/aged-payables.png)
-{% end %}
+{{< screenshot src="../../screenshots/payables/aged-payables.png" alt="Aged Payables Report Screenshot" />}}
 
 ## Report Columns
 

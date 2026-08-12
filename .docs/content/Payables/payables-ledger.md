@@ -9,9 +9,7 @@ weight = 1
 The Payables Ledger is your central hub for managing all vendor invoices. It provides a comprehensive list of all
 outstanding and paid invoices, along with powerful filtering tools to help you stay on top of your liabilities.
 
-{% screenshot() %}
-![Payables Ledger Screenshot](../../screenshots/payables/payables-ledger.png)
-{% end %}
+{{< screenshot src="../../screenshots/payables/payables-ledger.png" alt="Payables Ledger Screenshot" />}}
 
 ## The Invoice List
 

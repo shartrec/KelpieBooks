@@ -11,9 +11,7 @@ The Balance Sheet is a financial statement that provides a snapshot of your comp
 The fundamental accounting equation is always at the heart of the Balance Sheet:
 **Assets = Liabilities + Equity**
 
-{% screenshot() %}
-![Balance Sheet Screenshot](../../screenshots/accounts/balance-sheet.png)
-{% end %}
+{{< screenshot src="../../screenshots/accounts/balance-sheet.png" alt="Balance Sheet Screenshot" />}}
 
 ## Generating the Report
 

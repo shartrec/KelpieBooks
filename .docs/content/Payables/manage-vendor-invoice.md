@@ -20,18 +20,14 @@ The drawer has three main tabs:
 The "General" tab displays the core information about the invoice, such as the vendor, invoice number, dates, and
 amounts. You can also add or edit notes for the invoice here.
 
-{% screenshot() %}
-![Manage Vendor Invoice - General Tab Screenshot](../../screenshots/payables/manage-vendor-invoice-general.png)
-{% end %}
+{{< screenshot src="../../screenshots/payables/manage-vendor-invoice-general.png" alt="Manage Vendor Invoice - General Tab Screenshot" />}}
 
 ## The Items Tab
 
 The "Items" tab lists all the individual line items on the invoice. From here, you can add new items, edit existing
 ones, or delete them.
 
-{% screenshot() %}
-![Manage Vendor Invoice - Items Tab Screenshot](../../screenshots/payables/manage-vendor-invoice-items.png)
-{% end %}
+{{< screenshot src="../../screenshots/payables/manage-vendor-invoice-items.png" alt="Manage Vendor Invoice - Items Tab Screenshot" />}}
 
 Each line item includes a description, the expense account it's allocated to, and the net and tax amounts.
 
@@ -40,9 +36,7 @@ Each line item includes a description, the expense account it's allocated to, an
 The "Payments" tab is where you can record payments made against the invoice. It shows a list of all payments that have
 already been made and provides a form to enter a new payment.
 
-{% screenshot() %}
-![Manage Vendor Invoice - Payments Tab Screenshot](../../screenshots/payables/manage-vendor-invoice-payments.png)
-{% end %}
+{{< screenshot src="../../screenshots/payables/manage-vendor-invoice-payments.png" alt="Manage Vendor Invoice - Payments Tab Screenshot" />}}
 
 To make a new payment, you need to provide:
 

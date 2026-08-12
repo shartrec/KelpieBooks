@@ -8,9 +8,7 @@ weight = 85
 
 The Trial Balance is a report that lists all the accounts in your Chart of Accounts and their balances at a specific point in time. Its primary purpose is to ensure that the total debits equal the total credits, confirming the integrity of your ledger.
 
-{% screenshot() %}
-![Trial Balance Screenshot](../../screenshots/accounts/trial-balance.png)
-{% end %}
+{{< screenshot src="../../screenshots/accounts/trial-balance.png" alt="Trial Balance Screenshot" />}}
 
 ## Generating the Report
 
