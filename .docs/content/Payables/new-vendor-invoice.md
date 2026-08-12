@@ -9,9 +9,7 @@ weight = 2
 You can create a new vendor invoice by clicking the **+ New Invoice** button on the
 main [Payables Ledger](../payables-ledger/) page. This will take you to the "New Vendor Invoice" screen.
 
-{% screenshot() %}
-![New Vendor Invoice Screenshot](../../screenshots/payables/new-vendor-invoice.png)
-{% end %}
+{{< screenshot src="../../screenshots/payables/new-vendor-invoice.png" alt="New Vendor Invoice Screenshot" />}}
 
 ## Invoice Header
 

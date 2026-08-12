@@ -8,9 +8,7 @@ weight = 1
 
 The Partner List is where you manage all of your customers and vendors. A partner can be a customer, a vendor, or both.
 
-{% screenshot() %}
-![Partner List Screenshot](../../screenshots/partners/partner-list.png)
-{% end %}
+{{< screenshot src="../../screenshots/partners/partner-list.png" alt="Partner List Screenshot" />}}
 
 ## The Partner Table
 

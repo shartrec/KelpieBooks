@@ -8,9 +8,7 @@ weight = 4
 
 Catalog Items represent the goods or services your organization sells. By maintaining a centralized catalog, you can quickly add pre-configured items to sales invoices with consistent naming, pricing, and appropriate tax rules.
 
-{% screenshot() %}
-![Catalog Items List Screenshot](../../screenshots/sales/item-list.png)
-{% end %}
+{{< screenshot src="../../screenshots/sales/item-list.png" alt="Catalog Items List Screenshot" />}}
 
 ## Searching and Filtering Items
 
@@ -36,9 +34,7 @@ On the **Items** page, you can search for items by code or name using the filter
    - **Tax Category**: Assign a predefined tax category to determine the tax rate applied to this item during invoicing.
 4. Click **Save** to add the item.
 
-{% screenshot() %}
-![Add Catalog Item Modal Screenshot](../../screenshots/sales/add-item.png)
-{% end %}
+{{< screenshot src="../../screenshots/sales/add-item.png" alt="Add Catalog Item Modal Screenshot" />}}
 
 ## Editing or Disabling a Catalog Item
 

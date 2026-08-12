@@ -9,9 +9,7 @@ weight = 1
 The Sales Ledger is your central hub for managing all sales invoices. It provides a comprehensive list of all drafted,
 outstanding, and fully paid invoices, along with powerful filtering tools to help you manage your accounts receivable.
 
-{% screenshot() %}
-![Sales Ledger Screenshot](../../screenshots/sales/sales-invoice-list.png)
-{% end %}
+{{< screenshot src="../../screenshots/sales/sales-invoice-list.png" alt="Sales Ledger Screenshot" />}}
 
 ## The Invoice List
 

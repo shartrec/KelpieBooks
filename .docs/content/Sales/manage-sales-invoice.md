@@ -36,9 +36,7 @@ The **Addresses** tab shows the **Billing Address** and **Shipping Address** ass
 
 The **Items** tab lists all lines currently on the invoice, showing descriptions, quantities, and financial breakdowns (Net, Tax, and Gross amounts) for each.
 
-{% screenshot() %}
-![Manage Sales Invoice - Items Tab Screenshot](../../screenshots/sales/manage-sales-invoice-items.png)
-{% end %}
+{{< screenshot src="../../screenshots/sales/manage-sales-invoice-items.png" alt="Manage Sales Invoice - Items Tab Screenshot" />}}
 
 ### Adding an Item
 1. Click the **+ Add Item** button.
@@ -61,9 +59,7 @@ Once you have updated the items, click **Save Changes** at the bottom of the tab
 
 The **Payments** tab displays a history of all payments recorded against this invoice and includes a form to submit new payments.
 
-{% screenshot() %}
-![Manage Sales Invoice - Payments Tab Screenshot](../../screenshots/sales/manage-sales-invoice-payments.png)
-{% end %}
+{{< screenshot src="../../screenshots/sales/manage-sales-invoice-payments.png" alt="Manage Sales Invoice - Payments Tab Screenshot" />}}
 
 To record a new payment:
 - **Payment Date**: The date the customer payment was received.

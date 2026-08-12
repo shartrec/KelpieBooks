@@ -1,0 +1,16 @@
+{% component screenshot(src: string, alt: string = "Screenshot") %}
+<div class="screenshot-frame">
+    <div class="screenshot-wrapper">
+        <img src="{{ src }}" alt="{{ alt }}" />
+    </div>
+</div>
+{% endcomponent screenshot %}
+
+{% component warning(w: string) %}
+<div class="warning-card">
+    <div class="warning-card-icon">⚠️</div>
+    <div class="warning-card-content">
+        <p>{{ w }}</p>
+    </div>
+</div>
+{% endcomponent warning %}

@@ -8,17 +8,14 @@ weight = 8
 
 You can edit an existing transaction by clicking the **Edit** button (the pencil icon) on the [Account Ledger](./../account-ledger/) page. This will open the transaction in the "Edit Journal Transaction" screen.
 
-{% screenshot() %}
-![Edit Transaction Screenshot](../../screenshots/accounts/edit-transaction.png)
-{% end %}
+{{< screenshot src="../../screenshots/accounts/edit-transaction.png" alt="Edit Transaction Screenshot" />}}
 
-{% warning() %}You can only edit a transaction if the following conditions are met:
+{{<warning w="You can only edit a transaction if the following conditions are met:
 
 - The transaction occurred within the **current, open accounting period**.
 - **Strict Audit Mode** is turned **off** in the organization's settings.
 
-If these conditions are not met, the "Edit" button will be disabled.
-{% end %}
+If these conditions are not met, the \"Edit\" button will be disabled."/>}}
 
 ## Modifying the Transaction
 

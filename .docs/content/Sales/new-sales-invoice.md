@@ -8,9 +8,7 @@ weight = 2
 
 You can create a new sales invoice by clicking the **+ New Invoice** button on the main [Sales Ledger](../sales-ledger/) page. This will open the **New Sales Invoice** screen.
 
-{% screenshot() %}
-![New Sales Invoice Screenshot](../../screenshots/sales/new-sales-invoice.png)
-{% end %}
+{{< screenshot src="../../screenshots/sales/new-sales-invoice.png" alt="New Sales Invoice Screenshot" />}}
 
 ## Invoice Header
 

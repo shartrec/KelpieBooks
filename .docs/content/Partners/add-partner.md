@@ -9,9 +9,7 @@ weight = 2
 To add a new partner, you begin by clicking the **Add Partner** button on the main [Partner List](../partners/) page.
 This will open the "Add New Partner" modal dialog.
 
-{% screenshot() %}
-![Add Partner Screenshot](../../screenshots/partners/add-partner.png)
-{% end %}
+{{< screenshot src="../../screenshots/partners/add-partner.png" alt="Add Partner Screenshot" />}}
 
 ## Partner Fields
 

@@ -8,9 +8,7 @@ weight = 5
 
 Units of Measure (UoMs) define the quantities used to measure your catalog items (e.g., "Each" for individual products, "Hours" for services, or "Kilograms" for physical weight).
 
-{% screenshot() %}
-![Units of Measure Screenshot](../../screenshots/sales/units-of-measure.png)
-{% end %}
+{{< screenshot src="../../screenshots/sales/units-of-measure.png" alt="Units of Measure Screenshot" />}}
 
 ## Adding a Unit of Measure
 
@@ -22,9 +20,7 @@ Units of Measure (UoMs) define the quantities used to measure your catalog items
    - **Is Active**: Check this box to make the UoM available when configuring catalog items.
 4. Click **Save** to create the Unit of Measure.
 
-{% screenshot() %}
-![Add Unit of Measure Modal Screenshot](../../screenshots/sales/add-edit-uom.png)
-{% end %}
+{{< screenshot src="../../screenshots/sales/add-edit-uom.png" alt="Add Unit of Measure Modal Screenshot" />}}
 
 ## Editing or Deleting a Unit of Measure
 

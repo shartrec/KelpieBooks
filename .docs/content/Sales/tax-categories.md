@@ -8,9 +8,7 @@ weight = 10
 
 Tax Categories allow you to define different tax classifications (e.g., standard sales tax, tax-free, or special reduced rates) and specify their rates over time. These categories are assigned to catalog items to automatically compute tax amounts during sales invoicing.
 
-{% screenshot() %}
-![Tax Categories List Screenshot](../../screenshots/sales/tax-categories.png)
-{% end %}
+{{< screenshot src="../../screenshots/sales/tax-categories.png" alt="Tax Categories List Screenshot" />}}
 
 ## Adding a Tax Category
 
@@ -30,9 +28,7 @@ Select any tax category from the list table to open its **Tax Category Drawer**.
 
 The **General** tab allows you to edit the basic profile details of the tax category.
 
-{% screenshot() %}
-![Edit Tax Category - General Tab Screenshot](../../screenshots/sales/edit-tax-category-general.png)
-{% end %}
+{{< screenshot src="../../screenshots/sales/edit-tax-category-general.png" alt="Edit Tax Category - General Tab Screenshot" />}}
 
 - Update the **Name**, **Description**, or toggle the **Is Active** checkbox.
 - Click **Save** to apply changes.
@@ -41,9 +37,7 @@ The **General** tab allows you to edit the basic profile details of the tax cate
 
 A tax category can have multiple tax rates, each applicable within a specific validity period. This ensures historical invoices remain accurate even if tax rates change over time.
 
-{% screenshot() %}
-![Edit Tax Category - Rates Tab Screenshot](../../screenshots/sales/edit-tax-category-rates.png)
-{% end %}
+{{< screenshot src="../../screenshots/sales/edit-tax-category-rates.png" alt="Edit Tax Category - Rates Tab Screenshot" />}}
 
 #### Adding a Tax Rate
 1. Click the **+ Add Rate** button in the **Manage Rates** tab.
