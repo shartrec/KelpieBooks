@@ -16,8 +16,10 @@ deletions.
 
 Before you can delete an account, you must confirm your intention by clicking the **Confirm Delete** button.
 
-{{<warning w="You can only delete accounts that have no transactions. If an account has any associated financial
+{% <warning> %}
+You can only delete accounts that have no transactions. If an account has any associated financial
 history, you will not be able to delete it. This is a critical safety feature to ensure the integrity of your financial
-records."/>}}
+records.
+{% </warning> %}
 If you are sure you want to proceed, and the account has no transactions, clicking the confirmation button will
 permanently remove the account from your Chart of Accounts.

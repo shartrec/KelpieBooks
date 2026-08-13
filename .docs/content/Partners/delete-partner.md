@@ -15,9 +15,12 @@ main [Partner List](../partners/) page. This will open a confirmation modal.
 
 Before you can delete a partner, you must confirm your intention by clicking the **Confirm Delete** button.
 
-{{<warning w="You can only delete partners that have no transactions associated with them. If a partner has any
-financial history, the \"Delete\" button will be disabled. This is a critical safety feature to ensure the integrity of
-your financial records."/>}}
+
+{% <warning> %}
+You can only delete partners that have no transactions associated with them. If a partner has any
+financial history, the "Delete" button will be disabled. This is a critical safety feature to ensure the integrity of
+your financial records.
+{% </warning> %}
 
 If you are sure you want to proceed, and the partner has no transactions, clicking the confirmation button will
 permanently remove the partner from your system.

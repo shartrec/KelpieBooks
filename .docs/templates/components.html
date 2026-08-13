@@ -6,11 +6,11 @@
 </div>
 {% endcomponent screenshot %}
 
-{% component warning(w: string) %}
+{% component warning() %}
 <div class="warning-card">
     <div class="warning-card-icon">⚠️</div>
     <div class="warning-card-content">
-        <p>{{ w }}</p>
+        <p>{{ body }}</p>
     </div>
 </div>
 {% endcomponent warning %}
