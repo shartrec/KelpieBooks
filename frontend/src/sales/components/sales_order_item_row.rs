@@ -182,14 +182,53 @@ pub fn sales_order_item_row(props: &SalesOrderItemRowProps) -> Html {
 
                 // 2. Future B: Inventory Balances Request
                 let url = format!("/api/inventory/items/{}/balances", selected_item.id);
-                let balances_future = Api::get(
-                    &url,
-                    user_ctx.clone(),
-                    navigator.clone(),
-                );
+                let balances_future = async move {
+
+                    #[cfg(feature = "inventory")]
+                    {
+                        let res = Api::get(
+                            &url,
+                            user_ctx.clone(),
+                            navigator.clone(),
+                        )
+                            .await;
+
+
+                        match res {
+                            Ok(response) if response.ok() => {
+                                match response.json::<ItemStockBalancesResponse>().await {
+                                    Ok(balance_data) => {
+                                        Some(balance_data)
+                                    }
+                                    Err(e) => {
+                                        error.set(Some(i18n.t_args(
+                                            "inventory-error-parse-balances",
+                                            &fluent_args!["error" => e.to_string()],
+                                        )));
+                                        None
+                                    },
+                                }
+                            }
+                            Ok(response) => {
+                                info!("Failed to retrieve item balances, status: {}", response.status());
+                                None
+                            }
+                            Err(e) => {
+                                error.set(Some(i18n.t_args(
+                                    "common-network-error",
+                                    &fluent_args!["error" => e.to_string()],
+                                )));
+                                None
+                            },
+                        }
+                    }
+                    #[cfg(not(feature = "inventory"))]{
+                        None
+                    }
+                };
 
                 // 3. Await both concurrently
-                let (fetched_tax_rate, balances_response) = futures::join!(tax_rate_future, balances_future);
+                let (fetched_tax_rate, balances_data) = futures::join!(tax_rate_future, balances_future);
 
                 // Apply fetched tax rate if retrieved
                 if let Some(rate) = fetched_tax_rate {
@@ -197,25 +236,8 @@ pub fn sales_order_item_row(props: &SalesOrderItemRowProps) -> Html {
                 }
 
                 // Process Inventory Balances
-                match balances_response {
-                    Ok(response) if response.ok() => {
-                        match response.json::<ItemStockBalancesResponse>().await {
-                            Ok(balance_data) => {
-                                new_item.quantity_available = balance_data.total_available;
-                            }
-                            Err(e) => error.set(Some(i18n.t_args(
-                                "inventory-error-parse-balances",
-                                &fluent_args!["error" => e.to_string()],
-                            ))),
-                        }
-                    }
-                    Ok(response) => {
-                        info!("Failed to retrieve item balances, status: {}", response.status());
-                    }
-                    Err(e) => error.set(Some(i18n.t_args(
-                        "common-network-error",
-                        &fluent_args!["error" => e.to_string()],
-                    ))),
+                if let Some(balances) = balances_data {
+                    new_item.quantity_available = balances.total_available;
                 }
 
                 // 4. Recalculate net_amount and tax_amount
