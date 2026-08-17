@@ -389,17 +389,19 @@ pub(crate) async fn update_sales_order_totals(
     subtotal: Decimal,
     tax_total: Decimal,
     total_amount: Decimal,
+    amount_remaining: Decimal,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         r#"
         UPDATE sales_orders
-        SET subtotal = $1, tax_total = $2, total_amount = $3
-        WHERE id = $4 AND organization_id = $5
+        SET subtotal = $1, tax_total = $2, total_amount = $3, amount_remaining = $4
+        WHERE id = $5 AND organization_id = $6
         "#,
     )
     .bind(subtotal)
     .bind(tax_total)
     .bind(total_amount)
+    .bind(amount_remaining)
     .bind(id)
     .bind(org_id)
     .execute(conn)

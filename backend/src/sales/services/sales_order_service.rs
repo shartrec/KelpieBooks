@@ -79,6 +79,7 @@ pub(crate) async fn create_order(
         order.subtotal,
         order.tax_total,
         order.total_amount,
+        order.amount_remaining,
     )
     .await?;
 

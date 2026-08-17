@@ -51,6 +51,9 @@ pub struct SalesOrder {
 
 impl SalesOrder {
     pub fn calculate(&mut self) {
+
+        let amount_paid = self.total_amount - self.amount_remaining;
+
         let mut net_amount = Decimal::ZERO;
         let mut tax_amount = Decimal::ZERO;
 
@@ -62,5 +65,7 @@ impl SalesOrder {
         self.subtotal = net_amount;
         self.tax_total = tax_amount;
         self.total_amount = net_amount + tax_amount;
+
+        self.amount_remaining = self.total_amount - amount_paid;
     }
 }
