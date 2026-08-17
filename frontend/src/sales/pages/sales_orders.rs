@@ -10,9 +10,8 @@ use fluent::fluent_args;
 use shared_core::sales::{
     dtos::sales_order_list_item::SalesOrderListItem,
     models::{
-        sales_invoice::SalesInvoice,
         sales_order::SalesOrder,
-        sales_order_status::SalesOrderStatus,
+        sales_document_status::SalesDocumentStatus,
     },
 };
 use uuid::Uuid;
@@ -47,6 +46,9 @@ pub fn sales_orders_page() -> Html {
     // Drawer state
     let selected_order = use_state(|| None::<SalesOrder>);
     let drawer_error = use_state(|| None::<String>);
+
+    // Actions drop down
+    let show_actions = use_state(|| None::<uuid::Uuid>);
 
     // Fetch the order list whenever the status filter changes
     let fetch_orders = {
@@ -120,7 +122,7 @@ pub fn sales_orders_page() -> Html {
     };
 
     // When a row is clicked, fetch the full order and open the drawer
-    let on_row_click = {
+    let on_view_click = {
         let selected_order = selected_order.clone();
         let drawer_error = drawer_error.clone();
         let user_ctx = user_ctx.clone();
@@ -164,11 +166,11 @@ pub fn sales_orders_page() -> Html {
         Callback::from(move |()| selected_order.set(None))
     };
 
-    // On confirm: navigate to SalesLedger so the user sees the new invoice
+    // On confirm: navigate to SalesOrders so the user sees the new order
     let on_confirmed = {
         let navigator = navigator.clone();
-        Callback::from(move |_invoice: SalesInvoice| {
-            navigator.push(&Route::SalesLedger);
+        Callback::from(move |_order: SalesOrder| {
+            navigator.push(&Route::SalesOrders);
         })
     };
 
@@ -189,8 +191,9 @@ pub fn sales_orders_page() -> Html {
             </div>
             <div class="table-actions">
                 <select onchange={on_status_change} value={(*status_filter).clone()}>
+                    <option value="Draft" selected={*status_filter == "Draft"}>{ i18n.t("sales-order-status-draft") }</option>
                     <option value="Open" selected={*status_filter == "Open"}>{ i18n.t("sales-order-status-open") }</option>
-                    <option value="Confirmed" selected={*status_filter == "Confirmed"}>{ i18n.t("sales-order-status-confirmed") }</option>
+                    <option value="Completed" selected={*status_filter == "Completed"}>{ i18n.t("sales-order-status-completed") }</option>
                     <option value="Cancelled" selected={*status_filter == "Cancelled"}>{ i18n.t("sales-order-status-cancelled") }</option>
                     <option value="All" selected={*status_filter == "All"}>{ i18n.t("sales-orders-list-filter-all") }</option>
                 </select>
@@ -219,20 +222,54 @@ pub fn sales_orders_page() -> Html {
                 <tbody>
                     { for (*orders).iter().map(|order| {
                         let id = order.id;
-                        let on_click = {
-                            let on_row_click = on_row_click.clone();
-                            Callback::from(move |_| on_row_click.emit(id))
+                        let on_view = {
+                            let on_view_click = on_view_click.clone();
+                            let show_actions = show_actions.clone();
+                            let order_id = id;
+                            Callback::from(move |_| {
+                                show_actions.set(None);
+                                on_view_click.emit(order_id);
+                            })
                         };
-                        let status_class = status_chip_class(&order.status);
+                       let on_actions_toggle = {
+                            let show_actions = show_actions.clone();
+                            let order_id = id;
+                            Callback::from(move |_| {
+                                if show_actions.as_ref() == Some(&order_id) {
+                                    show_actions.set(None);
+                                } else {
+                                    show_actions.set(Some(order_id));
+                                }
+                            })
+                        };
+                        let status_class = status_chip_class(&order.document_status);
                         html! {
-                            <tr class="clickable-row" onclick={on_click}>
+                            <tr class="clickable-row">
                                 <td class="table__text-col">{ &order.order_number }</td>
                                 <td class="table__text-col">{ &order.partner_name }</td>
                                 <td class="table__text-col">{ &order.warehouse_name }</td>
                                 <td class="table__value-col">{ i18n.format_date(order.order_date) }</td>
-                                <td class="table__text-col"><span class={status_class}>{ status_label(&order.status, &i18n) }</span></td>
-                                <td class="table__value-col">{ i18n.format_currency(order.total_amount) }</td>
-                                <td class="table__col-actions"></td>
+                                <td class="table__text-col"><span class={status_class}>{ status_label(&order.document_status, &i18n) }</span></td>
+                                <td class="table__value-col">{ i18n.format_currency(order.amount_remaining) }</td>
+                                <td class="table__col-actions">
+                                    <div class="actions-dropdown">
+                                        <button class="icon-button" onclick={on_actions_toggle} title={i18n.t("common-actions")}>
+                                            <img src="/images/more-vertical.svg" alt={i18n.t("common-actions")} class="dropdown-trigger-icon" />
+                                        </button>
+                                        if *show_actions == Some(id) {
+                                            <div class="actions-dropdown__content">
+                                                <button class="dropdown-item" onclick={on_view}>
+                                                    <img src="/images/view.svg" alt={i18n.t("common-view")} />
+                                                    <span>{ i18n.t("common-view") }</span>
+                                                </button>
+                                                <button class="dropdown-item">
+                                                    <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
+                                                    <span>{ i18n.t("common-delete") }</span>
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                </td>
                             </tr>
                         }
                     }) }
@@ -251,18 +288,20 @@ pub fn sales_orders_page() -> Html {
     }
 }
 
-fn status_chip_class(status: &SalesOrderStatus) -> &'static str {
+fn status_chip_class(status: &SalesDocumentStatus) -> &'static str {
     match status {
-        SalesOrderStatus::Open => "status-badge status-badge--open",
-        SalesOrderStatus::Confirmed => "status-badge status-badge--confirmed",
-        SalesOrderStatus::Cancelled => "status-badge status-badge--cancelled",
+        SalesDocumentStatus::Draft => "status-badge status-badge--draft",
+        SalesDocumentStatus::Open => "status-badge status-badge--open",
+        SalesDocumentStatus::Completed => "status-badge status-badge--completed",
+        SalesDocumentStatus::Cancelled => "status-badge status-badge--cancelled",
     }
 }
 
-fn status_label(status: &SalesOrderStatus, i18n: &LocaleContext) -> String {
+fn status_label(status: &SalesDocumentStatus, i18n: &LocaleContext) -> String {
     match status {
-        SalesOrderStatus::Open => i18n.t("sales-order-status-open"),
-        SalesOrderStatus::Confirmed => i18n.t("sales-order-status-confirmed"),
-        SalesOrderStatus::Cancelled => i18n.t("sales-order-status-cancelled"),
+        SalesDocumentStatus::Draft => i18n.t("sales-order-status-draft"),
+        SalesDocumentStatus::Open => i18n.t("sales-order-status-open"),
+        SalesDocumentStatus::Completed => i18n.t("sales-order-status-confirmed"),
+        SalesDocumentStatus::Cancelled => i18n.t("sales-order-status-cancelled"),
     }
 }

@@ -13,16 +13,24 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
-
-use crate::sales::models::sales_order_status::SalesOrderStatus;
+use crate::sales::models::fulfillment_status::FulfillmentStatus;
+use crate::sales::models::payment_status::PaymentStatus;
+use crate::sales::models::sales_document_status::SalesDocumentStatus;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SalesOrderListItem {
     pub id: Uuid,
     pub order_number: String,
+    pub partner_id: Uuid,
     pub partner_name: String,
     pub order_date: NaiveDate,
     pub warehouse_name: String,
-    pub status: SalesOrderStatus,
+    pub fulfillment_status: FulfillmentStatus,
+    pub payment_status: PaymentStatus,
+    pub document_status: SalesDocumentStatus,
+    pub due_date: NaiveDate,
+    pub subtotal: Decimal,
+    pub tax_total: Decimal,
     pub total_amount: Decimal,
+    pub amount_remaining: Decimal,
 }

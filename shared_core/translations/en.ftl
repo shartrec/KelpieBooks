@@ -748,8 +748,9 @@ new-sales-order-error-parse-warehouses = Failed to parse warehouses: { $error }
 new-sales-order-error-fetch-warehouses = Failed to fetch warehouses: { $status }
 
 # Sales Order — Status labels
+sales-order-status-draft = Draft
 sales-order-status-open = Open
-sales-order-status-confirmed = Confirmed
+sales-order-status-completed = Completed
 sales-order-status-cancelled = Cancelled
 
 # Sales Orders — List page

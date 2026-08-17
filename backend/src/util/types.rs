@@ -23,9 +23,8 @@ use rocket::{
 use shared_core::{
     payables::models::invoice_status::InvoiceStatus,
     sales::models::{
-        invoice_status::InvoiceStatus as SalesInvoiceStatus,
         item::ItemType,
-        sales_order_status::SalesOrderStatus,
+        sales_document_status::SalesDocumentStatus,
     },
 };
 use uuid::Uuid;
@@ -85,28 +84,7 @@ impl<'r> FromFormField<'r> for FormInvoiceStatus {
     }
 }
 
-/// A newtype wrapper for Sales `InvoiceStatus` to implement `FromFormField` and satisfy the orphan rule.
-#[derive(Clone, Copy)]
-pub(crate) struct FormSalesInvoiceStatus(pub(crate) SalesInvoiceStatus);
 
-/// Allows `FormSalesInvoiceStatus` to be used as a `InvoiceStatus` via dereferencing.
-impl Deref for FormSalesInvoiceStatus {
-    type Target = SalesInvoiceStatus;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-#[rocket::async_trait]
-impl<'r> FromFormField<'r> for FormSalesInvoiceStatus {
-    fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
-        // The `from_str` comes from `strum::EnumString` on the InvoiceStatus enum
-        match SalesInvoiceStatus::from_str(field.value) {
-            Ok(status) => Ok(FormSalesInvoiceStatus(status)),
-            Err(_) => Err(form::Error::validation("Invalid invoice status.").into()),
-        }
-    }
-}
 
 #[derive(Clone, Copy)]
 pub(crate) struct FormItemType(pub(crate) ItemType);
@@ -131,11 +109,11 @@ impl<'r> FromFormField<'r> for FormItemType {
 
 /// A newtype wrapper for `SalesOrderStatus` to implement `FromFormField` and satisfy the orphan rule.
 #[derive(Clone, Copy)]
-pub(crate) struct FormSalesOrderStatus(pub(crate) SalesOrderStatus);
+pub(crate) struct FormSalesOrderStatus(pub(crate) SalesDocumentStatus);
 
 /// Allows `FormSalesOrderStatus` to be used as a `SalesOrderStatus` via dereferencing.
 impl Deref for FormSalesOrderStatus {
-    type Target = SalesOrderStatus;
+    type Target = SalesDocumentStatus;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -144,7 +122,7 @@ impl Deref for FormSalesOrderStatus {
 #[rocket::async_trait]
 impl<'r> FromFormField<'r> for FormSalesOrderStatus {
     fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
-        match SalesOrderStatus::from_str(field.value) {
+        match SalesDocumentStatus::from_str(field.value) {
             Ok(status) => Ok(FormSalesOrderStatus(status)),
             Err(_) => Err(form::Error::validation("Invalid sales order status.").into()),
         }

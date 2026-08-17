@@ -13,6 +13,32 @@ ALTER TYPE system_tag ADD VALUE IF NOT EXISTS 'inventory_asset';
 ALTER TYPE system_tag ADD VALUE IF NOT EXISTS 'received_not_invoiced';
 ALTER TYPE system_tag ADD VALUE IF NOT EXISTS 'inventory_adjustment';
 
+DROP TYPE sales_order_status;
+
+-- 1. Physical / Dispatch Tracking
+CREATE TYPE fulfillment_status AS ENUM (
+    'unfulfilled',        -- Nothing shipped yet / Service pending
+    'partially_fulfilled', -- Partial shipment
+    'fulfilled',          -- Shipped / Delivered / Service Completed
+    'not_required'        -- Pure digital/service lines with no delivery step
+    );
+
+-- 2. Financial / Billing Tracking
+CREATE TYPE payment_status AS ENUM (
+    'unpaid',             -- Invoice issued, $0 received
+    'partially_paid',      -- Deposit or partial payment received
+    'paid',               -- Fully settled
+    'refunded'            -- Voided / Returned
+    );
+
+-- 3. Document Lifecycle (Overall Document State)
+CREATE TYPE sales_document_status AS ENUM (
+    'draft',              -- Quote / Unapproved Draft
+    'open',               -- Approved & Active
+    'completed',          -- Fully Fulfilled AND Fully Paid
+    'cancelled'           -- Voided
+    );
+
 CREATE TYPE stock_transaction_type AS ENUM (
     'receipt',
     'adjustment',
@@ -168,3 +194,117 @@ CREATE TABLE stock_transactions (
                                     created_by UUID NOT NULL,
                                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE sales_orders
+(
+    id              UUID PRIMARY KEY         DEFAULT gen_random_uuid(),
+    organization_id UUID            NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    partner_id      UUID            NOT NULL REFERENCES partners(id) ON DELETE RESTRICT,
+    warehouse_id    UUID            NOT NULL REFERENCES warehouses(id) ON DELETE RESTRICT,
+
+    order_number    TEXT            NOT NULL,
+    order_date      DATE            NOT NULL DEFAULT CURRENT_DATE,
+    due_date        DATE            NOT NULL DEFAULT CURRENT_DATE,
+
+    -- Statuses
+    fulfillment_status fulfillment_status NOT NULL DEFAULT 'unfulfilled',
+    payment_status payment_status NOT NULL DEFAULT 'unpaid',
+    document_status sales_document_status NOT NULL DEFAULT 'draft',
+
+    -- Addresses: selected saved IDs (optional) + immutable snapshots stored on the order
+    billing_address_id  UUID REFERENCES partner_addresses(id) ON DELETE SET NULL,
+    shipping_address_id UUID REFERENCES partner_addresses(id) ON DELETE SET NULL,
+
+    -- Bill To snapshot
+    bill_to_name        TEXT,
+    bill_to_attention   TEXT,
+    bill_to_line1       TEXT,
+    bill_to_line2       TEXT,
+    bill_to_city        TEXT,
+    bill_to_region      TEXT,
+    bill_to_postal_code TEXT,
+    bill_to_country     TEXT,
+
+    -- Ship To snapshot
+    ship_to_name        TEXT,
+    ship_to_attention   TEXT,
+    ship_to_line1       TEXT,
+    ship_to_line2       TEXT,
+    ship_to_city        TEXT,
+    ship_to_region      TEXT,
+    ship_to_postal_code TEXT,
+    ship_to_country     TEXT,
+
+    -- Financial summary (denormalized for fast reading)
+    subtotal        NUMERIC(15,4)   NOT NULL DEFAULT 0,
+    tax_total       NUMERIC(15,4)   NOT NULL DEFAULT 0,
+    total_amount    NUMERIC(15,4)   NOT NULL DEFAULT 0,
+    amount_remaining    NUMERIC(15,4)   NOT NULL DEFAULT 0,
+
+    created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_sales_orders_org ON sales_orders(organization_id);
+CREATE UNIQUE INDEX idx_sales_orders_org_number ON sales_orders(organization_id, order_number);
+
+CREATE TABLE sales_order_items
+(
+    id              UUID PRIMARY KEY         DEFAULT gen_random_uuid(),
+    order_id        UUID            NOT NULL REFERENCES sales_orders(id) ON DELETE CASCADE,
+    item_id         UUID            NOT NULL REFERENCES items(id) ON DELETE RESTRICT,
+
+    code            TEXT            NOT NULL,
+    name            TEXT            NOT NULL,
+    description     TEXT,
+    quantity        NUMERIC(15,4)   NOT NULL DEFAULT 0,
+    unit_price      NUMERIC(15,4)   NOT NULL DEFAULT 0,
+    tax_category_id UUID            REFERENCES tax_categories(id) ON DELETE SET NULL,
+    tax_rate        NUMERIC(15,4)   NOT NULL DEFAULT 0,
+    tax_amount      NUMERIC(15,4)   NOT NULL DEFAULT 0,
+    net_amount      NUMERIC(15,4)   NOT NULL DEFAULT 0,
+    sort_order      INT             NOT NULL DEFAULT 0
+);
+
+CREATE INDEX idx_sales_order_items_org ON sales_order_items(order_id);
+
+-- =============================================================================
+-- 1. Customer Payments
+-- =============================================================================
+CREATE TABLE customer_payments
+(
+    id                 UUID PRIMARY KEY         DEFAULT gen_random_uuid(),
+    organization_id    UUID            NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
+    partner_id        UUID            NOT NULL REFERENCES partners (id) ON DELETE RESTRICT,
+
+    -- The transaction clearing the asset (Debit Bank, Credit AR)
+    transaction_id     UUID                     REFERENCES transactions (id) ON DELETE SET NULL,
+
+    payment_date       DATE            NOT NULL,
+    deposited_to_account UUID          NOT NULL, -- Ledger Account (e.g., Operating Bank Account)
+    amount             NUMERIC(15,4)   NOT NULL, -- Total payment amount received
+    reference          TEXT,                     -- Check number, Stripe transfer ID, or EFT reference
+
+    created_at         TIMESTAMPTZ     NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_customer_payments_org ON customer_payments (organization_id);
+CREATE INDEX idx_customer_payments_customer ON customer_payments (partner_id);
+
+-- =============================================================================
+-- 2. Customer Payment Allocations
+-- =============================================================================
+CREATE TABLE customer_payment_allocations
+(
+    id                 UUID PRIMARY KEY         DEFAULT gen_random_uuid(),
+    organization_id    UUID            NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
+    sales_order_id   UUID            NOT NULL REFERENCES sales_orders (id) ON DELETE CASCADE,
+    customer_payment_id UUID           NOT NULL REFERENCES customer_payments (id) ON DELETE CASCADE,
+
+    allocated_amount   NUMERIC(15,4)   NOT NULL, -- Amount applied to this specific invoice
+    created_at         TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT check_customer_alloc_positive CHECK (allocated_amount > 0)
+);
+
+CREATE INDEX idx_cust_allocations_invoice ON customer_payment_allocations (sales_order_id);
+CREATE INDEX idx_cust_allocations_payment ON customer_payment_allocations (customer_payment_id);

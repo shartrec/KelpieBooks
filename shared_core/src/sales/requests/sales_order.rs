@@ -23,6 +23,7 @@ pub struct CreateSalesOrderRequest {
     pub partner_id: Uuid,
     pub warehouse_id: Uuid,
     pub order_date: NaiveDate,
+    pub due_date: NaiveDate,
     pub lines: Vec<SalesOrderItem>,
 
     // Optional references to saved partner addresses used to populate the snapshots

@@ -20,7 +20,7 @@ fn from_row_to_customer_payment_allocation(
     CustomerPaymentAllocation {
         id: row.get("id"),
         organization_id: row.get("organization_id"),
-        sales_invoice_id: row.get("sales_invoice_id"),
+        sales_order_id: row.get("sales_invoice_id"),
         customer_payment_id: row.get("customer_payment_id"),
         allocated_amount: row.get("allocated_amount"),
         created_at: row.get("created_at"),
@@ -84,7 +84,7 @@ pub(crate) async fn insert(
         "#,
     )
     .bind(req.organization_id)
-    .bind(req.sales_invoice_id)
+    .bind(req.sales_order_id)
     .bind(customer_payment_id)
     .bind(req.allocated_amount)
     .fetch_one(pool)
@@ -108,7 +108,7 @@ pub(crate) async fn update(
         RETURNING *
         "#,
     )
-    .bind(req.sales_invoice_id)
+    .bind(req.sales_order_id)
     .bind(req.customer_payment_id)
     .bind(req.allocated_amount)
     .bind(id)

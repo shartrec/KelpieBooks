@@ -6,7 +6,6 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-pub mod sales_invoice_list_item;
 pub mod item_payload;
 pub mod aged_receivable_summary;
 pub mod sales_order_list_item;

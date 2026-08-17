@@ -37,6 +37,48 @@ invoicing. A Sales Order is a confirmed customer commitment that:
 - PDF printing of the order (can be added later following the invoice print pattern).
 - Per-location picking location selection during confirm (future).
 
+### Status Flow
+
+## 2. How Prepayments & Workflows Work Seamlessly
+
+With split statuses, accounting entries and inventory movements trigger independently based on real-world events:
+
+### Scenario A: Prepayment (Pay First, Ship Later)
+1. **Order Placed**:
+  * `payment_status`: `Unpaid` | `fulfillment_status`: `Unfulfilled`
+2. **Customer Pays upfront ($1,000)**:
+  * `payment_status`: `Paid` | `fulfillment_status`: `Unfulfilled`
+  * **GL Entry**: Debit `Cash at Bank` ($1,000) / Credit `Customer Prepayments / Unearned Revenue` ($1,000). *(Or directly to Accounts Receivable if using deposit clearing)*.
+3. **Goods are Shipped**:
+  * `fulfillment_status`: `Fulfilled`
+  * **Stock Entry**: Issue physical inventory (Debit `COGS` / Credit `Inventory Asset`).
+  * **GL Entry**: Recognize Revenue (Debit `Unearned Revenue` / Credit `Sales Revenue`).
+4. **Overall Document Status**: Moves to `Completed`.
+
+---
+
+### Scenario B: B2B Credit (Ship First, Pay Later)
+1. **Order Placed & Approved**:
+  * `payment_status`: `Unpaid` | `fulfillment_status`: `Unfulfilled`
+2. **Goods Shipped**:
+  * `fulfillment_status`: `Fulfilled` | `payment_status`: `Unpaid`
+  * **Stock Entry**: Debit `COGS` / Credit `Inventory Asset`.
+  * **GL Entry**: Debit `Accounts Receivable` / Credit `Sales Revenue`.
+3. **Customer Pays Invoice (30 Days Later)**:
+  * `payment_status`: `Paid`
+  * **GL Entry**: Debit `Cash at Bank` / Credit `Accounts Receivable`.
+4. **Overall Document Status**: Moves to `Completed`.
+
+---
+
+### Scenario C: Pure Services (No Shipping Needed)
+1. **Service Invoice Created**:
+  * Set `fulfillment_status` = `NotRequired`.
+2. **Service Approved / Issued**:
+  * **GL Entry**: Debit `Accounts Receivable` / Credit `Service Revenue`.
+3. **Customer Pays**:
+  * `payment_status`: `Paid`.
+4. **Overall Document Status**: Automatically moves to `Completed`.
 ---
 
 ## Sub-Tasks

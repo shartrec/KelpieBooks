@@ -22,7 +22,7 @@ pub enum SeqType {
 }
 
 /// Safely increments and formats the next sequential invoice number for an organization without gaps.
-pub(crate) async fn get_next_invoice_number(
+pub(crate) async fn get_next_order_number(
     conn: &mut PgConnection,
     org_id: Uuid,
     key: &SeqType,

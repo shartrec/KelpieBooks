@@ -23,7 +23,7 @@ use crate::{
         locale_context::use_locale,
     },
     core::components::currency_input::DecimalInput,
-    sales::contexts::sales_invoice_filter_context::{
+    sales::contexts::sales_order_filter_context::{
         use_sales_invoice_filter,
         PaymentStatusFilter,
         SalesInvoiceFilterAction,

@@ -66,20 +66,20 @@ pub(crate) async fn get_all(
     .map(|rows| rows.iter().map(from_row_to_customer_payment).collect())
 }
 
-pub(crate) async fn get_all_by_invoice(
+pub(crate) async fn get_all_by_order(
     pool: &mut PgConnection,
-    invoice_id: Uuid,
+    order_id: Uuid,
 ) -> Result<Vec<CustomerPayment>, sqlx::Error> {
     sqlx::query(
         r#"
         SELECT cp.*
         FROM customer_payments cp
         JOIN customer_payment_allocations cpa ON cp.id = cpa.customer_payment_id
-        WHERE cpa.sales_invoice_id = $1
+        WHERE cpa.sales_order_id = $1
         ORDER BY cp.payment_date DESC, cp.created_at DESC
         "#,
     )
-    .bind(invoice_id)
+    .bind(order_id)
     .fetch_all(pool)
     .await
     .map(|rows| rows.iter().map(from_row_to_customer_payment).collect())

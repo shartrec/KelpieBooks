@@ -139,7 +139,6 @@ fn rocket() -> _ {
     #[cfg(feature = "sales")]
     let rocket = rocket
         .mount("/", sales::routes::tax_categories::routes())
-        .mount("/", sales::routes::sales_invoices::routes())
         .mount("/", sales::routes::sales_orders::routes())
         .mount("/", sales::routes::customer_payments::routes())
         .mount("/", sales::routes::reports::routes());

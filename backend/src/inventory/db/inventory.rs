@@ -16,6 +16,7 @@ use shared_core::inventory::models::warehouse_profile::{
 };
 use uuid::Uuid;
 use shared_core::inventory::dtos::inventory::{ItemLocationBalanceDto, ItemStockBalancesResponse};
+use shared_core::sales::models::item::ItemType;
 // =============================================================================
 // Item Warehouse Profile Operations (Physical Attributes Extension)
 // =============================================================================
@@ -73,6 +74,27 @@ pub async fn get_item_stock_balances(
     item_id: Uuid,
     org_id: Uuid,
 ) -> Result<ItemStockBalancesResponse, sqlx::Error> {
+
+    // check the item is a stocked item first
+    let it = sqlx::query_scalar(r#"SELECT item_type FROM items
+            WHERE id = $1 AND organization_id = $2"#)
+        .bind(item_id)
+        .bind(org_id)
+        .fetch_optional(& mut *conn).await?;
+
+    match it {
+        Some(ItemType::Stocked) => {}
+        _ => {
+            return Ok(ItemStockBalancesResponse {
+                item_id,
+                total_on_hand: None,
+                total_allocated: None,
+                total_available: None,
+                location_balances: vec![],
+            });
+        }
+    }
+
     let location_balances = sqlx::query_as(
         r#"
         SELECT
@@ -102,9 +124,9 @@ pub async fn get_item_stock_balances(
 
     Ok(ItemStockBalancesResponse {
         item_id,
-        total_on_hand,
-        total_allocated,
-        total_available,
+        total_on_hand: Some(total_on_hand),
+        total_allocated: Some(total_allocated),
+        total_available: Some(total_available),
         location_balances,
     })
 }

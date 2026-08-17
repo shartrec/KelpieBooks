@@ -16,7 +16,7 @@ use shared_core::sales::models::{
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::hooks::use_navigator;
-
+use shared_core::inventory::dtos::inventory::ItemStockBalancesResponse;
 use crate::{
     api::Api,
     contexts::{
@@ -128,48 +128,102 @@ pub fn sales_order_item_row(props: &SalesOrderItemRowProps) -> Html {
             let i18n = i18n.clone();
 
             wasm_bindgen_futures::spawn_local(async move {
-                if let Some(tax_category_id) = new_item.tax_category_id {
-                    let fetched_tax_rate = Api::get(
-                        &format!("/api/sales/tax-categories/{}/current-rate", tax_category_id),
-                        user_ctx,
-                        navigator,
-                    )
-                    .await;
+                let user_ctx_tax = user_ctx.clone();
+                let navigator_tax = navigator.clone();
+                let error_tax = error.clone();
+                let i18n_tax = i18n.clone();
 
-                    match fetched_tax_rate {
-                        Ok(response) if response.ok() => {
-                            match response.json::<Option<TaxRate>>().await {
-                                Ok(Some(tax_rate_data)) => {
-                                    new_item.tax_rate = tax_rate_data.rate;
+                // 1. Future A: Resolves directly to Option<Decimal>
+                let tax_rate_future = async move {
+                    if let Some(tax_category_id) = new_item.tax_category_id {
+                        let res = Api::get(
+                            &format!("/api/sales/tax-categories/{}/current-rate", tax_category_id),
+                            user_ctx_tax,
+                            navigator_tax,
+                        )
+                            .await;
+
+                        match res {
+                            Ok(response) if response.ok() => {
+                                match response.json::<Option<TaxRate>>().await {
+                                    Ok(Some(tax_rate_data)) => Some(tax_rate_data.rate),
+                                    Ok(None) => {
+                                        info!("No current tax rate found for category {}", tax_category_id);
+                                        None
+                                    }
+                                    Err(e) => {
+                                        error_tax.set(Some(i18n_tax.t_args(
+                                            "new-sales-invoice-error-parse-tax-rate",
+                                            &fluent_args!["error" => e.to_string()],
+                                        )));
+                                        None
+                                    }
                                 }
-                                Ok(None) => {
-                                    info!(
-                                        "No current tax rate found for category {}",
-                                        tax_category_id
-                                    );
-                                }
-                                Err(e) => error.set(Some(i18n.t_args(
-                                    "new-sales-invoice-error-parse-tax-rate",
+                            }
+                            Ok(response) => {
+                                error_tax.set(Some(i18n_tax.t_args(
+                                    "new-sales-invoice-error-fetch-tax-rate",
+                                    &fluent_args!["status" => response.status()],
+                                )));
+                                None
+                            }
+                            Err(e) => {
+                                error_tax.set(Some(i18n_tax.t_args(
+                                    "common-network-error",
                                     &fluent_args!["error" => e.to_string()],
-                                ))),
+                                )));
+                                None
                             }
                         }
-                        Ok(response) => error.set(Some(i18n.t_args(
-                            "new-sales-invoice-error-fetch-tax-rate",
-                            &fluent_args!["status" => response.status()],
-                        ))),
-                        Err(e) => error.set(Some(i18n.t_args(
-                            "common-network-error",
-                            &fluent_args!["error" => e.to_string()],
-                        ))),
+                    } else {
+                        None
                     }
-                    // Recalculate net_amount and tax_amount
-                    new_item.tax_amount =
-                        new_item.net_amount * (new_item.tax_rate / Decimal::new(100, 0));
+                };
 
-                    on_change.emit(new_item);
-                    items.set(vec![]);
+                // 2. Future B: Inventory Balances Request
+                let url = format!("/api/inventory/items/{}/balances", selected_item.id);
+                let balances_future = Api::get(
+                    &url,
+                    user_ctx.clone(),
+                    navigator.clone(),
+                );
+
+                // 3. Await both concurrently
+                let (fetched_tax_rate, balances_response) = futures::join!(tax_rate_future, balances_future);
+
+                // Apply fetched tax rate if retrieved
+                if let Some(rate) = fetched_tax_rate {
+                    new_item.tax_rate = rate;
                 }
+
+                // Process Inventory Balances
+                match balances_response {
+                    Ok(response) if response.ok() => {
+                        match response.json::<ItemStockBalancesResponse>().await {
+                            Ok(balance_data) => {
+                                new_item.quantity_available = balance_data.total_available;
+                            }
+                            Err(e) => error.set(Some(i18n.t_args(
+                                "inventory-error-parse-balances",
+                                &fluent_args!["error" => e.to_string()],
+                            ))),
+                        }
+                    }
+                    Ok(response) => {
+                        info!("Failed to retrieve item balances, status: {}", response.status());
+                    }
+                    Err(e) => error.set(Some(i18n.t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
+                }
+
+                // 4. Recalculate net_amount and tax_amount
+                new_item.tax_amount =
+                    new_item.net_amount * (new_item.tax_rate / Decimal::new(100, 0));
+
+                on_change.emit(new_item);
+                items.set(vec![]);
             });
         })
     };
@@ -211,17 +265,23 @@ pub fn sales_order_item_row(props: &SalesOrderItemRowProps) -> Html {
         let quantity = props.item.quantity;
         match props.quantity_available {
             None => html! {
-                <span class="badge badge--neutral">{ "—" }</span>
+                <span class="badge badge--neutral">{ "" }</span>
             },
-            Some(avail) if quantity <= avail => html! {
-                <span class="badge badge--success" title={i18n.t("sales-order-item-available")}>
-                    { i18n.t_args("sales-order-item-available", &fluent_args!["qty" => avail.to_string()]) }
-                </span>
+            Some(avail) if quantity <= avail => {
+                let badge = i18n.t_args("sales-order-item-available", &fluent_args!["qty" => avail.to_string()]);
+                html! {
+                    <span class="badge badge--success" title={badge.clone()}>
+                        { badge }
+                    </span>
+                }
             },
-            Some(avail) => html! {
-                <span class="badge badge--warning" title={i18n.t("sales-order-item-insufficient-stock")}>
-                    { i18n.t_args("sales-order-item-insufficient-stock", &fluent_args!["qty" => avail.to_string()]) }
-                </span>
+            Some(avail) => {
+                let badge = i18n.t_args("sales-order-item-insufficient-stock", &fluent_args!["qty" => avail.to_string()]);
+                html! {
+                    <span class="badge badge--warning" title={ badge.clone() }>
+                        { badge }
+                    </span>
+                }
             },
         }
     };
@@ -236,10 +296,8 @@ pub fn sales_order_item_row(props: &SalesOrderItemRowProps) -> Html {
                 on_select={on_item_select}
             />
             <input type="text" class="table__text-col" value={props.item.description.clone()} readonly=true />
-            <div class="sale__quantity-cell">
-                <DecimalInput class="table__value-col" value={props.item.quantity} on_change={on_quantity_change} />
-                { availability_badge }
-            </div>
+            <DecimalInput class="table__value-col" value={props.item.quantity} on_change={on_quantity_change} />
+            { availability_badge }
             <DecimalInput class="table__value-col" value={props.item.unit_price} on_change={on_price_change} />
             // Display the tax rate
             <DecimalInput class="table__value-col" value={props.item.tax_rate} on_change={Callback::noop()} readonly=true />

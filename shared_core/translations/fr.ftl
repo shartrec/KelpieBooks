@@ -747,8 +747,9 @@ new-sales-order-error-parse-warehouses = Échec de l'analyse des entrepôts : { 
 new-sales-order-error-fetch-warehouses = Échec du chargement des entrepôts : { $status }
 
 # Sales Order — Status labels
+sales-order-status-draft = Provisoire
 sales-order-status-open = Ouvert
-sales-order-status-confirmed = Confirmé
+sales-order-status-completed = Complété
 sales-order-status-cancelled = Annulé
 
 # Sales Orders — List page

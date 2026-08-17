@@ -13,9 +13,8 @@ use fluent::fluent_args;
 use shared_core::{
     core::models::auth::SystemPrivilege,
     sales::models::{
-        sales_invoice::SalesInvoice,
         sales_order::SalesOrder,
-        sales_order_status::SalesOrderStatus,
+        sales_document_status::SalesDocumentStatus,
     },
 };
 use yew::prelude::*;
@@ -43,7 +42,7 @@ enum DrawerTab {
 pub struct SalesOrderDrawerProps {
     pub order: SalesOrder,
     pub on_close: Callback<()>,
-    pub on_confirmed: Callback<SalesInvoice>,
+    pub on_confirmed: Callback<SalesOrder>,
     pub on_cancelled: Callback<()>,
 }
 
@@ -60,7 +59,7 @@ pub fn sales_order_drawer(props: &SalesOrderDrawerProps) -> Html {
 
     let order_id = props.order.id;
     let can_manage = user_ctx.has_privilege(&SystemPrivilege::ManageSales);
-    let is_open = props.order.status == SalesOrderStatus::Open;
+    let is_open = props.order.document_status == SalesDocumentStatus::Open;
 
     let on_close = {
         let on_close = props.on_close.clone();
@@ -87,7 +86,7 @@ pub fn sales_order_drawer(props: &SalesOrderDrawerProps) -> Html {
                 let resp = Api::post(&url, &(), user_ctx, navigator).await;
                 is_confirming.set(false);
                 match resp {
-                    Ok(r) if r.ok() => match r.json::<SalesInvoice>().await {
+                    Ok(r) if r.ok() => match r.json::<SalesOrder>().await {
                         Ok(invoice) => {
                             confirm_error.set(None);
                             on_confirmed.emit(invoice);
@@ -147,16 +146,18 @@ pub fn sales_order_drawer(props: &SalesOrderDrawerProps) -> Html {
         })
     };
 
-    let status_class = match props.order.status {
-        SalesOrderStatus::Open => "status-badge status-badge--open",
-        SalesOrderStatus::Confirmed => "status-badge status-badge--confirmed",
-        SalesOrderStatus::Cancelled => "status-badge status-badge--cancelled",
+    let status_class = match props.order.document_status {
+        SalesDocumentStatus::Draft => "status-badge status-badge--draft",
+        SalesDocumentStatus::Open => "status-badge status-badge--open",
+        SalesDocumentStatus::Completed => "status-badge status-badge--complete",
+        SalesDocumentStatus::Cancelled => "status-badge status-badge--cancelled",
     };
 
-    let status_label = match props.order.status {
-        SalesOrderStatus::Open => i18n.t("sales-order-status-open"),
-        SalesOrderStatus::Confirmed => i18n.t("sales-order-status-confirmed"),
-        SalesOrderStatus::Cancelled => i18n.t("sales-order-status-cancelled"),
+    let status_label = match props.order.document_status {
+        SalesDocumentStatus::Draft => i18n.t("sales-order-status-draft"),
+        SalesDocumentStatus::Open => i18n.t("sales-order-status-open"),
+        SalesDocumentStatus::Completed => i18n.t("sales-order-status-complete"),
+        SalesDocumentStatus::Cancelled => i18n.t("sales-order-status-cancelled"),
     };
 
     html! {

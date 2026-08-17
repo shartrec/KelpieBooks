@@ -22,16 +22,17 @@ use strum::{
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(
     feature = "backend",
-    sqlx(type_name = "sales_order_status", rename_all = "snake_case")
+    sqlx(type_name = "sales_document_status", rename_all = "snake_case")
 )]
-pub enum SalesOrderStatus {
-    Open,
-    Confirmed,
-    Cancelled,
+pub enum SalesDocumentStatus {
+    Draft,              // Quote / Unapproved Draft
+    Open,                // Approved & Active
+    Completed,          // Fully Fulfilled AND Fully Paid
+    Cancelled,          // Voided
 }
 
-impl Default for SalesOrderStatus {
+impl Default for SalesDocumentStatus {
     fn default() -> Self {
-        Self::Open
+        Self::Draft
     }
 }

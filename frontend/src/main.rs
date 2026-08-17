@@ -69,9 +69,7 @@ use frontend::{
     router::Route,
     sales::pages::{
         item_list::ItemListPage,
-        new_sales_invoice::NewSalesInvoicePage,
         new_sales_order::NewSalesOrderPage,
-        sales_ledger::SalesLedgerPage,
         sales_orders::SalesOrdersPage,
         tax_category_list::TaxCategoryListPage,
         uom_list::UomListPage,
@@ -200,14 +198,10 @@ fn switch(routes: Route) -> Html {
         Route::NewVendorInvoice => html! { <NewVendorInvoicePage /> },
         #[cfg(feature = "payables")]
         Route::AgedPayables => html! { <AgedPayablesPage /> },
-        #[cfg(feature = "sales")]
-        Route::SalesLedger => html! { <SalesLedgerPage /> },
         #[cfg(any(feature = "sales", feature = "inventory"))]
         Route::ItemList => html! { <ItemListPage /> },
         #[cfg(any(feature = "sales", feature = "inventory"))]
         Route::UomList => html! { <UomListPage /> },
-        #[cfg(feature = "sales")]
-        Route::NewSalesInvoice => html! { <NewSalesInvoicePage /> },
         #[cfg(feature = "sales")]
         Route::SalesOrders => html! { <SalesOrdersPage /> },
         #[cfg(feature = "sales")]

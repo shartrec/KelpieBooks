@@ -17,8 +17,10 @@ use uuid::Uuid;
 use crate::sales::models::invoice_address::InvoiceAddress;
 pub use crate::sales::models::{
     sales_order_item::SalesOrderItem,
-    sales_order_status::SalesOrderStatus,
 };
+use crate::sales::models::fulfillment_status::FulfillmentStatus;
+use crate::sales::models::payment_status::PaymentStatus;
+use crate::sales::models::sales_document_status::SalesDocumentStatus;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SalesOrder {
@@ -29,10 +31,14 @@ pub struct SalesOrder {
     pub warehouse_name: String,
     pub order_number: String,
     pub order_date: NaiveDate,
-    pub status: SalesOrderStatus,
+    pub due_date: NaiveDate,
+    pub fulfillment_status: FulfillmentStatus,
+    pub payment_status: PaymentStatus,
+    pub document_status: SalesDocumentStatus,
     pub subtotal: Decimal,
     pub tax_total: Decimal,
     pub total_amount: Decimal,
+    pub amount_remaining: Decimal,
     // Optional references to saved partner addresses used to populate the snapshots
     pub billing_address_id: Option<Uuid>,
     pub shipping_address_id: Option<Uuid>,

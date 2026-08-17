@@ -16,23 +16,24 @@ use strum::{
     EnumString,
 };
 
+/// Tracks physical stock dispatch / delivery state
 #[derive(
     Debug, Display, EnumString, EnumIter, Serialize, Deserialize, PartialEq, Eq, Clone, Copy,
 )]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(
     feature = "backend",
-    sqlx(type_name = "invoice_status", rename_all = "snake_case")
+    sqlx(type_name = "fulfillment_status", rename_all = "snake_case")
 )]
-pub enum InvoiceStatus {
-    Draft,
-    Open,
-    Paid,
-    Overdue,
+pub enum FulfillmentStatus {
+    Unfulfilled,        // Nothing shipped yet / Service pending
+    PartiallyFulfilled, // Partial shipment
+    Fulfilled,          // Shipped / Delivered / Service Completed
+    NotRequired,        // Pure digital/service lines with no delivery step
 }
 
-impl Default for InvoiceStatus {
+impl Default for FulfillmentStatus {
     fn default() -> Self {
-        Self::Draft
+        Self::Unfulfilled
     }
 }

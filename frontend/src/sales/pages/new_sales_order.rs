@@ -37,7 +37,6 @@ use web_sys::{
 };
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-
 use crate::{
     api::Api,
     contexts::{
@@ -72,6 +71,7 @@ pub fn new_sales_order_page() -> Html {
             partner_id: Uuid::nil(),
             warehouse_id: Uuid::nil(),
             order_date: today,
+            due_date: today,
             lines: vec![SalesOrderItem {
                 id: Uuid::new_v4(),
                 order_id: Uuid::nil(),
@@ -577,6 +577,7 @@ pub fn new_sales_order_page() -> Html {
                             <span class="table__text-col">{i18n.t("common-item")}</span>
                             <span class="table__text-col">{i18n.t("common-description")}</span>
                             <span class="table__value-col">{i18n.t("common-quantity")}</span>
+                            <span class="table__value-col"></span>
                             <span class="table__value-col">{i18n.t("common-price")}</span>
                             <span class="table__value-col">{i18n.t("common-tax-rate")}</span>
                             <span class="table__value-col">{i18n.t("common-tax")}</span>

@@ -17,7 +17,7 @@ use shared_core::{
         dtos::sales_order_list_item::SalesOrderListItem,
         models::{
             sales_order::SalesOrder,
-            sales_order_status::SalesOrderStatus,
+            sales_document_status::SalesDocumentStatus,
         },
         requests::sales_order::CreateSalesOrderRequest,
     },
@@ -25,14 +25,13 @@ use shared_core::{
         ReferenceType,
         TransactionType,
     },
-    sales::models::sales_invoice::SalesInvoice,
 };
 use sqlx::Acquire;
 use uuid::Uuid;
 
 use crate::{
     core::db::sequences::{
-        get_next_invoice_number,
+        get_next_order_number,
         SeqType,
     },
     inventory::db::{
@@ -47,7 +46,6 @@ use crate::{
             item as item_db,
             sales_order as sales_order_db,
         },
-        services::sales_invoice_service,
     },
     util::ApiError,
 };
@@ -60,7 +58,7 @@ pub(crate) async fn create_order(
     let mut tx = pool.begin().await?;
 
     // Generate the next order number using the SalesOrder sequence
-    let order_number = get_next_invoice_number(&mut tx, org_id, &SeqType::SalesOrder).await?;
+    let order_number = get_next_order_number(&mut tx, org_id, &SeqType::SalesOrder).await?;
 
     let mut order = sales_order_db::create_draft_order(&mut tx, req, org_id, &order_number).await?;
 
@@ -122,9 +120,13 @@ pub(crate) async fn get_sales_order(
 pub(crate) async fn list_sales_orders(
     pool: &mut PgConnection,
     org_id: Uuid,
-    status_filter: Option<SalesOrderStatus>,
+    start_date: Option<chrono::NaiveDate>,
+    end_date: Option<chrono::NaiveDate>,
+    partner_id: Option<Uuid>,
+    min_amount: Option<rust_decimal::Decimal>,
+    statuses: Vec<SalesDocumentStatus>,
 ) -> Result<Vec<SalesOrderListItem>, ApiError> {
-    let items = sales_order_db::list_sales_orders(pool, org_id, status_filter).await?;
+    let items = sales_order_db::list_sales_orders(pool, org_id, start_date, end_date, partner_id, min_amount, Some(statuses)).await?;
     Ok(items)
 }
 
@@ -133,7 +135,7 @@ pub(crate) async fn confirm_order(
     id: Uuid,
     org_id: Uuid,
     user_id: Uuid,
-) -> Result<SalesInvoice, ApiError> {
+) -> Result<SalesOrder, ApiError> {
     let mut tx = pool.begin().await?;
 
     // Load and verify order status
@@ -141,7 +143,7 @@ pub(crate) async fn confirm_order(
         .await?
         .ok_or_else(|| ApiError::NotFound("Sales order not found.".to_string()))?;
 
-    if order.status != SalesOrderStatus::Open {
+    if order.document_status != SalesDocumentStatus::Open {
         return Err(ApiError::BadRequest(
             "Only Open orders can be confirmed.".to_string(),
         ));
@@ -198,17 +200,13 @@ pub(crate) async fn confirm_order(
         }
     }
 
-    // Create a SalesInvoice from the order within the same transaction
-    let invoice =
-        sales_invoice_service::create_invoice_from_order(&mut tx, org_id, &order).await?;
-
     // Mark order as Confirmed
-    sales_order_db::update_sales_order_status(&mut tx, id, org_id, SalesOrderStatus::Confirmed)
+    sales_order_db::update_sales_order_status(&mut tx, id, org_id, SalesDocumentStatus::Open)
         .await?;
 
     tx.commit().await?;
 
-    Ok(invoice)
+    Ok(order)
 }
 
 pub(crate) async fn cancel_order(
@@ -220,13 +218,13 @@ pub(crate) async fn cancel_order(
         .await?
         .ok_or_else(|| ApiError::NotFound("Sales order not found.".to_string()))?;
 
-    if order.status != SalesOrderStatus::Open {
+    if order.document_status != SalesDocumentStatus::Open || order.document_status != SalesDocumentStatus::Draft {
         return Err(ApiError::BadRequest(
-            "Only Open orders can be cancelled.".to_string(),
+            "Only Draft or Open orders can be cancelled.".to_string(),
         ));
     }
 
-    sales_order_db::update_sales_order_status(pool, id, org_id, SalesOrderStatus::Cancelled).await?;
+    sales_order_db::update_sales_order_status(pool, id, org_id, SalesDocumentStatus::Cancelled).await?;
 
     Ok(())
 }

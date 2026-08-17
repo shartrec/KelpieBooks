@@ -7,4 +7,4 @@
  */
 
 pub mod item_filter_context;
-pub mod sales_invoice_filter_context;
+pub mod sales_order_filter_context;

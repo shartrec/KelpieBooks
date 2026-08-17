@@ -99,9 +99,9 @@ pub struct ItemLocationBalanceDto {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ItemStockBalancesResponse {
     pub item_id: Uuid,
-    pub total_on_hand: Decimal,
-    pub total_allocated: Decimal,
-    pub total_available: Decimal,
+    pub total_on_hand: Option<Decimal>,
+    pub total_allocated: Option<Decimal>,
+    pub total_available: Option<Decimal>,
     pub location_balances: Vec<ItemLocationBalanceDto>,
 }
 

@@ -13,12 +13,8 @@ pub mod edit_tax_category_modal;
 pub mod item_filter;
 pub mod item_list_table;
 pub mod item_row;
-pub mod sales_invoice_drawer;
-pub mod sales_invoice_filter;
-pub mod sales_invoice_item_row;
 pub mod sales_order_drawer;
 pub mod sales_order_item_row;
-pub mod sales_invoice_table;
 pub mod tax_category_drawer;
 pub mod tax_category_list_table;
 pub mod tax_category_row;
@@ -42,22 +38,6 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
         target_route: None,
         on_click: None,
         children: vec![
-            SidebarModuleContribution {
-                id: "sales-invoice-list",
-                label_key: "sales-invoice-list",
-                privilege: Some(SystemPrivilege::ManageSales),
-                target_route: Some(Route::SalesLedger),
-                on_click: None,
-                children: vec![],
-            },
-            SidebarModuleContribution {
-                id: "sales-new-invoice",
-                label_key: "new-sales-invoice-title",
-                privilege: Some(SystemPrivilege::ManageSales),
-                target_route: Some(Route::NewSalesInvoice),
-                on_click: None,
-                children: vec![],
-            },
             SidebarModuleContribution {
                 id: "sales-orders",
                 label_key: "sidebar-sales-orders",

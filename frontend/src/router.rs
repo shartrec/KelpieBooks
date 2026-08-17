@@ -87,12 +87,6 @@ pub enum Route {
     #[at("/tax-categories")]
     TaxCategoryList,
     #[cfg(feature = "sales")]
-    #[at("/sales")]
-    SalesLedger,
-    #[cfg(feature = "sales")]
-    #[at("/sales/new")]
-    NewSalesInvoice,
-    #[cfg(feature = "sales")]
     #[at("/sales/orders")]
     SalesOrders,
     #[cfg(feature = "sales")]

@@ -18,7 +18,6 @@ use rocket_db_pools::Connection;
 use shared_core::sales::{
     dtos::sales_order_list_item::SalesOrderListItem,
     models::{
-        sales_invoice::SalesInvoice,
         sales_order::SalesOrder,
     },
     requests::sales_order::CreateSalesOrderRequest,
@@ -58,10 +57,15 @@ async fn list_sales_orders(
     status: Option<FormSalesOrderStatus>,
 ) -> Result<Json<Vec<SalesOrderListItem>>, ApiError> {
     let user = guard.0;
+    let status_list = match status {
+        Some(s) => vec![*s],
+        None => vec![]
+    };
+
     let orders = sales_order_service::list_sales_orders(
         &mut pool,
         user.organization_id,
-        status.map(|s| *s),
+        None, None, None, None, status_list
     )
     .await?;
     Ok(Json(orders))
@@ -96,7 +100,7 @@ async fn confirm_sales_order(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageSales>,
     id: PathUuid,
-) -> Result<Json<SalesInvoice>, ApiError> {
+) -> Result<Json<SalesOrder>, ApiError> {
     let user = guard.0;
     let invoice =
         sales_order_service::confirm_order(&mut pool, *id, user.organization_id, user.user_id).await?;
