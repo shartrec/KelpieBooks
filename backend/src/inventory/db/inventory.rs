@@ -153,28 +153,6 @@ pub async fn get_balance_for_location(
         .await
 }
 
-pub async fn update_inventory_quantities(
-    conn: &mut PgConnection,
-    id: Uuid,
-    org_id: Uuid,
-    qty_on_hand: rust_decimal::Decimal,
-    qty_allocated: rust_decimal::Decimal,
-) -> Result<WarehouseInventoryBalance, sqlx::Error> {
-    sqlx::query_as!(
-        WarehouseInventoryBalance,
-        "UPDATE warehouse_inventory_balances
-         SET quantity_on_hand = $1, quantity_allocated = $2, updated_at = NOW()
-         WHERE id = $3 AND organization_id = $4
-         RETURNING *",
-        qty_on_hand,
-        qty_allocated,
-        id,
-        org_id
-    )
-    .fetch_one(conn)
-    .await
-}
-
 /// Atomically adjusts the `quantity_on_hand` for an item at a location.
 /// Creates a new balance record if one doesn't exist for this location/item combination.
 pub async fn adjust_on_hand(

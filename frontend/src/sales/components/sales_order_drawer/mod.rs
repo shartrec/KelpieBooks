@@ -13,8 +13,8 @@ use fluent::fluent_args;
 use shared_core::{
     core::models::auth::SystemPrivilege,
     sales::models::{
-        sales_order::SalesOrder,
         sales_document_status::SalesDocumentStatus,
+        sales_order::SalesOrder,
     },
 };
 use yew::prelude::*;

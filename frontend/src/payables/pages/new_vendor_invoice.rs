@@ -6,10 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use chrono::{
-    Local,
-    NaiveDate,
-};
+use chrono::{Local, NaiveDate, Utc};
 use fluent::fluent_args;
 use rust_decimal::dec;
 use shared_core::{
@@ -51,10 +48,11 @@ pub fn new_vendor_invoice_page() -> Html {
                 id: Uuid::new_v4(),
                 vendor_invoice_id: Uuid::nil(),
                 account_id: Uuid::nil(),
-                description: String::new(),
+                description: None,
                 net_amount: dec!(0.00),
                 tax_amount: dec!(0.00),
                 total_amount: dec!(0.00),
+                created_at: Utc::now(),
             }],
             ..Default::default()
         }
@@ -188,10 +186,11 @@ pub fn new_vendor_invoice_page() -> Html {
                 id: Uuid::new_v4(),
                 vendor_invoice_id: Uuid::nil(),
                 account_id: last_account_id,
-                description: String::new(),
+                description: None,
                 net_amount: dec!(0.00),
                 tax_amount: dec!(0.00),
                 total_amount: dec!(0.00),
+                created_at: Utc::now(),
             });
             request.set(req);
         })

@@ -14,10 +14,9 @@ pub mod payments_view;
 use fluent::fluent_args;
 use shared_core::{
     partners::models::partner::Partner,
-    payables::models::vendor_invoice::VendorInvoice,
 };
 use yew::prelude::*;
-
+use shared_core::payables::dtos::vendor_invoice_dto::VendorInvoiceDto;
 use crate::{
     contexts::locale_context::use_locale,
     payables::components::vendor_invoice_drawer::{
@@ -36,7 +35,7 @@ pub enum InvoiceDrawerTab {
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct VendorInvoiceDrawerProps {
-    pub invoice: VendorInvoice,
+    pub invoice: VendorInvoiceDto,
     pub partner: Partner,
     pub on_close: Callback<()>,
     pub on_change: Callback<()>,
@@ -62,8 +61,9 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
         })
     };
 
-    let total_gross = props.invoice.gross_amount;
-    let balance_remaining = props.invoice.amount_remaining;
+    let invoice = &props.invoice.invoice;
+    let total_gross = invoice.gross_amount;
+    let balance_remaining = invoice.amount_remaining;
 
     html! {
         <div class="drawer-overlay" onclick={on_close.clone()}>
@@ -79,7 +79,7 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
                 <div class="payment-context-banner">
                     // Metadata & Financial Reconciliation Badges
                     <div class="payment-context-banner__details">
-                        <span>{ i18n.t_args("vendor-invoice-drawer-inv-number", &fluent_args!["number" => props.invoice.invoice_number.clone()]) }</span>
+                        <span>{ i18n.t_args("vendor-invoice-drawer-inv-number", &fluent_args!["number" => invoice.invoice_number.clone()]) }</span>
                         <span style="color: var(--border-color, #cbd5e1);">{"|"}</span>
 
                         // Always display the true historical original invoice gross liability
@@ -123,9 +123,9 @@ pub fn vendor_invoice_drawer(props: &VendorInvoiceDrawerProps) -> Html {
                 <div class="drawer__content">
                     {
                         match *active_tab {
-                            InvoiceDrawerTab::General => html! { <DetailsView invoice={props.invoice.clone()} on_change={props.on_change.clone()} /> },
+                            InvoiceDrawerTab::General => html! { <DetailsView invoice={invoice.clone()} on_change={props.on_change.clone()} /> },
                             InvoiceDrawerTab::Items => html! { <ItemsView invoice={props.invoice.clone()} on_change={props.on_change.clone()} /> },
-                            InvoiceDrawerTab::Payments => html! { <PaymentsView invoice={props.invoice.clone()} on_change={props.on_change.clone()} /> },
+                            InvoiceDrawerTab::Payments => html! { <PaymentsView invoice={invoice.clone()} on_change={props.on_change.clone()} /> },
                         }
                     }
                 </div>

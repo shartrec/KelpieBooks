@@ -6,6 +6,20 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+use crate::{
+    api::Api,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    core::components::{
+        layout::Layout,
+        progressive_search::ProgressiveSearch,
+        SearchableItem,
+    },
+    router::Route,
+    sales::components::sales_order_item_row::SalesOrderItemRow,
+};
 use chrono::{
     Local,
     NaiveDate,
@@ -37,20 +51,6 @@ use web_sys::{
 };
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use crate::{
-    api::Api,
-    contexts::{
-        auth_context::use_user_context,
-        locale_context::use_locale,
-    },
-    core::components::{
-        layout::Layout,
-        progressive_search::ProgressiveSearch,
-        SearchableItem,
-    },
-    router::Route,
-    sales::components::sales_order_item_row::SalesOrderItemRow,
-};
 
 #[derive(PartialEq, Clone, Copy)]
 enum AddressTab {

@@ -5,18 +5,6 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use fluent::fluent_args;
-use log::info;
-use rust_decimal::Decimal;
-use shared_core::sales::models::{
-    item::Item,
-    sales_order_item::SalesOrderItem,
-    tax::TaxRate,
-};
-use uuid::Uuid;
-use yew::prelude::*;
-use yew_router::hooks::use_navigator;
-use shared_core::inventory::dtos::inventory::ItemStockBalancesResponse;
 use crate::{
     api::Api,
     contexts::{
@@ -29,6 +17,18 @@ use crate::{
         SearchableItem,
     },
 };
+use fluent::fluent_args;
+use log::info;
+use rust_decimal::Decimal;
+use shared_core::inventory::dtos::inventory::ItemStockBalancesResponse;
+use shared_core::sales::models::{
+    item::Item,
+    sales_order_item::SalesOrderItem,
+    tax::TaxRate,
+};
+use uuid::Uuid;
+use yew::prelude::*;
+use yew_router::hooks::use_navigator;
 
 #[derive(Properties, PartialEq)]
 pub struct SalesOrderItemRowProps {

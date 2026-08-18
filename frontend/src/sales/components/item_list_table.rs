@@ -7,11 +7,11 @@
  */
 
 use fluent::fluent_args;
-use uuid::Uuid;
 use shared_core::{
     core::models::auth::SystemPrivilege,
     sales::models::item::Item,
 };
+use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 

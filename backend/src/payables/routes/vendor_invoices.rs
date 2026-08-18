@@ -19,7 +19,6 @@ use rust_decimal::Decimal;
 use shared_core::payables::{
     dtos::vendor_invoice_list_item::VendorInvoiceListItem,
     models::{
-        vendor_invoice::VendorInvoice,
         vendor_invoice_item::VendorInvoiceItem,
         vendor_payment::VendorPayment,
     },
@@ -28,7 +27,7 @@ use shared_core::payables::{
         UpdateVendorInvoiceRequest,
     },
 };
-
+use shared_core::payables::dtos::vendor_invoice_dto::VendorInvoiceDto;
 use crate::{
     payables::services::{
         vendor_invoice_service,
@@ -90,7 +89,7 @@ async fn get_vendor_invoice(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseVendorInvoices>,
     id: PathUuid,
-) -> Result<Json<VendorInvoice>, ApiError> {
+) -> Result<Json<VendorInvoiceDto>, ApiError> {
     let user = guard.0;
     let invoice =
         vendor_invoice_service::get_vendor_invoice(&mut pool, user.organization_id, *id).await?;
@@ -118,7 +117,7 @@ async fn create_vendor_invoice(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageVendorInvoices>,
     req: Json<CreateVendorInvoiceRequest>,
-) -> Result<Json<VendorInvoice>, ApiError> {
+) -> Result<Json<VendorInvoiceDto>, ApiError> {
     let user = guard.0;
     let new_invoice =
         vendor_invoice_service::create_vendor_invoice(&mut pool, user.organization_id, &req)
@@ -132,7 +131,7 @@ async fn update_vendor_invoice(
     guard: RequirePrivilege<ManageVendorInvoices>,
     id: PathUuid,
     req: Json<UpdateVendorInvoiceRequest>,
-) -> Result<Json<VendorInvoice>, ApiError> {
+) -> Result<Json<VendorInvoiceDto>, ApiError> {
     let user = guard.0;
     let updated_invoice =
         vendor_invoice_service::update_vendor_invoice(&mut pool, user.organization_id, *id, &req)

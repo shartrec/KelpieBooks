@@ -200,7 +200,7 @@ pub async fn receive_vendor_stock(
 
         //todo get total amount
         let total_amount = Decimal::from_f32(1.0).unwrap();
-        let _tx_id = post_receive_journal_entry(&mut tx, org_id, user_id, total_amount, &*req.po_number.clone().unwrap_or("n/a".to_string())).await?;
+        let _tx_id = post_receive_journal_entry(&mut tx, org_id, total_amount, &*req.po_number.clone().unwrap_or("n/a".to_string())).await?;
 
         updated_balances.push(balance);
     }
@@ -296,7 +296,7 @@ pub async fn adjust_stock(
 
         //todo get total amount
         let total_amount = Decimal::from_f32(1.0).unwrap();
-        let _tx_id = post_receive_journal_entry(&mut tx, org_id, user_id, total_amount, &audit_note).await?;
+        let _tx_id = post_receive_journal_entry(&mut tx, org_id, total_amount, &audit_note).await?;
 
         updated_balances.push(balance);
     }
@@ -309,9 +309,8 @@ pub async fn adjust_stock(
 pub async fn post_receive_journal_entry(
     conn: &mut PgConnection,
     org_id: Uuid,
-    user_id: Uuid,
     total_value: Decimal, // quantity * unit_cost
-    reference: &str,      // e.g. "Receipt #REC-1002"
+    reference: &str,
 ) -> Result<Uuid, ApiError> {
     if total_value <= Decimal::ZERO {
         return Ok(Uuid::nil()); // Skip 0-value postings
@@ -357,9 +356,8 @@ pub async fn post_receive_journal_entry(
 pub async fn post_adjustment_journal_entry(
     conn: &mut PgConnection,
     org_id: Uuid,
-    user_id: Uuid,
     adjustment_value: Decimal, // positive = stock gain, negative = stock loss
-    reference: &str,           // e.g. "Adjustment #ADJ-501"
+    reference: &str,
 ) -> Result<Uuid, ApiError> {
     if adjustment_value.is_zero() {
         return Ok(Uuid::nil());

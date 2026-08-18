@@ -10,8 +10,8 @@ use fluent::fluent_args;
 use shared_core::sales::{
     dtos::sales_order_list_item::SalesOrderListItem,
     models::{
-        sales_order::SalesOrder,
         sales_document_status::SalesDocumentStatus,
+        sales_order::SalesOrder,
     },
 };
 use uuid::Uuid;

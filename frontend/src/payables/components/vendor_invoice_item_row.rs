@@ -35,9 +35,9 @@ pub fn vendor_invoice_item_row(props: &VendorInvoiceItemRowProps) -> Html {
         let item = props.item.clone();
         Callback::from(move |e: InputEvent| {
             let mut new_item = item.clone();
-            new_item.description = e
+            new_item.description = Some(e
                 .target_unchecked_into::<web_sys::HtmlInputElement>()
-                .value();
+                .value());
             on_change.emit(new_item);
         })
     };

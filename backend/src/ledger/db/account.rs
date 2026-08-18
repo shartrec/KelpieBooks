@@ -11,7 +11,6 @@ use std::collections::HashMap;
 use rocket_db_pools::sqlx::{
     self,
     PgConnection,
-    Row,
 };
 use shared_core::ledger::{
     models::{

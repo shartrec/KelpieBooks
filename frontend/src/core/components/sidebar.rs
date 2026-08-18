@@ -21,8 +21,8 @@ use crate::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
-    inventory,
     core::components::about_modal::AboutModal,
+    inventory,
     router::Route,
     sales,
 };

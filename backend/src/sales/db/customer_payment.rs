@@ -48,24 +48,6 @@ pub(crate) async fn get(
     .map(|row| row.map(|r| from_row_to_customer_payment(&r)))
 }
 
-pub(crate) async fn get_all(
-    pool: &mut PgConnection,
-    organization_id: Uuid,
-) -> Result<Vec<CustomerPayment>, sqlx::Error> {
-    sqlx::query(
-        r#"
-        SELECT *
-        FROM customer_payments
-        WHERE organization_id = $1
-        ORDER BY payment_date DESC, created_at DESC
-        "#,
-    )
-    .bind(organization_id)
-    .fetch_all(pool)
-    .await
-    .map(|rows| rows.iter().map(from_row_to_customer_payment).collect())
-}
-
 pub(crate) async fn get_all_by_order(
     pool: &mut PgConnection,
     order_id: Uuid,

@@ -29,7 +29,6 @@ use shared_core::{
         dtos::vendor_invoice_list_item::VendorInvoiceListItem,
         models::{
             invoice_status::InvoiceStatus,
-            vendor_invoice::VendorInvoice,
             vendor_invoice_item::VendorInvoiceItem,
         },
         requests::vendor_invoice::{
@@ -40,7 +39,7 @@ use shared_core::{
 };
 use sqlx::Acquire;
 use uuid::Uuid;
-
+use shared_core::payables::dtos::vendor_invoice_dto::VendorInvoiceDto;
 use crate::{
     ledger::{
         db::account as account_db,
@@ -80,8 +79,8 @@ pub(crate) async fn get_vendor_invoice(
     pool: &mut PgConnection,
     organization_id: Uuid,
     id: Uuid,
-) -> Result<VendorInvoice, ApiError> {
-    let mut invoice = vendor_invoice_db::get(pool, id)
+) -> Result<VendorInvoiceDto, ApiError> {
+    let invoice = vendor_invoice_db::get(pool, id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Invoice not found.".to_string()))?;
     if invoice.organization_id != organization_id {
@@ -89,15 +88,15 @@ pub(crate) async fn get_vendor_invoice(
             "You do not have permission to view this invoice.".to_string(),
         ));
     }
-    invoice.items = vendor_invoice_db::get_items(pool, id).await?;
-    Ok(invoice)
+    let items = vendor_invoice_db::get_items(pool, id).await?;
+    Ok(VendorInvoiceDto{invoice, items})
 }
 
 pub(crate) async fn create_vendor_invoice(
     pool: &mut PgConnection,
     organization_id: Uuid,
     req: &CreateVendorInvoiceRequest,
-) -> Result<VendorInvoice, ApiError> {
+) -> Result<VendorInvoiceDto, ApiError> {
     if vendor_invoice_db::is_duplicate(pool, organization_id, req.partner_id, &req.invoice_number)
         .await?
     {
@@ -130,7 +129,7 @@ pub(crate) async fn create_vendor_invoice(
                 account_id: item.account_id,
                 debit: item.net_amount,
                 credit: dec!(0.00),
-                description: Some(item.description.clone()),
+                description: item.description.clone(),
             };
             jels.push(jel);
         }
@@ -182,7 +181,7 @@ pub(crate) async fn update_vendor_invoice(
     organization_id: Uuid,
     id: Uuid,
     req: &UpdateVendorInvoiceRequest,
-) -> Result<VendorInvoice, ApiError> {
+) -> Result<VendorInvoiceDto, ApiError> {
     let invoice = vendor_invoice_db::get(pool, id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Invoice not found.".to_string()))?;

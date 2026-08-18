@@ -53,16 +53,6 @@ pub(crate) async fn set_audit_mode(
     Ok(())
 }
 
-fn from_row_to_org(row: &sqlx::postgres::PgRow) -> Organization {
-    Organization {
-        id: row.get("id"),
-        name: row.get("name"),
-        strict_audit_mode: row.get("strict_audit_mode"),
-        created_at: row.get("created_at"),
-        locked_until: row.get("locked_until"),
-    }
-}
-
 pub(crate) async fn create(tx: &mut PgConnection, name: &str) -> Result<Organization, sqlx::Error> {
     let row = sqlx::query_as!(Organization,
         "INSERT INTO organizations (name) VALUES ($1) RETURNING *",

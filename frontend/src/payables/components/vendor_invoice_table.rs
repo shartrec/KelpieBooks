@@ -14,14 +14,13 @@ use shared_core::{
         dtos::vendor_invoice_list_item::VendorInvoiceListItem,
         models::{
             invoice_status::InvoiceStatus,
-            vendor_invoice::VendorInvoice,
         },
     },
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-
+use shared_core::payables::dtos::vendor_invoice_dto::VendorInvoiceDto;
 use crate::{
     api::Api,
     contexts::{
@@ -49,7 +48,7 @@ pub fn vendor_invoice_table() -> Html {
     let invoices = use_state(Vec::new);
     let error = use_state(|| None::<String>);
     let loading = use_state(|| true);
-    let invoice_to_edit = use_state(|| None::<VendorInvoice>);
+    let invoice_to_edit = use_state(|| None::<VendorInvoiceDto>);
     let partner_to_edit = use_state(|| None::<Partner>);
     let show_actions = use_state(|| None::<Uuid>);
     let initial_tab = use_state(|| InvoiceDrawerTab::General);
@@ -161,10 +160,10 @@ pub fn vendor_invoice_table() -> Html {
                 )
                 .await;
                 match resp {
-                    Ok(r) if r.ok() => match r.json::<VendorInvoice>().await {
+                    Ok(r) if r.ok() => match r.json::<VendorInvoiceDto>().await {
                         Ok(invoice) => {
                             let partner_resp = Api::get(
-                                &format!("/api/partners/{}", invoice.partner_id),
+                                &format!("/api/partners/{}", invoice.invoice.partner_id),
                                 user_ctx,
                                 navigator,
                             )
@@ -216,7 +215,7 @@ pub fn vendor_invoice_table() -> Html {
     };
 
     let on_drawer_change = {
-        let invoice_id = invoice_to_edit.as_ref().map(|i| i.id);
+        let invoice_id = invoice_to_edit.as_ref().map(|i| i.invoice.id);
         let on_edit_click = on_edit_click.clone();
         let fetch_invoices = fetch_invoices.clone();
         Callback::from(move |()| {
