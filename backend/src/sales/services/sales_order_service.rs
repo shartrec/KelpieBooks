@@ -108,7 +108,7 @@ pub(crate) async fn get_sales_order(
                     .location_balances
                     .iter()
                     .filter(|b| b.warehouse_id == order.warehouse_id)
-                    .map(|b| b.quantity_available)
+                    .map(|b| b.quantity_available.unwrap_or(Decimal::ZERO))
                     .sum();
                 line.quantity_available = Some(warehouse_available);
             }

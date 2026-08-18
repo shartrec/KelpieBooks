@@ -5,6 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use rust_decimal::Decimal;
 use uuid::Uuid;
 use shared_core::{
     core::models::auth::SystemPrivilege,
@@ -200,9 +201,9 @@ pub fn item_row(props: &ItemRowProps) -> Html {
                                                 <tr>
                                                     <td class="table__text-col">{ &b.warehouse_name }</td>
                                                     <td class="table__text-col">{ &b.location_display_label }</td>
-                                                    <td class="table__value-col">{ i18n.format_decimal(b.quantity_on_hand) }</td>
-                                                    <td class="table__value-col">{ i18n.format_decimal(b.quantity_allocated) }</td>
-                                                    <td class="table__value-col"><strong>{ i18n.format_decimal(b.quantity_on_hand - b.quantity_allocated) }</strong></td>
+                                                    <td class="table__value-col">{ i18n.format_decimal(b.quantity_on_hand.unwrap_or(Decimal::ZERO)) }</td>
+                                                    <td class="table__value-col">{ i18n.format_decimal(b.quantity_allocated.unwrap_or(Decimal::ZERO)) }</td>
+                                                    <td class="table__value-col"><strong>{ i18n.format_decimal(b.quantity_on_hand.unwrap_or(Decimal::ZERO) - b.quantity_allocated.unwrap_or(Decimal::ZERO)) }</strong></td>
                                                     <td class="table__col-actions">
                                                         { if user_ctx.has_privilege(&SystemPrivilege::ManageInventory) {
                                                             html! {

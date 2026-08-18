@@ -7,7 +7,6 @@
  */
 use sqlx::{
     PgConnection,
-    Row,
 };
 use strum::Display;
 use uuid::Uuid;

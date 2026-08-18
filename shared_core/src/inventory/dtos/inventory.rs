@@ -91,9 +91,9 @@ pub struct ItemLocationBalanceDto {
     pub location_id: Uuid,
     pub location_display_label: String,
     pub is_picking_location: bool,
-    pub quantity_on_hand: Decimal,
-    pub quantity_allocated: Decimal,
-    pub quantity_available: Decimal, // Calculated: on_hand - allocated
+    pub quantity_on_hand: Option<Decimal>,
+    pub quantity_allocated: Option<Decimal>,
+    pub quantity_available: Option<Decimal>, // Calculated: on_hand - allocated
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

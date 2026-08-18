@@ -32,9 +32,9 @@ pub fn location_tree(props: &TreeProps) -> Html {
     let mut topography: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
     for loc in &props.locations {
         topography
-            .entry(loc.zone.clone())
+            .entry(loc.zone.clone().unwrap_or("".to_string()))
             .or_default()
-            .insert(loc.aisle.clone());
+            .insert(loc.aisle.clone().unwrap_or("".to_string()));
     }
 
     let make_select_callback = |zone: Option<String>, aisle: Option<String>| {

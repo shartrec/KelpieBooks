@@ -33,27 +33,28 @@ pub async fn log_transaction(
     conn: &mut PgConnection,
     entry: NewStockTransaction<'_>,
 ) -> Result<StockTransaction, sqlx::Error> {
-    sqlx::query_as::<_, StockTransaction>(
+    sqlx::query_as!(
+        StockTransaction,
         r#"
         INSERT INTO stock_transactions
             (id, organization_id, warehouse_id, location_id, item_id,
              transaction_type, quantity_change, reference_type, reference_id, notes, created_by)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING id, organization_id, warehouse_id, location_id, item_id,
-                  transaction_type, quantity_change, reference_type, reference_id, notes, created_by, created_at
+                  transaction_type as "transaction_type: TransactionType", quantity_change, reference_type as "reference_type: ReferenceType", reference_id, notes, created_by, created_at
         "#,
+         Uuid::new_v4(),
+        entry.organization_id,
+        entry.warehouse_id,
+        entry.location_id,
+        entry.item_id,
+        entry.transaction_type as TransactionType,
+        entry.quantity_change,
+        entry.reference_type as Option<ReferenceType>,
+        entry.reference_id,
+        entry.notes,
+        entry.created_by
     )
-        .bind(Uuid::new_v4())
-        .bind(entry.organization_id)
-        .bind(entry.warehouse_id)
-        .bind(entry.location_id)
-        .bind(entry.item_id)
-        .bind(entry.transaction_type)
-        .bind(entry.quantity_change)
-        .bind(entry.reference_type)
-        .bind(entry.reference_id)
-        .bind(entry.notes)
-        .bind(entry.created_by)
         .fetch_one(conn)
         .await
 }
@@ -65,19 +66,21 @@ pub async fn get_history_for_item(
     org_id: Uuid,
     limit: i64,
 ) -> Result<Vec<StockTransaction>, sqlx::Error> {
-    sqlx::query_as::<_, StockTransaction>(
+    sqlx::query_as!(
+        StockTransaction,
         r#"
         SELECT id, organization_id, warehouse_id, location_id, item_id,
-               transaction_type, quantity_change, reference_type, reference_id, notes, created_by, created_at
+                  transaction_type as "transaction_type: TransactionType", quantity_change, reference_type as "reference_type: ReferenceType", reference_id, notes, created_by, created_at
         FROM stock_transactions
         WHERE item_id = $1 AND organization_id = $2
         ORDER BY created_at DESC
         LIMIT $3
         "#,
+        item_id,
+       org_id,
+       limit
     )
-        .bind(item_id)
-        .bind(org_id)
-        .bind(limit)
         .fetch_all(conn)
+
         .await
 }

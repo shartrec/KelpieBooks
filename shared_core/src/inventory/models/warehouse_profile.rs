@@ -32,14 +32,13 @@ use uuid::Uuid;
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct ItemWarehouseProfile {
     pub item_id: Uuid,
-    #[cfg_attr(feature = "backend", sqlx(rename = "organization_id"))]
-    pub org_id: Uuid,
-    pub weight_kg: Decimal,
-    pub length_cm: Decimal,
-    pub width_cm: Decimal,
-    pub height_cm: Decimal,
-    pub reorder_point: Decimal,
-    pub safety_stock: Decimal,
+    pub organization_id: Uuid,
+    pub weight_kg: Option<Decimal>,
+    pub length_cm: Option<Decimal>,
+    pub width_cm: Option<Decimal>,
+    pub height_cm: Option<Decimal>,
+    pub reorder_point: Option<Decimal>,
+    pub safety_stock: Option<Decimal>,
     pub updated_at: Option<DateTime<Utc>>,
 }
 
@@ -51,12 +50,12 @@ pub struct ItemWarehouseProfile {
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct WarehouseInventoryBalance {
     pub id: Uuid,
-    #[cfg_attr(feature = "backend", sqlx(rename = "organization_id"))]
-    pub org_id: Uuid,
+    pub organization_id: Uuid,
     pub item_id: Uuid,
     pub warehouse_id: Uuid,
     pub location_id: Uuid,
     pub quantity_on_hand: Decimal,
     pub quantity_allocated: Decimal,
+    pub unit_cost: Decimal,
     pub updated_at: Option<DateTime<Utc>>,
 }

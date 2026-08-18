@@ -19,16 +19,17 @@ pub async fn all_by_warehouse(
     warehouse_id: Uuid,
     org_id: Uuid,
 ) -> Result<Vec<WarehouseLocation>, sqlx::Error> {
-    sqlx::query_as::<_, WarehouseLocation>(
+    sqlx::query_as!(
+        WarehouseLocation,
         r#"
         SELECT id, warehouse_id, organization_id, zone, aisle, shelf, bin, display_label, is_picking_location, created_at
         FROM warehouse_locations
         WHERE warehouse_id = $1 AND organization_id = $2
         ORDER BY zone, aisle, shelf, bin
-        "#
+        "#,
+        warehouse_id,
+        org_id
     )
-        .bind(warehouse_id)
-        .bind(org_id)
         .fetch_all(conn)
         .await
 }
@@ -38,9 +39,12 @@ pub async fn get_location(
     id: Uuid,
     org_id: Uuid,
 ) -> Result<Option<WarehouseLocation>, sqlx::Error> {
-    sqlx::query_as("SELECT * FROM warehouse_locations WHERE id = $1 AND organization_id = $2")
-        .bind(id)
-        .bind(org_id)
+    sqlx::query_as!(
+        WarehouseLocation,
+        "SELECT * FROM warehouse_locations WHERE id = $1 AND organization_id = $2",
+        id,
+        org_id
+    )
         .fetch_optional(conn)
         .await
 }
@@ -50,19 +54,20 @@ pub async fn create_location(
     org_id: Uuid,
     loc: &WarehouseLocation,
 ) -> Result<WarehouseLocation, sqlx::Error> {
-    sqlx::query_as(
+    sqlx::query_as!(
+        WarehouseLocation,
         "INSERT INTO warehouse_locations (id, organization_id, warehouse_id, zone, aisle, shelf, bin, display_label, is_picking_location)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+        Uuid::new_v4(),
+        org_id,
+        loc.warehouse_id,
+        loc.zone,
+        loc.aisle,
+        loc.shelf,
+        loc.bin,
+        loc.display_label,
+        loc.is_picking_location
     )
-        .bind(Uuid::new_v4())
-        .bind(org_id)
-        .bind(loc.warehouse_id)
-        .bind(&loc.zone)
-        .bind(&loc.aisle)
-        .bind(&loc.shelf)
-        .bind(&loc.bin)
-        .bind(&loc.display_label)
-        .bind(loc.is_picking_location)
         .fetch_one(conn)
         .await
 }
@@ -73,18 +78,19 @@ pub async fn update_location(
     org_id: Uuid,
     loc: &WarehouseLocation,
 ) -> Result<WarehouseLocation, sqlx::Error> {
-    sqlx::query_as(
+    sqlx::query_as!(
+        WarehouseLocation,
         "UPDATE warehouse_locations SET zone = $1, aisle = $2, shelf = $3, bin = $4, display_label = $5, is_picking_location = $6
          WHERE id = $7 AND organization_id = $8 RETURNING *",
+        loc.zone,
+        loc.aisle,
+        loc.shelf,
+        loc.bin,
+        loc.display_label,
+        loc.is_picking_location,
+        id,
+        org_id
     )
-        .bind(&loc.zone)
-        .bind(&loc.aisle)
-        .bind(&loc.shelf)
-        .bind(&loc.bin)
-        .bind(&loc.display_label)
-        .bind(loc.is_picking_location)
-        .bind(id)
-        .bind(org_id)
         .fetch_one(conn)
         .await
 }
@@ -104,7 +110,7 @@ pub async fn bulk_insert(
     query_builder.push_values(locations, |mut b, loc| {
         b.push_bind(loc.id)
             .push_bind(loc.warehouse_id)
-            .push_bind(loc.org_id)
+            .push_bind(loc.organization_id)
             .push_bind(&loc.zone)
             .push_bind(&loc.aisle)
             .push_bind(&loc.shelf)

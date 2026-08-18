@@ -39,8 +39,8 @@ pub fn location_grid(props: &GridProps) -> Html {
     let filtered_locations: Vec<&WarehouseLocation> = props
         .locations
         .iter()
-        .filter(|loc| props.zone.as_ref().map_or(true, |z| &loc.zone == z))
-        .filter(|loc| props.aisle.as_ref().map_or(true, |a| &loc.aisle == a))
+        .filter(|loc| props.zone.as_ref().map_or(true, |z| loc.zone.as_ref() == Some(z)))
+        .filter(|loc| props.aisle.as_ref().map_or(true, |a| loc.aisle.as_ref() == Some(a)))
         .collect();
 
     let open_bulk = {
@@ -95,10 +95,10 @@ pub fn location_grid(props: &GridProps) -> Html {
                     { for filtered_locations.into_iter().map(|loc| html! {
                         <tr>
                             <td class="table__text-col">{ &loc.display_label }</td>
-                            <td class="table__text-col">{ &loc.zone }</td>
-                            <td class="table__text-col">{ &loc.aisle }</td>
-                            <td class="table__text-col">{ &loc.shelf }</td>
-                            <td class="table__text-col">{ &loc.bin }</td>
+                            <td class="table__text-col">{ &loc.zone.clone().unwrap_or("".to_string()) }</td>
+                            <td class="table__text-col">{ &loc.aisle.clone().unwrap_or("".to_string()) }</td>
+                            <td class="table__text-col">{ &loc.shelf.clone().unwrap_or("".to_string()) }</td>
+                            <td class="table__text-col">{ &loc.bin.clone().unwrap_or("".to_string()) }</td>
                             <td class="table__text-col">
                                 <input type="checkbox" checked={loc.is_picking_location} disabled=true />
                             </td>
