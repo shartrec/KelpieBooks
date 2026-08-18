@@ -129,20 +129,27 @@ pub(crate) async fn check_security_admin_remains(
     org_id: Uuid,
     i18n: &LocaleContext<'_>,
 ) -> Result<(), ApiError> {
-    let admin_count = sqlx::query(
-        r#"SELECT Count(u.id) FROM users u
+    let admin_count = sqlx::query!(
+        r#"SELECT Count(u.id)  FROM users u
             JOIN roles r ON u.role_id = r.id
             JOIN role_privileges rp ON r.id = rp.role_id
             WHERE rp.privilege_id = $1
             AND u.organization_id = $2
         "#,
+        SystemPrivilege::SecurityAdmin as i64,
+        org_id,
     )
+
     .fetch_one(pool)
-    .await
-    .map(|row| row.get::<i64, &str>("count"));
+    .await;
     match admin_count {
-        Ok(count) if count == 0 => Err(ApiError::Forbidden(i18n.t("security-error-no-admin"))),
-        Ok(_) => Ok(()),
+        Ok(r) => {
+            if r.count.is_some_and(|c| c >= 0) {
+                Ok(())
+            } else {
+                Err(ApiError::Forbidden(i18n.t("security-error-no-admin")))
+            }
+        }
         Err(e) => Err(ApiError::Db(e)),
     }
 }

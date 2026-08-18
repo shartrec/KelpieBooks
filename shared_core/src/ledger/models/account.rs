@@ -22,6 +22,11 @@ use crate::ledger::models::{
 };
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
+#[cfg_attr(
+    feature = "backend",
+    sqlx(type_name = "accounts", rename_all = "snake_case")
+)]
 pub struct Account {
     pub id: Uuid,
     pub organization_id: Uuid,
