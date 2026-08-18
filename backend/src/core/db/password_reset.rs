@@ -28,38 +28,39 @@ pub async fn save_reset_token(
     token_hash: &str,
     expires_at: DateTime<Utc>,
 ) -> Result<i32, sqlx::Error> {
-    let row = sqlx::query(
+    let row = sqlx::query!(
         r#"INSERT INTO password_reset_tokens (user_id, token_hash, expires_at)
             VALUES ($1, $2, $3)
             RETURNING id"#,
-    )
-    .bind(user_id)
-    .bind(token_hash)
-    .bind(expires_at)
+    user_id,
+    token_hash,
+    expires_at)
     .fetch_one(pool)
     .await?;
-    Ok(row.get("id"))
+    Ok(row.id)
 }
 
 pub async fn find_active_token(
     pool: &mut PgConnection,
     token_id: &i32,
 ) -> Result<Option<PasswordResetToken>, sqlx::Error> {
-    let row = sqlx::query(
-        "SELECT token_hash, user_id, expires_at FROM password_reset_tokens WHERE id = $1 AND used = false AND expires_at > NOW()")
-        .bind(token_id)
+    let row = sqlx::query!(
+        "SELECT token_hash, user_id, expires_at FROM password_reset_tokens WHERE id = $1 AND used = false AND expires_at > NOW()",
+        token_id
+    )
         .fetch_optional(pool)
         .await?;
     Ok(row.map(|r| PasswordResetToken {
-        user_id: r.get("user_id"),
-        token_hash: r.get("token_hash"),
-        expires_at: r.get("expires_at"),
+        user_id: r.user_id,
+        token_hash: r.token_hash,
+        expires_at: r.expires_at,
     }))
 }
 
 pub async fn mark_token_as_used(pool: &mut PgConnection, token_id: i32) -> Result<(), sqlx::Error> {
-    sqlx::query("UPDATE password_reset_tokens SET used = true WHERE id = $1 AND used = false")
-        .bind(token_id)
+    sqlx::query!("UPDATE password_reset_tokens SET used = true WHERE id = $1 AND used = false",
+        token_id
+    )
         .execute(pool)
         .await?;
     Ok(())
@@ -68,7 +69,7 @@ pub async fn mark_token_as_used(pool: &mut PgConnection, token_id: i32) -> Resul
 pub(crate) async fn delete_expired_reset_tokens(
     pool: &mut PgConnection,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query("DELETE FROM password_reset_tokens WHERE expires_at < CURRENT_TIMESTAMP")
+    sqlx::query!("DELETE FROM password_reset_tokens WHERE expires_at < CURRENT_TIMESTAMP")
         .execute(pool)
         .await?;
     Ok(())

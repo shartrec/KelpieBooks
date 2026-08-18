@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO organization_sequences\n                    (org_id, document_type, next_value) VALUES ($1, $2, 1000) RETURNING prefix, next_value",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "prefix",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "next_value",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      true,
+      false
+    ]
+  },
+  "hash": "77e8d5d4f2b226cde8282a04ffe8dc1d6311b6d3358b56150d04882efb74081f"
+}

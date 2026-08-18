@@ -18,11 +18,12 @@ pub(crate) async fn get(
     pool: &mut PgConnection,
     id: Uuid,
 ) -> Result<Option<Organization>, sqlx::Error> {
-    sqlx::query("SELECT * FROM organizations WHERE id = $1")
-        .bind(id)
+    sqlx::query_as!(Organization,
+        "SELECT * FROM organizations WHERE id = $1",
+        id
+    )
         .fetch_optional(pool)
         .await
-        .map(|row| row.map(|r| from_row_to_org(&r)))
 }
 
 pub(crate) async fn set_lock_date(
@@ -30,9 +31,10 @@ pub(crate) async fn set_lock_date(
     id: Uuid,
     date: Option<NaiveDate>,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query("UPDATE organizations SET locked_until = $1 WHERE id = $2")
-        .bind(date)
-        .bind(id)
+    sqlx::query!("UPDATE organizations SET locked_until = $1 WHERE id = $2",
+        date,
+        id
+    )
         .execute(pool)
         .await?;
     Ok(())
@@ -42,9 +44,10 @@ pub(crate) async fn set_audit_mode(
     id: Uuid,
     mode: bool,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query("UPDATE organizations SET strict_audit_mode = $1 WHERE id = $2")
-        .bind(mode)
-        .bind(id)
+    sqlx::query!("UPDATE organizations SET strict_audit_mode = $1 WHERE id = $2",
+        mode,
+        id
+    )
         .execute(pool)
         .await?;
     Ok(())
@@ -61,9 +64,11 @@ fn from_row_to_org(row: &sqlx::postgres::PgRow) -> Organization {
 }
 
 pub(crate) async fn create(tx: &mut PgConnection, name: &str) -> Result<Organization, sqlx::Error> {
-    let row = sqlx::query("INSERT INTO organizations (name) VALUES ($1) RETURNING *")
-        .bind(name)
+    let row = sqlx::query_as!(Organization,
+        "INSERT INTO organizations (name) VALUES ($1) RETURNING *",
+        name
+    )
         .fetch_one(tx)
         .await?;
-    Ok(from_row_to_org(&row))
+    Ok(row)
 }
