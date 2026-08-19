@@ -21,7 +21,7 @@ pub struct SalesOrderItem {
     pub item_id: Uuid,
     pub code: String,
     pub name: String,
-    pub description: String,
+    pub description: Option<String>,
     pub quantity: Decimal,
     pub unit_price: Decimal,
     pub tax_category_id: Option<Uuid>,

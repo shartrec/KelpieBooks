@@ -76,7 +76,7 @@ pub fn new_sales_order_page() -> Html {
                 id: Uuid::new_v4(),
                 order_id: Uuid::nil(),
                 item_id: Uuid::nil(),
-                description: String::new(),
+                description: None,
                 code: String::new(),
                 name: String::new(),
                 quantity: Decimal::ONE,
@@ -232,10 +232,10 @@ pub fn new_sales_order_page() -> Html {
                                     req.bill_to = InvoiceAddress {
                                         name: Some(display_name2.clone()),
                                         attention: req.bill_to.attention.clone(),
-                                        address_line1: Some(bill.address_line1.clone()),
-                                        address_line2: bill.address_line2.clone(),
+                                        line1: Some(bill.address_line1.clone()),
+                                        line2: bill.address_line2.clone(),
                                         city: Some(bill.city.clone()),
-                                        state_province: bill.state_province.clone(),
+                                        region: bill.state_province.clone(),
                                         postal_code: bill.postal_code.clone(),
                                         country: Some(bill.country.clone()),
                                     };
@@ -249,10 +249,10 @@ pub fn new_sales_order_page() -> Html {
                                     req.ship_to = InvoiceAddress {
                                         name: Some(display_name2.clone()),
                                         attention: req.ship_to.attention.clone(),
-                                        address_line1: Some(ship.address_line1.clone()),
-                                        address_line2: ship.address_line2.clone(),
+                                        line1: Some(ship.address_line1.clone()),
+                                        line2: ship.address_line2.clone(),
                                         city: Some(ship.city.clone()),
-                                        state_province: ship.state_province.clone(),
+                                        region: ship.state_province.clone(),
                                         postal_code: ship.postal_code.clone(),
                                         country: Some(ship.country.clone()),
                                     };
@@ -348,7 +348,7 @@ pub fn new_sales_order_page() -> Html {
                 item_id: Uuid::nil(),
                 code: String::new(),
                 name: String::new(),
-                description: String::new(),
+                description: None,
                 quantity: Decimal::ONE,
                 unit_price: Decimal::ZERO,
                 tax_category_id: None,
@@ -487,10 +487,10 @@ pub fn new_sales_order_page() -> Html {
                                                     if let Some(addr) = (*partner_addresses).iter().find(|a| a.id == id) {
                                                         let mut req = (*state).clone();
                                                         req.billing_address_id = Some(id);
-                                                        req.bill_to.address_line1 = Some(addr.address_line1.clone());
-                                                        req.bill_to.address_line2 = addr.address_line2.clone();
+                                                        req.bill_to.line1 = Some(addr.address_line1.clone());
+                                                        req.bill_to.line2 = addr.address_line2.clone();
                                                         req.bill_to.city = Some(addr.city.clone());
-                                                        req.bill_to.state_province = addr.state_province.clone();
+                                                        req.bill_to.region = addr.state_province.clone();
                                                         req.bill_to.postal_code = addr.postal_code.clone();
                                                         req.bill_to.country = Some(addr.country.clone());
                                                         state.set(req);
@@ -511,12 +511,12 @@ pub fn new_sales_order_page() -> Html {
                                         <input value={request.bill_to.attention.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.attention = Some(v))} placeholder={i18n.t("address-attention")} />
                                     </div>
 
-                                    <textarea class="full-width-row" rows="1" value={request.bill_to.address_line1.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.address_line1 = Some(v))} placeholder={i18n.t("address-line1")} />
-                                    <input class="full-width-row" value={request.bill_to.address_line2.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.address_line2 = Some(v))} placeholder={i18n.t("address-line2")} />
+                                    <textarea class="full-width-row" rows="1" value={request.bill_to.line1.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.line1 = Some(v))} placeholder={i18n.t("address-line1")} />
+                                    <input class="full-width-row" value={request.bill_to.line2.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.line2 = Some(v))} placeholder={i18n.t("address-line2")} />
 
                                     <div class="geo-quad-row">
                                         <input value={request.bill_to.city.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.city = Some(v))} placeholder={i18n.t("address-city")} />
-                                        <input value={request.bill_to.state_province.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.state_province = Some(v))} placeholder={i18n.t("address-region")} />
+                                        <input value={request.bill_to.region.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.region = Some(v))} placeholder={i18n.t("address-region")} />
                                         <input value={request.bill_to.postal_code.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.postal_code = Some(v))} placeholder={i18n.t("address-postal-code")} />
                                         <input value={request.bill_to.country.clone().unwrap_or_default()} oninput={on_input(|r, v| r.bill_to.country = Some(v))} placeholder={i18n.t("address-country")} />
                                     </div>
@@ -534,10 +534,10 @@ pub fn new_sales_order_page() -> Html {
                                                     if let Some(addr) = (*partner_addresses).iter().find(|a| a.id == id) {
                                                         let mut req = (*state).clone();
                                                         req.shipping_address_id = Some(id);
-                                                        req.ship_to.address_line1 = Some(addr.address_line1.clone());
-                                                        req.ship_to.address_line2 = addr.address_line2.clone();
+                                                        req.ship_to.line1 = Some(addr.address_line1.clone());
+                                                        req.ship_to.line2 = addr.address_line2.clone();
                                                         req.ship_to.city = Some(addr.city.clone());
-                                                        req.ship_to.state_province = addr.state_province.clone();
+                                                        req.ship_to.region = addr.state_province.clone();
                                                         req.ship_to.postal_code = addr.postal_code.clone();
                                                         req.ship_to.country = Some(addr.country.clone());
                                                         state.set(req);
@@ -558,12 +558,12 @@ pub fn new_sales_order_page() -> Html {
                                         <input value={request.ship_to.attention.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.attention = Some(v))} placeholder={i18n.t("address-attention")} />
                                     </div>
 
-                                    <textarea class="full-width-row" rows="1" value={request.ship_to.address_line1.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.address_line1 = Some(v))} placeholder={i18n.t("address-line1")} />
-                                    <input class="full-width-row" value={request.ship_to.address_line2.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.address_line2 = Some(v))} placeholder={i18n.t("address-line2")} />
+                                    <textarea class="full-width-row" rows="1" value={request.ship_to.line1.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.line1 = Some(v))} placeholder={i18n.t("address-line1")} />
+                                    <input class="full-width-row" value={request.ship_to.line2.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.line2 = Some(v))} placeholder={i18n.t("address-line2")} />
 
                                     <div class="geo-quad-row">
                                         <input value={request.ship_to.city.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.city = Some(v))} placeholder={i18n.t("address-city")} />
-                                        <input value={request.ship_to.state_province.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.state_province = Some(v))} placeholder={i18n.t("address-region")} />
+                                        <input value={request.ship_to.region.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.region = Some(v))} placeholder={i18n.t("address-region")} />
                                         <input value={request.ship_to.postal_code.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.postal_code = Some(v))} placeholder={i18n.t("address-postal-code")} />
                                         <input value={request.ship_to.country.clone().unwrap_or_default()} oninput={on_input(|r, v| r.ship_to.country = Some(v))} placeholder={i18n.t("address-country")} />
                                     </div>

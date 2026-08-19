@@ -83,11 +83,11 @@ pub(crate) async fn generate_order(
         );
         bill_to.insert(
             "addr_line1".into(),
-            Value::Str(order.bill_to.address_line1.unwrap_or_default().into()),
+            Value::Str(order.bill_to.line1.unwrap_or_default().into()),
         );
         bill_to.insert(
             "addr_line2".into(),
-            Value::Str(order.bill_to.address_line2.unwrap_or_default().into()),
+            Value::Str(order.bill_to.line2.unwrap_or_default().into()),
         );
         bill_to.insert(
             "city".into(),
@@ -95,7 +95,7 @@ pub(crate) async fn generate_order(
         );
         bill_to.insert(
             "state".into(),
-            Value::Str(order.bill_to.state_province.unwrap_or_default().into()),
+            Value::Str(order.bill_to.region.unwrap_or_default().into()),
         );
         bill_to.insert(
             "post_code".into(),
@@ -114,11 +114,11 @@ pub(crate) async fn generate_order(
         );
         ship_to.insert(
             "addr_line1".into(),
-            Value::Str(order.ship_to.address_line1.unwrap_or_default().into()),
+            Value::Str(order.ship_to.line1.unwrap_or_default().into()),
         );
         ship_to.insert(
             "addr_line2".into(),
-            Value::Str(order.ship_to.address_line2.unwrap_or_default().into()),
+            Value::Str(order.ship_to.line2.unwrap_or_default().into()),
         );
         ship_to.insert(
             "city".into(),
@@ -126,7 +126,7 @@ pub(crate) async fn generate_order(
         );
         ship_to.insert(
             "state".into(),
-            Value::Str(order.ship_to.state_province.unwrap_or_default().into()),
+            Value::Str(order.ship_to.region.unwrap_or_default().into()),
         );
         ship_to.insert(
             "post_code".into(),

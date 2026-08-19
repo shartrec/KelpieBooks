@@ -20,7 +20,7 @@ pub struct TaxCategory {
     #[cfg_attr(feature = "backend", sqlx(rename = "organization_id"))]
     pub org_id: Uuid,
     pub name: String,
-    pub description: String,
+    pub description: Option<String>,
     pub is_active: bool,
 }
 

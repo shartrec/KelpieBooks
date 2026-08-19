@@ -46,6 +46,7 @@ pub struct SalesOrder {
     // Snapshots stored on the order (overridable by user per-order)
     pub bill_to: InvoiceAddress,
     pub ship_to: InvoiceAddress,
+
     pub lines: Vec<SalesOrderItem>,
 }
 

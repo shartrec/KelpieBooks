@@ -22,10 +22,10 @@ pub enum AddressType {
 pub struct InvoiceAddress {
     pub name: Option<String>,
     pub attention: Option<String>,
-    pub address_line1: Option<String>,
-    pub address_line2: Option<String>,
+    pub line1: Option<String>,
+    pub line2: Option<String>,
     pub city: Option<String>,
-    pub state_province: Option<String>,
+    pub region: Option<String>,
     pub postal_code: Option<String>,
     pub country: Option<String>,
 }

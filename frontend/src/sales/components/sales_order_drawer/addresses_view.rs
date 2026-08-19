@@ -52,15 +52,15 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
                                         <p class="card-item-compact__desc">{ attn }</p>
                                     }
                                 }
-                                if let Some(line1) = &address.address_line1 {
+                                if let Some(line1) = &address.line1 {
                                     if !line1.is_empty() { <p>{ line1 }</p> }
                                 }
-                                if let Some(line2) = &address.address_line2 {
+                                if let Some(line2) = &address.line2 {
                                     if !line2.is_empty() { <p>{ line2 }</p> }
                                 }
                                 <p>{ format!("{}, {} {}",
                                     address.city.as_deref().unwrap_or(""),
-                                    address.state_province.as_deref().unwrap_or(""),
+                                    address.region.as_deref().unwrap_or(""),
                                     address.postal_code.as_deref().unwrap_or(""))
                                 }</p>
                                 if let Some(country) = &address.country {

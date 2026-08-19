@@ -12,6 +12,7 @@ use rocket_db_pools::sqlx::{
     Row,
 };
 use rust_decimal::Decimal;
+use sqlx::postgres::PgRow;
 use shared_core::sales::{
     dtos::sales_order_list_item::SalesOrderListItem,
     models::{
@@ -26,24 +27,24 @@ use uuid::Uuid;
 use shared_core::sales::models::fulfillment_status::FulfillmentStatus;
 use shared_core::sales::models::payment_status::PaymentStatus;
 
-fn from_row_to_sales_order(row: &sqlx::postgres::PgRow) -> SalesOrder {
+fn from_row_to_sales_order(row: &PgRow) -> SalesOrder {
     let bill_to = InvoiceAddress {
         name: row.get("bill_to_name"),
         attention: row.get("bill_to_attention"),
-        address_line1: row.get("bill_to_line1"),
-        address_line2: row.get("bill_to_line2"),
+        line1: row.get("bill_to_line1"),
+        line2: row.get("bill_to_line2"),
         city: row.get("bill_to_city"),
-        state_province: row.get("bill_to_region"),
+        region: row.get("bill_to_region"),
         postal_code: row.get("bill_to_postal_code"),
         country: row.get("bill_to_country"),
     };
     let ship_to = InvoiceAddress {
         name: row.get("ship_to_name"),
         attention: row.get("ship_to_attention"),
-        address_line1: row.get("ship_to_line1"),
-        address_line2: row.get("ship_to_line2"),
+        line1: row.get("ship_to_line1"),
+        line2: row.get("ship_to_line2"),
         city: row.get("ship_to_city"),
-        state_province: row.get("ship_to_region"),
+        region: row.get("ship_to_region"),
         postal_code: row.get("ship_to_postal_code"),
         country: row.get("ship_to_country"),
     };
@@ -161,18 +162,18 @@ pub(crate) async fn create_draft_order(
     .bind(request.shipping_address_id)
     .bind(&request.bill_to.name)
     .bind(&request.bill_to.attention)
-    .bind(&request.bill_to.address_line1)
-    .bind(&request.bill_to.address_line2)
+    .bind(&request.bill_to.line1)
+    .bind(&request.bill_to.line2)
     .bind(&request.bill_to.city)
-    .bind(&request.bill_to.state_province)
+    .bind(&request.bill_to.region)
     .bind(&request.bill_to.postal_code)
     .bind(&request.bill_to.country)
     .bind(&request.ship_to.name)
     .bind(&request.ship_to.attention)
-    .bind(&request.ship_to.address_line1)
-    .bind(&request.ship_to.address_line2)
+    .bind(&request.ship_to.line1)
+    .bind(&request.ship_to.line2)
     .bind(&request.ship_to.city)
-    .bind(&request.ship_to.state_province)
+    .bind(&request.ship_to.region)
     .bind(&request.ship_to.postal_code)
     .bind(&request.ship_to.country)
     .bind(Decimal::ZERO)
@@ -189,7 +190,8 @@ pub(crate) async fn insert_sales_order_line(
     line: &SalesOrderItem,
     order_id: Uuid,
 ) -> Result<SalesOrderItem, sqlx::Error> {
-    let row = sqlx::query(
+    let row = sqlx::query_as!(
+        SalesOrderItem,
         r#"
         INSERT INTO sales_order_items (
             order_id, item_id, code, name, description,
@@ -197,46 +199,47 @@ pub(crate) async fn insert_sales_order_line(
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         RETURNING id, order_id, item_id, code, name, description,
-            quantity, unit_price, tax_category_id, tax_rate, tax_amount, net_amount, sort_order
+            quantity, unit_price, tax_category_id, tax_rate, tax_amount, net_amount, sort_order, null as "quantity_available: Decimal"
         "#,
+        order_id,
+        line.item_id,
+        line.code,
+        line.name,
+        line.description,
+        line.quantity,
+        line.unit_price,
+        line.tax_category_id,
+        line.tax_rate,
+        line.tax_amount,
+        line.net_amount,
+        line.sort_order,
     )
-    .bind(order_id)
-    .bind(line.item_id)
-    .bind(&line.code)
-    .bind(&line.name)
-    .bind(&line.description)
-    .bind(line.quantity)
-    .bind(line.unit_price)
-    .bind(line.tax_category_id)
-    .bind(line.tax_rate)
-    .bind(line.tax_amount)
-    .bind(line.net_amount)
-    .bind(line.sort_order)
     .fetch_one(conn)
     .await?;
 
-    Ok(from_row_to_sales_order_item(&row))
+    Ok(row)
 }
 
 pub(crate) async fn get_sales_order_items(
     conn: &mut PgConnection,
     order_id: Uuid,
 ) -> Result<Vec<SalesOrderItem>, sqlx::Error> {
-    let rows = sqlx::query(
+    let rows = sqlx::query_as!(
+        SalesOrderItem,
         r#"
-        SELECT soi.id, soi.order_id, soi.item_id, soi.code, soi.name, soi.description,
-               soi.quantity, soi.unit_price, soi.tax_category_id, soi.tax_rate,
-               soi.tax_amount, soi.net_amount, soi.sort_order
+        SELECT id, order_id, item_id, code, name, description,
+               quantity, unit_price, tax_category_id, tax_rate,
+               tax_amount, net_amount, sort_order, null as "quantity_available: Decimal"
         FROM sales_order_items soi
-        WHERE soi.order_id = $1
-        ORDER BY soi.sort_order
+        WHERE order_id = $1
+        ORDER BY sort_order
         "#,
+        order_id,
     )
-    .bind(order_id)
     .fetch_all(&mut *conn)
     .await?;
 
-    Ok(rows.iter().map(from_row_to_sales_order_item).collect())
+    Ok(rows)
 }
 
 pub(crate) async fn get_sales_order(
@@ -391,19 +394,19 @@ pub(crate) async fn update_sales_order_totals(
     total_amount: Decimal,
     amount_remaining: Decimal,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query(
+    sqlx::query!(
         r#"
         UPDATE sales_orders
         SET subtotal = $1, tax_total = $2, total_amount = $3, amount_remaining = $4
         WHERE id = $5 AND organization_id = $6
         "#,
+        subtotal,
+        tax_total,
+        total_amount,
+        amount_remaining,
+        id,
+        org_id,
     )
-    .bind(subtotal)
-    .bind(tax_total)
-    .bind(total_amount)
-    .bind(amount_remaining)
-    .bind(id)
-    .bind(org_id)
     .execute(conn)
     .await?;
     Ok(())
@@ -415,16 +418,16 @@ pub(crate) async fn update_sales_order_status(
     org_id: Uuid,
     new_status: SalesDocumentStatus,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query(
+    sqlx::query!(
         r#"
         UPDATE sales_orders
-        SET document_status = $1
+        SET document_status = $1::sales_document_status
         WHERE id = $2 AND organization_id = $3
         "#,
+        new_status as SalesDocumentStatus,
+        id,
+        org_id,
     )
-    .bind(new_status)
-    .bind(id)
-    .bind(org_id)
     .execute(conn)
     .await?;
     Ok(())
@@ -454,22 +457,22 @@ pub(crate) async fn get_sales_order_with_lines(
     if let Some(order_row) = order_row {
         let mut sales_order = from_row_to_sales_order(&order_row);
 
-        let line_rows = sqlx::query(
+        let line_rows = sqlx::query_as!(
+            SalesOrderItem,
             r#"
-            SELECT sil.id, order_id, item_id, it.code,  it.name, it.code, sil.description, quantity, sil.unit_price, sil.tax_category_id, tax_amount, net_amount, sort_order
+            SELECT sil.id, order_id, item_id, it.code,  it.name, sil.description, quantity,
+                   sil.unit_price, sil.tax_category_id, tax_amount, tax_rate, net_amount, sort_order,
+                   null as "quantity_available: Decimal"
             FROM sales_order_items sil, items it
             WHERE sil.item_id = it.id
                 AND order_id = $1
             "#,
+            id,
         )
-            .bind(id)
             .fetch_all(&mut *pool)
             .await?;
 
-        sales_order.lines = line_rows
-            .iter()
-            .map(from_row_to_sales_order_item)
-            .collect();
+        sales_order.lines = line_rows;
 
         Ok(Some(sales_order))
     } else {
@@ -483,30 +486,28 @@ pub(crate) async fn update_amount_remaining(
     amount: Decimal,
 ) -> Result<(), sqlx::Error> {
 
-    let query = sqlx::query(
+    let query = sqlx::query!(
             r#"
         UPDATE sales_orders
-        SET amount_remaining = amount_remaining + $1
-        WHERE id = $2
+            SET amount_remaining = amount_remaining + $1
+            WHERE id = $2
         "#,
+        amount,
+        id
     )
-
-    .bind(amount)
-    .bind(id);
-    query.execute(& mut *pool).await?;
+    .execute(& mut *pool).await?;
 
     // update the status if amount is zero
-    let query = sqlx::query(
+    let query = sqlx::query!(
         r#"
         UPDATE sales_orders
-        SET payment_status = $1
-        WHERE id = $2 and amount_remaining = 0.0
+            SET payment_status = $1::payment_status
+            WHERE id = $2 and amount_remaining = 0.0
         "#,
+        PaymentStatus::Paid as PaymentStatus,
+        id
     )
-
-        .bind(PaymentStatus::Paid)
-        .bind(id);
-    query.execute(& mut *pool).await?;
+    .execute(& mut *pool).await?;
 
     Ok(())
 }

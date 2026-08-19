@@ -114,7 +114,7 @@ pub fn sales_order_item_row(props: &SalesOrderItemRowProps) -> Html {
             let mut new_item = item.clone();
             new_item.item_id = selected_item.id;
             new_item.name = selected_item.name.clone();
-            new_item.description = selected_item.description.unwrap_or("".to_string()).clone();
+            new_item.description = selected_item.description.clone();
             new_item.unit_price = selected_item.unit_price;
             new_item.tax_category_id = selected_item.tax_category_id;
             new_item.tax_rate = Decimal::new(0, 4); // Default to 0

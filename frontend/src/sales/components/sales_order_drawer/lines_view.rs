@@ -57,7 +57,7 @@ pub fn lines_view(props: &LinesViewProps) -> Html {
                         // Body row: description on the left, financials on the right
                         <div class="card-item-compact__body">
                             <p class="card-item-compact__desc">
-                                { if line.description.is_empty() { &line.name } else { &line.description } }
+                                { line.description.clone().unwrap_or(line.name.clone()) }
                             </p>
                             <div class="card-item-compact__financials">
                                 <p class="card-item-compact__total">
