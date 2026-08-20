@@ -16,13 +16,13 @@ use rocket::{
 };
 use rocket_db_pools::Connection;
 use shared_core::sales::{
-    dtos::sales_order_list_item::SalesOrderListItem,
     models::{
         sales_order::SalesOrder,
     },
     requests::sales_order::CreateSalesOrderRequest,
 };
-
+use shared_core::sales::dtos::sales_order_dto::SalesOrderDto;
+use shared_core::sales::dtos::sales_order_list_item::SalesOrderListItem;
 use crate::{
     sales::services::sales_order_service,
     security::{
@@ -76,7 +76,7 @@ async fn get_sales_order(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseSales>,
     id: PathUuid,
-) -> Result<Json<SalesOrder>, ApiError> {
+) -> Result<Json<SalesOrderDto>, ApiError> {
     let user = guard.0;
     let order =
         sales_order_service::get_sales_order(&mut pool, *id, user.organization_id).await?;
@@ -100,11 +100,11 @@ async fn confirm_sales_order(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageSales>,
     id: PathUuid,
-) -> Result<Json<SalesOrder>, ApiError> {
+) -> Result<Json<SalesOrderDto>, ApiError> {
     let user = guard.0;
-    let invoice =
+    let order =
         sales_order_service::confirm_order(&mut pool, *id, user.organization_id, user.user_id).await?;
-    Ok(Json(invoice))
+    Ok(Json(order))
 }
 
 #[post("/api/sales-orders/<id>/cancel")]

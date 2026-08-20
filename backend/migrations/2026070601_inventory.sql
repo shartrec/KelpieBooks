@@ -215,26 +215,6 @@ CREATE TABLE sales_orders
     billing_address_id  UUID REFERENCES partner_addresses(id) ON DELETE SET NULL,
     shipping_address_id UUID REFERENCES partner_addresses(id) ON DELETE SET NULL,
 
-    -- Bill To snapshot
-    bill_to_name        TEXT,
-    bill_to_attention   TEXT,
-    bill_to_line1       TEXT,
-    bill_to_line2       TEXT,
-    bill_to_city        TEXT,
-    bill_to_region      TEXT,
-    bill_to_postal_code TEXT,
-    bill_to_country     TEXT,
-
-    -- Ship To snapshot
-    ship_to_name        TEXT,
-    ship_to_attention   TEXT,
-    ship_to_line1       TEXT,
-    ship_to_line2       TEXT,
-    ship_to_city        TEXT,
-    ship_to_region      TEXT,
-    ship_to_postal_code TEXT,
-    ship_to_country     TEXT,
-
     -- Financial summary (denormalized for fast reading)
     subtotal        NUMERIC(15,4)   NOT NULL DEFAULT 0,
     tax_total       NUMERIC(15,4)   NOT NULL DEFAULT 0,
@@ -266,6 +246,23 @@ CREATE TABLE sales_order_items
 );
 
 CREATE INDEX idx_sales_order_items_org ON sales_order_items(order_id);
+
+CREATE TABLE sales_order_addresses
+(
+    id       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_id UUID NOT NULL REFERENCES sales_orders (id) ON DELETE CASCADE,
+    type        address_type,
+    name        TEXT,
+    attention   TEXT,
+    line1       TEXT,
+    line2       TEXT,
+    city        TEXT,
+    region      TEXT,
+    postal_code TEXT,
+    country     TEXT
+);
+
+CREATE INDEX idx_sales_order_address_ord ON sales_order_items(order_id);
 
 -- =============================================================================
 -- 1. Customer Payments

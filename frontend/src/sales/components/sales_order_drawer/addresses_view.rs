@@ -7,7 +7,7 @@
  */
 
 use shared_core::sales::models::{
-    invoice_address::AddressType,
+    order_address::AddressType,
     sales_order::SalesOrder,
 };
 use yew::prelude::*;

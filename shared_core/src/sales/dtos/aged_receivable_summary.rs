@@ -12,7 +12,6 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
-
 use crate::sales::dtos::sales_order_list_item::SalesOrderListItem;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

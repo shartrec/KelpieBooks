@@ -26,7 +26,6 @@ use crate::{
         db::organization as db_org,
         routes::security::AuthenticatedUser,
     },
-    sales::db::sales_order::get_sales_order_with_lines,
     util::{
         locale_context::LocaleContext,
         ApiError,
@@ -34,6 +33,7 @@ use crate::{
     DbKelpie,
     TemplateConfig,
 };
+use crate::sales::db::sales_order::get_sales_order;
 
 pub(crate) async fn generate_order(
     conn: &mut Connection<DbKelpie>,
@@ -53,9 +53,11 @@ pub(crate) async fn generate_order(
         return Err(ApiError::Forbidden("Organization ID does not exist".into()));
     }
 
-    let order = get_sales_order_with_lines(conn, order_id, user.organization_id).await?;
+    let order = get_sales_order(conn, order_id, user.organization_id).await?;
 
-    if let Some(order) = order {
+    if let Some(order_dto) = order {
+        let order = order_dto.order;
+
         dict.insert(
             "order-number".into(),
             Value::Str(order.order_number.into()),
@@ -72,71 +74,72 @@ pub(crate) async fn generate_order(
         let inv_gross = i18n.format_money_typ(order.total_amount.round_dp(2));
         dict.insert("order-gross".into(), Value::Str(inv_gross.into()));
 
+
         let mut bill_to = Dict::new();
         bill_to.insert(
             "name".into(),
-            Value::Str(order.bill_to.name.unwrap_or_default().into()),
+            Value::Str(order_dto.bill_to.name.unwrap_or_default().into()),
         );
         bill_to.insert(
             "attn".into(),
-            Value::Str(order.bill_to.attention.unwrap_or_default().into()),
+            Value::Str(order_dto.bill_to.attention.unwrap_or_default().into()),
         );
         bill_to.insert(
             "addr_line1".into(),
-            Value::Str(order.bill_to.line1.unwrap_or_default().into()),
+            Value::Str(order_dto.bill_to.line1.unwrap_or_default().into()),
         );
         bill_to.insert(
             "addr_line2".into(),
-            Value::Str(order.bill_to.line2.unwrap_or_default().into()),
+            Value::Str(order_dto.bill_to.line2.unwrap_or_default().into()),
         );
         bill_to.insert(
             "city".into(),
-            Value::Str(order.bill_to.city.unwrap_or_default().into()),
+            Value::Str(order_dto.bill_to.city.unwrap_or_default().into()),
         );
         bill_to.insert(
             "state".into(),
-            Value::Str(order.bill_to.region.unwrap_or_default().into()),
+            Value::Str(order_dto.bill_to.region.unwrap_or_default().into()),
         );
         bill_to.insert(
             "post_code".into(),
-            Value::Str(order.bill_to.postal_code.unwrap_or_default().into()),
+            Value::Str(order_dto.bill_to.postal_code.unwrap_or_default().into()),
         );
         dict.insert("bill_to".into(), Value::Dict(bill_to));
 
         let mut ship_to = Dict::new();
         ship_to.insert(
             "name".into(),
-            Value::Str(order.ship_to.name.unwrap_or_default().into()),
+            Value::Str(order_dto.ship_to.name.unwrap_or_default().into()),
         );
         ship_to.insert(
             "attn".into(),
-            Value::Str(order.ship_to.attention.unwrap_or_default().into()),
+            Value::Str(order_dto.ship_to.attention.unwrap_or_default().into()),
         );
         ship_to.insert(
             "addr_line1".into(),
-            Value::Str(order.ship_to.line1.unwrap_or_default().into()),
+            Value::Str(order_dto.ship_to.line1.unwrap_or_default().into()),
         );
         ship_to.insert(
             "addr_line2".into(),
-            Value::Str(order.ship_to.line2.unwrap_or_default().into()),
+            Value::Str(order_dto.ship_to.line2.unwrap_or_default().into()),
         );
         ship_to.insert(
             "city".into(),
-            Value::Str(order.ship_to.city.unwrap_or_default().into()),
+            Value::Str(order_dto.ship_to.city.unwrap_or_default().into()),
         );
         ship_to.insert(
             "state".into(),
-            Value::Str(order.ship_to.region.unwrap_or_default().into()),
+            Value::Str(order_dto.ship_to.region.unwrap_or_default().into()),
         );
         ship_to.insert(
             "post_code".into(),
-            Value::Str(order.ship_to.postal_code.unwrap_or_default().into()),
+            Value::Str(order_dto.ship_to.postal_code.unwrap_or_default().into()),
         );
         dict.insert("ship_to".into(), Value::Dict(ship_to));
 
         // Now we add the lines to an array each as a Dict
         let mut lines = Array::new();
-        for line in order.lines {
+        for line in order_dto.items {
             let mut item = Dict::new();
             item.insert("name".into(), Value::Str(line.name.into()));
             item.insert("code".into(), Value::Str(line.code.into()));

@@ -14,7 +14,6 @@ use rocket_db_pools::sqlx::{
 use rust_decimal::Decimal;
 use shared_core::{
     sales::{
-        dtos::sales_order_list_item::SalesOrderListItem,
         models::{
             sales_order::SalesOrder,
             sales_document_status::SalesDocumentStatus,
@@ -28,7 +27,8 @@ use shared_core::{
 };
 use sqlx::Acquire;
 use uuid::Uuid;
-
+use shared_core::sales::dtos::sales_order_dto::SalesOrderDto;
+use shared_core::sales::dtos::sales_order_list_item::SalesOrderListItem;
 use crate::{
     core::db::sequences::{
         get_next_order_number,
@@ -69,8 +69,8 @@ pub(crate) async fn create_order(
         sales_order_db::insert_sales_order_line(&mut tx, line, order.id).await?;
     }
 
-    order.lines = req.lines.clone();
-    order.calculate();
+    let lines = req.lines.clone();
+    order.calculate(&lines);
 
     sales_order_db::update_sales_order_totals(
         &mut tx,
@@ -92,13 +92,13 @@ pub(crate) async fn get_sales_order(
     pool: &mut PgConnection,
     id: Uuid,
     org_id: Uuid,
-) -> Result<SalesOrder, ApiError> {
+) -> Result<SalesOrderDto, ApiError> {
     let mut order = sales_order_db::get_sales_order(pool, id, org_id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Sales order not found.".to_string()))?;
 
     // Inject quantity_available for stocked line items
-    for line in &mut order.lines {
+    for line in &mut order.items {
         let item = item_db::get(pool, org_id, line.item_id).await?;
         if let Some(item) = item {
             if item.is_stocked() {
@@ -107,7 +107,7 @@ pub(crate) async fn get_sales_order(
                 let warehouse_available: Decimal = balances
                     .location_balances
                     .iter()
-                    .filter(|b| b.warehouse_id == order.warehouse_id)
+                    .filter(|b| b.warehouse_id == order.order.warehouse_id)
                     .map(|b| b.quantity_available.unwrap_or(Decimal::ZERO))
                     .sum();
                 line.quantity_available = Some(warehouse_available);
@@ -136,7 +136,7 @@ pub(crate) async fn confirm_order(
     id: Uuid,
     org_id: Uuid,
     user_id: Uuid,
-) -> Result<SalesOrder, ApiError> {
+) -> Result<SalesOrderDto, ApiError> {
     let mut tx = pool.begin().await?;
 
     // Load and verify order status
@@ -144,7 +144,7 @@ pub(crate) async fn confirm_order(
         .await?
         .ok_or_else(|| ApiError::NotFound("Sales order not found.".to_string()))?;
 
-    if order.document_status != SalesDocumentStatus::Open {
+    if order.order.document_status != SalesDocumentStatus::Open {
         return Err(ApiError::BadRequest(
             "Only Open orders can be confirmed.".to_string(),
         ));
@@ -160,7 +160,7 @@ pub(crate) async fn confirm_order(
         LIMIT 1
         "#,
     )
-    .bind(order.warehouse_id)
+    .bind(order.order.warehouse_id)
     .bind(org_id)
     .fetch_optional(&mut *tx)
     .await?;
@@ -168,7 +168,7 @@ pub(crate) async fn confirm_order(
     let picking_location_id: Option<Uuid> = picking_location.as_ref().map(|r| r.get("id"));
 
     // For each stocked line: adjust allocated quantity and log a stock transaction
-    for line in &order.lines {
+    for line in &order.items {
         let item = item_db::get(&mut tx, org_id, line.item_id).await?;
         if let Some(item) = item {
             if item.is_stocked() {
@@ -185,13 +185,13 @@ pub(crate) async fn confirm_order(
                     &mut tx,
                     NewStockTransaction {
                         organization_id: org_id,
-                        warehouse_id: order.warehouse_id,
+                        warehouse_id: order.order.warehouse_id,
                         location_id: loc_id,
                         item_id: line.item_id,
                         transaction_type: TransactionType::Allocation,
                         quantity_change: line.quantity,
                         reference_type: Some(ReferenceType::SalesOrder),
-                        reference_id: Some(order.id),
+                        reference_id: Some(order.order.id),
                         notes: Some("Allocated on sales order confirmation"),
                         created_by: user_id,
                     },
@@ -219,7 +219,7 @@ pub(crate) async fn cancel_order(
         .await?
         .ok_or_else(|| ApiError::NotFound("Sales order not found.".to_string()))?;
 
-    if order.document_status != SalesDocumentStatus::Open || order.document_status != SalesDocumentStatus::Draft {
+    if order.order.document_status != SalesDocumentStatus::Open || order.order.document_status != SalesDocumentStatus::Draft {
         return Err(ApiError::BadRequest(
             "Only Draft or Open orders can be cancelled.".to_string(),
         ));

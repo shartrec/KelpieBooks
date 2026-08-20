@@ -37,7 +37,7 @@ use shared_core::{
     },
     sales::{
         models::{
-            invoice_address::InvoiceAddress,
+            order_address::OrderAddress,
             sales_order::SalesOrder,
             sales_order_item::SalesOrderItem,
         },
@@ -90,8 +90,8 @@ pub fn new_sales_order_page() -> Html {
             }],
             billing_address_id: None,
             shipping_address_id: None,
-            bill_to: InvoiceAddress::default(),
-            ship_to: InvoiceAddress::default(),
+            bill_to: OrderAddress::default(),
+            ship_to: OrderAddress::default(),
         }
     });
 
@@ -229,7 +229,7 @@ pub fn new_sales_order_page() -> Html {
                                     .or_else(|| addresses.first())
                                 {
                                     req.billing_address_id = Some(bill.id);
-                                    req.bill_to = InvoiceAddress {
+                                    req.bill_to = OrderAddress {
                                         name: Some(display_name2.clone()),
                                         attention: req.bill_to.attention.clone(),
                                         line1: Some(bill.address_line1.clone()),
@@ -246,7 +246,7 @@ pub fn new_sales_order_page() -> Html {
                                     .or_else(|| addresses.first())
                                 {
                                     req.shipping_address_id = Some(ship.id);
-                                    req.ship_to = InvoiceAddress {
+                                    req.ship_to = OrderAddress {
                                         name: Some(display_name2.clone()),
                                         attention: req.ship_to.attention.clone(),
                                         line1: Some(ship.address_line1.clone()),

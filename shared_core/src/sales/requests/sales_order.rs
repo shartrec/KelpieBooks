@@ -14,7 +14,7 @@ use serde::{
 use uuid::Uuid;
 
 use crate::sales::models::{
-    invoice_address::InvoiceAddress,
+    order_address::OrderAddress,
     sales_order_item::SalesOrderItem,
 };
 
@@ -31,6 +31,6 @@ pub struct CreateSalesOrderRequest {
     pub shipping_address_id: Option<Uuid>,
 
     // Snapshots stored on the order (overridable by user per-order)
-    pub bill_to: InvoiceAddress,
-    pub ship_to: InvoiceAddress,
+    pub bill_to: OrderAddress,
+    pub ship_to: OrderAddress,
 }

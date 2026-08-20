@@ -14,7 +14,6 @@ use serde::{
 };
 use uuid::Uuid;
 
-use crate::sales::models::invoice_address::InvoiceAddress;
 pub use crate::sales::models::{
     sales_order_item::SalesOrderItem,
 };
@@ -28,7 +27,7 @@ pub struct SalesOrder {
     pub org_id: Uuid,
     pub partner_id: Uuid,
     pub warehouse_id: Uuid,
-    pub warehouse_name: String,
+    pub warehouse_name: Option<String>,
     pub order_number: String,
     pub order_date: NaiveDate,
     pub due_date: NaiveDate,
@@ -42,23 +41,17 @@ pub struct SalesOrder {
     // Optional references to saved partner addresses used to populate the snapshots
     pub billing_address_id: Option<Uuid>,
     pub shipping_address_id: Option<Uuid>,
-
-    // Snapshots stored on the order (overridable by user per-order)
-    pub bill_to: InvoiceAddress,
-    pub ship_to: InvoiceAddress,
-
-    pub lines: Vec<SalesOrderItem>,
 }
 
 impl SalesOrder {
-    pub fn calculate(&mut self) {
+    pub fn calculate(&mut self, lines: &Vec<SalesOrderItem>) {
 
         let amount_paid = self.total_amount - self.amount_remaining;
 
         let mut net_amount = Decimal::ZERO;
         let mut tax_amount = Decimal::ZERO;
 
-        for line in &mut self.lines {
+        for line in lines {
             net_amount += line.net_amount;
             tax_amount += line.tax_amount;
         }

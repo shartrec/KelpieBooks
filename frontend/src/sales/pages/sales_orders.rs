@@ -8,7 +8,6 @@
 
 use fluent::fluent_args;
 use shared_core::sales::{
-    dtos::sales_order_list_item::SalesOrderListItem,
     models::{
         sales_document_status::SalesDocumentStatus,
         sales_order::SalesOrder,
@@ -39,7 +38,7 @@ pub fn sales_orders_page() -> Html {
     let navigator = use_navigator().unwrap();
 
     // List state
-    let orders = use_state(Vec::<SalesOrderListItem>::new);
+    let orders = use_state(Vec::<SalesOrder>::new);
     let status_filter = use_state(|| "Open".to_string());
     let list_error = use_state(|| None::<String>);
 
@@ -73,7 +72,7 @@ pub fn sales_orders_page() -> Html {
                 };
                 let resp = Api::get(&url, user_ctx, navigator).await;
                 match resp {
-                    Ok(r) if r.ok() => match r.json::<Vec<SalesOrderListItem>>().await {
+                    Ok(r) if r.ok() => match r.json::<Vec<SalesOrder>>().await {
                         Ok(data) => {
                             orders.set(data);
                             list_error.set(None);

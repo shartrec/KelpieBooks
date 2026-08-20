@@ -12,11 +12,10 @@ use rocket_db_pools::sqlx::{
     Row,
 };
 use rust_decimal::Decimal;
-use sqlx::postgres::PgRow;
+use sqlx::Acquire;
 use shared_core::sales::{
-    dtos::sales_order_list_item::SalesOrderListItem,
     models::{
-        invoice_address::InvoiceAddress,
+        order_address::OrderAddress,
         sales_order::SalesOrder,
         sales_order_item::SalesOrderItem,
         sales_document_status::SalesDocumentStatus,
@@ -24,73 +23,11 @@ use shared_core::sales::{
     requests::sales_order::CreateSalesOrderRequest,
 };
 use uuid::Uuid;
+use shared_core::sales::dtos::sales_order_dto::SalesOrderDto;
+use shared_core::sales::dtos::sales_order_list_item::SalesOrderListItem;
 use shared_core::sales::models::fulfillment_status::FulfillmentStatus;
+use shared_core::sales::models::order_address::AddressType;
 use shared_core::sales::models::payment_status::PaymentStatus;
-
-fn from_row_to_sales_order(row: &PgRow) -> SalesOrder {
-    let bill_to = InvoiceAddress {
-        name: row.get("bill_to_name"),
-        attention: row.get("bill_to_attention"),
-        line1: row.get("bill_to_line1"),
-        line2: row.get("bill_to_line2"),
-        city: row.get("bill_to_city"),
-        region: row.get("bill_to_region"),
-        postal_code: row.get("bill_to_postal_code"),
-        country: row.get("bill_to_country"),
-    };
-    let ship_to = InvoiceAddress {
-        name: row.get("ship_to_name"),
-        attention: row.get("ship_to_attention"),
-        line1: row.get("ship_to_line1"),
-        line2: row.get("ship_to_line2"),
-        city: row.get("ship_to_city"),
-        region: row.get("ship_to_region"),
-        postal_code: row.get("ship_to_postal_code"),
-        country: row.get("ship_to_country"),
-    };
-
-    SalesOrder {
-        id: row.get("id"),
-        org_id: row.get("organization_id"),
-        partner_id: row.get("partner_id"),
-        warehouse_id: row.get("warehouse_id"),
-        warehouse_name: row.try_get("warehouse_name").unwrap_or_default(),
-        order_number: row.get("order_number"),
-        order_date: row.get("order_date"),
-        due_date: row.get("due_date"),
-        document_status: row.get("document_status"),
-        fulfillment_status: row.get("fulfillment_status"),
-        payment_status: row.get("payment_status"),
-        billing_address_id: row.get("billing_address_id"),
-        shipping_address_id: row.get("shipping_address_id"),
-        bill_to,
-        ship_to,
-        subtotal: row.get("subtotal"),
-        tax_total: row.get("tax_total"),
-        total_amount: row.get("total_amount"),
-        amount_remaining: row.get("amount_remaining"),
-        lines: vec![], // populated separately
-    }
-}
-
-fn from_row_to_sales_order_item(row: &sqlx::postgres::PgRow) -> SalesOrderItem {
-    SalesOrderItem {
-        id: row.get("id"),
-        order_id: row.get("order_id"),
-        item_id: row.get("item_id"),
-        code: row.get("code"),
-        name: row.get("name"),
-        description: row.get("description"),
-        quantity: row.get("quantity"),
-        unit_price: row.get("unit_price"),
-        tax_category_id: row.get("tax_category_id"),
-        tax_rate: row.get("tax_rate"),
-        tax_amount: row.get("tax_amount"),
-        net_amount: row.get("net_amount"),
-        sort_order: row.get("sort_order"),
-        quantity_available: None, // populated by service layer
-    }
-}
 
 fn from_row_to_sales_order_list_item(row: &sqlx::postgres::PgRow) -> SalesOrderListItem {
     SalesOrderListItem {
@@ -117,72 +54,82 @@ pub(crate) async fn create_draft_order(
     org_id: Uuid,
     order_number: &str,
 ) -> Result<SalesOrder, sqlx::Error> {
-    let row = sqlx::query(
+
+    let mut tx = conn.begin().await?;
+
+    let row = sqlx::query_as!(
+        SalesOrder,
         r#"
         INSERT INTO sales_orders (
             organization_id, partner_id, warehouse_id, order_number, order_date, due_date,
             fulfillment_status, payment_status, document_status,
             billing_address_id, shipping_address_id,
-            bill_to_name, bill_to_attention, bill_to_line1, bill_to_line2,
-            bill_to_city, bill_to_region, bill_to_postal_code, bill_to_country,
-            ship_to_name, ship_to_attention, ship_to_line1, ship_to_line2,
-            ship_to_city, ship_to_region, ship_to_postal_code, ship_to_country,
             subtotal, tax_total, total_amount
         )
         VALUES (
             $1, $2, $3, $4, $5, $6,
-            $7, $8, $9,
+            $7::fulfillment_status, $8::payment_status, $9::sales_document_status,
             $10, $11,
-            $12, $13, $14, $15, $16, $17, $18, $19,
-            $20, $21, $22, $23, $24, $25, $26, $27,
-            $28, $29, $30
+            $12, $13, $14
         )
         RETURNING
-            id, organization_id, partner_id, warehouse_id, order_number, order_date, due_date,
-            fulfillment_status, payment_status, document_status,
+            id, organization_id as org_id, partner_id, warehouse_id, null as warehouse_name, order_number, order_date, due_date,
+            fulfillment_status as "fulfillment_status: FulfillmentStatus",
+            payment_status as "payment_status: PaymentStatus",
+            document_status as "document_status: SalesDocumentStatus",
             billing_address_id, shipping_address_id,
-            bill_to_name, bill_to_attention, bill_to_line1, bill_to_line2,
-            bill_to_city, bill_to_region, bill_to_postal_code, bill_to_country,
-            ship_to_name, ship_to_attention, ship_to_line1, ship_to_line2,
-            ship_to_city, ship_to_region, ship_to_postal_code, ship_to_country,
             subtotal, tax_total, total_amount, amount_remaining
         "#,
+        org_id,
+        request.partner_id,
+        request.warehouse_id,
+        order_number,
+        request.order_date,
+        request.due_date,
+        FulfillmentStatus::Unfulfilled as FulfillmentStatus,
+        PaymentStatus::Unpaid as PaymentStatus,
+        SalesDocumentStatus::Draft as SalesDocumentStatus,
+        request.billing_address_id,
+        request.shipping_address_id,
+        Decimal::ZERO,
+        Decimal::ZERO,
+        Decimal::ZERO,
     )
+        .fetch_one(&mut *tx)
 
-    .bind(org_id)
-    .bind(request.partner_id)
-    .bind(request.warehouse_id)
-    .bind(order_number)
-    .bind(request.order_date)
-    .bind(request.due_date)
-    .bind(FulfillmentStatus::Unfulfilled)
-    .bind(PaymentStatus::Unpaid)
-    .bind(SalesDocumentStatus::Draft)
-    .bind(request.billing_address_id)
-    .bind(request.shipping_address_id)
-    .bind(&request.bill_to.name)
-    .bind(&request.bill_to.attention)
-    .bind(&request.bill_to.line1)
-    .bind(&request.bill_to.line2)
-    .bind(&request.bill_to.city)
-    .bind(&request.bill_to.region)
-    .bind(&request.bill_to.postal_code)
-    .bind(&request.bill_to.country)
-    .bind(&request.ship_to.name)
-    .bind(&request.ship_to.attention)
-    .bind(&request.ship_to.line1)
-    .bind(&request.ship_to.line2)
-    .bind(&request.ship_to.city)
-    .bind(&request.ship_to.region)
-    .bind(&request.ship_to.postal_code)
-    .bind(&request.ship_to.country)
-    .bind(Decimal::ZERO)
-    .bind(Decimal::ZERO)
-    .bind(Decimal::ZERO)
-    .fetch_one(conn)
     .await?;
 
-    Ok(from_row_to_sales_order(&row))
+    let bill_to = OrderAddress {
+        id: Uuid::new_v4(),
+        order_id: row.id,
+        name: request.bill_to.name.clone(),
+        attention: request.bill_to.attention.clone(),
+        line1: request.bill_to.line1.clone(),
+        line2: request.bill_to.line2.clone(),
+        city: request.bill_to.city.clone(),
+        region: request.bill_to.region.clone(),
+        postal_code: request.bill_to.postal_code.clone(),
+        country: request.bill_to.country.clone(),
+    };
+    insert_sales_order_address(&mut tx, row.id, &bill_to, AddressType::Billing).await?;
+
+    let ship_to = OrderAddress {
+        id: Uuid::new_v4(),
+        order_id: row.id,
+        name: request.ship_to.name.clone(),
+        attention: request.ship_to.attention.clone(),
+        line1: request.ship_to.line1.clone(),
+        line2: request.ship_to.line2.clone(),
+        city: request.ship_to.city.clone(),
+        region: request.ship_to.region.clone(),
+        postal_code: request.ship_to.postal_code.clone(),
+        country: request.ship_to.country.clone(),
+    };
+    insert_sales_order_address(&mut tx, row.id, &ship_to, AddressType::Shipping).await?;
+
+    tx.commit().await?;
+
+    Ok(row)
 }
 
 pub(crate) async fn insert_sales_order_line(
@@ -219,6 +166,37 @@ pub(crate) async fn insert_sales_order_line(
 
     Ok(row)
 }
+pub(crate) async fn insert_sales_order_address(
+    conn: &mut PgConnection,
+    order_id: Uuid,
+    addr: &OrderAddress,
+    address_type: AddressType,
+) -> Result<OrderAddress, sqlx::Error> {
+    let row = sqlx::query_as!(
+        OrderAddress,
+        r#"
+        INSERT INTO sales_order_addresses (
+            order_id, name, attention, line1, line2, city, region, postal_code, country, type
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::address_type)
+        RETURNING id, order_id, name, attention, line1, line2, city, region, postal_code, country
+        "#,
+        order_id,
+        addr.name,
+        addr.attention,
+        addr.line1,
+        addr.line2,
+        addr.city,
+        addr.region,
+        addr.postal_code,
+        addr.country,
+        address_type as AddressType,
+    )
+        .fetch_one(conn)
+        .await?;
+
+    Ok(row)
+}
 
 pub(crate) async fn get_sales_order_items(
     conn: &mut PgConnection,
@@ -242,36 +220,62 @@ pub(crate) async fn get_sales_order_items(
     Ok(rows)
 }
 
+pub(crate) async fn get_sales_order_address(
+    conn: &mut PgConnection,
+    order_id: Uuid,
+    address_type: AddressType,
+) -> Result<OrderAddress, sqlx::Error> {
+    let address = sqlx::query_as!(
+        OrderAddress,
+        r#"
+        SELECT id, order_id, name, attention, line1, line2, city, region, postal_code, country
+        FROM sales_order_addresses
+        WHERE order_id = $1 and type = $2::address_type
+        "#,
+        order_id,
+        address_type as AddressType,
+    )
+    .fetch_one(&mut *conn)
+    .await?;
+
+    Ok(address)
+}
+
 pub(crate) async fn get_sales_order(
     conn: &mut PgConnection,
     id: Uuid,
     org_id: Uuid,
-) -> Result<Option<SalesOrder>, sqlx::Error> {
-    let order_row = sqlx::query(
+) -> Result<Option<SalesOrderDto>, sqlx::Error> {
+    let order_row = sqlx::query_as!(
+        SalesOrder,
         r#"
-        SELECT so.id, so.organization_id, so.partner_id, so.warehouse_id, so.order_number, so.order_date, so.due_date,
-               so.fulfillment_status, so.payment_status, so.document_status,
+        SELECT so.id, so.organization_id as org_id, so.partner_id, so.warehouse_id, so.order_number, so.order_date, so.due_date,
+               so.fulfillment_status as "fulfillment_status: FulfillmentStatus",
+               so.payment_status as "payment_status: PaymentStatus",
+               so.document_status as "document_status: SalesDocumentStatus",
                so.billing_address_id, so.shipping_address_id,
-               so.bill_to_name, so.bill_to_attention, so.bill_to_line1, so.bill_to_line2,
-               so.bill_to_city, so.bill_to_region, so.bill_to_postal_code, so.bill_to_country,
-               so.ship_to_name, so.ship_to_attention, so.ship_to_line1, so.ship_to_line2,
-               so.ship_to_city, so.ship_to_region, so.ship_to_postal_code, so.ship_to_country,
                so.subtotal, so.tax_total, so.total_amount, so.amount_remaining,
                w.name AS warehouse_name
         FROM sales_orders so
         JOIN warehouses w ON w.id = so.warehouse_id
         WHERE so.id = $1 AND so.organization_id = $2
         "#,
+        id,
+        org_id,
     )
-    .bind(id)
-    .bind(org_id)
     .fetch_optional(&mut *conn)
     .await?;
 
-    if let Some(row) = order_row {
-        let mut order = from_row_to_sales_order(&row);
-        order.lines = get_sales_order_items(conn, order.id).await?;
-        Ok(Some(order))
+    if let Some(order) = order_row {
+        let items = get_sales_order_items(conn, order.id).await?;
+        let bill_to = get_sales_order_address(conn, order.id, AddressType::Billing).await?;
+        let ship_to = get_sales_order_address(conn, order.id, AddressType::Shipping).await?;
+        Ok(Some(SalesOrderDto{
+            order,
+            bill_to,
+            ship_to,
+            items
+        }))
     } else {
         Ok(None)
     }
@@ -286,99 +290,78 @@ pub(crate) async fn list_sales_orders(
     min_amount: Option<Decimal>,
     statuses: Option<Vec<SalesDocumentStatus>>,
 ) -> Result<Vec<SalesOrderListItem>, sqlx::Error> {
-
-    // Build dynamic WHERE clause
-    let mut conditions: Vec<String> = vec!["so.organization_id = $1".to_string()];
-
-    // We'll keep a parallel Vec of bind closures is not possible; instead compute indices manually
-    // indices start after $1 (org_id)
-    let mut idx = 2;
-
-    if start_date.is_some() {
-        conditions.push(format!("so.issue_date >= ${}", idx));
-        idx += 1;
-    }
-    if end_date.is_some() {
-        conditions.push(format!("so.issue_date <= ${}", idx));
-        idx += 1;
-    }
-    if partner_id.is_some() {
-        conditions.push(format!("so.partner_id = ${}", idx));
-        idx += 1;
-    }
-    if min_amount.is_some() {
-        conditions.push(format!("so.total_amount >= ${}", idx));
-        idx += 1;
-    }
-    if let Some(sts) = statuses.as_ref() {
-        if !sts.is_empty() {
-            let or_clauses: Vec<String> = (0..sts.len())
-                .map(|_| {
-                    let clause = format!("so.document_status = ${}", idx);
-                    idx += 1;
-                    clause
-                })
-                .collect();
-            conditions.push(format!("({})", or_clauses.join(" OR ")));
-        }
-    }
-
-    let where_sql = if conditions.is_empty() {
-        String::new()
-    } else {
-        format!("WHERE {}", conditions.join(" AND "))
-    };
-
-
-    let base_sql =format!(
+    let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(
         r#"
         SELECT
             so.id,
+            so.organization_id AS org_id,
+            so.partner_id,
+            so.warehouse_id,
             so.order_number,
-            p.legal_name AS partner_name,
-            p.id AS partner_id,
             so.order_date,
             so.due_date,
-            w.name AS warehouse_name,
-            so.document_status,
             so.fulfillment_status,
             so.payment_status,
+            so.document_status,
+            so.billing_address_id,
+            so.shipping_address_id,
             so.subtotal,
             so.tax_total,
             so.total_amount,
-            so.amount_remaining
+            so.amount_remaining,
+            w.name AS warehouse_name,
+            p.name AS partner_name
         FROM sales_orders so
-        JOIN partners p  ON p.id = so.partner_id
+        JOIN partners p ON p.id = so.partner_id
         JOIN warehouses w ON w.id = so.warehouse_id
-        {}
-        ORDER BY so.order_date DESC, so.order_number DESC
-        "#, where_sql);
+        WHERE so.organization_id =
+        "#,
+    );
 
+    query.push_bind(org_id);
 
+    if let Some(start_date) = start_date {
+        query
+            .push(" AND so.issue_date >= ")
+            .push_bind(start_date);
+    }
 
-    let mut query = sqlx::query(&base_sql).bind(org_id);
-    // Bind params in the same order as added
-    if let Some(sd) = start_date {
-        query = query.bind(sd);
+    if let Some(end_date) = end_date {
+        query
+            .push(" AND so.issue_date <= ")
+            .push_bind(end_date);
     }
-    if let Some(ed) = end_date {
-        query = query.bind(ed);
+
+    if let Some(partner_id) = partner_id {
+        query
+            .push(" AND so.partner_id = ")
+            .push_bind(partner_id);
     }
-    if let Some(pid) = partner_id {
-        query = query.bind(pid);
+
+    if let Some(min_amount) = min_amount {
+        query
+            .push(" AND so.total_amount >= ")
+            .push_bind(min_amount);
     }
-    if let Some(mina) = min_amount {
-        query = query.bind(mina)
-    }
-    if let Some(sts) = statuses.as_ref() {
-        if !sts.is_empty() {
-            for status in sts {
-                query = query.bind(status);
+
+    if let Some(statuses) = statuses {
+        if !statuses.is_empty() {
+            query.push(" AND so.document_status IN (");
+
+            let mut separated = query.separated(", ");
+
+            for status in statuses {
+                separated.push_bind(status);
             }
+
+            separated.push_unseparated(")");
         }
     }
 
-    let rows = query.fetch_all(&mut *conn).await?;
+    query.push(" ORDER BY so.order_date DESC, so.order_number DESC");
+
+    let rows = query.build().fetch_all(&mut *conn).await?;
+
     Ok(rows
         .iter()
         .map(from_row_to_sales_order_list_item)
@@ -433,60 +416,13 @@ pub(crate) async fn update_sales_order_status(
     Ok(())
 }
 
-pub(crate) async fn get_sales_order_with_lines(
-    pool: &mut PgConnection,
-    id: Uuid,
-    org_id: Uuid,
-) -> Result<Option<SalesOrder>, sqlx::Error> {
-    let order_row = sqlx::query(
-        r#"
-        SELECT id, organization_id, partner_id, order_number, order_date, due_date, sales_orders.document_status,
-            billing_address_id, shipping_address_id,
-            bill_to_name, bill_to_attention, bill_to_line1, bill_to_line2, bill_to_city, bill_to_region, bill_to_postal_code, bill_to_country,
-            ship_to_name, ship_to_attention, ship_to_line1, ship_to_line2, ship_to_city, ship_to_region, ship_to_postal_code, ship_to_country,
-            subtotal, tax_total, total_amount, amount_remaining
-        FROM sales_orders
-        WHERE id = $1 AND organization_id = $2
-        "#,
-    )
-        .bind(id)
-        .bind(org_id)
-        .fetch_optional(&mut *pool)
-        .await?;
-
-    if let Some(order_row) = order_row {
-        let mut sales_order = from_row_to_sales_order(&order_row);
-
-        let line_rows = sqlx::query_as!(
-            SalesOrderItem,
-            r#"
-            SELECT sil.id, order_id, item_id, it.code,  it.name, sil.description, quantity,
-                   sil.unit_price, sil.tax_category_id, tax_amount, tax_rate, net_amount, sort_order,
-                   null as "quantity_available: Decimal"
-            FROM sales_order_items sil, items it
-            WHERE sil.item_id = it.id
-                AND order_id = $1
-            "#,
-            id,
-        )
-            .fetch_all(&mut *pool)
-            .await?;
-
-        sales_order.lines = line_rows;
-
-        Ok(Some(sales_order))
-    } else {
-        Ok(None)
-    }
-}
-
 pub(crate) async fn update_amount_remaining(
     pool: &mut PgConnection,
     id: Uuid,
     amount: Decimal,
 ) -> Result<(), sqlx::Error> {
 
-    let query = sqlx::query!(
+    let _result = sqlx::query!(
             r#"
         UPDATE sales_orders
             SET amount_remaining = amount_remaining + $1
@@ -498,7 +434,7 @@ pub(crate) async fn update_amount_remaining(
     .execute(& mut *pool).await?;
 
     // update the status if amount is zero
-    let query = sqlx::query!(
+    let _result = sqlx::query!(
         r#"
         UPDATE sales_orders
             SET payment_status = $1::payment_status
