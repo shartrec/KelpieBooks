@@ -49,7 +49,6 @@ pub(crate) async fn get_all_by_org(
     )
     .fetch_all(pool)
     .await
-
 }
 
 pub(crate) async fn get_all_by_transaction(

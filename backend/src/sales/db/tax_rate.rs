@@ -71,12 +71,13 @@ pub async fn update_tax_rates_for_category(
     let mut tx = conn.begin().await?;
 
     // First, delete all existing rates for this category
-    sqlx::query!("DELETE FROM tax_rates WHERE tax_category_id = $1 AND organization_id = $2",
+    sqlx::query!(
+        "DELETE FROM tax_rates WHERE tax_category_id = $1 AND organization_id = $2",
         category_id,
         organization_id,
     )
-        .execute(&mut *tx)
-        .await?;
+    .execute(&mut *tx)
+    .await?;
 
     // Then, insert the new rates
     for rate in rates {

@@ -16,12 +16,11 @@ use rocket::{
 };
 use rocket_db_pools::Connection;
 use shared_core::sales::{
-    models::{
-        sales_order::SalesOrder,
-    },
+    dtos::sales_order_dto::SalesOrderDto,
+    models::sales_order::SalesOrder,
     requests::sales_order::CreateSalesOrderRequest,
 };
-use shared_core::sales::dtos::sales_order_dto::SalesOrderDto;
+
 use crate::{
     sales::services::sales_order_service,
     security::{
@@ -58,13 +57,17 @@ async fn list_sales_orders(
     let user = guard.0;
     let status_list = match status {
         Some(s) => vec![*s],
-        None => vec![]
+        None => vec![],
     };
 
     let orders = sales_order_service::list_sales_orders(
         &mut pool,
         user.organization_id,
-        None, None, None, None, status_list
+        None,
+        None,
+        None,
+        None,
+        status_list,
     )
     .await?;
     Ok(Json(orders))
@@ -77,8 +80,7 @@ async fn get_sales_order(
     id: PathUuid,
 ) -> Result<Json<SalesOrderDto>, ApiError> {
     let user = guard.0;
-    let order =
-        sales_order_service::get_sales_order(&mut pool, *id, user.organization_id).await?;
+    let order = sales_order_service::get_sales_order(&mut pool, *id, user.organization_id).await?;
     Ok(Json(order))
 }
 
@@ -89,8 +91,7 @@ async fn create_sales_order(
     req: Json<CreateSalesOrderRequest>,
 ) -> Result<Json<SalesOrder>, ApiError> {
     let user = guard.0;
-    let order =
-        sales_order_service::create_order(&mut pool, user.organization_id, &req).await?;
+    let order = sales_order_service::create_order(&mut pool, user.organization_id, &req).await?;
     Ok(Json(order))
 }
 
@@ -102,7 +103,8 @@ async fn confirm_sales_order(
 ) -> Result<Json<SalesOrderDto>, ApiError> {
     let user = guard.0;
     let order =
-        sales_order_service::confirm_order(&mut pool, *id, user.organization_id, user.user_id).await?;
+        sales_order_service::confirm_order(&mut pool, *id, user.organization_id, user.user_id)
+            .await?;
     Ok(Json(order))
 }
 

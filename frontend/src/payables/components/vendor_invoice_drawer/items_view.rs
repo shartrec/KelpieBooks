@@ -5,19 +5,20 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use chrono::{Utc};
+use chrono::Utc;
 use fluent::fluent_args;
 use rust_decimal::dec;
 use shared_core::{
     ledger::models::account_category::AccountCategory,
-    payables::models::{
-        vendor_invoice_item::VendorInvoiceItem,
+    payables::{
+        dtos::vendor_invoice_dto::VendorInvoiceDto,
+        models::vendor_invoice_item::VendorInvoiceItem,
     },
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::payables::dtos::vendor_invoice_dto::VendorInvoiceDto;
+
 use crate::{
     api::Api,
     contexts::{

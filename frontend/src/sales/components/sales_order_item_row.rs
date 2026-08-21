@@ -5,6 +5,21 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use fluent::fluent_args;
+use log::info;
+use rust_decimal::Decimal;
+use shared_core::{
+    inventory::dtos::inventory::ItemStockBalancesResponse,
+    sales::models::{
+        item::Item,
+        sales_order_item::SalesOrderItem,
+        tax::TaxRate,
+    },
+};
+use uuid::Uuid;
+use yew::prelude::*;
+use yew_router::hooks::use_navigator;
+
 use crate::{
     api::Api,
     contexts::{
@@ -17,18 +32,6 @@ use crate::{
         SearchableItem,
     },
 };
-use fluent::fluent_args;
-use log::info;
-use rust_decimal::Decimal;
-use shared_core::inventory::dtos::inventory::ItemStockBalancesResponse;
-use shared_core::sales::models::{
-    item::Item,
-    sales_order_item::SalesOrderItem,
-    tax::TaxRate,
-};
-use uuid::Uuid;
-use yew::prelude::*;
-use yew_router::hooks::use_navigator;
 
 #[derive(Properties, PartialEq)]
 pub struct SalesOrderItemRowProps {
@@ -141,14 +144,17 @@ pub fn sales_order_item_row(props: &SalesOrderItemRowProps) -> Html {
                             user_ctx_tax,
                             navigator_tax,
                         )
-                            .await;
+                        .await;
 
                         match res {
                             Ok(response) if response.ok() => {
                                 match response.json::<Option<TaxRate>>().await {
                                     Ok(Some(tax_rate_data)) => Some(tax_rate_data.rate),
                                     Ok(None) => {
-                                        info!("No current tax rate found for category {}", tax_category_id);
+                                        info!(
+                                            "No current tax rate found for category {}",
+                                            tax_category_id
+                                        );
                                         None
                                     }
                                     Err(e) => {
@@ -183,34 +189,28 @@ pub fn sales_order_item_row(props: &SalesOrderItemRowProps) -> Html {
                 // 2. Future B: Inventory Balances Request
                 let url = format!("/api/inventory/items/{}/balances", selected_item.id);
                 let balances_future = async move {
-
                     #[cfg(feature = "inventory")]
                     {
-                        let res = Api::get(
-                            &url,
-                            user_ctx.clone(),
-                            navigator.clone(),
-                        )
-                            .await;
-
+                        let res = Api::get(&url, user_ctx.clone(), navigator.clone()).await;
 
                         match res {
                             Ok(response) if response.ok() => {
                                 match response.json::<ItemStockBalancesResponse>().await {
-                                    Ok(balance_data) => {
-                                        Some(balance_data)
-                                    }
+                                    Ok(balance_data) => Some(balance_data),
                                     Err(e) => {
                                         error.set(Some(i18n.t_args(
                                             "inventory-error-parse-balances",
                                             &fluent_args!["error" => e.to_string()],
                                         )));
                                         None
-                                    },
+                                    }
                                 }
                             }
                             Ok(response) => {
-                                info!("Failed to retrieve item balances, status: {}", response.status());
+                                info!(
+                                    "Failed to retrieve item balances, status: {}",
+                                    response.status()
+                                );
                                 None
                             }
                             Err(e) => {
@@ -219,16 +219,18 @@ pub fn sales_order_item_row(props: &SalesOrderItemRowProps) -> Html {
                                     &fluent_args!["error" => e.to_string()],
                                 )));
                                 None
-                            },
+                            }
                         }
                     }
-                    #[cfg(not(feature = "inventory"))]{
+                    #[cfg(not(feature = "inventory"))]
+                    {
                         None
                     }
                 };
 
                 // 3. Await both concurrently
-                let (fetched_tax_rate, balances_data) = futures::join!(tax_rate_future, balances_future);
+                let (fetched_tax_rate, balances_data) =
+                    futures::join!(tax_rate_future, balances_future);
 
                 // Apply fetched tax rate if retrieved
                 if let Some(rate) = fetched_tax_rate {
@@ -290,21 +292,27 @@ pub fn sales_order_item_row(props: &SalesOrderItemRowProps) -> Html {
                 <span class="badge badge--neutral">{ "" }</span>
             },
             Some(avail) if quantity <= avail => {
-                let badge = i18n.t_args("sales-order-item-available", &fluent_args!["qty" => avail.to_string()]);
+                let badge = i18n.t_args(
+                    "sales-order-item-available",
+                    &fluent_args!["qty" => avail.to_string()],
+                );
                 html! {
                     <span class="badge badge--success" title={badge.clone()}>
                         { badge }
                     </span>
                 }
-            },
+            }
             Some(avail) => {
-                let badge = i18n.t_args("sales-order-item-insufficient-stock", &fluent_args!["qty" => avail.to_string()]);
+                let badge = i18n.t_args(
+                    "sales-order-item-insufficient-stock",
+                    &fluent_args!["qty" => avail.to_string()],
+                );
                 html! {
                     <span class="badge badge--warning" title={ badge.clone() }>
                         { badge }
                     </span>
                 }
-            },
+            }
         }
     };
 

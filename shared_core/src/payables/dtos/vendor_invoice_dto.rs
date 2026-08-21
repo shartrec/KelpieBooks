@@ -5,9 +5,15 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use serde::{Deserialize, Serialize};
-use crate::payables::models::vendor_invoice::VendorInvoice;
-use crate::payables::models::vendor_invoice_item::VendorInvoiceItem;
+use serde::{
+    Deserialize,
+    Serialize,
+};
+
+use crate::payables::models::{
+    vendor_invoice::VendorInvoice,
+    vendor_invoice_item::VendorInvoiceItem,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct VendorInvoiceDto {

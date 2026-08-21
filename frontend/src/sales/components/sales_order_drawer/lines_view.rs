@@ -7,8 +7,9 @@
  */
 
 use fluent::fluent_args;
-use yew::prelude::*;
 use shared_core::sales::dtos::sales_order_dto::SalesOrderDto;
+use yew::prelude::*;
+
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq, Clone)]

@@ -5,9 +5,18 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use serde::{Deserialize, Serialize};
-use crate::sales::models::order_address::OrderAddress;
-use crate::sales::models::sales_order::{SalesOrder, SalesOrderItem};
+use serde::{
+    Deserialize,
+    Serialize,
+};
+
+use crate::sales::models::{
+    order_address::OrderAddress,
+    sales_order::{
+        SalesOrder,
+        SalesOrderItem,
+    },
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SalesOrderDto {

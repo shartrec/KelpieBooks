@@ -144,12 +144,12 @@ pub(crate) async fn has_journal_entries(
     pool: &mut PgConnection,
     id: Uuid,
 ) -> Result<bool, sqlx::Error> {
-    let count: Option<i64> =
-        sqlx::query_scalar!("SELECT COUNT(*) FROM journal_entries WHERE account_id = $1",
-            id
-        )
-            .fetch_one(pool)
-            .await?;
+    let count: Option<i64> = sqlx::query_scalar!(
+        "SELECT COUNT(*) FROM journal_entries WHERE account_id = $1",
+        id
+    )
+    .fetch_one(pool)
+    .await?;
     Ok(count.unwrap_or(0) > 0)
 }
 
@@ -158,12 +158,13 @@ pub(crate) async fn delete(
     id: Uuid,
     org_id: Uuid,
 ) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query!("DELETE FROM accounts WHERE id = $1 AND organization_id = $2",
+    let result = sqlx::query!(
+        "DELETE FROM accounts WHERE id = $1 AND organization_id = $2",
         id,
         org_id
-        )
-        .execute(pool)
-        .await?;
+    )
+    .execute(pool)
+    .await?;
     Ok(result.rows_affected())
 }
 
@@ -202,10 +203,7 @@ pub(crate) async fn get_all_by_category(
 
     separated.push_unseparated(")");
 
-    query
-        .build_query_as::<Account>()
-        .fetch_all(pool)
-        .await
+    query.build_query_as::<Account>().fetch_all(pool).await
 }
 
 pub(crate) async fn get_by_system_tag(
@@ -235,7 +233,6 @@ pub(crate) async fn get_by_system_tag(
     )
     .fetch_optional(pool)
     .await
-
 }
 
 pub(crate) async fn get_system_accounts(
@@ -249,7 +246,7 @@ pub(crate) async fn get_system_accounts(
         WHERE organization_id = $1 AND system_tag IS NOT NULL
         "#,
         organization_id
-        )
+    )
     .fetch_all(pool)
     .await?;
 

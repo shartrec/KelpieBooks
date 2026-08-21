@@ -14,9 +14,10 @@ pub mod payments_view;
 use fluent::fluent_args;
 use shared_core::{
     partners::models::partner::Partner,
+    payables::dtos::vendor_invoice_dto::VendorInvoiceDto,
 };
 use yew::prelude::*;
-use shared_core::payables::dtos::vendor_invoice_dto::VendorInvoiceDto;
+
 use crate::{
     contexts::locale_context::use_locale,
     payables::components::vendor_invoice_drawer::{

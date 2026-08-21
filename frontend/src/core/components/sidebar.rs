@@ -255,15 +255,13 @@ pub fn get_help_contribution(on_about_open: Callback<()>) -> Option<SidebarModul
         privilege: Some(SystemPrivilege::ManageUsers),
         target_route: None,
         on_click: None,
-        children: vec![
-            SidebarModuleContribution {
-                id: "sidebar-about",
-                label_key: "sidebar-about",
-                privilege: Some(SystemPrivilege::ManageUsers),
-                target_route: None,
-                on_click: Some(on_about_open),
-                children: vec![],
-            },
-        ],
+        children: vec![SidebarModuleContribution {
+            id: "sidebar-about",
+            label_key: "sidebar-about",
+            privilege: Some(SystemPrivilege::ManageUsers),
+            target_route: None,
+            on_click: Some(on_about_open),
+            children: vec![],
+        }],
     })
 }

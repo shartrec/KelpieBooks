@@ -80,11 +80,12 @@ pub async fn update(
 }
 
 pub async fn delete(conn: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query!("DELETE FROM tax_categories WHERE id = $1 AND organization_id = $2",
+    let result = sqlx::query!(
+        "DELETE FROM tax_categories WHERE id = $1 AND organization_id = $2",
         id,
         org_id,
     )
-        .execute(conn)
-        .await?;
+    .execute(conn)
+    .await?;
     Ok(result.rows_affected())
 }

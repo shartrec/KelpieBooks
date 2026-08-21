@@ -11,16 +11,17 @@ use rust_decimal::dec;
 use shared_core::{
     partners::models::partner::Partner,
     payables::{
-        dtos::vendor_invoice_list_item::VendorInvoiceListItem,
-        models::{
-            invoice_status::InvoiceStatus,
+        dtos::{
+            vendor_invoice_dto::VendorInvoiceDto,
+            vendor_invoice_list_item::VendorInvoiceListItem,
         },
+        models::invoice_status::InvoiceStatus,
     },
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::payables::dtos::vendor_invoice_dto::VendorInvoiceDto;
+
 use crate::{
     api::Api,
     contexts::{

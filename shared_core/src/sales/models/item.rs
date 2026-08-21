@@ -22,7 +22,10 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, EnumString, Display, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(type_name = "item_type", rename_all = "snake_case"))]
+#[cfg_attr(
+    feature = "backend",
+    sqlx(type_name = "item_type", rename_all = "snake_case")
+)]
 pub enum ItemType {
     Stocked,
     NonStocked,
@@ -71,5 +74,4 @@ impl Item {
     pub fn is_stocked(&self) -> bool {
         self.item_type == ItemType::Stocked
     }
-
 }

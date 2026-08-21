@@ -25,9 +25,9 @@ pub async fn all_warehouses(
         Warehouse,
         "SELECT * FROM warehouses WHERE organization_id = $1 ORDER BY code",
         org_id
-        )
-        .fetch_all(conn)
-        .await
+    )
+    .fetch_all(conn)
+    .await
 }
 
 pub async fn get_warehouse(
@@ -41,8 +41,8 @@ pub async fn get_warehouse(
         id,
         org_id
     )
-        .fetch_optional(conn)
-        .await
+    .fetch_optional(conn)
+    .await
 }
 
 pub async fn create_warehouse(
@@ -87,10 +87,11 @@ pub async fn delete_warehouse(
     id: Uuid,
     org_id: Uuid,
 ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
-    sqlx::query!("DELETE FROM warehouses WHERE id = $1 AND organization_id = $2",
+    sqlx::query!(
+        "DELETE FROM warehouses WHERE id = $1 AND organization_id = $2",
         id,
         org_id
     )
-        .execute(conn)
-        .await
+    .execute(conn)
+    .await
 }

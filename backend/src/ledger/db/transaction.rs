@@ -25,8 +25,8 @@ pub(crate) async fn get(
         id,
         org_id
     )
-        .fetch_optional(pool)
-        .await
+    .fetch_optional(pool)
+    .await
 }
 
 pub(crate) async fn get_recent_transactions(
@@ -68,11 +68,12 @@ pub(crate) async fn delete(
     id: Uuid,
     org_id: Uuid,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query!("DELETE FROM transactions WHERE id = $1 and organization_id = $2",
+    sqlx::query!(
+        "DELETE FROM transactions WHERE id = $1 and organization_id = $2",
         id,
         org_id
     )
-        .execute(pool)
-        .await?;
+    .execute(pool)
+    .await?;
     Ok(())
 }

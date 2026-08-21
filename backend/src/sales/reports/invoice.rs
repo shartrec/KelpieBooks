@@ -26,6 +26,7 @@ use crate::{
         db::organization as db_org,
         routes::security::AuthenticatedUser,
     },
+    sales::db::sales_order::get_sales_order,
     util::{
         locale_context::LocaleContext,
         ApiError,
@@ -33,7 +34,6 @@ use crate::{
     DbKelpie,
     TemplateConfig,
 };
-use crate::sales::db::sales_order::get_sales_order;
 
 pub(crate) async fn generate_order(
     conn: &mut Connection<DbKelpie>,
@@ -58,10 +58,7 @@ pub(crate) async fn generate_order(
     if let Some(order_dto) = order {
         let order = order_dto.order;
 
-        dict.insert(
-            "order-number".into(),
-            Value::Str(order.order_number.into()),
-        );
+        dict.insert("order-number".into(), Value::Str(order.order_number.into()));
         let inv_due = i18n.format_date(order.due_date);
         dict.insert("due-date".into(), Value::Str(inv_due.into()));
         let order_date = i18n.format_date(order.order_date);
@@ -73,7 +70,6 @@ pub(crate) async fn generate_order(
         dict.insert("order-tax".into(), Value::Str(inv_tax.into()));
         let inv_gross = i18n.format_money_typ(order.total_amount.round_dp(2));
         dict.insert("order-gross".into(), Value::Str(inv_gross.into()));
-
 
         let mut bill_to = Dict::new();
         bill_to.insert(

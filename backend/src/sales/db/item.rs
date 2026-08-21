@@ -28,9 +28,9 @@ pub(crate) async fn get_active_uoms(
         UnitOfMeasure,
         r#"SELECT id, organization_id as org_id ,code, name, is_active FROM units_of_measure
                              WHERE organization_id = $1 AND is_active = true ORDER BY name ASC"#,
-       org_id,
+        org_id,
     )
-   .fetch_all(conn)
+    .fetch_all(conn)
     .await
 }
 
@@ -43,7 +43,7 @@ pub async fn all(
     limit: u32,
 ) -> Result<Vec<Item>, sqlx::Error> {
     let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(
-    r#"SELECT id,
+        r#"SELECT id,
                organization_id,
                code,
                name,
@@ -58,7 +58,7 @@ pub async fn all(
                created_at
         FROM items
         WHERE organization_id =
-        "#
+        "#,
     );
 
     query.push_bind(org_id);
@@ -86,11 +86,7 @@ pub async fn all(
     query.push(" LIMIT ");
     query.push_bind(limit as i32);
 
-
-    query
-        .build_query_as::<Item>()
-        .fetch_all(conn)
-        .await
+    query.build_query_as::<Item>().fetch_all(conn).await
 }
 
 pub async fn get(
@@ -215,15 +211,22 @@ pub async fn update(
 }
 
 pub async fn delete(conn: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query!("DELETE FROM items WHERE id = $1 AND organization_id = $2", &id, &org_id)
-        .execute(conn)
-        .await?;
+    let result = sqlx::query!(
+        "DELETE FROM items WHERE id = $1 AND organization_id = $2",
+        &id,
+        &org_id
+    )
+    .execute(conn)
+    .await?;
     Ok(result.rows_affected())
 }
 
 pub async fn is_uom_in_use(conn: &mut PgConnection, uom_id: Uuid) -> Result<bool, sqlx::Error> {
-    let exists = sqlx::query_scalar!("SELECT EXISTS (SELECT 1 FROM items WHERE uom_id = $1)", &uom_id)
-        .fetch_one(conn)
-        .await?;
+    let exists = sqlx::query_scalar!(
+        "SELECT EXISTS (SELECT 1 FROM items WHERE uom_id = $1)",
+        &uom_id
+    )
+    .fetch_one(conn)
+    .await?;
     Ok(exists.unwrap_or(false))
 }

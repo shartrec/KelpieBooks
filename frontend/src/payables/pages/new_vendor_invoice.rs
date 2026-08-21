@@ -6,7 +6,11 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use chrono::{Local, NaiveDate, Utc};
+use chrono::{
+    Local,
+    NaiveDate,
+    Utc,
+};
 use fluent::fluent_args;
 use rust_decimal::dec;
 use shared_core::{

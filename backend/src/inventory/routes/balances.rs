@@ -17,6 +17,7 @@ use rocket::{
 use rocket_db_pools::Connection;
 use shared_core::inventory::{
     dtos::inventory::{
+        ItemStockBalancesResponse,
         ReceiveStockRequest,
         StockAdjustmentRequest,
     },
@@ -25,7 +26,7 @@ use shared_core::inventory::{
         WarehouseInventoryBalance,
     },
 };
-use shared_core::inventory::dtos::inventory::ItemStockBalancesResponse;
+
 use crate::{
     core::routes::security::AuthenticatedUser,
     inventory::services::{

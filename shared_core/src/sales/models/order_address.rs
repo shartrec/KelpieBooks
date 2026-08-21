@@ -10,9 +10,7 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use strum::{
-    Display,
-};
+use strum::Display;
 use uuid::Uuid;
 
 #[derive(Clone, Debug, Display, PartialEq)]

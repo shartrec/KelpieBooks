@@ -14,12 +14,12 @@ use serde::{
 };
 use uuid::Uuid;
 
-pub use crate::sales::models::{
-    sales_order_item::SalesOrderItem,
+pub use crate::sales::models::sales_order_item::SalesOrderItem;
+use crate::sales::models::{
+    fulfillment_status::FulfillmentStatus,
+    payment_status::PaymentStatus,
+    sales_document_status::SalesDocumentStatus,
 };
-use crate::sales::models::fulfillment_status::FulfillmentStatus;
-use crate::sales::models::payment_status::PaymentStatus;
-use crate::sales::models::sales_document_status::SalesDocumentStatus;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SalesOrder {
@@ -46,7 +46,6 @@ pub struct SalesOrder {
 
 impl SalesOrder {
     pub fn calculate(&mut self, lines: &Vec<SalesOrderItem>) {
-
         let amount_paid = self.total_amount - self.amount_remaining;
 
         let mut net_amount = Decimal::ZERO;

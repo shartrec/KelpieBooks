@@ -13,21 +13,22 @@ use rocket_db_pools::sqlx::{
 };
 use rust_decimal::Decimal;
 use shared_core::{
-    sales::{
-        models::{
-            sales_order::SalesOrder,
-            sales_document_status::SalesDocumentStatus,
-        },
-        requests::sales_order::CreateSalesOrderRequest,
-    },
     inventory::models::stock_balance::{
         ReferenceType,
         TransactionType,
     },
+    sales::{
+        dtos::sales_order_dto::SalesOrderDto,
+        models::{
+            sales_document_status::SalesDocumentStatus,
+            sales_order::SalesOrder,
+        },
+        requests::sales_order::CreateSalesOrderRequest,
+    },
 };
 use sqlx::Acquire;
 use uuid::Uuid;
-use shared_core::sales::dtos::sales_order_dto::SalesOrderDto;
+
 use crate::{
     core::db::sequences::{
         get_next_order_number,
@@ -40,11 +41,9 @@ use crate::{
             NewStockTransaction,
         },
     },
-    sales::{
-        db::{
-            item as item_db,
-            sales_order as sales_order_db,
-        },
+    sales::db::{
+        item as item_db,
+        sales_order as sales_order_db,
     },
     util::ApiError,
 };
@@ -101,7 +100,8 @@ pub(crate) async fn get_sales_order(
         let item = item_db::get(pool, org_id, line.item_id).await?;
         if let Some(item) = item {
             if item.is_stocked() {
-                let balances = inventory_db::get_item_stock_balances(pool, line.item_id, org_id).await?;
+                let balances =
+                    inventory_db::get_item_stock_balances(pool, line.item_id, org_id).await?;
                 // Sum available across only the locations in the order's warehouse
                 let warehouse_available: Decimal = balances
                     .location_balances
@@ -126,7 +126,16 @@ pub(crate) async fn list_sales_orders(
     min_amount: Option<rust_decimal::Decimal>,
     statuses: Vec<SalesDocumentStatus>,
 ) -> Result<Vec<SalesOrder>, ApiError> {
-    let items = sales_order_db::list_sales_orders(pool, org_id, start_date, end_date, partner_id, min_amount, Some(statuses)).await?;
+    let items = sales_order_db::list_sales_orders(
+        pool,
+        org_id,
+        start_date,
+        end_date,
+        partner_id,
+        min_amount,
+        Some(statuses),
+    )
+    .await?;
     Ok(items)
 }
 
@@ -177,8 +186,14 @@ pub(crate) async fn confirm_order(
                     )
                 })?;
 
-                inventory_db::adjust_allocated(&mut tx, loc_id, line.item_id, org_id, line.quantity)
-                    .await?;
+                inventory_db::adjust_allocated(
+                    &mut tx,
+                    loc_id,
+                    line.item_id,
+                    org_id,
+                    line.quantity,
+                )
+                .await?;
 
                 log_transaction(
                     &mut tx,
@@ -218,13 +233,16 @@ pub(crate) async fn cancel_order(
         .await?
         .ok_or_else(|| ApiError::NotFound("Sales order not found.".to_string()))?;
 
-    if order.order.document_status != SalesDocumentStatus::Open || order.order.document_status != SalesDocumentStatus::Draft {
+    if order.order.document_status != SalesDocumentStatus::Open
+        || order.order.document_status != SalesDocumentStatus::Draft
+    {
         return Err(ApiError::BadRequest(
             "Only Draft or Open orders can be cancelled.".to_string(),
         ));
     }
 
-    sales_order_db::update_sales_order_status(pool, id, org_id, SalesDocumentStatus::Cancelled).await?;
+    sales_order_db::update_sales_order_status(pool, id, org_id, SalesDocumentStatus::Cancelled)
+        .await?;
 
     Ok(())
 }

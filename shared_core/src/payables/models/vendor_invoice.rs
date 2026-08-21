@@ -18,9 +18,7 @@ use serde::{
 };
 use uuid::Uuid;
 
-use crate::payables::models::{
-    invoice_status::InvoiceStatus,
-};
+use crate::payables::models::invoice_status::InvoiceStatus;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct VendorInvoice {

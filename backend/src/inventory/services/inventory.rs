@@ -6,32 +6,47 @@
  * (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use std::collections::HashMap;
+
 use chrono::NaiveDate;
 use rocket_db_pools::Connection;
-use rust_decimal::Decimal;
-use rust_decimal::prelude::FromPrimitive;
-use shared_core::inventory::{
-    dtos::inventory::{
-        AdjustmentReason,
-        ReceiveStockRequest,
-        StockAdjustmentRequest,
-    },
-    models::{
-        stock_balance::{
-            ReferenceType,
-            TransactionType,
+use rust_decimal::{
+    prelude::FromPrimitive,
+    Decimal,
+};
+use shared_core::{
+    inventory::{
+        dtos::inventory::{
+            AdjustmentReason,
+            ItemStockBalancesResponse,
+            ReceiveStockRequest,
+            StockAdjustmentRequest,
         },
-        warehouse_profile::{
-            ItemWarehouseProfile,
-            WarehouseInventoryBalance,
+        models::{
+            stock_balance::{
+                ReferenceType,
+                TransactionType,
+            },
+            warehouse_profile::{
+                ItemWarehouseProfile,
+                WarehouseInventoryBalance,
+            },
+        },
+    },
+    ledger::{
+        models::system_tag::SystemTag,
+        requests::transaction::{
+            CreateTransactionRequest,
+            JournalEntryLine,
         },
     },
 };
-use sqlx::{Acquire, Error, PgConnection};
+use sqlx::{
+    Acquire,
+    Error,
+    PgConnection,
+};
 use uuid::Uuid;
-use shared_core::inventory::dtos::inventory::ItemStockBalancesResponse;
-use shared_core::ledger::models::system_tag::SystemTag;
-use shared_core::ledger::requests::transaction::{CreateTransactionRequest, JournalEntryLine};
+
 use crate::{
     inventory::db::{
         inventory as inventory_db,
@@ -42,12 +57,13 @@ use crate::{
         stock_transaction,
         stock_transaction::NewStockTransaction,
     },
+    ledger::services::{
+        account_service,
+        account_service::get_system_accounts,
+    },
     util::ApiError,
     DbKelpie,
 };
-use crate::ledger::services::account_service;
-use crate::ledger::services::account_service::get_system_accounts;
-
 
 pub struct InventorySystemAccounts {
     pub inventory_asset_id: Uuid,
@@ -60,10 +76,7 @@ impl InventorySystemAccounts {
     pub fn from_map(map: &HashMap<SystemTag, Uuid>) -> Result<Self, ApiError> {
         let get_account = |tag: SystemTag| {
             map.get(&tag).copied().ok_or_else(|| {
-                ApiError::NotFound(format!(
-                    "Missing system account mapping for tag: {:?}",
-                    tag
-                ))
+                ApiError::NotFound(format!("Missing system account mapping for tag: {:?}", tag))
             })
         };
 
@@ -200,7 +213,13 @@ pub async fn receive_vendor_stock(
 
         //todo get total amount
         let total_amount = Decimal::from_f32(1.0).unwrap();
-        let _tx_id = post_receive_journal_entry(&mut tx, org_id, total_amount, &*req.po_number.clone().unwrap_or("n/a".to_string())).await?;
+        let _tx_id = post_receive_journal_entry(
+            &mut tx,
+            org_id,
+            total_amount,
+            &*req.po_number.clone().unwrap_or("n/a".to_string()),
+        )
+        .await?;
 
         updated_balances.push(balance);
     }
@@ -231,11 +250,19 @@ pub async fn adjust_stock(
             continue;
         }
 
-        let old_balance =
-            match get_balance_for_location(&mut *tx, line.item_id, line.location_id, org_id).await {
-                Ok(balance) => balance.map(|wib| wib.quantity_on_hand).unwrap_or(Decimal::ZERO),
-                Err(e) => return Err(ApiError::Db(e)),
-            };
+        let old_balance = match get_balance_for_location(
+            &mut *tx,
+            line.item_id,
+            line.location_id,
+            org_id,
+        )
+        .await
+        {
+            Ok(balance) => balance
+                .map(|wib| wib.quantity_on_hand)
+                .unwrap_or(Decimal::ZERO),
+            Err(e) => return Err(ApiError::Db(e)),
+        };
         if (old_balance + line.quantity_delta) < Decimal::ZERO {
             return Err(ApiError::BadRequest(format!(
                 "Adjustment rejected: Item {} at location {} would have a negative balance.",
@@ -325,21 +352,21 @@ pub async fn post_receive_journal_entry(
     // Credit: Received Not Invoiced (Increases Liability)
     let description = Some(format!("Inventory receipt {}", reference));
     let jels = vec![
-            JournalEntryLine {
-                line_id: Uuid::new_v4(),
-                account_id: accounts.inventory_asset_id,
-                debit: total_value,
-                credit:  Decimal::ZERO,
-                description: description.clone(),
-            },
-            JournalEntryLine {
-                line_id: Uuid::new_v4(),
-                account_id: accounts.received_not_invoiced_id,
-                debit: Decimal::ZERO,
-                credit:  total_value,
-                description: description.clone(),
-            },
-        ];
+        JournalEntryLine {
+            line_id: Uuid::new_v4(),
+            account_id: accounts.inventory_asset_id,
+            debit: total_value,
+            credit: Decimal::ZERO,
+            description: description.clone(),
+        },
+        JournalEntryLine {
+            line_id: Uuid::new_v4(),
+            account_id: accounts.received_not_invoiced_id,
+            debit: Decimal::ZERO,
+            credit: total_value,
+            description: description.clone(),
+        },
+    ];
 
     let ct_req = CreateTransactionRequest {
         date: NaiveDate::default(),
@@ -347,8 +374,7 @@ pub async fn post_receive_journal_entry(
         reference: Some(reference.to_string()),
         entries: jels,
     };
-    let journal_id =
-        account_service::create_transaction(conn, org_id, &ct_req).await?;
+    let journal_id = account_service::create_transaction(conn, org_id, &ct_req).await?;
 
     Ok(journal_id)
 }
@@ -368,11 +394,19 @@ pub async fn post_adjustment_journal_entry(
 
     let (debit_account, credit_account, amount) = if adjustment_value > Decimal::ZERO {
         // Gain: Debit Asset, Credit Adjustment (P&L Gain)
-        (accounts.inventory_asset_id, accounts.inventory_adjustment_id, adjustment_value)
+        (
+            accounts.inventory_asset_id,
+            accounts.inventory_adjustment_id,
+            adjustment_value,
+        )
     } else {
         // Loss: Debit Adjustment (P&L Expense), Credit Asset
         let abs_amount = adjustment_value.abs();
-        (accounts.inventory_adjustment_id, accounts.inventory_asset_id, abs_amount)
+        (
+            accounts.inventory_adjustment_id,
+            accounts.inventory_asset_id,
+            abs_amount,
+        )
     };
 
     let description = Some(format!("Inventory receipt {}", reference));
@@ -381,14 +415,14 @@ pub async fn post_adjustment_journal_entry(
             line_id: Uuid::new_v4(),
             account_id: debit_account,
             debit: amount,
-            credit:  Decimal::ZERO,
+            credit: Decimal::ZERO,
             description: description.clone(),
         },
         JournalEntryLine {
             line_id: Uuid::new_v4(),
             account_id: credit_account,
             debit: Decimal::ZERO,
-            credit:  amount,
+            credit: amount,
             description: description.clone(),
         },
     ];
@@ -399,8 +433,7 @@ pub async fn post_adjustment_journal_entry(
         reference: Some(reference.to_string()),
         entries: jels,
     };
-    let journal_id =
-        account_service::create_transaction(conn, org_id, &ct_req).await?;
+    let journal_id = account_service::create_transaction(conn, org_id, &ct_req).await?;
 
     Ok(journal_id)
 }

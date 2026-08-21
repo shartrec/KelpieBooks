@@ -5,9 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use sqlx::{
-    PgConnection,
-};
+use sqlx::PgConnection;
 use strum::Display;
 use uuid::Uuid;
 

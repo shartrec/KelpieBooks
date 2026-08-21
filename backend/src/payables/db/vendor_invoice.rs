@@ -45,7 +45,6 @@ pub(crate) async fn get(
     )
     .fetch_optional(pool)
     .await
-
 }
 
 pub(crate) async fn get_items(
@@ -97,27 +96,19 @@ pub(crate) async fn get_by_org(
     query.push_bind(organization_id);
 
     if let Some(start_date) = start_date {
-        query
-            .push(" AND vi.issue_date >= ")
-            .push_bind(start_date);
+        query.push(" AND vi.issue_date >= ").push_bind(start_date);
     }
 
     if let Some(end_date) = end_date {
-        query
-            .push(" AND vi.issue_date <= ")
-            .push_bind(end_date);
+        query.push(" AND vi.issue_date <= ").push_bind(end_date);
     }
 
     if let Some(partner_id) = partner_id {
-        query
-            .push(" AND vi.partner_id = ")
-            .push_bind(partner_id);
+        query.push(" AND vi.partner_id = ").push_bind(partner_id);
     }
 
     if let Some(min_amount) = min_amount {
-        query
-            .push(" AND vi.gross_amount >= ")
-            .push_bind(min_amount);
+        query.push(" AND vi.gross_amount >= ").push_bind(min_amount);
     }
 
     if !statuses.is_empty() {
@@ -302,7 +293,7 @@ pub(crate) async fn delete_items(
         "#,
         vendor_invoice_id
     )
-        .execute(pool)
+    .execute(pool)
     .await?;
     Ok(())
 }

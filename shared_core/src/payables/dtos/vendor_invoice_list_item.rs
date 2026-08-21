@@ -18,10 +18,7 @@ use crate::payables::models::invoice_status::InvoiceStatus;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
-#[cfg_attr(
-    feature = "backend",
-    sqlx(rename_all = "snake_case")
-)]
+#[cfg_attr(feature = "backend", sqlx(rename_all = "snake_case"))]
 pub struct VendorInvoiceListItem {
     pub id: Uuid,
     pub partner_id: Uuid,

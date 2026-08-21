@@ -13,9 +13,12 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
-use crate::sales::models::fulfillment_status::FulfillmentStatus;
-use crate::sales::models::payment_status::PaymentStatus;
-use crate::sales::models::sales_document_status::SalesDocumentStatus;
+
+use crate::sales::models::{
+    fulfillment_status::FulfillmentStatus,
+    payment_status::PaymentStatus,
+    sales_document_status::SalesDocumentStatus,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SalesOrderListItem {

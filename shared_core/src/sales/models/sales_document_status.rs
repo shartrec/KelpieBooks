@@ -25,10 +25,10 @@ use strum::{
     sqlx(type_name = "sales_document_status", rename_all = "snake_case")
 )]
 pub enum SalesDocumentStatus {
-    Draft,              // Quote / Unapproved Draft
-    Open,                // Approved & Active
-    Completed,          // Fully Fulfilled AND Fully Paid
-    Cancelled,          // Voided
+    Draft,     // Quote / Unapproved Draft
+    Open,      // Approved & Active
+    Completed, // Fully Fulfilled AND Fully Paid
+    Cancelled, // Voided
 }
 
 impl Default for SalesDocumentStatus {

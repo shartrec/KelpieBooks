@@ -45,8 +45,8 @@ pub async fn get_location(
         id,
         org_id
     )
-        .fetch_optional(conn)
-        .await
+    .fetch_optional(conn)
+    .await
 }
 
 pub async fn create_location(

@@ -32,9 +32,10 @@ pub async fn save_reset_token(
         r#"INSERT INTO password_reset_tokens (user_id, token_hash, expires_at)
             VALUES ($1, $2, $3)
             RETURNING id"#,
-    user_id,
-    token_hash,
-    expires_at)
+        user_id,
+        token_hash,
+        expires_at
+    )
     .fetch_one(pool)
     .await?;
     Ok(row.id)
@@ -58,11 +59,12 @@ pub async fn find_active_token(
 }
 
 pub async fn mark_token_as_used(pool: &mut PgConnection, token_id: i32) -> Result<(), sqlx::Error> {
-    sqlx::query!("UPDATE password_reset_tokens SET used = true WHERE id = $1 AND used = false",
+    sqlx::query!(
+        "UPDATE password_reset_tokens SET used = true WHERE id = $1 AND used = false",
         token_id
     )
-        .execute(pool)
-        .await?;
+    .execute(pool)
+    .await?;
     Ok(())
 }
 

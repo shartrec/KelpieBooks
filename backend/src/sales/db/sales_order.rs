@@ -12,21 +12,23 @@ use rocket_db_pools::sqlx::{
     Row,
 };
 use rust_decimal::Decimal;
-use sqlx::Acquire;
 use shared_core::sales::{
+    dtos::sales_order_dto::SalesOrderDto,
     models::{
-        order_address::OrderAddress,
+        fulfillment_status::FulfillmentStatus,
+        order_address::{
+            AddressType,
+            OrderAddress,
+        },
+        payment_status::PaymentStatus,
+        sales_document_status::SalesDocumentStatus,
         sales_order::SalesOrder,
         sales_order_item::SalesOrderItem,
-        sales_document_status::SalesDocumentStatus,
     },
     requests::sales_order::CreateSalesOrderRequest,
 };
+use sqlx::Acquire;
 use uuid::Uuid;
-use shared_core::sales::dtos::sales_order_dto::SalesOrderDto;
-use shared_core::sales::models::fulfillment_status::FulfillmentStatus;
-use shared_core::sales::models::order_address::AddressType;
-use shared_core::sales::models::payment_status::PaymentStatus;
 
 fn from_row_to_sales_order_list_item(row: &sqlx::postgres::PgRow) -> SalesOrder {
     SalesOrder {
@@ -57,7 +59,6 @@ pub(crate) async fn create_draft_order(
     org_id: Uuid,
     order_number: &str,
 ) -> Result<SalesOrder, sqlx::Error> {
-
     let mut tx = conn.begin().await?;
 
     let row = sqlx::query_as!(
@@ -195,8 +196,8 @@ pub(crate) async fn insert_sales_order_address(
         addr.country,
         address_type as AddressType,
     )
-        .fetch_one(conn)
-        .await?;
+    .fetch_one(conn)
+    .await?;
 
     Ok(row)
 }
@@ -275,11 +276,11 @@ pub(crate) async fn get_sales_order(
         let items = get_sales_order_items(conn, order.id).await?;
         let bill_to = get_sales_order_address(conn, order.id, AddressType::Billing).await?;
         let ship_to = get_sales_order_address(conn, order.id, AddressType::Shipping).await?;
-        Ok(Some(SalesOrderDto{
+        Ok(Some(SalesOrderDto {
             order,
             bill_to,
             ship_to,
-            items
+            items,
         }))
     } else {
         Ok(None)
@@ -326,27 +327,19 @@ pub(crate) async fn list_sales_orders(
     query.push_bind(org_id);
 
     if let Some(start_date) = start_date {
-        query
-            .push(" AND so.issue_date >= ")
-            .push_bind(start_date);
+        query.push(" AND so.issue_date >= ").push_bind(start_date);
     }
 
     if let Some(end_date) = end_date {
-        query
-            .push(" AND so.issue_date <= ")
-            .push_bind(end_date);
+        query.push(" AND so.issue_date <= ").push_bind(end_date);
     }
 
     if let Some(partner_id) = partner_id {
-        query
-            .push(" AND so.partner_id = ")
-            .push_bind(partner_id);
+        query.push(" AND so.partner_id = ").push_bind(partner_id);
     }
 
     if let Some(min_amount) = min_amount {
-        query
-            .push(" AND so.total_amount >= ")
-            .push_bind(min_amount);
+        query.push(" AND so.total_amount >= ").push_bind(min_amount);
     }
 
     if let Some(statuses) = statuses {
@@ -367,10 +360,7 @@ pub(crate) async fn list_sales_orders(
 
     let rows = query.build().fetch_all(&mut *conn).await?;
 
-    Ok(rows
-        .iter()
-        .map(from_row_to_sales_order_list_item)
-        .collect())
+    Ok(rows.iter().map(from_row_to_sales_order_list_item).collect())
 }
 
 pub(crate) async fn update_sales_order_totals(
@@ -426,9 +416,8 @@ pub(crate) async fn update_amount_remaining(
     id: Uuid,
     amount: Decimal,
 ) -> Result<(), sqlx::Error> {
-
     let _result = sqlx::query!(
-            r#"
+        r#"
         UPDATE sales_orders
             SET amount_remaining = amount_remaining + $1
             WHERE id = $2
@@ -436,7 +425,8 @@ pub(crate) async fn update_amount_remaining(
         amount,
         id
     )
-    .execute(& mut *pool).await?;
+    .execute(&mut *pool)
+    .await?;
 
     // update the status if amount is zero
     let _result = sqlx::query!(
@@ -448,7 +438,8 @@ pub(crate) async fn update_amount_remaining(
         PaymentStatus::Paid as PaymentStatus,
         id
     )
-    .execute(& mut *pool).await?;
+    .execute(&mut *pool)
+    .await?;
 
     Ok(())
 }

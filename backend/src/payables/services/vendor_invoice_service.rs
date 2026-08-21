@@ -26,7 +26,10 @@ use shared_core::{
         },
     },
     payables::{
-        dtos::vendor_invoice_list_item::VendorInvoiceListItem,
+        dtos::{
+            vendor_invoice_dto::VendorInvoiceDto,
+            vendor_invoice_list_item::VendorInvoiceListItem,
+        },
         models::{
             invoice_status::InvoiceStatus,
             vendor_invoice_item::VendorInvoiceItem,
@@ -39,7 +42,7 @@ use shared_core::{
 };
 use sqlx::Acquire;
 use uuid::Uuid;
-use shared_core::payables::dtos::vendor_invoice_dto::VendorInvoiceDto;
+
 use crate::{
     ledger::{
         db::account as account_db,
@@ -89,7 +92,7 @@ pub(crate) async fn get_vendor_invoice(
         ));
     }
     let items = vendor_invoice_db::get_items(pool, id).await?;
-    Ok(VendorInvoiceDto{invoice, items})
+    Ok(VendorInvoiceDto { invoice, items })
 }
 
 pub(crate) async fn create_vendor_invoice(

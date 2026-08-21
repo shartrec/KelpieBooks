@@ -51,8 +51,8 @@ pub(crate) async fn insert(
         req.sales_order_id,
         customer_payment_id,
         req.allocated_amount,
-     )
-        .fetch_one(pool)
+    )
+    .fetch_one(pool)
     .await?;
     Ok(row)
 }

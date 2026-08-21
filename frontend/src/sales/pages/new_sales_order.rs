@@ -6,20 +6,6 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use crate::{
-    api::Api,
-    contexts::{
-        auth_context::use_user_context,
-        locale_context::use_locale,
-    },
-    core::components::{
-        layout::Layout,
-        progressive_search::ProgressiveSearch,
-        SearchableItem,
-    },
-    router::Route,
-    sales::components::sales_order_item_row::SalesOrderItemRow,
-};
 use chrono::{
     Local,
     NaiveDate,
@@ -51,6 +37,21 @@ use web_sys::{
 };
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
+
+use crate::{
+    api::Api,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    core::components::{
+        layout::Layout,
+        progressive_search::ProgressiveSearch,
+        SearchableItem,
+    },
+    router::Route,
+    sales::components::sales_order_item_row::SalesOrderItemRow,
+};
 
 #[derive(PartialEq, Clone, Copy)]
 enum AddressTab {
@@ -218,59 +219,57 @@ pub fn new_sales_order_page() -> Html {
                 )
                 .await
                 {
-                    Ok(resp) if resp.ok() => {
-                        match resp.json::<Vec<PartnerAddress>>().await {
-                            Ok(addresses) => {
-                                partner_addresses_state.set(addresses.clone());
-                                let mut req = (*state2).clone();
-                                if let Some(bill) = addresses
-                                    .iter()
-                                    .find(|a| matches!(a.address_type, AddressType::Billing))
-                                    .or_else(|| addresses.first())
-                                {
-                                    req.billing_address_id = Some(bill.id);
-                                    req.bill_to = OrderAddress {
-                                        id: Uuid::new_v4(),
-                                        order_id: Uuid::new_v4(),
-                                        name: Some(display_name2.clone()),
-                                        attention: req.bill_to.attention.clone(),
-                                        line1: Some(bill.address_line1.clone()),
-                                        line2: bill.address_line2.clone(),
-                                        city: Some(bill.city.clone()),
-                                        region: bill.state_province.clone(),
-                                        postal_code: bill.postal_code.clone(),
-                                        country: Some(bill.country.clone()),
-                                    };
-                                }
-                                if let Some(ship) = addresses
-                                    .iter()
-                                    .find(|a| matches!(a.address_type, AddressType::Shipping))
-                                    .or_else(|| addresses.first())
-                                {
-                                    req.shipping_address_id = Some(ship.id);
-                                    req.ship_to = OrderAddress {
-                                        id: Uuid::new_v4(),
-                                        order_id: Uuid::new_v4(),
-                                        name: Some(display_name2.clone()),
-                                        attention: req.ship_to.attention.clone(),
-                                        line1: Some(ship.address_line1.clone()),
-                                        line2: ship.address_line2.clone(),
-                                        city: Some(ship.city.clone()),
-                                        region: ship.state_province.clone(),
-                                        postal_code: ship.postal_code.clone(),
-                                        country: Some(ship.country.clone()),
-                                    };
-                                }
-                                state2.set(req);
+                    Ok(resp) if resp.ok() => match resp.json::<Vec<PartnerAddress>>().await {
+                        Ok(addresses) => {
+                            partner_addresses_state.set(addresses.clone());
+                            let mut req = (*state2).clone();
+                            if let Some(bill) = addresses
+                                .iter()
+                                .find(|a| matches!(a.address_type, AddressType::Billing))
+                                .or_else(|| addresses.first())
+                            {
+                                req.billing_address_id = Some(bill.id);
+                                req.bill_to = OrderAddress {
+                                    id: Uuid::new_v4(),
+                                    order_id: Uuid::new_v4(),
+                                    name: Some(display_name2.clone()),
+                                    attention: req.bill_to.attention.clone(),
+                                    line1: Some(bill.address_line1.clone()),
+                                    line2: bill.address_line2.clone(),
+                                    city: Some(bill.city.clone()),
+                                    region: bill.state_province.clone(),
+                                    postal_code: bill.postal_code.clone(),
+                                    country: Some(bill.country.clone()),
+                                };
                             }
-                            Err(e) => {
-                                error2.set(Some(i18n2.t_args(
-                                    "new-sales-invoice-error-parse-addresses",
-                                    &fluent_args!["error" => e.to_string()],
-                                )));
+                            if let Some(ship) = addresses
+                                .iter()
+                                .find(|a| matches!(a.address_type, AddressType::Shipping))
+                                .or_else(|| addresses.first())
+                            {
+                                req.shipping_address_id = Some(ship.id);
+                                req.ship_to = OrderAddress {
+                                    id: Uuid::new_v4(),
+                                    order_id: Uuid::new_v4(),
+                                    name: Some(display_name2.clone()),
+                                    attention: req.ship_to.attention.clone(),
+                                    line1: Some(ship.address_line1.clone()),
+                                    line2: ship.address_line2.clone(),
+                                    city: Some(ship.city.clone()),
+                                    region: ship.state_province.clone(),
+                                    postal_code: ship.postal_code.clone(),
+                                    country: Some(ship.country.clone()),
+                                };
                             }
+                            state2.set(req);
                         }
-                    }
+                        Err(e) => {
+                            error2.set(Some(i18n2.t_args(
+                                "new-sales-invoice-error-parse-addresses",
+                                &fluent_args!["error" => e.to_string()],
+                            )));
+                        }
+                    },
                     Ok(resp) => {
                         error2.set(Some(i18n2.t_args(
                             "new-sales-invoice-error-fetch-addresses",
@@ -387,29 +386,22 @@ pub fn new_sales_order_page() -> Html {
             request.set(req);
 
             wasm_bindgen_futures::spawn_local(async move {
-                let resp = Api::post(
-                    "/api/sales-orders",
-                    &*request,
-                    user_ctx,
-                    navigator.clone(),
-                )
-                .await;
+                let resp =
+                    Api::post("/api/sales-orders", &*request, user_ctx, navigator.clone()).await;
                 match resp {
-                    Ok(r) if r.ok() => {
-                        match r.json::<SalesOrder>().await {
-                            Ok(order) => {
-                                success.set(Some(i18n.t_args(
-                                    "new-sales-order-success",
-                                    &fluent_args!["number" => order.order_number.clone()],
-                                )));
-                                navigator.push(&Route::SalesOrders);
-                            }
-                            Err(e) => error.set(Some(i18n.t_args(
-                                "new-sales-order-error-parse-response",
-                                &fluent_args!["error" => e.to_string()],
-                            ))),
+                    Ok(r) if r.ok() => match r.json::<SalesOrder>().await {
+                        Ok(order) => {
+                            success.set(Some(i18n.t_args(
+                                "new-sales-order-success",
+                                &fluent_args!["number" => order.order_number.clone()],
+                            )));
+                            navigator.push(&Route::SalesOrders);
                         }
-                    }
+                        Err(e) => error.set(Some(i18n.t_args(
+                            "new-sales-order-error-parse-response",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
+                    },
                     Ok(r) => error.set(Some(i18n.t_args(
                         "new-sales-order-error-create",
                         &fluent_args!["status" => r.status()],

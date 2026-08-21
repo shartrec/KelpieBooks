@@ -62,4 +62,3 @@ mod tests {
         assert_eq!(tag.translation_key(), "system-tag-cash_at_bank");
     }
 }
-

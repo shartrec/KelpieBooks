@@ -10,13 +10,20 @@ use rocket_db_pools::sqlx::{
     PgConnection,
 };
 use rust_decimal::Decimal;
-use shared_core::inventory::models::warehouse_profile::{
-    ItemWarehouseProfile,
-    WarehouseInventoryBalance,
+use shared_core::{
+    inventory::{
+        dtos::inventory::{
+            ItemLocationBalanceDto,
+            ItemStockBalancesResponse,
+        },
+        models::warehouse_profile::{
+            ItemWarehouseProfile,
+            WarehouseInventoryBalance,
+        },
+    },
+    sales::models::item::ItemType,
 };
 use uuid::Uuid;
-use shared_core::inventory::dtos::inventory::{ItemLocationBalanceDto, ItemStockBalancesResponse};
-use shared_core::sales::models::item::ItemType;
 // =============================================================================
 // Item Warehouse Profile Operations (Physical Attributes Extension)
 // =============================================================================
@@ -76,14 +83,15 @@ pub async fn get_item_stock_balances(
     item_id: Uuid,
     org_id: Uuid,
 ) -> Result<ItemStockBalancesResponse, sqlx::Error> {
-
     // check the item is a stocked item first
-    let it = sqlx::query_scalar!(r#"SELECT item_type  AS "type_id: ItemType"  FROM items
+    let it = sqlx::query_scalar!(
+        r#"SELECT item_type  AS "type_id: ItemType"  FROM items
             WHERE id = $1 AND organization_id = $2"#,
         item_id,
         org_id
     )
-        .fetch_optional(& mut *conn).await?;
+    .fetch_optional(&mut *conn)
+    .await?;
 
     match it {
         Some(ItemType::Stocked) => {}
@@ -120,11 +128,17 @@ pub async fn get_item_stock_balances(
         org_id,
         item_id
     )
-        .fetch_all(conn)
-        .await?;
+    .fetch_all(conn)
+    .await?;
 
-    let total_on_hand = location_balances.iter().map(|b: &ItemLocationBalanceDto | b.quantity_on_hand.unwrap_or(Decimal::ZERO)).sum();
-    let total_allocated = location_balances.iter().map(|b: &ItemLocationBalanceDto| b.quantity_allocated.unwrap_or(Decimal::ZERO)).sum();
+    let total_on_hand = location_balances
+        .iter()
+        .map(|b: &ItemLocationBalanceDto| b.quantity_on_hand.unwrap_or(Decimal::ZERO))
+        .sum();
+    let total_allocated = location_balances
+        .iter()
+        .map(|b: &ItemLocationBalanceDto| b.quantity_allocated.unwrap_or(Decimal::ZERO))
+        .sum();
     let total_available = total_on_hand - total_allocated;
 
     Ok(ItemStockBalancesResponse {
@@ -225,10 +239,10 @@ pub async fn adjust_allocated(
         WHERE location_id = $2 AND item_id = $3 AND organization_id = $4
         RETURNING *
         "#,
-    delta,
-    location_id,
-    item_id,
-    org_id
+        delta,
+        location_id,
+        item_id,
+        org_id
     )
     .fetch_one(conn)
     .await

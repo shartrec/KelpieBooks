@@ -39,8 +39,18 @@ pub fn location_grid(props: &GridProps) -> Html {
     let filtered_locations: Vec<&WarehouseLocation> = props
         .locations
         .iter()
-        .filter(|loc| props.zone.as_ref().map_or(true, |z| loc.zone.as_ref() == Some(z)))
-        .filter(|loc| props.aisle.as_ref().map_or(true, |a| loc.aisle.as_ref() == Some(a)))
+        .filter(|loc| {
+            props
+                .zone
+                .as_ref()
+                .map_or(true, |z| loc.zone.as_ref() == Some(z))
+        })
+        .filter(|loc| {
+            props
+                .aisle
+                .as_ref()
+                .map_or(true, |a| loc.aisle.as_ref() == Some(a))
+        })
         .collect();
 
     let open_bulk = {

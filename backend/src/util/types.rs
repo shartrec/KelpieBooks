@@ -84,8 +84,6 @@ impl<'r> FromFormField<'r> for FormInvoiceStatus {
     }
 }
 
-
-
 #[derive(Clone, Copy)]
 pub(crate) struct FormItemType(pub(crate) ItemType);
 /// Allows `FormItemType` to be used as a `ItemType` via dereferencing.
