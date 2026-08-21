@@ -5,9 +5,9 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+pub mod aged_receivables;
 pub mod item_list;
-pub mod new_sales_invoice;
-pub mod sales_ledger;
+pub mod new_sales_order;
+pub mod sales_orders;
 pub mod tax_category_list;
 pub mod uom_list;
-pub mod aged_receivables;

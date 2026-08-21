@@ -22,8 +22,7 @@ use crate::{
     },
     core::components::delete_confirmation_modal::DeleteConfirmationModal,
     sales::components::{
-        add_uom_modal::AddUomModal,
-        edit_uom_modal::EditUomModal,
+        uom_modal::UomModal,
         uom_row::UomRow,
     },
 };
@@ -211,10 +210,10 @@ pub fn uom_list_table() -> Html {
             </table>
 
             if *show_add_modal {
-                <AddUomModal on_close={on_modal_close.clone()} on_submit={on_submit.clone()} />
+                <UomModal uom={None} on_close={on_modal_close.clone()} on_submit={on_submit.clone()} />
             }
             if let Some(uom) = &*uom_to_edit {
-                <EditUomModal uom={uom.clone()} on_close={on_modal_close.clone()} on_submit={on_submit.clone()} />
+                <UomModal uom={Some(uom.clone())} on_close={on_modal_close.clone()} on_submit={on_submit.clone()} />
             }
             if let Some(uom) = &*uom_to_delete {
                 <DeleteConfirmationModal

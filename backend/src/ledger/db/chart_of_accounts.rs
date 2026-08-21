@@ -17,7 +17,6 @@ use shared_core::ledger::models::{
     account_category::AccountCategory,
     system_tag::SystemTag,
 };
-use sqlx::Row;
 use uuid::Uuid;
 
 /// Represents the top-level structure of a TOML template file.
@@ -89,22 +88,23 @@ async fn insert_account(
     parent_id: Option<Uuid>,
     template: &AccountImport,
 ) -> Result<Uuid, sqlx::Error> {
-    let row = sqlx::query(
+    let row = sqlx::query!(
         r#"
         INSERT INTO accounts (organization_id, parent_id, code, name, category, is_group, system_tag)
         VALUES ($1, $2, $3, $4, $5::account_category, $6, $7::system_tag)
         RETURNING id
-        "#)
-        .bind(organization_id)
-        .bind(parent_id)
-        .bind(&template.code)
-        .bind(&template.name)
-        .bind(template.category.to_string())
-        .bind(template.is_group)
-        .bind(template.system_tag.map(|s| s.to_string()))
+        "#,
+            organization_id,
+            parent_id,
+            &template.code,
+            &template.name,
+            template.category as AccountCategory,
+            template.is_group,
+            template.system_tag as Option<SystemTag>
+        )
         .fetch_one(tx)
         .await?;
 
     // Retrieve the 'id' from the row and return it.
-    Ok(row.get(0))
+    Ok(row.id)
 }

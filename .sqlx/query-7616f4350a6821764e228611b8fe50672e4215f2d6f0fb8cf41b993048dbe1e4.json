@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT COALESCE(SUM(debit - credit), 0)::NUMERIC(15,4) as balance\n        FROM journal_entries je\n        JOIN transactions t ON je.transaction_id = t.id\n        JOIN accounts a ON je.account_id = a.id\n        WHERE je.account_id = $1  AND a.organization_id = $2 AND t.date <= $3\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "balance",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Date"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7616f4350a6821764e228611b8fe50672e4215f2d6f0fb8cf41b993048dbe1e4"
+}

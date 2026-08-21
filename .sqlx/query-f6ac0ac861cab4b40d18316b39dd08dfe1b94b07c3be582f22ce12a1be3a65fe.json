@@ -1,0 +1,77 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO item_warehouse_profiles (item_id, organization_id, weight_kg, length_cm, width_cm, height_cm, reorder_point, safety_stock, updated_at)\n         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())\n         ON CONFLICT (item_id)\n         DO UPDATE SET\n            weight_kg = EXCLUDED.weight_kg,\n            length_cm = EXCLUDED.length_cm,\n            width_cm = EXCLUDED.width_cm,\n            height_cm = EXCLUDED.height_cm,\n            reorder_point = EXCLUDED.reorder_point,\n            safety_stock = EXCLUDED.safety_stock,\n            updated_at = NOW()\n         RETURNING *",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "item_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "organization_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "weight_kg",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 3,
+        "name": "length_cm",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 4,
+        "name": "width_cm",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 5,
+        "name": "height_cm",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 6,
+        "name": "reorder_point",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 7,
+        "name": "safety_stock",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 8,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "f6ac0ac861cab4b40d18316b39dd08dfe1b94b07c3be582f22ce12a1be3a65fe"
+}

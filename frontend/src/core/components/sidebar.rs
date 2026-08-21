@@ -22,6 +22,7 @@ use crate::{
         locale_context::use_locale,
     },
     core::components::about_modal::AboutModal,
+    inventory,
     router::Route,
     sales,
 };
@@ -42,6 +43,27 @@ pub fn sidebar() -> Html {
         }
     }
 
+    #[cfg(feature = "partners")]
+    if user_ctx.has_privilege(&SystemPrivilege::UseAccounts) {
+        if let Some(contrib) = partners::components::get_sidebar_contribution() {
+            registry.push(contrib);
+        }
+    }
+
+    #[cfg(feature = "inventory")]
+    if user_ctx.has_privilege(&SystemPrivilege::UseInventory) {
+        if let Some(contrib) = inventory::components::get_sidebar_contribution() {
+            registry.push(contrib);
+        }
+    }
+
+    #[cfg(all(feature = "sales", not(feature = "inventory")))]
+    if user_ctx.has_privilege(&SystemPrivilege::UseSales) {
+        if let Some(contrib) = sales::components::get_sidebar_item_contribution() {
+            registry.push(contrib);
+        }
+    }
+
     #[cfg(feature = "payables")]
     if user_ctx.has_privilege(&SystemPrivilege::UseVendorInvoices) {
         if let Some(contrib) = payables::components::get_sidebar_contribution() {
@@ -52,13 +74,6 @@ pub fn sidebar() -> Html {
     #[cfg(feature = "sales")]
     if user_ctx.has_privilege(&SystemPrivilege::UseVendorInvoices) {
         if let Some(contrib) = sales::components::get_sidebar_contribution() {
-            registry.push(contrib);
-        }
-    }
-
-    #[cfg(feature = "partners")]
-    if user_ctx.has_privilege(&SystemPrivilege::UseAccounts) {
-        if let Some(contrib) = partners::components::get_sidebar_contribution() {
             registry.push(contrib);
         }
     }
@@ -240,15 +255,13 @@ pub fn get_help_contribution(on_about_open: Callback<()>) -> Option<SidebarModul
         privilege: Some(SystemPrivilege::ManageUsers),
         target_route: None,
         on_click: None,
-        children: vec![
-            SidebarModuleContribution {
-                id: "sidebar-about",
-                label_key: "sidebar-about",
-                privilege: Some(SystemPrivilege::ManageUsers),
-                target_route: None,
-                on_click: Some(on_about_open),
-                children: vec![],
-            },
-        ],
+        children: vec![SidebarModuleContribution {
+            id: "sidebar-about",
+            label_key: "sidebar-about",
+            privilege: Some(SystemPrivilege::ManageUsers),
+            target_route: None,
+            on_click: Some(on_about_open),
+            children: vec![],
+        }],
     })
 }

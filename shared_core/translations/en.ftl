@@ -32,10 +32,17 @@ sys-privilege-manage_vendor_invoices-description = Permits entering, updating an
 
 # Sales Module
 sys-privilege-use_sales-name = View item and sales invoices
-sys-privilege-use_sales-description = Permites view sales invoices and item details.
+sys-privilege-use_sales-description = Permits view sales invoices and item details.
 
 sys-privilege-manage_sales-name = Mangage items and sales invoices
 sys-privilege-manage_sales-description = Permits maintenance of items and entering, updating sales invoices.
+
+# Inventory Module
+sys-privilege-use_inventory-name = View item inventories and locations
+sys-privilege-use_inventory-description = Permits view of item inventories and location details.
+
+sys-privilege-manage_inventory-name = Mangage item inventories and locations
+sys-privilege-manage_inventory-description = Permits maintenance of item inventories, warehouses and locations.
 
 # Transactions Module
 sys-privilege-use_transactions-name = Record Transactions
@@ -79,6 +86,7 @@ common-name = Name
 common-category = Category
 common-balance = Balance
 common-actions = Actions
+common-status = Status
 common-cancel = Cancel
 common-edit = Edit
 common-delete = Delete
@@ -180,6 +188,7 @@ sidebar-admin = Admin
 sidebar-users = Users
 sidebar-roles = Roles
 sidebar-sales = Sales
+sidebar-sales-orders = Sales Orders
 sidebar-help = Help
 sidebar-about = About KelpieBooks...
 
@@ -191,6 +200,7 @@ about-author-label = Author
 about-license-label = License
 about-website-label = Source Code
 about-docs-label = Documentation
+
 
 # Sales invoice list
 sales-invoice-list = Sales Invoices
@@ -214,6 +224,20 @@ coa-error-add-account = Failed to add account: { $status }
 coa-error-update-account = Failed to update account: { $status }
 coa-error-not-found = Account not found
 coa-error-delete-account = Failed to delete account: { $status }
+
+# System account display names
+system-tag-cash_at_bank = Cash at Bank
+system-tag-accounts_receivable = Accounts Receivable
+system-tag-accounts_payable = Accounts Payable
+system-tag-retained_earnings = Retained Earnings
+system-tag-sales_tax_payable = Sales Tax Payable
+system-tag-sales_tax_clearing = Tax Clearing
+system-tag-revenue = Revenue
+system-tag-expense = Expense
+system-tag-cost_of_goods_sold = Cost of Goods Sold
+system-tag-inventory_asset = Inventory Asset
+system-tag-received_not_invoiced = Received Not Invoiced (RNI)
+system-tag-inventory_adjustment = Inventory Adjustment
 
 # Add/Edit Account Modal
 account-modal-add-title = Add New Account
@@ -711,6 +735,52 @@ new-sales-invoice-shipping-address = Shipping address
 new-sales-invoice-select-shipping = Select shipping address
 new-sales-invoice-shipping-override = Shipping address override
 
+# Sales Order — Create
+new-sales-order-title = New Sales Order
+new-sales-order-date-label = Order Date
+new-sales-order-warehouse-label = Warehouse
+new-sales-order-select-warehouse = — Select a warehouse —
+new-sales-order-save-button = Save Order
+new-sales-order-success = Sales order { $number } was created successfully.
+new-sales-order-error-parse-response = Failed to parse created order: { $error }
+new-sales-order-error-create = Failed to create order: { $status }
+new-sales-order-error-parse-warehouses = Failed to parse warehouses: { $error }
+new-sales-order-error-fetch-warehouses = Failed to fetch warehouses: { $status }
+
+# Sales Order — Status labels
+sales-order-status-draft = Draft
+sales-order-status-open = Open
+sales-order-status-completed = Completed
+sales-order-status-cancelled = Cancelled
+
+# Sales Orders — List page
+sales-orders-list-title = Sales Orders
+sales-orders-list-new-button = + New Order
+sales-orders-list-filter-all = All
+sales-orders-list-col-number = Order #
+sales-orders-list-col-warehouse = Warehouse
+sales-orders-list-error-parse = Failed to parse orders: { $error }
+sales-orders-list-error-fetch = Failed to fetch orders: { $status }
+
+# Sales Orders — Drawer
+sales-orders-drawer-order-number = Order #{ $number }
+sales-orders-drawer-warehouse = Warehouse: { $warehouse }
+sales-order-drawer-address-edit-future = Address editing coming soon
+sales-orders-drawer-confirm-button = Confirm Order
+sales-orders-drawer-cancel-button = Cancel Order
+sales-orders-drawer-error-confirm = Failed to confirm order: { $status }
+sales-orders-drawer-error-confirm-parse = Failed to parse confirmed order: { $error }
+sales-orders-drawer-error-cancel = Failed to cancel order: { $status }
+sales-orders-drawer-error-parse = Failed to parse order: { $error }
+sales-orders-drawer-error-fetch = Failed to fetch order: { $status }
+
+# Sales Order — Item line columns
+sales-order-item-col-available = Available
+
+# Sales Order — Item availability badge
+sales-order-item-available = { $qty } available
+sales-order-item-insufficient-stock = Only { $qty } available
+
 # Address field labels/placeholders
 address-name = Name
 address-attention = Attention
@@ -728,6 +798,7 @@ item-list-code = Code
 item-list-name = Name
 item-list-type = Type
 item-list-price = Price
+item-list-unit-cost = Unit Cost
 item-list-add-item-button = Add Item
 item-list-error-parse-items = Failed to parse items: { $error }
 item-list-error-fetch-items = Failed to fetch items: { $status }
@@ -740,6 +811,7 @@ item-type-label = Type:
 item-uom-label = Unit of Measure:
 item-select-uom = Select a unit of measure
 item-price-label = Price:
+item-cost-label = Unit Cost:
 item-tax-category-label = Tax Category:
 item-select-tax-category = Select a tax category
 item-income-account-label = Income Account:
@@ -800,6 +872,99 @@ tax-rate-edit-card-edit-title = Edit Rate
 tax-rate-edit-card-rate-label = Rate:
 tax-rate-edit-card-valid-from-label = Valid From:
 tax-rate-edit-card-valid-to-label = Valid To:
+
+# Products
+
+sidebar-products = Inventory
+inventory-warehouse-title = Warehouses
+
+warehouse-list-title = Warehouses
+warehouse-list-description = Manage your physical inventory distribution nodes, fulfillment hubs, and stock locations.
+warehouse-list-add-button = Add Warehouse
+warehouse-list-code = Code
+warehouse-list-name = Name
+warehouse-list-is-active = Active
+
+warehouse-add-title = Add New Warehouse
+warehouse-edit-title = Edit Warehouse Details
+warehouse-code-label = Warehouse Code (e.g., WH-SYD)
+warehouse-name-label = Warehouse Name
+warehouse-is-active-label = Active tracking.
+
+# Error Handlers
+warehouse-list-error-fetch = Failed to retrieve warehouse directory (Server Status: { $status }).
+warehouse-list-error-parse = Failed to compile warehouse data payload: { $error }
+
+warehouse-delete-title = Delete Warehouse
+warehouse-delete-confirm-message = Are you sure you want to permanently remove warehouse "{ $name }"? This action cannot be undone.
+
+# Business Guard Error Messages
+warehouse-delete-error = Failed to delete warehouse. Please ensure you have sufficient permissions.
+warehouse-delete-error-conflict = Cannot delete warehouse. It still contains nested storage locations or active tracking balances.
+
+warehouse-action-view-locations = View Location Mapping Structure
+
+# Warehouse Locations Dashboard
+warehouse-locations-title = Locations — { $name }
+location-btn-bulk-generate = Bulk Generate Locations
+
+# Location Topography Tree Navigation
+location-tree-header = Warehouse Structure
+location-tree-all-view = All Storage Locations
+location-tree-aisle-prefix = Aisle
+
+# Location Grid Table Columns
+location-grid-label = Location Tag
+location-grid-zone = Zone
+location-grid-aisle = Aisle
+location-grid-shelf = Shelf / Tier
+location-grid-bin = Bin / Slot
+location-grid-picking = Picking Loc
+
+# Bulk Sequence Generator Modal
+bulk-gen-title = Bulk Matrix Generator
+bulk-gen-zone-label = Target Zone Name
+bulk-gen-aisles = Aisle Sequence Range
+bulk-gen-shelves = Shelf/Tier Sequence Range (Alpha)
+bulk-gen-bins = Bin/Slot Sequence Range
+bulk-gen-picking-label = Designate generated rows as Picking Locations
+bulk-gen-btn-execute = Execute Bulk Generation
+
+# Inventory - Common Labels
+inventory-item-label = { common-item }
+inventory-location-label = Location / Bin
+inventory-quantity-label = { common-quantity }
+inventory-po-number-label = PO Number
+inventory-notes-label = Notes
+inventory-delta-label = Delta (+/-)
+inventory-reason-label = Adjustment Reason
+inventory-warehouse-label = Warehouse
+inventory-on-hand-label = On hand
+inventory-allocated-label = Allocated
+inventory-available-label = Available
+inventory-no-stock-found = No stock found
+
+# Inventory - Item List Row Action Tooltips
+inventory-receive-stock = Receive Stock
+inventory-adjust-stock = Adjust Stock
+
+# Inventory - Receiving View / Modal
+inventory-receiving-title = Receive Vendor Inventory
+inventory-receive-stock-title = Receive Stock
+inventory-post-receipt = Post Stock Receipt
+
+# Inventory - Stock Adjustment View / Modal
+inventory-adjustment-title = Inventory Stock Adjustments
+inventory-adjust-stock-title = Adjust Stock Level
+inventory-commit-adjustment = Commit Adjustments
+
+# Inventory - Adjustment Reasons
+inventory-reason-cycle-count = Cycle Count
+inventory-reason-damage = Damage / Scrap
+inventory-reason-scrap = Scrap
+inventory-reason-audit = Audit Correction
+inventory-reason-found = Found Stock
+inventory-reason-other = Other
 
 # Security
 security-error-no-admin = You cannot perform this action. At least one security administrator must remain.

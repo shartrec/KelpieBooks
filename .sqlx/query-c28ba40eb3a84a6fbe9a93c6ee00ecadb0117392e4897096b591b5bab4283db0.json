@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE organization_sequences\n        SET next_value = next_value + 1\n        WHERE org_id = $1 AND document_type = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c28ba40eb3a84a6fbe9a93c6ee00ecadb0117392e4897096b591b5bab4283db0"
+}

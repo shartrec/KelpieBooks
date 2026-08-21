@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            w.id AS warehouse_id,\n            w.code AS warehouse_code,\n            w.name AS warehouse_name,\n            loc.id AS location_id,\n            loc.display_label AS location_display_label,\n            loc.is_picking_location,\n            b.quantity_on_hand,\n            b.quantity_allocated,\n            (b.quantity_on_hand - b.quantity_allocated) AS quantity_available\n        FROM warehouse_inventory_balances b\n        INNER JOIN warehouses w ON w.id = b.warehouse_id\n        INNER JOIN warehouse_locations loc ON loc.id = b.location_id\n        WHERE b.organization_id = $1 AND b.item_id = $2\n        ORDER BY w.name ASC, loc.display_label ASC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "warehouse_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "warehouse_code",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "warehouse_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "location_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "location_display_label",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "is_picking_location",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "quantity_on_hand",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 7,
+        "name": "quantity_allocated",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 8,
+        "name": "quantity_available",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "c70ba58aa1e230e46d49d384be6ee8458a3ed67b7416bdd3b761c783fc6fd21e"
+}

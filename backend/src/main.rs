@@ -18,26 +18,26 @@ use core::routes::{
     security as security_routes,
     users,
 };
-use std::{
-    env,
-    path::PathBuf,
-};
+use std::path::PathBuf;
 
 use log::error;
 use rocket::{
     fairing::AdHoc,
     fs::{
-        relative,
         FileServer,
         NamedFile,
     },
     get,
+    http::ContentType,
     routes,
+    State,
 };
 use rocket_db_pools::Database;
 
 use crate::util::logging::setup_logging;
 
+#[cfg(feature = "inventory")]
+pub mod inventory;
 #[cfg(feature = "ledger")]
 pub(crate) mod ledger;
 #[cfg(feature = "partners")]
@@ -56,10 +56,35 @@ mod util;
 #[database("kelpie_db")]
 pub(crate) struct DbKelpie(sqlx::PgPool);
 
+// In your main setup or utility module
+pub struct AssetsDir {
+    pub path: std::path::PathBuf,
+}
+
 #[get("/<_..>", rank = 20)]
-async fn spa_index() -> Option<NamedFile> {
+async fn spa_index(assets_state: &State<AssetsDir>) -> Option<NamedFile> {
     // This tells Rocket: "If nothing else matched, just send them the index.html"
-    NamedFile::open(relative!("./static/index.html")).await.ok()
+    NamedFile::open(assets_state.path.join("index.html"))
+        .await
+        .ok()
+}
+
+#[get("/fonts/<file..>", rank = 10)]
+pub async fn serve_fonts(
+    file: PathBuf,
+    assets_state: &State<AssetsDir>,
+) -> Option<(ContentType, NamedFile)> {
+    let path = assets_state.path.join("fonts").join(file);
+    let ext = path.extension()?.to_str()?;
+
+    let content_type = match ext {
+        "woff2" => ContentType::WOFF2,
+        "woff" => ContentType::WOFF,
+        _ => ContentType::Binary,
+    };
+
+    let named_file = NamedFile::open(path).await.ok()?;
+    Some((content_type, named_file))
 }
 
 pub struct TemplateConfig {
@@ -113,22 +138,37 @@ fn rocket() -> _ {
         .mount("/", payables::routes::vendor_payments::routes());
     #[cfg(feature = "sales")]
     let rocket = rocket
-        .mount("/", sales::routes::items::routes())
-        .mount("/", sales::routes::uoms::routes())
         .mount("/", sales::routes::tax_categories::routes())
-        .mount("/", sales::routes::sales_invoices::routes())
+        .mount("/", sales::routes::sales_orders::routes())
         .mount("/", sales::routes::customer_payments::routes())
         .mount("/", sales::routes::reports::routes());
+
+    #[cfg(any(feature = "sales", feature = "inventory"))]
+    let rocket = rocket
+        .mount("/", sales::routes::items::routes())
+        .mount("/", sales::routes::uoms::routes());
+
+    #[cfg(feature = "inventory")]
+    let rocket = rocket
+        .mount("/", inventory::routes::locations::routes())
+        .mount("/", inventory::routes::balances::routes())
+        .mount("/", inventory::routes::warehouse::routes());
 
     // Determine the environment directory pathway
     let assets_dir = util::get_static_dir(&rocket);
     let rocket = rocket
-        .mount("/", FileServer::from(assets_dir))
-        // 3. Mount the fallback route with a lower priority (rank 2)
+        // 1. Store the asset directory pathway in managed state
+        .manage(AssetsDir {
+            path: assets_dir.clone(),
+        })
+        .mount("/", routes![serve_fonts])
+        .mount("/", FileServer::from(assets_dir).rank(15))
         .mount("/", routes![spa_index]);
 
     let template_dir = util::get_template_dir(&rocket);
-    let rocket = rocket.manage(TemplateConfig { root_directory: template_dir });
+    let rocket = rocket.manage(TemplateConfig {
+        root_directory: template_dir,
+    });
 
     rocket
 }

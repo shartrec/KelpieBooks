@@ -11,11 +11,22 @@ pub(crate) mod logging;
 pub(crate) mod reports;
 pub(crate) mod types;
 
-use std::env;
-use std::path::PathBuf;
+use std::{
+    env,
+    path::PathBuf,
+};
+
 use bcrypt;
 use log::error;
-use rocket::{http::Status, response::Responder, serde::json::Json, Build, Request, Response, Rocket};
+use rocket::{
+    http::Status,
+    response::Responder,
+    serde::json::Json,
+    Build,
+    Request,
+    Response,
+    Rocket,
+};
 use rocket_db_pools::sqlx;
 use shared_core::core::dtos::ApiErrorMessage;
 

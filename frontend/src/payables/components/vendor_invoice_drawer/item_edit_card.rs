@@ -96,14 +96,14 @@ pub fn item_edit_card(props: &ItemEditCardProps) -> Html {
             <div class="card__meta-line" style="margin-bottom: 0.75rem;">
                 <div class="card__title">
                     <strong style="font-size: 0.85rem; text-transform: uppercase; color: var(--brand-dark);">
-                        { if props.item.description.is_empty() { i18n.t("item-edit-card-add-title") } else { i18n.t("item-edit-card-edit-title") } }
+                        { if props.item.description.is_none() { i18n.t("item-edit-card-add-title") } else { i18n.t("item-edit-card-edit-title") } }
                     </strong>
                 </div>
             </div>
 
             <div class="card-form-compact">
                     <label>{i18n.t("common-description")}</label>
-                    <input type="text" value={item.description.clone()} oninput={on_input(|i, v| i.description = v)} />
+                    <input type="text" value={item.description.clone()} oninput={on_input(|i, v| i.description = Some(v))} />
 
                     <label>{i18n.t("common-account")}</label>
                     <select onchange={on_select_change(|i, v| i.account_id = Uuid::parse_str(&v).unwrap_or_default())}>

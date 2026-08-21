@@ -13,6 +13,7 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
+
 use crate::sales::models::customer_payment_allocation::CustomerPaymentAllocation;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

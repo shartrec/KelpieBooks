@@ -1,0 +1,63 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            p.legal_name as partner_name,\n            vi.due_date,\n            vi.amount_remaining as amount\n        FROM vendor_invoices vi\n        JOIN partners p ON vi.partner_id = p.id\n        WHERE vi.organization_id = $1\n          AND (vi.status = $3 OR vi.status = $4)\n          AND vi.due_date <= $2\n        ORDER BY vi.amount_remaining DESC\n        LIMIT 5\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "partner_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "due_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 2,
+        "name": "amount",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        {
+          "Custom": {
+            "name": "invoice_status",
+            "kind": {
+              "Enum": [
+                "open",
+                "paid",
+                "partially_paid",
+                "void",
+                "draft"
+              ]
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "invoice_status",
+            "kind": {
+              "Enum": [
+                "open",
+                "paid",
+                "partially_paid",
+                "void",
+                "draft"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "6788184a40ab795c1301fdd429b4fdd6ad0ff60db4cbe197e33ad0f387b8e08d"
+}

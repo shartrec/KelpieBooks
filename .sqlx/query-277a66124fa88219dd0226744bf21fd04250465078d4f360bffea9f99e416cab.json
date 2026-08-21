@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE sales_orders\n        SET subtotal = $1, tax_total = $2, total_amount = $3, amount_remaining = $4\n        WHERE id = $5 AND organization_id = $6\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Numeric",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "277a66124fa88219dd0226744bf21fd04250465078d4f360bffea9f99e416cab"
+}

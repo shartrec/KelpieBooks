@@ -7,23 +7,20 @@
  */
 pub mod add_item_modal;
 pub mod add_tax_category_modal;
-pub mod add_uom_modal;
+pub mod aged_trial_balance_matrix;
 pub mod edit_item_modal;
 pub mod edit_tax_category_modal;
-pub mod edit_uom_modal;
 pub mod item_filter;
 pub mod item_list_table;
 pub mod item_row;
-pub mod sales_invoice_drawer;
-pub mod sales_invoice_filter;
-pub mod sales_invoice_item_row;
-pub mod sales_invoice_table;
+pub mod sales_order_drawer;
+pub mod sales_order_item_row;
 pub mod tax_category_drawer;
 pub mod tax_category_list_table;
 pub mod tax_category_row;
 pub mod uom_list_table;
+pub mod uom_modal;
 pub mod uom_row;
-pub mod aged_trial_balance_matrix;
 
 use shared_core::core::models::auth::SystemPrivilege;
 
@@ -42,18 +39,10 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
         on_click: None,
         children: vec![
             SidebarModuleContribution {
-                id: "sales-invoice-list",
-                label_key: "sales-invoice-list",
-                privilege: Some(SystemPrivilege::ManageSales),
-                target_route: Some(Route::SalesLedger),
-                on_click: None,
-                children: vec![],
-            },
-            SidebarModuleContribution {
-                id: "sales-new-invoice",
-                label_key: "new-sales-invoice-title",
-                privilege: Some(SystemPrivilege::ManageSales),
-                target_route: Some(Route::NewSalesInvoice),
+                id: "sales-orders",
+                label_key: "sidebar-sales-orders",
+                privilege: Some(SystemPrivilege::UseSales),
+                target_route: Some(Route::SalesOrders),
                 on_click: None,
                 children: vec![],
             },

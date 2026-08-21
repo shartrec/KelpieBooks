@@ -40,6 +40,8 @@ pub enum SystemPrivilege {
     ManageOrganization,
     UseSales,
     ManageSales,
+    UseInventory,
+    ManageInventory,
 }
 
 impl SystemPrivilege {
@@ -54,7 +56,10 @@ impl SystemPrivilege {
 
     /// Returns the description identifier key for verbose tooltips or help panels
     pub fn description_key(&self) -> String {
-        format!("sys-privilege-{}-description", self.as_ref().to_snake_case())
+        format!(
+            "sys-privilege-{}-description",
+            self.as_ref().to_snake_case()
+        )
     }
 
     /// Converts variant to its snake_case database value string representation for JWT payloads

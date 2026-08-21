@@ -95,9 +95,10 @@ pub fn chart_of_accounts_table() -> Html {
                         "coa-error-fetch-accounts",
                         &fluent_args!["status" => response.status()],
                     ))),
-                    Err(e) => error.set(Some(
-                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
-                    )),
+                    Err(e) => error.set(Some(i18n.t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -138,9 +139,10 @@ pub fn chart_of_accounts_table() -> Html {
                         "coa-error-add-account",
                         &fluent_args!["status" => r.status()],
                     ))),
-                    Err(e) => error.set(Some(
-                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
-                    )),
+                    Err(e) => error.set(Some(i18n.t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
         })
@@ -173,12 +175,10 @@ pub fn chart_of_accounts_table() -> Html {
                             "coa-error-update-account",
                             &fluent_args!["status" => r.status()],
                         ))),
-                        Err(e) => {
-                            error.set(Some(i18n.t_args(
-                                "common-network-error",
-                                &fluent_args!["error" => e.to_string()],
-                            )))
-                        }
+                        Err(e) => error.set(Some(i18n.t_args(
+                            "common-network-error",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     }
                 });
             }
@@ -212,12 +212,10 @@ pub fn chart_of_accounts_table() -> Html {
                             "coa-error-delete-account",
                             &fluent_args!["status" => r.status()],
                         ))),
-                        Err(e) => {
-                            error.set(Some(i18n.t_args(
-                                "common-network-error",
-                                &fluent_args!["error" => e.to_string()],
-                            )))
-                        }
+                        Err(e) => error.set(Some(i18n.t_args(
+                            "common-network-error",
+                            &fluent_args!["error" => e.to_string()],
+                        ))),
                     }
                 });
             }

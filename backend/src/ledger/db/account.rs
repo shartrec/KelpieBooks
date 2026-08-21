@@ -11,7 +11,6 @@ use std::collections::HashMap;
 use rocket_db_pools::sqlx::{
     self,
     PgConnection,
-    Row,
 };
 use shared_core::ledger::{
     models::{
@@ -26,27 +25,13 @@ use shared_core::ledger::{
 };
 use uuid::Uuid;
 
-fn from_row_to_account(row: &sqlx::postgres::PgRow) -> Account {
-    Account {
-        id: row.get("id"),
-        organization_id: row.get("organization_id"),
-        parent_id: row.get("parent_id"),
-        code: row.get("code"),
-        name: row.get("name"),
-        category: row.get("category"),
-        is_group: row.get("is_group"),
-        is_bank_account: row.get("is_bank_account"),
-        system_tag: row.get("system_tag"),
-        created_at: row.get("created_at"),
-    }
-}
-
 pub(crate) async fn get(
     pool: &mut PgConnection,
     id: Uuid,
     org_id: Uuid,
 ) -> Result<Option<Account>, sqlx::Error> {
-    sqlx::query(
+    sqlx::query_as!(
+        Account,
         r#"
         SELECT
             id,
@@ -54,28 +39,28 @@ pub(crate) async fn get(
             parent_id,
             code,
             name,
-            category,
+            category as "category: AccountCategory",
             is_group,
             is_bank_account,
-            system_tag,
+            system_tag as "system_tag: SystemTag",
             created_at
         FROM accounts
         WHERE id = $1
         AND organization_id = $2
         "#,
+        id,
+        org_id
     )
-    .bind(id)
-    .bind(org_id)
     .fetch_optional(pool)
     .await
-    .map(|row| row.map(|r| from_row_to_account(&r)))
 }
 
 pub(crate) async fn get_all_by_org(
     pool: &mut PgConnection,
     organization_id: Uuid,
 ) -> Result<Vec<Account>, sqlx::Error> {
-    sqlx::query(
+    sqlx::query_as!(
+        Account,
         r#"
         SELECT
             id,
@@ -83,20 +68,19 @@ pub(crate) async fn get_all_by_org(
             parent_id,
             code,
             name,
-            category,
+            category as "category: AccountCategory",
             is_group,
             is_bank_account,
-            system_tag,
+            system_tag as "system_tag: SystemTag",
             created_at
         FROM accounts
         WHERE organization_id = $1
         ORDER BY name
         "#,
+        organization_id
     )
-    .bind(organization_id)
     .fetch_all(pool)
     .await
-    .map(|rows| rows.iter().map(from_row_to_account).collect())
 }
 
 pub(crate) async fn insert(
@@ -104,24 +88,26 @@ pub(crate) async fn insert(
     org_id: Uuid,
     req: &CreateAccountRequest,
 ) -> Result<Account, sqlx::Error> {
-    let row = sqlx::query(
+    let account = sqlx::query_as!(
+        Account,
         r#"
         INSERT INTO accounts (organization_id, name, code, category, parent_id, is_group, is_bank_account, system_tag)
         VALUES ($1, $2, $3, $4::account_category, $5, $6, $7, $8::system_tag)
-        RETURNING id, organization_id, parent_id, code, name, category, is_group, is_bank_account, system_tag, created_at
+        RETURNING id, organization_id, parent_id, code, name, category as "category: AccountCategory",
+            is_group, is_bank_account, system_tag as "system_tag: SystemTag", created_at
         "#,
+    org_id,
+    &req.name,
+    &req.code,
+    req.category as AccountCategory,
+    req.parent_id,
+    req.is_group,
+    req.is_bank_account,
+    req.system_tag as Option<SystemTag>,
     )
-    .bind(org_id)
-    .bind(&req.name)
-    .bind(&req.code)
-    .bind(req.category)
-    .bind(req.parent_id)
-    .bind(req.is_group)
-    .bind(req.is_bank_account)
-    .bind(req.system_tag)
-    .fetch_one(pool)
+    .   fetch_one(pool)
     .await?;
-    Ok(from_row_to_account(&row))
+    Ok(account)
 }
 
 pub(crate) async fn update(
@@ -130,38 +116,41 @@ pub(crate) async fn update(
     org_id: Uuid,
     req: &UpdateAccountRequest,
 ) -> Result<Account, sqlx::Error> {
-    let row = sqlx::query(
+    let account = sqlx::query_as!(
+        Account,
         r#"
         UPDATE accounts
         SET name = $1, code = $2, category = $3::account_category, is_group = $4, is_bank_account = $5, system_tag = $6::system_tag
         WHERE id = $7
         AND organization_id = $8
-        RETURNING id, organization_id, parent_id, code, name, category, is_group, is_bank_account, system_tag, created_at
+        RETURNING id, organization_id, parent_id, code, name, category as "category: AccountCategory",
+            is_group, is_bank_account, system_tag as "system_tag: SystemTag", created_at
         "#,
+        &req.name,
+        &req.code,
+        req.category as AccountCategory,
+        req.is_group,
+        req.is_bank_account,
+        req.system_tag.clone() as Option<SystemTag>,
+        id,
+        org_id
     )
-    .bind(&req.name)
-    .bind(&req.code)
-    .bind(req.category)
-    .bind(req.is_group)
-    .bind(req.is_bank_account)
-    .bind(req.system_tag)
-    .bind(id)
-    .bind(org_id)
     .fetch_one(pool)
     .await?;
-    Ok(from_row_to_account(&row))
+    Ok(account)
 }
 
 pub(crate) async fn has_journal_entries(
     pool: &mut PgConnection,
     id: Uuid,
 ) -> Result<bool, sqlx::Error> {
-    let count: i64 =
-        sqlx::query_scalar("SELECT COUNT(*) FROM journal_entries WHERE account_id = $1")
-            .bind(id)
-            .fetch_one(pool)
-            .await?;
-    Ok(count > 0)
+    let count: Option<i64> = sqlx::query_scalar!(
+        "SELECT COUNT(*) FROM journal_entries WHERE account_id = $1",
+        id
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(count.unwrap_or(0) > 0)
 }
 
 pub(crate) async fn delete(
@@ -169,11 +158,13 @@ pub(crate) async fn delete(
     id: Uuid,
     org_id: Uuid,
 ) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query("DELETE FROM accounts WHERE id = $1 AND organization_id = $2")
-        .bind(id)
-        .bind(org_id)
-        .execute(pool)
-        .await?;
+    let result = sqlx::query!(
+        "DELETE FROM accounts WHERE id = $1 AND organization_id = $2",
+        id,
+        org_id
+    )
+    .execute(pool)
+    .await?;
     Ok(result.rows_affected())
 }
 
@@ -182,7 +173,7 @@ pub(crate) async fn get_all_by_category(
     organization_id: Uuid,
     categories: &[AccountCategory],
 ) -> Result<Vec<Account>, sqlx::Error> {
-    let mut query = String::from(
+    let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(
         r#"
         SELECT
             id,
@@ -196,27 +187,23 @@ pub(crate) async fn get_all_by_category(
             system_tag,
             created_at
         FROM accounts
-        WHERE organization_id = $1
+        WHERE organization_id =
         "#,
     );
-    let mut i = 2i32;
-    let or_clauses: Vec<String> = (0..categories.len())
-        .map(|_| {
-            let clause = format!("category = ${}", i);
-            i += 1;
-            clause
-        })
-        .collect();
-    query.push_str(&format!(" AND ({})", or_clauses.join(" OR ")));
 
-    let mut query = sqlx::query(&query).bind(organization_id);
+    query.push_bind(organization_id);
+
+    query.push(" AND category IN (");
+
+    let mut separated = query.separated(", ");
+
     for category in categories {
-        query = query.bind(category);
+        separated.push_bind(category);
     }
-    query
-        .fetch_all(pool)
-        .await
-        .map(|rows| rows.iter().map(from_row_to_account).collect())
+
+    separated.push_unseparated(")");
+
+    query.build_query_as::<Account>().fetch_all(pool).await
 }
 
 pub(crate) async fn get_by_system_tag(
@@ -224,7 +211,8 @@ pub(crate) async fn get_by_system_tag(
     organization_id: Uuid,
     tag: &SystemTag,
 ) -> Result<Option<Account>, sqlx::Error> {
-    sqlx::query(
+    sqlx::query_as!(
+        Account,
         r#"
         SELECT
             id,
@@ -232,41 +220,40 @@ pub(crate) async fn get_by_system_tag(
             parent_id,
             code,
             name,
-            category,
+            category as "category: AccountCategory",
             is_group,
             is_bank_account,
-            system_tag,
+            system_tag as "system_tag: SystemTag",
             created_at
         FROM accounts
-        WHERE organization_id = $1 AND system_tag = $2
+        WHERE organization_id = $1 AND system_tag = $2::system_tag
         "#,
+        organization_id,
+        tag as &SystemTag
     )
-    .bind(organization_id)
-    .bind(tag)
     .fetch_optional(pool)
     .await
-    .map(|row| row.map(|r| from_row_to_account(&r)))
 }
 
 pub(crate) async fn get_system_accounts(
     pool: &mut PgConnection,
     organization_id: Uuid,
 ) -> Result<HashMap<SystemTag, Uuid>, sqlx::Error> {
-    let rows = sqlx::query(
+    let rows = sqlx::query!(
         r#"
-        SELECT system_tag, id
+        SELECT system_tag as "system_tag: SystemTag", id
         FROM accounts
         WHERE organization_id = $1 AND system_tag IS NOT NULL
         "#,
+        organization_id
     )
-    .bind(organization_id)
     .fetch_all(pool)
     .await?;
 
     let mut map = HashMap::new();
     for row in rows.iter() {
-        let tag: Option<SystemTag> = row.get("system_tag");
-        let id: Uuid = row.get("id");
+        let tag: Option<SystemTag> = row.system_tag;
+        let id: Uuid = row.id;
         if let Some(tag) = tag {
             map.insert(tag, id);
         }
@@ -280,29 +267,29 @@ pub(crate) async fn update_system_accounts(
     system_accounts: &HashMap<SystemTag, Uuid>,
 ) -> Result<(), sqlx::Error> {
     // Clear all existing system tags for the organization
-    sqlx::query(
+    sqlx::query!(
         r#"
         UPDATE accounts
         SET system_tag = NULL
         WHERE organization_id = $1 AND system_tag IS NOT NULL
         "#,
+        organization_id
     )
-    .bind(organization_id)
     .execute(&mut *pool)
     .await?;
 
     // Set the new system tags
     for (tag, account_id) in system_accounts {
-        sqlx::query(
+        sqlx::query!(
             r#"
             UPDATE accounts
             SET system_tag = $1
             WHERE id = $2 AND organization_id = $3
             "#,
+            tag as &SystemTag,
+            account_id,
+            organization_id
         )
-        .bind(tag)
-        .bind(account_id)
-        .bind(organization_id)
         .execute(&mut *pool)
         .await?;
     }

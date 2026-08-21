@@ -6,6 +6,8 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+#[cfg(feature = "inventory")]
+pub mod inventory;
 #[cfg(feature = "ledger")]
 pub mod ledger;
 #[cfg(feature = "partners")]
@@ -15,6 +17,6 @@ pub mod payables;
 #[cfg(feature = "sales")]
 pub mod sales;
 
+pub mod core;
 pub mod i18n;
 pub mod util;
-pub mod core;

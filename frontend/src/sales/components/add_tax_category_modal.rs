@@ -92,7 +92,7 @@ pub fn add_tax_category_modal(props: &AddTaxCategoryModalProps) -> Html {
                     <input type="text" value={request.name.clone()} oninput={on_input(|r, v| r.name = v)} required=true />
 
                     <label>{i18n.t("common-description")}</label>
-                    <input type="text" value={request.description.clone()} oninput={on_input(|r, v| r.description = v)} />
+                    <input type="text" value={request.description.clone()} oninput={on_input(|r, v| r.description = Some(v))} />
 
                     <label>{i18n.t("tax-category-is-active-label")}</label>
                     <input type="checkbox" checked={request.is_active} onchange={on_is_active_change} />

@@ -146,13 +146,13 @@ pub fn aged_trial_balance_matrix() -> Html {
                                 <td class="table__value-col">{ i18n.format_currency(summary.total) }</td>
                             </tr>
                             if is_expanded {
-                                { for summary.invoices.iter().map(|invoice| {
+                                { for summary.orders.iter().map(|order| {
                                     html! {
                                         <tr class="sub-row">
-                                            <td class="table__text-col" colspan="2">{ &invoice.invoice_number }</td>
-                                            <td class="table__value-col">{ i18n.format_date(invoice.issue_date) }</td>
-                                            <td class="table__value-col">{ i18n.format_date(invoice.due_date) }</td>
-                                            <td class="table__value-col" colspan="2">{ i18n.format_currency(invoice.amount_remaining) }</td>
+                                            <td class="table__text-col" colspan="2">{ &order.order_number }</td>
+                                            <td class="table__value-col">{ i18n.format_date(order.order_date) }</td>
+                                            <td class="table__value-col">{ i18n.format_date(order.due_date) }</td>
+                                            <td class="table__value-col" colspan="2">{ i18n.format_currency(order.amount_remaining) }</td>
                                             <td class="table__value-col">{ "" }</td>
                                         </tr>
                                     }

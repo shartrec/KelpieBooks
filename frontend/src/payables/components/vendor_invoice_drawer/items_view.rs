@@ -5,16 +5,14 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
+use chrono::Utc;
 use fluent::fluent_args;
 use rust_decimal::dec;
 use shared_core::{
-    ledger::models::{
-        account_category::AccountCategory,
-    },
-    payables::models::{
-        vendor_invoice::VendorInvoice,
-        vendor_invoice_item::VendorInvoiceItem,
+    ledger::models::account_category::AccountCategory,
+    payables::{
+        dtos::vendor_invoice_dto::VendorInvoiceDto,
+        models::vendor_invoice_item::VendorInvoiceItem,
     },
 };
 use uuid::Uuid;
@@ -28,13 +26,13 @@ use crate::{
         locale_context::use_locale,
     },
     core::components::delete_confirmation_modal::DeleteConfirmationModal,
+    ledger::util::get_accounts_by_category,
     payables::components::vendor_invoice_drawer::item_edit_card::ItemEditCard,
 };
-use crate::ledger::util::get_accounts_by_category;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct ItemsViewProps {
-    pub invoice: VendorInvoice,
+    pub invoice: VendorInvoiceDto,
     pub on_change: Callback<()>,
 }
 
@@ -46,7 +44,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
     let items = use_state(|| props.invoice.items.clone());
     let accounts = use_state(Vec::new);
     let error = use_state(|| None::<String>);
-    let invoice_id = props.invoice.id;
+    let invoice_id = props.invoice.invoice.id;
     let item_to_edit = use_state(|| None::<VendorInvoiceItem>);
     let item_to_delete = use_state(|| None::<VendorInvoiceItem>);
 
@@ -69,7 +67,8 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                     navigator,
                     &i18n,
                     false,
-                    ).await;
+                )
+                .await;
                 match fetched_accounts {
                     Ok(postable_accounts) => {
                         accounts.set(postable_accounts);
@@ -148,10 +147,11 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                 id: Uuid::new_v4(),
                 vendor_invoice_id: invoice_id,
                 account_id: Uuid::nil(),
-                description: String::new(),
+                description: None,
                 net_amount: dec!(0.00),
                 tax_amount: dec!(0.00),
                 total_amount: dec!(0.00),
+                created_at: Utc::now(),
             }));
         })
     };
@@ -252,7 +252,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
                                 // Bottom Layout Split Line: Context and Financial Auditing Calculations
                                 <div class="card-item-compact__body">
                                     // Left Column
-                                    <p class="card-item-compact__desc">{ &item.description }</p>
+                                    <p class="card-item-compact__desc">{ item.description.as_deref().unwrap_or("") }</p>
 
                                     // Right Column
                                     <div class="card-item-compact__financials">

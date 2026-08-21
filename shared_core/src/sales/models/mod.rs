@@ -1,8 +1,10 @@
-pub mod invoice_status;
-pub mod sales_invoice;
-pub mod sales_invoice_item;
-pub mod item;
-pub mod tax;
-pub mod invoice_address;
 pub mod customer_payment;
 pub mod customer_payment_allocation;
+pub mod fulfillment_status;
+pub mod item;
+pub mod order_address;
+pub mod payment_status;
+pub mod sales_document_status;
+pub mod sales_order;
+pub mod sales_order_item;
+pub mod tax;

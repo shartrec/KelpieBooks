@@ -12,6 +12,7 @@
   width: 100%;
   border-collapse: collapse;
   background-color: #fff;
+  table-layout: auto;
 
   &__text-col {
       text-align: left;
@@ -30,7 +31,8 @@
     .actions-wrapper {
       display: inline-flex;  // Wraps tightly around children elements
       align-items: center;
-      gap: 5px;             // Gives clear, compact breathing room between actions
+      gap: 5px;
+      width: max-content;
     }
 
     .btn-action,
@@ -56,5 +58,20 @@
 
   tbody tr:nth-child(even) {
     background-color: #ebf5ff; // Alt row color
+  }
+
+  &__sub-row {
+    tr {
+      background-color: #f8f9fa; /* Optional slight tint for hierarchy */
+    }
+
+    .stock-breakdown-row {
+      padding: 0;
+    }
+
+    /* Target the inner div container directly */
+    .stock-breakdown-container {
+      padding-left: 2.5rem; /* Indents the entire sub-table neatly under the chevron/code */
+    }
   }
 }

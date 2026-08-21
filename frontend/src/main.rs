@@ -31,12 +31,12 @@ use frontend::ledger::pages::trial_balance::TrialBalancePage;
 use frontend::partners::pages::partner_list_page::PartnerListPage;
 #[cfg(feature = "payables")]
 use frontend::payables::pages::aged_payables::AgedPayablesPage;
-#[cfg(feature = "sales")]
-use frontend::sales::pages::aged_receivables::AgedReceivablesPage;
 #[cfg(feature = "payables")]
 use frontend::payables::pages::new_vendor_invoice::NewVendorInvoicePage;
 #[cfg(feature = "payables")]
 use frontend::payables::pages::payables_ledger::PayablesLedgerPage;
+#[cfg(feature = "sales")]
+use frontend::sales::pages::aged_receivables::AgedReceivablesPage;
 use frontend::{
     contexts::{
         auth_context::{
@@ -53,8 +53,8 @@ use frontend::{
     },
     core::pages::{
         dashboard::DashboardPage,
-        login::LoginPage,
         forgot_password::ForgotPasswordPage,
+        login::LoginPage,
         profile::ProfilePage,
         register::RegisterPage,
         reset_password::ResetPasswordPage,
@@ -62,11 +62,15 @@ use frontend::{
         style_guide::StyleGuide,
         users::UsersPage,
     },
+    inventory::pages::{
+        warehouse_list::WarehouseListPage,
+        warehouse_locations::WarehouseLocationsPage,
+    },
     router::Route,
     sales::pages::{
         item_list::ItemListPage,
-        new_sales_invoice::NewSalesInvoicePage,
-        sales_ledger::SalesLedgerPage,
+        new_sales_order::NewSalesOrderPage,
+        sales_orders::SalesOrdersPage,
         tax_category_list::TaxCategoryListPage,
         uom_list::UomListPage,
     },
@@ -194,18 +198,22 @@ fn switch(routes: Route) -> Html {
         Route::NewVendorInvoice => html! { <NewVendorInvoicePage /> },
         #[cfg(feature = "payables")]
         Route::AgedPayables => html! { <AgedPayablesPage /> },
-        #[cfg(feature = "sales")]
-        Route::SalesLedger => html! { <SalesLedgerPage /> },
-        #[cfg(feature = "sales")]
+        #[cfg(any(feature = "sales", feature = "inventory"))]
         Route::ItemList => html! { <ItemListPage /> },
-        #[cfg(feature = "sales")]
+        #[cfg(any(feature = "sales", feature = "inventory"))]
         Route::UomList => html! { <UomListPage /> },
         #[cfg(feature = "sales")]
-        Route::NewSalesInvoice => html! { <NewSalesInvoicePage /> },
+        Route::SalesOrders => html! { <SalesOrdersPage /> },
+        #[cfg(feature = "sales")]
+        Route::NewSalesOrder => html! { <NewSalesOrderPage /> },
         #[cfg(feature = "sales")]
         Route::TaxCategoryList => html! { <TaxCategoryListPage /> },
         #[cfg(feature = "sales")]
         Route::AgedReceivables => html! { <AgedReceivablesPage /> },
+        #[cfg(any(feature = "inventory"))]
+        Route::WarehouseList => html! { <WarehouseListPage /> },
+        #[cfg(any(feature = "inventory"))]
+        Route::WarehouseLocations { id } => html! { <WarehouseLocationsPage warehouse_id = {id}/> },
 
         Route::StyleGuide => html! {<StyleGuide />},
     }

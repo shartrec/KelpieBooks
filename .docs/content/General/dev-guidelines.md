@@ -241,8 +241,6 @@ Use __transactions__ where appropriate. Any route that makes multiple transactio
 in the accounts, __must__ be placed in a transaction.
 Most of the database updates are write only so there is generally little need to consider deadlocks in this situation.
 
-__Do not__ use sqlx macros suxh as ```sqlx::query_as!```. They break CI.
-
 ### Keep Frontend Components Focused
 
 Frontend code is split into:

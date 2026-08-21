@@ -7,7 +7,10 @@
  */
 use chrono::NaiveDate;
 use rust_decimal::Decimal;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
@@ -17,7 +20,7 @@ pub struct TaxCategory {
     #[cfg_attr(feature = "backend", sqlx(rename = "organization_id"))]
     pub org_id: Uuid,
     pub name: String,
-    pub description: String,
+    pub description: Option<String>,
     pub is_active: bool,
 }
 

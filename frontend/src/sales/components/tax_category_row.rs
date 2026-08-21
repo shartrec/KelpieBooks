@@ -49,7 +49,7 @@ pub fn tax_category_row(props: &TaxCategoryRowProps) -> Html {
     html! {
         <tr>
             <td class="table__text-col">{ &props.tax_category.name }</td>
-            <td class="table__text-col">{ &props.tax_category.description }</td>
+            <td class="table__text-col">{ &props.tax_category.description.clone().unwrap_or("".to_string()) }</td>
             <td class="table__text-col"><input type="checkbox" checked={props.tax_category.is_active} disabled=true /></td>
             <td class="table__col-actions">
                 <div class="actions-wrapper">

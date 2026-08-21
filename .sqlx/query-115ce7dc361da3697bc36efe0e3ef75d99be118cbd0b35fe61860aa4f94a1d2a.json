@@ -1,0 +1,77 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT id, warehouse_id, organization_id, zone, aisle, shelf, bin, display_label, is_picking_location, created_at\n        FROM warehouse_locations\n        WHERE warehouse_id = $1 AND organization_id = $2\n        ORDER BY zone, aisle, shelf, bin\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "warehouse_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "organization_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "zone",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "aisle",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "shelf",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "bin",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "display_label",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "is_picking_location",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "115ce7dc361da3697bc36efe0e3ef75d99be118cbd0b35fe61860aa4f94a1d2a"
+}

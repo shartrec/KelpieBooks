@@ -8,7 +8,14 @@
 
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use rocket::{get, http::ContentType, routes, serde::json::Json, Route, State};
+use rocket::{
+    get,
+    http::ContentType,
+    routes,
+    serde::json::Json,
+    Route,
+    State,
+};
 use rocket_db_pools::Connection;
 use rust_decimal::Decimal;
 use shared_core::ledger::dtos::{
@@ -18,38 +25,44 @@ use shared_core::ledger::dtos::{
 };
 use uuid::Uuid;
 
-use crate::{ledger::{
-    db::account,
-    reports::{
-        balance_sheet_export::{
-            generate_balance_sheet_csv,
-            generate_balance_sheet_typst,
+use crate::{
+    ledger::{
+        db::account,
+        reports::{
+            balance_sheet_export::{
+                generate_balance_sheet_csv,
+                generate_balance_sheet_typst,
+            },
+            general_ledger_export::{
+                generate_general_ledger_csv,
+                generate_general_ledger_typst,
+            },
+            profit_loss_export::{
+                generate_profit_loss_csv,
+                generate_profit_loss_typst,
+            },
+            trial_balance_export::{
+                generate_trial_balance_csv,
+                generate_trial_balance_typst,
+            },
         },
-        general_ledger_export::{
-            generate_general_ledger_csv,
-            generate_general_ledger_typst,
-        },
-        profit_loss_export::{
-            generate_profit_loss_csv,
-            generate_profit_loss_typst,
-        },
-        trial_balance_export::{
-            generate_trial_balance_csv,
-            generate_trial_balance_typst,
-        },
+        services::report_service,
     },
-    services::report_service,
-}, security::{
-    RequirePrivilege,
-    UseTransactions,
-}, util::{
-    locale_context::LocaleContext,
-    reports::{
-        compile_typst_to_pdf,
-        DownloadFile,
+    security::{
+        RequirePrivilege,
+        UseTransactions,
     },
-    ApiError,
-}, DbKelpie, TemplateConfig};
+    util::{
+        locale_context::LocaleContext,
+        reports::{
+            compile_typst_to_pdf,
+            DownloadFile,
+        },
+        ApiError,
+    },
+    DbKelpie,
+    TemplateConfig,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -187,7 +200,7 @@ async fn export_trial_balance(
                 &i18n.t("trial-balance-title"),
                 &report_qual,
                 &org.map(|o| o.name).unwrap_or("".to_string()),
-                &template_dir
+                &template_dir,
             ) {
                 Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
                 Err(e) => return Err(ApiError::Internal(e)),
@@ -232,8 +245,7 @@ async fn export_profit_loss(
             )
         }
         "pdf" => {
-            let typst_data =
-                generate_profit_loss_typst(&user, &accounts);
+            let typst_data = generate_profit_loss_typst(&user, &accounts);
             let start_date_str = i18n.format_date(start_date);
             let end_date_str = i18n.format_date(end_date);
             let report_qual = i18n.t_args(
@@ -245,7 +257,7 @@ async fn export_profit_loss(
                 &i18n.t("profit-loss-title"),
                 &report_qual,
                 &org.map(|o| o.name).unwrap_or("".to_string()),
-                &template_dir
+                &template_dir,
             ) {
                 Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
                 Err(e) => return Err(ApiError::Internal(e)),
@@ -286,8 +298,7 @@ async fn export_balance_sheet(
             )
         }
         "pdf" => {
-            let typst_data =
-                generate_balance_sheet_typst(&user, &balance_sheet);
+            let typst_data = generate_balance_sheet_typst(&user, &balance_sheet);
             let date_str = i18n.format_date(report_date);
             let report_qual = i18n.t_args(
                 "balance-sheet-export-as-at",
@@ -298,7 +309,7 @@ async fn export_balance_sheet(
                 &i18n.t("balance-sheet-title"),
                 &report_qual,
                 &org.map(|o| o.name).unwrap_or("".to_string()),
-                &template_dir
+                &template_dir,
             ) {
                 Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
                 Err(e) => return Err(ApiError::Internal(e)),
@@ -369,8 +380,7 @@ async fn export_general_ledger(
             )
         }
         "pdf" => {
-            let typst_data =
-                generate_general_ledger_typst(&user, &lines);
+            let typst_data = generate_general_ledger_typst(&user, &lines);
 
             let start_date_str = i18n.format_date(start_date);
             let end_date_str = i18n.format_date(end_date);
@@ -384,7 +394,7 @@ async fn export_general_ledger(
                 &i18n.t("account-ledger-export-title"),
                 &report_qual,
                 &org.map(|o| o.name).unwrap_or("".to_string()),
-                &template_dir
+                &template_dir,
             ) {
                 Ok(pdf_bytes) => (
                     pdf_bytes,

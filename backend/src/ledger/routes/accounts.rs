@@ -10,7 +10,17 @@ use std::str::FromStr;
 
 use chrono::NaiveDate;
 use fluent::fluent_args;
-use rocket::{delete, get, http::ContentType, post, put, routes, serde::json::Json, Route, State};
+use rocket::{
+    delete,
+    get,
+    http::ContentType,
+    post,
+    put,
+    routes,
+    serde::json::Json,
+    Route,
+    State,
+};
 use rocket_db_pools::Connection;
 use rust_decimal::dec;
 use shared_core::ledger::{
@@ -28,26 +38,32 @@ use shared_core::ledger::{
     },
 };
 
-use crate::{ledger::{
-    db::account as account_db,
-    reports::account_ledger_export::{
-        generate_ledger_csv,
-        generate_ledger_typst,
+use crate::{
+    ledger::{
+        db::account as account_db,
+        reports::account_ledger_export::{
+            generate_ledger_csv,
+            generate_ledger_typst,
+        },
+        services::account_service,
     },
-    services::account_service,
-}, security::{
-    ManageAccounts,
-    RequirePrivilege,
-    UseAccounts,
-}, util::{
-    reports::{
-        compile_typst_to_pdf,
-        DownloadFile,
+    security::{
+        ManageAccounts,
+        RequirePrivilege,
+        UseAccounts,
     },
-    types::PathUuid,
-    ApiError,
-}, DbKelpie, TemplateConfig};
-use crate::util::locale_context::LocaleContext;
+    util::{
+        locale_context::LocaleContext,
+        reports::{
+            compile_typst_to_pdf,
+            DownloadFile,
+        },
+        types::PathUuid,
+        ApiError,
+    },
+    DbKelpie,
+    TemplateConfig,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -265,10 +281,7 @@ async fn export_account_ledger(
                 )
             }
             "pdf" => {
-                let typst_data = generate_ledger_typst(
-                    &user,
-                    &entries,
-                );
+                let typst_data = generate_ledger_typst(&user, &entries);
                 let report_qual = i18n.t_args(
                     "account-ledger-export-report-qualifier",
                     &fluent_args!["account_name" => &account.name, "start_date" => start_date.format("%d %b %Y").to_string(), "end_date" => end_date.format("%d %b %Y").to_string()],
@@ -279,7 +292,7 @@ async fn export_account_ledger(
                     &i18n.t("account-ledger-export-title"),
                     &report_qual,
                     &org.map(|o| o.name).unwrap_or("".to_string()),
-                    &template_dir
+                    &template_dir,
                 ) {
                     Ok(pdf_bytes) => (pdf_bytes, ContentType::PDF, "trial_balance.pdf".to_string()),
                     Err(e) => return Err(ApiError::Internal(e)),

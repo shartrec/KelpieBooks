@@ -9,7 +9,6 @@
 use rocket_db_pools::sqlx::{
     self,
     PgConnection,
-    Row,
 };
 use shared_core::sales::{
     models::customer_payment::CustomerPayment,
@@ -17,72 +16,40 @@ use shared_core::sales::{
 };
 use uuid::Uuid;
 
-fn from_row_to_customer_payment(row: &sqlx::postgres::PgRow) -> CustomerPayment {
-    CustomerPayment {
-        id: row.get("id"),
-        organization_id: row.get("organization_id"),
-        partner_id: row.get("partner_id"),
-        transaction_id: row.get("transaction_id"),
-        payment_date: row.get("payment_date"),
-        deposited_to_account: row.get("deposited_to_account"),
-        amount: row.get("amount"),
-        reference: row.get("reference"),
-        created_at: row.get("created_at"),
-    }
-}
-
 pub(crate) async fn get(
     pool: &mut PgConnection,
     id: Uuid,
 ) -> Result<Option<CustomerPayment>, sqlx::Error> {
-    sqlx::query(
+    sqlx::query_as!(
+        CustomerPayment,
         r#"
         SELECT *
         FROM customer_payments
         WHERE id = $1
         "#,
+        id,
     )
-    .bind(id)
     .fetch_optional(pool)
     .await
-    .map(|row| row.map(|r| from_row_to_customer_payment(&r)))
 }
 
-pub(crate) async fn get_all(
+pub(crate) async fn get_all_by_order(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    order_id: Uuid,
 ) -> Result<Vec<CustomerPayment>, sqlx::Error> {
-    sqlx::query(
-        r#"
-        SELECT *
-        FROM customer_payments
-        WHERE organization_id = $1
-        ORDER BY payment_date DESC, created_at DESC
-        "#,
-    )
-    .bind(organization_id)
-    .fetch_all(pool)
-    .await
-    .map(|rows| rows.iter().map(from_row_to_customer_payment).collect())
-}
-
-pub(crate) async fn get_all_by_invoice(
-    pool: &mut PgConnection,
-    invoice_id: Uuid,
-) -> Result<Vec<CustomerPayment>, sqlx::Error> {
-    sqlx::query(
+    sqlx::query_as!(
+        CustomerPayment,
         r#"
         SELECT cp.*
         FROM customer_payments cp
         JOIN customer_payment_allocations cpa ON cp.id = cpa.customer_payment_id
-        WHERE cpa.sales_invoice_id = $1
+        WHERE cpa.sales_order_id = $1
         ORDER BY cp.payment_date DESC, cp.created_at DESC
         "#,
+        order_id,
     )
-    .bind(invoice_id)
     .fetch_all(pool)
     .await
-    .map(|rows| rows.iter().map(from_row_to_customer_payment).collect())
 }
 
 pub(crate) async fn insert(
@@ -91,7 +58,8 @@ pub(crate) async fn insert(
     transaction_id: Uuid,
     req: &CreateCustomerPaymentRequest,
 ) -> Result<CustomerPayment, sqlx::Error> {
-    let row = sqlx::query(
+    let row = sqlx::query_as!(
+        CustomerPayment,
         r#"
         INSERT INTO customer_payments (
             organization_id,
@@ -105,17 +73,17 @@ pub(crate) async fn insert(
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *
         "#,
+        organization_id,
+        req.partner_id,
+        transaction_id,
+        req.payment_date,
+        req.bank_account_id,
+        req.amount,
+        req.reference,
     )
-    .bind(organization_id)
-    .bind(req.partner_id)
-    .bind(transaction_id)
-    .bind(req.payment_date)
-    .bind(req.bank_account_id)
-    .bind(req.amount)
-    .bind(&req.reference)
     .fetch_one(pool)
     .await?;
-    Ok(from_row_to_customer_payment(&row))
+    Ok(row)
 }
 
 pub(crate) async fn update(
@@ -123,7 +91,8 @@ pub(crate) async fn update(
     id: Uuid,
     req: &CreateCustomerPaymentRequest,
 ) -> Result<CustomerPayment, sqlx::Error> {
-    let row = sqlx::query(
+    let row = sqlx::query_as!(
+        CustomerPayment,
         r#"
         UPDATE customer_payments
         SET
@@ -135,21 +104,20 @@ pub(crate) async fn update(
         WHERE id = $6
         RETURNING *
         "#,
+        req.partner_id,
+        req.payment_date,
+        req.bank_account_id,
+        req.amount,
+        req.reference,
+        id,
     )
-    .bind(req.partner_id)
-    .bind(req.payment_date)
-    .bind(req.bank_account_id)
-    .bind(req.amount)
-    .bind(&req.reference)
-    .bind(id)
     .fetch_one(pool)
     .await?;
-    Ok(from_row_to_customer_payment(&row))
+    Ok(row)
 }
 
 pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query("DELETE FROM customer_payments WHERE id = $1")
-        .bind(id)
+    let result = sqlx::query!("DELETE FROM customer_payments WHERE id = $1", id)
         .execute(pool)
         .await?;
     Ok(result.rows_affected())

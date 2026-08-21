@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE FROM vendor_invoice_items\n        WHERE vendor_invoice_id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "88355bc462f0887a2b2107df45471e93309995986e29569f9027926ee6056010"
+}

@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT Count(u.id)  FROM users u\n            JOIN roles r ON u.role_id = r.id\n            JOIN role_privileges rp ON r.id = rp.role_id\n            WHERE rp.privilege_id = $1\n            AND u.organization_id = $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "system_privilege",
+            "kind": {
+              "Enum": [
+                "security_admin",
+                "use_accounts",
+                "manage_accounts",
+                "use_partners",
+                "manage_partners",
+                "use_vendor_invoices",
+                "manage_vendor_invoices",
+                "use_transactions",
+                "manage_transactions",
+                "manage_users",
+                "manage_organization",
+                "use_sales",
+                "manage_sales",
+                "use_inventory",
+                "manage_inventory"
+              ]
+            }
+          }
+        },
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d1d44b78dd46e997d0fdcd3ffc06cfe29be8a6dbb8514aae1c60d8b97db366b5"
+}

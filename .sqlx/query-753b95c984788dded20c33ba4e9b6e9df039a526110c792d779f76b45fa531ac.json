@@ -1,0 +1,100 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT id, order_id, item_id, code, name, description,\n               quantity, unit_price, tax_category_id, tax_rate,\n               tax_amount, net_amount, sort_order, null as \"quantity_available: Decimal\"\n        FROM sales_order_items soi\n        WHERE order_id = $1\n        ORDER BY sort_order\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "order_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "item_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "code",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "quantity",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 7,
+        "name": "unit_price",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 8,
+        "name": "tax_category_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 9,
+        "name": "tax_rate",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 10,
+        "name": "tax_amount",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 11,
+        "name": "net_amount",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 12,
+        "name": "sort_order",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 13,
+        "name": "quantity_available: Decimal",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "753b95c984788dded20c33ba4e9b6e9df039a526110c792d779f76b45fa531ac"
+}

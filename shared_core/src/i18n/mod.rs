@@ -11,9 +11,10 @@
 use std::{
     cell::RefCell,
     collections::HashMap,
+    ffi::OsStr,
     sync::LazyLock,
 };
-use std::ffi::OsStr;
+
 use fluent::{
     concurrent::FluentBundle,
     FluentArgs,
@@ -29,7 +30,11 @@ use icu_provider::prelude::icu_locale_core::{
     locale,
     Locale,
 };
-use include_dir::{include_dir, Dir, File};
+use include_dir::{
+    include_dir,
+    Dir,
+    File,
+};
 use rust_decimal::Decimal;
 use unic_langid::{
     langid,
@@ -73,7 +78,7 @@ impl I18nManager {
 
         for file in TRANSLATIONS_DIR.files().filter(|f| is_ftl(f)) {
             let path = file.path();
-            let err_msg = format!("Translation dir {:?}",path);
+            let err_msg = format!("Translation dir {:?}", path);
             if let Some(lang_str) = path.file_stem().and_then(|s| s.to_str()) {
                 if let Ok(lang_id) = lang_str.parse::<LanguageIdentifier>() {
                     // Only process base languages without regions in the first pass (e.g., length == 1 or region is None)
@@ -83,9 +88,7 @@ impl I18nManager {
                             .expect("Failed to parse base FTL file.");
 
                         let mut bundle = FluentBundle::new_concurrent(vec![lang_id.clone()]);
-                        bundle
-                            .add_resource(resource)
-                            .expect(&err_msg);
+                        bundle.add_resource(resource).expect(&err_msg);
 
                         // Disable isolation markers if desired, or keep default
                         bundles.insert(lang_id, bundle);
@@ -97,8 +100,7 @@ impl I18nManager {
         // 2. Second pass: Load regional overrides (e.g., "en-AU", "fr-CA")
         // and layer them into a dedicated regional bundle that inherits the base file!
         for file in TRANSLATIONS_DIR.files().filter(|f| is_ftl(f)) {
-
-        let path = file.path();
+            let path = file.path();
             if let Some(lang_str) = path.file_stem().and_then(|s| s.to_str()) {
                 if let Ok(lang_id) = lang_str.parse::<LanguageIdentifier>() {
                     if lang_id.region.is_some() {
@@ -310,11 +312,9 @@ pub fn format_decimal_icu(amount: Decimal, target_locale: Option<&str>) -> Strin
 }
 
 pub fn format_percentage_icu(amount: Decimal, target_locale: Option<&str>) -> String {
-
     // Todo Use ICU formatting when Notation formatting is no longer experimental
     let s = format_decimal_icu(amount, target_locale);
     format!("{}%", s)
-
 }
 
 /// Specialized wrapper for Typst reporting layouts
@@ -370,9 +370,10 @@ pub fn format_date_icu(year: i32, month: u32, day: u32, target_locale: Option<&s
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use fluent::fluent_args;
     use rust_decimal::dec;
+
+    use super::*;
     // Define a clear, readable alias for the Narrow No-Break Space character
     const NNBSP: &str = "\u{202f}";
 
@@ -406,20 +407,28 @@ mod tests {
 
     #[test]
     fn test_format_currency_icu() {
-
         assert_eq!(format_currency_icu(dec!(-1234), Some("en-AU")), "-1,234.00");
         assert_eq!(format_currency_icu(dec!(1234), Some("en-AU")), "1,234.00");
-        assert_eq!(format_currency_icu(dec!(1234.56), Some("en-AU")), "1,234.56");
+        assert_eq!(
+            format_currency_icu(dec!(1234.56), Some("en-AU")),
+            "1,234.56"
+        );
         // Define a clear, readable alias for the Narrow No-Break Space character
         let expected = format!("1{}234,56", NNBSP);
         assert_eq!(format_currency_icu(dec!(1234.56), Some("fr-FR")), expected);
         assert_eq!(format_currency_icu(dec!(1234.56), None), "1,234.56");
-        assert_eq!(format_currency_icu(dec!(-1234.56), Some("en-AU")), "-1,234.56");
+        assert_eq!(
+            format_currency_icu(dec!(-1234.56), Some("en-AU")),
+            "-1,234.56"
+        );
     }
 
     #[test]
     fn test_format_currency_icu_typ() {
-        assert_eq!(format_currency_icu_typ(dec!(-1234.56), Some("en-AU")), "−1,234.56");
+        assert_eq!(
+            format_currency_icu_typ(dec!(-1234.56), Some("en-AU")),
+            "−1,234.56"
+        );
     }
 
     #[test]
@@ -468,7 +477,7 @@ mod tests {
     }
 
     #[test]
-    fn test_fr () {
+    fn test_fr() {
         audit_missing_translations("fr")
     }
 }

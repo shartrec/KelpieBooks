@@ -1,0 +1,249 @@
+/*!
+ * Copyright (c) 2026.
+ *
+ * This file is part of KelpieBooks. For terms of use, please see the file
+ * called LICENSE at the top level of the KelpieBooks source tree
+ *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
+ */
+
+@use '../abstracts/variables' as *;
+
+// Theme Variables (Adjust to match your central _variables.scss if needed)
+$color-focus-ring: #00bfa5;
+$color-border-subtle: #f0e6e8;
+$color-border-default: #cccccc;
+
+/* ==========================================================================
+   Locations Page Workspace Layout
+   ========================================================================== */
+
+.locations-page-container {
+  padding: 20px;
+
+  h1 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    color: #4a1504;
+    font-size: 1.8rem;
+  }
+}
+
+// The core side-by-side splitting wrapper
+.locations-workspace {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* ==========================================================================
+   Left Navigation Pane (The Tree)
+   ========================================================================== */
+.locations-sidebar {
+  flex: 0 0 260px; // Lock the sidebar width so it doesn't shrink or squish
+  background: #fdfbfc;
+  border: 1px solid #f0e6e8;
+  border-radius: 6px;
+  padding: 16px;
+  box-sizing: border-box;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4a1504;
+    border-bottom: 1px solid #f0e6e8;
+    padding-bottom: 8px;
+  }
+
+  // Tree styling rules
+  .tree-root-link {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: #8b3216;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .tree-zone-group {
+    margin-bottom: 14px;
+    padding-left: 4px;
+  }
+
+  .tree-aisle-list {
+    list-style-type: none;
+    padding-left: 16px;
+    margin: 6px 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .tree-item-clickable {
+    font-size: 0.9rem;
+    color: #333333;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+
+    &:hover {
+      background-color: #f0e6e8;
+      color: #4a1504;
+    }
+
+    &.active {
+      background-color: #4a1504;
+      color: #ffffff;
+      font-weight: 500;
+    }
+  }
+}
+
+/* ==========================================================================
+   Right Data Pane (Breadcrumbs, Actions, and Grid Table)
+   ========================================================================== */
+.locations-main-content {
+  flex: 1; // Directs table view space engine to take up all remaining viewport widths
+  min-width: 0; // Crucial for allowing tables to scale responsively without clipping
+
+  .breadcrumb-path {
+    font-size: 0.95rem;
+    color: #666666;
+    margin-bottom: 16px;
+    background: #f5f5f5;
+    padding: 8px 12px;
+    border-radius: 4px;
+    display: inline-block;
+
+    span {
+      font-weight: 600;
+      color: #333333;
+    }
+  }
+
+  .table-actions {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: flex-start;
+
+    button {
+      height: 36px;
+      padding: 0 16px;
+      background-color: #ffffff;
+      border: 1px solid #4a1504;
+      color: #4a1504;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+
+      &:hover {
+        background-color: #4a1504;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+/* ==========================================================================
+   Custom Grid Form Formatting
+   ========================================================================== */
+
+.custom-grid-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+
+  /* Form Item Rows */
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    &.full-width {
+      width: 100%;
+    }
+
+    /* Align Checkbox options */
+    &.checkbox-align {
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 0;
+      cursor: pointer;
+
+      input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+        cursor: pointer;
+      }
+
+      label {
+        font-weight: 500;
+        cursor: pointer;
+      }
+    }
+  }
+
+  label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    //color: $brand-primary;
+  }
+
+  /* Range Input Grid Layout Containers */
+  .range-group-box {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid $color-border-subtle;
+    border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
+
+    h4 {
+      grid-column: 1 / -1;
+      margin: 0 0 4px 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    span {
+      font-size: 0.85rem;
+      text-align: center;
+    }
+  }
+
+  /* Form Controls Fields Elements styling */
+  input[type="text"],
+  input[type="number"] {
+    //width: 100%;
+    //height: 38px;
+    //padding: 8px 12px;
+    //border: 1px solid $color-border-default;
+    //border-radius: 4px;
+    //font-size: 0.95rem;
+    //background: #ffffff;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease-in-out;
+
+    //&:focus {
+    //  border-color: $color-focus-ring;
+    //  outline: none;
+    //}
+  }
+
+}

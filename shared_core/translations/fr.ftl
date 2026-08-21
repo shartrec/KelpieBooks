@@ -37,6 +37,13 @@ sys-privilege-use_sales-description = Permet de consulter les factures de vente 
 sys-privilege-manage_sales-name = Gérer les articles et les factures de vente
 sys-privilege-manage_sales-description = Permet la maintenance des articles ainsi que la saisie et la mise à jour des factures de vente.
 
+# Inventory Module
+sys-privilege-use_inventory-name = Consulter les stocks d'articles et les emplacements
+sys-privilege-use_inventory-description = Permet de consulter les stocks d'articles et les détails des emplacements.
+
+sys-privilege-manage_inventory-name = Gérer les stocks d'articles et les emplacements
+sys-privilege-manage_inventory-description = Permet la maintenance des stocks d'articles, des entrepôts et des emplacements.
+
 # Module Transactions
 sys-privilege-use_transactions-name = Saisir les écritures
 sys-privilege-use_transactions-description = Permet de saisir les écritures de journal général, de préparer des brouillons de transaction et de structurer les données avant validation.
@@ -79,6 +86,7 @@ common-name = Nom
 common-category = Catégorie
 common-balance = Solde
 common-actions = Actions
+common-status = Statut
 common-cancel = Annuler
 common-edit = Modifier
 common-delete = Supprimer
@@ -180,6 +188,7 @@ sidebar-admin = Administration
 sidebar-users = Utilisateurs
 sidebar-roles = Rôles
 sidebar-sales = Ventes
+sidebar-sales-orders = Commandes clients
 sidebar-help = Aide
 sidebar-about = À propos de KelpieBooks...
 
@@ -214,6 +223,20 @@ coa-error-add-account = Impossible d’ajouter le compte : { $status }
 coa-error-update-account = Impossible de mettre à jour le compte : { $status }
 coa-error-not-found = Compte non trouvé
 coa-error-delete-account = Impossible de supprimer le compte : { $status }
+
+# System account display names
+system-tag-cash_at_bank = Banque
+system-tag-accounts_receivable = Comptes clients
+system-tag-accounts_payable = Comptes fournisseurs
+system-tag-retained_earnings = Report à nouveau
+system-tag-sales_tax_payable = TVA à payer
+system-tag-sales_tax_clearing = Compte d'attente TVA
+system-tag-revenue = Produits / Ventes
+system-tag-expense = Charges / Dépenses
+system-tag-cost_of_goods_sold = Coût des marchandises vendues
+system-tag-inventory_asset = Actif de stock
+system-tag-received_not_invoiced = Factures non parvenues (FNP)
+system-tag-inventory_adjustment = Ajustement de stock
 
 # Add/Edit Account Modal
 account-modal-add-title = Ajouter un nouveau compte
@@ -711,6 +734,52 @@ new-sales-invoice-shipping-address = Adresse de livraison
 new-sales-invoice-select-shipping = Sélectionner l'adresse de livraison
 new-sales-invoice-shipping-override = Remplacer l'adresse de livraison
 
+# Sales Order — Create
+new-sales-order-title = Nouvelle commande de vente
+new-sales-order-date-label = Date de commande
+new-sales-order-warehouse-label = Entrepôt
+new-sales-order-select-warehouse = — Sélectionner un entrepôt —
+new-sales-order-save-button = Enregistrer la commande
+new-sales-order-success = La commande de vente { $number } a été créée avec succès.
+new-sales-order-error-parse-response = Échec de l'analyse de la commande créée : { $error }
+new-sales-order-error-create = Échec de la création de la commande : { $status }
+new-sales-order-error-parse-warehouses = Échec de l'analyse des entrepôts : { $error }
+new-sales-order-error-fetch-warehouses = Échec du chargement des entrepôts : { $status }
+
+# Sales Order — Status labels
+sales-order-status-draft = Provisoire
+sales-order-status-open = Ouvert
+sales-order-status-completed = Complété
+sales-order-status-cancelled = Annulé
+
+# Sales Orders — List page
+sales-orders-list-title = Commandes clients
+sales-orders-list-new-button = + Nouvelle commande
+sales-orders-list-filter-all = Tous
+sales-orders-list-col-number = N° commande
+sales-orders-list-col-warehouse = Entrepôt
+sales-orders-list-error-parse = Échec de l'analyse des commandes : { $error }
+sales-orders-list-error-fetch = Échec du chargement des commandes : { $status }
+
+# Sales Orders — Drawer
+sales-orders-drawer-order-number = Commande n°{ $number }
+sales-orders-drawer-warehouse = Entrepôt : { $warehouse }
+sales-order-drawer-address-edit-future = Modification d'adresse bientôt disponible
+sales-orders-drawer-confirm-button = Confirmer la commande
+sales-orders-drawer-cancel-button = Annuler la commande
+sales-orders-drawer-error-confirm = Échec de la confirmation de la commande : { $status }
+sales-orders-drawer-error-confirm-parse = Échec de l'analyse de la commande confirmée : { $error }
+sales-orders-drawer-error-cancel = Échec de l'annulation de la commande : { $status }
+sales-orders-drawer-error-parse = Échec de l'analyse de la commande : { $error }
+sales-orders-drawer-error-fetch = Échec du chargement de la commande : { $status }
+
+# Sales Order — Item line columns
+sales-order-item-col-available = Disponible
+
+# Sales Order — Item availability badge
+sales-order-item-available = { $qty } disponible
+sales-order-item-insufficient-stock = Seulement { $qty } disponible
+
 # Address field labels/placeholders
 address-name = Nom
 address-attention = À l'attention de
@@ -728,6 +797,7 @@ item-list-code = Code
 item-list-name = Nom
 item-list-type = Type
 item-list-price = Prix
+item-list-unit-cost = Coût unitaire
 item-list-add-item-button = Ajouter un article
 item-list-error-parse-items = Impossible d'analyser les articles : { $error }
 item-list-error-fetch-items = Impossible de récupérer les articles : { $status }
@@ -740,6 +810,7 @@ item-type-label = Type :
 item-uom-label = Unité de mesure :
 item-select-uom = Sélectionner une unité de mesure
 item-price-label = Prix :
+item-cost-label = Coût unitaire :
 item-tax-category-label = Catégorie fiscale :
 item-select-tax-category = Sélectionner un catégorie fiscale
 item-income-account-label = Compte de revenus :
@@ -800,6 +871,99 @@ tax-rate-edit-card-edit-title = Modifier le taux
 tax-rate-edit-card-rate-label = Taux :
 tax-rate-edit-card-valid-from-label = Valide à partir du :
 tax-rate-edit-card-valid-to-label = Valide jusqu’au :
+
+# Products
+
+sidebar-products = Inventaire
+inventory-warehouse-title = Entrepôts
+
+warehouse-list-title = Entrepôts
+warehouse-list-description = Gérez vos nœuds de distribution physique, vos centres de traitement des commandes et vos emplacements de stockage.
+warehouse-list-add-button = Ajouter un entrepôt
+warehouse-list-code = Code
+warehouse-list-name = Nom
+warehouse-list-is-active = Actif
+
+warehouse-add-title = Ajouter un nouvel entrepôt
+warehouse-edit-title = Modifier les détails de l'entrepôt
+warehouse-code-label = Code de l'entrepôt (ex. WH-SYD)
+warehouse-name-label = Nom de l'entrepôt
+warehouse-is-active-label = Activer le suivi pour cet entrepôt
+
+# Error Handlers
+warehouse-list-error-fetch = Failed to retrieve warehouse directory (Server Status: { $status }).
+warehouse-list-error-parse = Failed to compile warehouse data payload: { $error }
+
+warehouse-delete-title = Supprimer l'entrepôt
+warehouse-delete-confirm-message = Êtes-vous sûr de vouloir supprimer définitivement l'entrepôt "{ $name }" ? Cette action est irréversible.
+
+# Business Guard Error Messages
+warehouse-delete-error = Failed to delete warehouse. Please ensure you have sufficient permissions.
+warehouse-delete-error-conflict = Cannot delete warehouse. It still contains nested storage locations or active tracking balances.
+
+warehouse-action-view-locations = Consulter la structure cartographique des emplacements
+
+# Warehouse Locations Dashboard
+warehouse-locations-title = Emplacements — { $name }
+location-btn-bulk-generate = Générer des emplacements en masse
+
+# Location Topography Tree Navigation
+location-tree-header = Structure de l'entrepôt
+location-tree-all-view = Tous les emplacements de stockage
+location-tree-aisle-prefix = Allée
+
+# Location Grid Table Columns
+location-grid-label = Étiquette d'emplacement
+location-grid-zone = Zone
+location-grid-aisle = Allée
+location-grid-shelf = Étagère / Niveau
+location-grid-bin = Bac / Alvéole
+location-grid-picking = Zone de picking
+
+# Bulk Sequence Generator Modal
+bulk-gen-title = Générateur de matrice en masse
+bulk-gen-zone-label = Nom de la zone cible
+bulk-gen-aisles = Plage séquentielle des allées
+bulk-gen-shelves = Plage séquentielle des étagères (Alpha)
+bulk-gen-bins = Plage séquentielle des bacs/alvéoles
+bulk-gen-picking-label = Désigner les lignes générées comme emplacements de picking
+bulk-gen-btn-execute = Exécuter la génération en masse
+
+# Inventory - Common Labels
+inventory-item-label = { common-item }
+inventory-location-label = Emplacement / Bac
+inventory-quantity-label = { common-quantity }
+inventory-po-number-label = N° de bon de commande
+inventory-notes-label = Remarques
+inventory-delta-label = Écart (+/-)
+inventory-reason-label = Motif de l'ajustement
+inventory-warehouse-label = Entrepôt
+inventory-on-hand-label = En stock
+inventory-allocated-label = Réservé
+inventory-available-label = Disponible
+inventory-no-stock-found = Aucun stock trouvé
+
+# Inventory - Item List Row Action Tooltips
+inventory-receive-stock = Recevoir du stock
+inventory-adjust-stock = Ajuster le stock
+
+# Inventory - Receiving View / Modal
+inventory-receiving-title = Réception du stock fournisseur
+inventory-receive-stock-title = Réceptionner le stock
+inventory-post-receipt = Valider la réception
+
+# Inventory - Stock Adjustment View / Modal
+inventory-adjustment-title = Ajustements de stock
+inventory-adjust-stock-title = Ajuster le niveau de stock
+inventory-commit-adjustment = Valider les ajustements
+
+# Inventory - Adjustment Reasons
+inventory-reason-cycle-count = Inventaire tournant
+inventory-reason-damage = Dommage / Rebut
+inventory-reason-scrap = Rebut
+inventory-reason-audit = Correction d'audit
+inventory-reason-found = Stock retrouvé
+inventory-reason-other = Autre
 
 # Security
 security-error-no-admin = Vous ne pouvez pas effectuer cette action. Au moins un administrateur de la sécurité doit rester.

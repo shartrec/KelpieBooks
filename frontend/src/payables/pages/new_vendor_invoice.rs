@@ -9,13 +9,12 @@
 use chrono::{
     Local,
     NaiveDate,
+    Utc,
 };
 use fluent::fluent_args;
 use rust_decimal::dec;
 use shared_core::{
-    ledger::models::{
-        account_category::AccountCategory,
-    },
+    ledger::models::account_category::AccountCategory,
     partners::dtos::partner_list_item::PartnerListItem,
     payables::{
         models::vendor_invoice_item::VendorInvoiceItem,
@@ -34,10 +33,10 @@ use crate::{
         locale_context::use_locale,
     },
     core::components::layout::Layout,
+    ledger::util::get_accounts_by_category,
     payables::components::vendor_invoice_item_row::VendorInvoiceItemRow,
     router::Route,
 };
-use crate::ledger::util::get_accounts_by_category;
 
 #[function_component(NewVendorInvoicePage)]
 pub fn new_vendor_invoice_page() -> Html {
@@ -53,10 +52,11 @@ pub fn new_vendor_invoice_page() -> Html {
                 id: Uuid::new_v4(),
                 vendor_invoice_id: Uuid::nil(),
                 account_id: Uuid::nil(),
-                description: String::new(),
+                description: None,
                 net_amount: dec!(0.00),
                 tax_amount: dec!(0.00),
                 total_amount: dec!(0.00),
+                created_at: Utc::now(),
             }],
             ..Default::default()
         }
@@ -110,7 +110,8 @@ pub fn new_vendor_invoice_page() -> Html {
                     navigator,
                     &i18n,
                     false,
-                ).await;
+                )
+                .await;
                 match fetched_accounts {
                     Ok(postable_accounts) => {
                         accounts.set(postable_accounts);
@@ -189,10 +190,11 @@ pub fn new_vendor_invoice_page() -> Html {
                 id: Uuid::new_v4(),
                 vendor_invoice_id: Uuid::nil(),
                 account_id: last_account_id,
-                description: String::new(),
+                description: None,
                 net_amount: dec!(0.00),
                 tax_amount: dec!(0.00),
                 total_amount: dec!(0.00),
+                created_at: Utc::now(),
             });
             request.set(req);
         })

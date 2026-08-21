@@ -7,6 +7,6 @@
  */
 
 pub(crate) mod db;
+pub(crate) mod reports;
 pub(crate) mod routes;
 pub(crate) mod services;
-pub(crate) mod reports;

@@ -1,0 +1,61 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO accounts (organization_id, parent_id, code, name, category, is_group, system_tag)\n        VALUES ($1, $2, $3, $4, $5::account_category, $6, $7::system_tag)\n        RETURNING id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        {
+          "Custom": {
+            "name": "account_category",
+            "kind": {
+              "Enum": [
+                "asset",
+                "liability",
+                "equity",
+                "revenue",
+                "expense"
+              ]
+            }
+          }
+        },
+        "Bool",
+        {
+          "Custom": {
+            "name": "system_tag",
+            "kind": {
+              "Enum": [
+                "cash_at_bank",
+                "accounts_receivable",
+                "accounts_payable",
+                "retained_earnings",
+                "sales_tax_payable",
+                "sales_tax_clearing",
+                "revenue",
+                "expense",
+                "cost_of_goods_sold",
+                "inventory_asset",
+                "received_not_invoiced",
+                "inventory_adjustment"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a7fb287ede22a7708635882fd3d19f0b469b8ff1916ad49079edcee3509fc1c9"
+}

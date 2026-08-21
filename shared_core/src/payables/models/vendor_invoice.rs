@@ -18,10 +18,7 @@ use serde::{
 };
 use uuid::Uuid;
 
-use crate::payables::models::{
-    invoice_status::InvoiceStatus,
-    vendor_invoice_item::VendorInvoiceItem,
-};
+use crate::payables::models::invoice_status::InvoiceStatus;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct VendorInvoice {
@@ -40,7 +37,6 @@ pub struct VendorInvoice {
     pub notes: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-    pub items: Vec<VendorInvoiceItem>,
 }
 
 impl VendorInvoice {

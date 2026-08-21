@@ -1,0 +1,70 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT vp.*\n        FROM vendor_payments vp\n        JOIN vendor_payment_allocations vpa ON vp.id = vpa.vendor_payment_id\n        WHERE vpa.vendor_invoice_id = $1\n        ORDER BY vp.payment_date DESC, vp.created_at DESC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "organization_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "partner_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "transaction_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "payment_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 5,
+        "name": "paid_from_account",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 6,
+        "name": "amount",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 7,
+        "name": "reference",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "d202092061014f6d34825726c699229983446631468faf095ca7df995dc413b4"
+}

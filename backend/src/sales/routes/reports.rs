@@ -14,7 +14,9 @@ use rocket::{
 };
 use rocket_db_pools::Connection;
 use shared_core::sales::dtos::aged_receivable_summary::AgedReceivableSummary;
+
 use crate::{
+    sales::services::report_service,
     security::{
         RequirePrivilege,
         UseSales,
@@ -22,7 +24,6 @@ use crate::{
     util::ApiError,
     DbKelpie,
 };
-use crate::sales::services::report_service;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![trial_balance,]

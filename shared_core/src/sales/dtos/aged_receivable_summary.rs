@@ -13,7 +13,7 @@ use serde::{
 };
 use uuid::Uuid;
 
-use crate::sales::dtos::sales_invoice_list_item::SalesInvoiceListItem;
+use crate::sales::models::sales_order::SalesOrder;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct AgedReceivableSummary {
@@ -25,5 +25,5 @@ pub struct AgedReceivableSummary {
     pub days_90: Decimal,
     pub days_90_plus: Decimal,
     pub total: Decimal,
-    pub invoices: Vec<SalesInvoiceListItem>,
+    pub orders: Vec<SalesOrder>,
 }

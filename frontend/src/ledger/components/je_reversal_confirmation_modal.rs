@@ -53,9 +53,10 @@ pub fn reversal_confirmation_modal(props: &ReversalConfirmationModalProps) -> Ht
                         "transaction-error-fetch",
                         &fluent_args!["status" => r.status()],
                     ))),
-                    Err(e) => error.set(Some(
-                        i18n.t_args("common-network-error", &fluent_args!["error" => e.to_string()]),
-                    )),
+                    Err(e) => error.set(Some(i18n.t_args(
+                        "common-network-error",
+                        &fluent_args!["error" => e.to_string()],
+                    ))),
                 }
             });
             || ()

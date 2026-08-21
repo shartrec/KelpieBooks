@@ -21,7 +21,7 @@ use uuid::Uuid;
 pub struct CustomerPaymentAllocation {
     pub id: Uuid,
     pub organization_id: Uuid,
-    pub sales_invoice_id: Uuid,
+    pub sales_order_id: Uuid,
     pub customer_payment_id: Uuid,
     pub allocated_amount: Decimal,
     pub created_at: DateTime<Utc>,
