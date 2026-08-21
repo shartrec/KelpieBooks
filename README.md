@@ -93,7 +93,7 @@ The frontend assets need to be built before they can be served by the backend.
 
 ### 5. Running the Application
 
-For a smooth development workflow, you should run the backend and frontend build processes concurrently in separate terminal sessions.
+For a smooth development workflow, you should run the backend and frontend build processes in separate terminal sessions.
 
 -   **Terminal 1: Run the Backend Server**
     The Backend needs an environment variable set to connect to the database of the form
@@ -112,6 +112,8 @@ For a smooth development workflow, you should run the backend and frontend build
     cd frontend
     trunk watch
     ```
+
+    __I don't like using `watch` type functionality in the font or back end. It just churns too much.__
 
 -   **Access the Application**:
     Open your web browser and navigate to `http://localhost:8000`. The Rocket backend serves the frontend assets, so you can see your changes live as both `cargo-watch` and `wasm-pack` do their work.

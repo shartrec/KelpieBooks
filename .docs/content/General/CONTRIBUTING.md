@@ -84,15 +84,3 @@ of your files:
  * (at your option) any later version.
  */
 ```
-
-## 4. Sub-Ledger Contribution Opportunities
-
-We are currently building out Module 2: Accounts Payable. If you want to dive into core sub-ledger development, we are
-actively looking for help with:
-
-* Building Frontend Yew tables to present Vendor Directories.
-* Creating input forms for logging incoming Vendor Invoices with automated ledger routing previews.
-* Designing out-of-the-box templates for the Chart of Accounts (COA) loader setup.
-
-If you have any questions or want to review code before submitting an official PR, feel free to start a discussion or
-leave comments inside our active issue tracker!
