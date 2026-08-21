@@ -91,11 +91,14 @@ planning documents should be added here.
 
 ### .sqlx/
 
-This directory contains the prepared statement infornation from __sqlx__ thatis used to compile in github or
+This directory contains the prepared statement infornation from __sqlx__ that is used to compile in github or
 elsewhere, when do database is available.
 
-__After any database or sql statement (query) changes you must run `cargo sqlx prepare --workspace` 
-to update this directory, before pushing changes to github.__
+__After any database or sql statement (query) changes you must run__ 
+```bash
+cargo sqlx prepare --workspace
+``` 
+to update this directory, before pushing changes to github.
 
 ### templates/
 
