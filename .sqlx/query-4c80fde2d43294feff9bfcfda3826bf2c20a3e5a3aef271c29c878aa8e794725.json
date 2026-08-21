@@ -1,0 +1,149 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE accounts\n        SET name = $1, code = $2, category = $3::account_category, is_group = $4, is_bank_account = $5, system_tag = $6::system_tag\n        WHERE id = $7\n        AND organization_id = $8\n        RETURNING id, organization_id, parent_id, code, name, category as \"category: AccountCategory\",\n            is_group, is_bank_account, system_tag as \"system_tag: SystemTag\", created_at\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "organization_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "parent_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "code",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "category: AccountCategory",
+        "type_info": {
+          "Custom": {
+            "name": "account_category",
+            "kind": {
+              "Enum": [
+                "asset",
+                "liability",
+                "equity",
+                "revenue",
+                "expense"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "is_group",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 7,
+        "name": "is_bank_account",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "system_tag: SystemTag",
+        "type_info": {
+          "Custom": {
+            "name": "system_tag",
+            "kind": {
+              "Enum": [
+                "cash_at_bank",
+                "accounts_receivable",
+                "accounts_payable",
+                "retained_earnings",
+                "sales_tax_payable",
+                "sales_tax_clearing",
+                "revenue",
+                "expense",
+                "cost_of_goods_sold",
+                "inventory_asset",
+                "received_not_invoiced",
+                "inventory_adjustment"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        {
+          "Custom": {
+            "name": "account_category",
+            "kind": {
+              "Enum": [
+                "asset",
+                "liability",
+                "equity",
+                "revenue",
+                "expense"
+              ]
+            }
+          }
+        },
+        "Bool",
+        "Bool",
+        {
+          "Custom": {
+            "name": "system_tag",
+            "kind": {
+              "Enum": [
+                "cash_at_bank",
+                "accounts_receivable",
+                "accounts_payable",
+                "retained_earnings",
+                "sales_tax_payable",
+                "sales_tax_clearing",
+                "revenue",
+                "expense",
+                "cost_of_goods_sold",
+                "inventory_asset",
+                "received_not_invoiced",
+                "inventory_adjustment"
+              ]
+            }
+          }
+        },
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "4c80fde2d43294feff9bfcfda3826bf2c20a3e5a3aef271c29c878aa8e794725"
+}

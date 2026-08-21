@@ -22,7 +22,6 @@ use shared_core::sales::{
     requests::sales_order::CreateSalesOrderRequest,
 };
 use shared_core::sales::dtos::sales_order_dto::SalesOrderDto;
-use shared_core::sales::dtos::sales_order_list_item::SalesOrderListItem;
 use crate::{
     sales::services::sales_order_service,
     security::{
@@ -55,7 +54,7 @@ async fn list_sales_orders(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseSales>,
     status: Option<FormSalesOrderStatus>,
-) -> Result<Json<Vec<SalesOrderListItem>>, ApiError> {
+) -> Result<Json<Vec<SalesOrder>>, ApiError> {
     let user = guard.0;
     let status_list = match status {
         Some(s) => vec![*s],

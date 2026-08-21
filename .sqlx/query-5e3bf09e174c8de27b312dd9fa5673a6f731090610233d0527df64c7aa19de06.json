@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT id, organization_id as org_id, tax_category_id, name, rate, liability_account_id, valid_from, valid_to\n        FROM tax_rates\n        WHERE tax_category_id = $1\n          AND organization_id = $2\n          AND valid_from <= $3\n          AND (valid_to IS NULL OR valid_to >= $3)\n        ORDER BY valid_from DESC\n        LIMIT 1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "org_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "tax_category_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "rate",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 5,
+        "name": "liability_account_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 6,
+        "name": "valid_from",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 7,
+        "name": "valid_to",
+        "type_info": "Date"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "5e3bf09e174c8de27b312dd9fa5673a6f731090610233d0527df64c7aa19de06"
+}

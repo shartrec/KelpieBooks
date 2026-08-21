@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE accounts\n        SET system_tag = NULL\n        WHERE organization_id = $1 AND system_tag IS NOT NULL\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "65e631dfddb745ffeb8d8a3b49374c49f1151561fa7d9f4b9615e52b23335341"
+}

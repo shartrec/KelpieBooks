@@ -230,6 +230,8 @@ pub fn new_sales_order_page() -> Html {
                                 {
                                     req.billing_address_id = Some(bill.id);
                                     req.bill_to = OrderAddress {
+                                        id: Uuid::new_v4(),
+                                        order_id: Uuid::new_v4(),
                                         name: Some(display_name2.clone()),
                                         attention: req.bill_to.attention.clone(),
                                         line1: Some(bill.address_line1.clone()),
@@ -247,6 +249,8 @@ pub fn new_sales_order_page() -> Html {
                                 {
                                     req.shipping_address_id = Some(ship.id);
                                     req.ship_to = OrderAddress {
+                                        id: Uuid::new_v4(),
+                                        order_id: Uuid::new_v4(),
                                         name: Some(display_name2.clone()),
                                         attention: req.ship_to.attention.clone(),
                                         line1: Some(ship.address_line1.clone()),

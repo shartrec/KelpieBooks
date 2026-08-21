@@ -14,12 +14,11 @@ use shared_core::{
     core::models::auth::SystemPrivilege,
     sales::models::{
         sales_document_status::SalesDocumentStatus,
-        sales_order::SalesOrder,
     },
 };
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-
+use shared_core::sales::dtos::sales_order_dto::SalesOrderDto;
 use crate::{
     api::Api,
     contexts::{
@@ -40,9 +39,9 @@ enum DrawerTab {
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct SalesOrderDrawerProps {
-    pub order: SalesOrder,
+    pub order: SalesOrderDto,
     pub on_close: Callback<()>,
-    pub on_confirmed: Callback<SalesOrder>,
+    pub on_confirmed: Callback<SalesOrderDto>,
     pub on_cancelled: Callback<()>,
 }
 
@@ -57,9 +56,9 @@ pub fn sales_order_drawer(props: &SalesOrderDrawerProps) -> Html {
     let is_confirming = use_state(|| false);
     let is_cancelling = use_state(|| false);
 
-    let order_id = props.order.id;
+    let order_id = props.order.order.id;
     let can_manage = user_ctx.has_privilege(&SystemPrivilege::ManageSales);
-    let is_open = props.order.document_status == SalesDocumentStatus::Open;
+    let is_open = props.order.order.document_status == SalesDocumentStatus::Open;
 
     let on_close = {
         let on_close = props.on_close.clone();
@@ -86,10 +85,10 @@ pub fn sales_order_drawer(props: &SalesOrderDrawerProps) -> Html {
                 let resp = Api::post(&url, &(), user_ctx, navigator).await;
                 is_confirming.set(false);
                 match resp {
-                    Ok(r) if r.ok() => match r.json::<SalesOrder>().await {
-                        Ok(invoice) => {
+                    Ok(r) if r.ok() => match r.json::<SalesOrderDto>().await {
+                        Ok(order) => {
                             confirm_error.set(None);
-                            on_confirmed.emit(invoice);
+                            on_confirmed.emit(order);
                         }
                         Err(e) => confirm_error.set(Some(i18n.t_args(
                             "sales-orders-drawer-error-confirm-parse",
@@ -146,14 +145,14 @@ pub fn sales_order_drawer(props: &SalesOrderDrawerProps) -> Html {
         })
     };
 
-    let status_class = match props.order.document_status {
+    let status_class = match props.order.order.document_status {
         SalesDocumentStatus::Draft => "status-badge status-badge--draft",
         SalesDocumentStatus::Open => "status-badge status-badge--open",
         SalesDocumentStatus::Completed => "status-badge status-badge--complete",
         SalesDocumentStatus::Cancelled => "status-badge status-badge--cancelled",
     };
 
-    let status_label = match props.order.document_status {
+    let status_label = match props.order.order.document_status {
         SalesDocumentStatus::Draft => i18n.t("sales-order-status-draft"),
         SalesDocumentStatus::Open => i18n.t("sales-order-status-open"),
         SalesDocumentStatus::Completed => i18n.t("sales-order-status-complete"),
@@ -165,7 +164,7 @@ pub fn sales_order_drawer(props: &SalesOrderDrawerProps) -> Html {
             <div class="drawer" onclick={|e: MouseEvent| e.stop_propagation()}>
                 // Header
                 <header class="drawer__header">
-                    <h3 class="payment-context-banner__vendor">{ &props.order.order_number }</h3>
+                    <h3 class="payment-context-banner__vendor">{ &props.order.order.order_number }</h3>
                     <button class="btn-close" type="button" onclick={on_close.clone()}>
                         <img src="/images/x.svg" alt={i18n.t("common-close")} />
                     </button>
@@ -174,12 +173,12 @@ pub fn sales_order_drawer(props: &SalesOrderDrawerProps) -> Html {
                 // Summary banner
                 <div class="payment-context-banner">
                     <div class="payment-context-banner__details">
-                        <span>{ i18n.t_args("sales-orders-drawer-order-number", &fluent_args!["number" => props.order.order_number.clone()]) }</span>
-                        <span>{ i18n.t_args("sales-orders-drawer-warehouse", &fluent_args!["warehouse" => props.order.warehouse_name.clone()]) }</span>
-                        <span>{ i18n.format_date(props.order.order_date) }</span>
+                        <span>{ i18n.t_args("sales-orders-drawer-order-number", &fluent_args!["number" => props.order.order.order_number.clone()]) }</span>
+                        <span>{ i18n.t_args("sales-orders-drawer-warehouse", &fluent_args!["warehouse" => props.order.order.warehouse_name.clone()]) }</span>
+                        <span>{ i18n.format_date(props.order.order.order_date) }</span>
                         <span class={status_class}>{ status_label }</span>
                         <span class="amount-badge amount-badge--gross">
-                            { i18n.t_args("vendor-invoice-drawer-gross", &fluent_args!["amount" => i18n.format_currency(props.order.total_amount)]) }
+                            { i18n.t_args("vendor-invoice-drawer-gross", &fluent_args!["amount" => i18n.format_currency(props.order.order.total_amount)]) }
                         </span>
                     </div>
                 </div>

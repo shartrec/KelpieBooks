@@ -10,13 +10,13 @@ use fluent::fluent_args;
 use shared_core::sales::{
     models::{
         sales_document_status::SalesDocumentStatus,
-        sales_order::SalesOrder,
     },
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-
+use shared_core::sales::dtos::sales_order_dto::SalesOrderDto;
+use shared_core::sales::models::sales_order::SalesOrder;
 use crate::{
     api::Api,
     contexts::{
@@ -43,7 +43,7 @@ pub fn sales_orders_page() -> Html {
     let list_error = use_state(|| None::<String>);
 
     // Drawer state
-    let selected_order = use_state(|| None::<SalesOrder>);
+    let selected_order = use_state(|| None::<SalesOrderDto>);
     let drawer_error = use_state(|| None::<String>);
 
     // Actions drop down
@@ -114,7 +114,6 @@ pub fn sales_orders_page() -> Html {
 
     let on_new_order = {
         let navigator = navigator.clone();
-        // TODO: Route::NewSalesOrder will be added in Sub-Task 9
         Callback::from(move |_| {
             navigator.push(&Route::NewSalesOrder);
         })
@@ -137,7 +136,7 @@ pub fn sales_orders_page() -> Html {
                 let url = format!("/api/sales-orders/{}", id);
                 let resp = Api::get(&url, user_ctx, navigator).await;
                 match resp {
-                    Ok(r) if r.ok() => match r.json::<SalesOrder>().await {
+                    Ok(r) if r.ok() => match r.json::<SalesOrderDto>().await {
                         Ok(order) => {
                             selected_order.set(Some(order));
                             drawer_error.set(None);
@@ -168,7 +167,7 @@ pub fn sales_orders_page() -> Html {
     // On confirm: navigate to SalesOrders so the user sees the new order
     let on_confirmed = {
         let navigator = navigator.clone();
-        Callback::from(move |_order: SalesOrder| {
+        Callback::from(move |_order: SalesOrderDto| {
             navigator.push(&Route::SalesOrders);
         })
     };
@@ -245,8 +244,8 @@ pub fn sales_orders_page() -> Html {
                         html! {
                             <tr class="clickable-row">
                                 <td class="table__text-col">{ &order.order_number }</td>
-                                <td class="table__text-col">{ &order.partner_name }</td>
-                                <td class="table__text-col">{ &order.warehouse_name }</td>
+                                <td class="table__text-col">{ &order.partner_name.as_ref().unwrap_or(&"".to_string()) }</td>
+                                <td class="table__text-col">{ &order.warehouse_name.as_ref().unwrap_or(&"".to_string()) }</td>
                                 <td class="table__value-col">{ i18n.format_date(order.order_date) }</td>
                                 <td class="table__text-col"><span class={status_class}>{ status_label(&order.document_status, &i18n) }</span></td>
                                 <td class="table__value-col">{ i18n.format_currency(order.amount_remaining) }</td>

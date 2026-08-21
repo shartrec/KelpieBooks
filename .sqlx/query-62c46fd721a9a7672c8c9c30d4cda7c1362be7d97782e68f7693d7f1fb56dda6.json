@@ -1,0 +1,96 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO sales_order_addresses (\n            order_id, name, attention, line1, line2, city, region, postal_code, country, type\n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::address_type)\n        RETURNING id, order_id, name, attention, line1, line2, city, region, postal_code, country\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "order_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "attention",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "line1",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "line2",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "city",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "region",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "postal_code",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "country",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        {
+          "Custom": {
+            "name": "address_type",
+            "kind": {
+              "Enum": [
+                "billing",
+                "shipping",
+                "general"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "62c46fd721a9a7672c8c9c30d4cda7c1362be7d97782e68f7693d7f1fb56dda6"
+}

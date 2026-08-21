@@ -24,19 +24,20 @@ use shared_core::sales::{
 };
 use uuid::Uuid;
 use shared_core::sales::dtos::sales_order_dto::SalesOrderDto;
-use shared_core::sales::dtos::sales_order_list_item::SalesOrderListItem;
 use shared_core::sales::models::fulfillment_status::FulfillmentStatus;
 use shared_core::sales::models::order_address::AddressType;
 use shared_core::sales::models::payment_status::PaymentStatus;
 
-fn from_row_to_sales_order_list_item(row: &sqlx::postgres::PgRow) -> SalesOrderListItem {
-    SalesOrderListItem {
+fn from_row_to_sales_order_list_item(row: &sqlx::postgres::PgRow) -> SalesOrder {
+    SalesOrder {
         id: row.get("id"),
+        org_id: row.get("org_id"),
         order_number: row.get("order_number"),
         partner_id: row.get("partner_id"),
         partner_name: row.get("partner_name"),
         order_date: row.get("order_date"),
         due_date: row.get("due_date"),
+        warehouse_id: row.get("warehouse_id"),
         warehouse_name: row.get("warehouse_name"),
         fulfillment_status: row.get("fulfillment_status"),
         payment_status: row.get("payment_status"),
@@ -45,6 +46,8 @@ fn from_row_to_sales_order_list_item(row: &sqlx::postgres::PgRow) -> SalesOrderL
         tax_total: row.get("tax_total"),
         total_amount: row.get("total_amount"),
         amount_remaining: row.get("amount_remaining"),
+        billing_address_id: row.get("billing_address_id"),
+        shipping_address_id: row.get("shipping_address_id"),
     }
 }
 
@@ -73,7 +76,7 @@ pub(crate) async fn create_draft_order(
             $12, $13, $14
         )
         RETURNING
-            id, organization_id as org_id, partner_id, warehouse_id, null as warehouse_name, order_number, order_date, due_date,
+            id, organization_id as org_id, partner_id, null as partner_name, warehouse_id, null as warehouse_name, order_number, order_date, due_date,
             fulfillment_status as "fulfillment_status: FulfillmentStatus",
             payment_status as "payment_status: PaymentStatus",
             document_status as "document_status: SalesDocumentStatus",
@@ -255,9 +258,11 @@ pub(crate) async fn get_sales_order(
                so.document_status as "document_status: SalesDocumentStatus",
                so.billing_address_id, so.shipping_address_id,
                so.subtotal, so.tax_total, so.total_amount, so.amount_remaining,
-               w.name AS warehouse_name
+               w.name AS warehouse_name,
+               p.trade_name as partner_name
         FROM sales_orders so
         JOIN warehouses w ON w.id = so.warehouse_id
+        JOIN partners p ON p.id = so.partner_id
         WHERE so.id = $1 AND so.organization_id = $2
         "#,
         id,
@@ -289,7 +294,7 @@ pub(crate) async fn list_sales_orders(
     partner_id: Option<Uuid>,
     min_amount: Option<Decimal>,
     statuses: Option<Vec<SalesDocumentStatus>>,
-) -> Result<Vec<SalesOrderListItem>, sqlx::Error> {
+) -> Result<Vec<SalesOrder>, sqlx::Error> {
     let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(
         r#"
         SELECT
@@ -310,7 +315,7 @@ pub(crate) async fn list_sales_orders(
             so.total_amount,
             so.amount_remaining,
             w.name AS warehouse_name,
-            p.name AS partner_name
+            p.legal_name AS partner_name
         FROM sales_orders so
         JOIN partners p ON p.id = so.partner_id
         JOIN warehouses w ON w.id = so.warehouse_id

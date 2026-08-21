@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE accounts\n            SET system_tag = $1\n            WHERE id = $2 AND organization_id = $3\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "system_tag",
+            "kind": {
+              "Enum": [
+                "cash_at_bank",
+                "accounts_receivable",
+                "accounts_payable",
+                "retained_earnings",
+                "sales_tax_payable",
+                "sales_tax_clearing",
+                "revenue",
+                "expense",
+                "cost_of_goods_sold",
+                "inventory_asset",
+                "received_not_invoiced",
+                "inventory_adjustment"
+              ]
+            }
+          }
+        },
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2bd9b51b64f3f4eee8ff595064be493a56c851c11ada8b30f1437997db46d0ee"
+}

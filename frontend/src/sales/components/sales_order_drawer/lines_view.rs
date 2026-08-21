@@ -7,14 +7,13 @@
  */
 
 use fluent::fluent_args;
-use shared_core::sales::models::sales_order::SalesOrder;
 use yew::prelude::*;
-
+use shared_core::sales::dtos::sales_order_dto::SalesOrderDto;
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct LinesViewProps {
-    pub order: SalesOrder,
+    pub order: SalesOrderDto,
 }
 
 #[function_component(LinesView)]
@@ -24,7 +23,7 @@ pub fn lines_view(props: &LinesViewProps) -> Html {
 
     html! {
         <div class="items-view">
-            { for order.lines.iter().map(|line| {
+            { for order.items.iter().map(|line| {
                 let gross = line.net_amount + line.tax_amount;
 
                 let avail_html = match line.quantity_available {
@@ -79,7 +78,7 @@ pub fn lines_view(props: &LinesViewProps) -> Html {
             <div class="voucher-footer">
                 <span class="amount-badge amount-badge--gross">
                     { i18n.t_args("vendor-invoice-drawer-gross",
-                        &fluent_args!["amount" => i18n.format_currency(order.total_amount)]) }
+                        &fluent_args!["amount" => i18n.format_currency(order.order.total_amount)]) }
                 </span>
             </div>
         </div>

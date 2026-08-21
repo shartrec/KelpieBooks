@@ -26,6 +26,7 @@ pub struct SalesOrder {
     pub id: Uuid,
     pub org_id: Uuid,
     pub partner_id: Uuid,
+    pub partner_name: Option<String>,
     pub warehouse_id: Uuid,
     pub warehouse_name: Option<String>,
     pub order_number: String,

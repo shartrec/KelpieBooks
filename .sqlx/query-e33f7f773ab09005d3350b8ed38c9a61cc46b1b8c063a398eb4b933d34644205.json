@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT item_type  AS \"type_id: ItemType\"  FROM items\n            WHERE id = $1 AND organization_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "type_id: ItemType",
+        "type_info": {
+          "Custom": {
+            "name": "item_type",
+            "kind": {
+              "Enum": [
+                "stocked",
+                "non_stocked",
+                "service"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "e33f7f773ab09005d3350b8ed38c9a61cc46b1b8c063a398eb4b933d34644205"
+}

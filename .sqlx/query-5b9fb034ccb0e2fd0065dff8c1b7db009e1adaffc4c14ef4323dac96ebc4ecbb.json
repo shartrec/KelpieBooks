@@ -1,0 +1,110 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            id,\n            organization_id,\n            parent_id,\n            code,\n            name,\n            category as \"category: AccountCategory\",\n            is_group,\n            is_bank_account,\n            system_tag as \"system_tag: SystemTag\",\n            created_at\n        FROM accounts\n        WHERE id = $1\n        AND organization_id = $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "organization_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "parent_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "code",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "category: AccountCategory",
+        "type_info": {
+          "Custom": {
+            "name": "account_category",
+            "kind": {
+              "Enum": [
+                "asset",
+                "liability",
+                "equity",
+                "revenue",
+                "expense"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "is_group",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 7,
+        "name": "is_bank_account",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "system_tag: SystemTag",
+        "type_info": {
+          "Custom": {
+            "name": "system_tag",
+            "kind": {
+              "Enum": [
+                "cash_at_bank",
+                "accounts_receivable",
+                "accounts_payable",
+                "retained_earnings",
+                "sales_tax_payable",
+                "sales_tax_clearing",
+                "revenue",
+                "expense",
+                "cost_of_goods_sold",
+                "inventory_asset",
+                "received_not_invoiced",
+                "inventory_adjustment"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "5b9fb034ccb0e2fd0065dff8c1b7db009e1adaffc4c14ef4323dac96ebc4ecbb"
+}

@@ -28,7 +28,6 @@ use shared_core::{
 use sqlx::Acquire;
 use uuid::Uuid;
 use shared_core::sales::dtos::sales_order_dto::SalesOrderDto;
-use shared_core::sales::dtos::sales_order_list_item::SalesOrderListItem;
 use crate::{
     core::db::sequences::{
         get_next_order_number,
@@ -126,7 +125,7 @@ pub(crate) async fn list_sales_orders(
     partner_id: Option<Uuid>,
     min_amount: Option<rust_decimal::Decimal>,
     statuses: Vec<SalesDocumentStatus>,
-) -> Result<Vec<SalesOrderListItem>, ApiError> {
+) -> Result<Vec<SalesOrder>, ApiError> {
     let items = sales_order_db::list_sales_orders(pool, org_id, start_date, end_date, partner_id, min_amount, Some(statuses)).await?;
     Ok(items)
 }

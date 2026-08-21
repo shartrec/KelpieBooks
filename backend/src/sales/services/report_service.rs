@@ -45,7 +45,7 @@ pub(crate) async fn get_trial_balance(
                 .entry(order.partner_id)
                 .or_insert_with(|| AgedReceivableSummary {
                     partner_id: order.partner_id,
-                    partner_name: order.partner_name.clone(),
+                    partner_name: order.partner_name.clone().unwrap_or("".to_string()),
                     current: dec!(0.00),
                     days_30: dec!(0.00),
                     days_60: dec!(0.00),

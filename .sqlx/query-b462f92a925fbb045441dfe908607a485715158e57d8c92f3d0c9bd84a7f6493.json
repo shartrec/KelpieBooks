@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE sales_orders\n        SET document_status = $1::sales_document_status\n        WHERE id = $2 AND organization_id = $3\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "sales_document_status",
+            "kind": {
+              "Enum": [
+                "draft",
+                "open",
+                "completed",
+                "cancelled"
+              ]
+            }
+          }
+        },
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b462f92a925fbb045441dfe908607a485715158e57d8c92f3d0c9bd84a7f6493"
+}

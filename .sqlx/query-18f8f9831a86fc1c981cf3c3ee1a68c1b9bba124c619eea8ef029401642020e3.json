@@ -1,0 +1,75 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO warehouse_inventory_balances\n            (id, organization_id, warehouse_id, location_id, item_id, quantity_on_hand, quantity_allocated, unit_cost)\n        VALUES ($1, $2, $3, $4, $5, $6, 0.0, 0.0)\n        ON CONFLICT (location_id, item_id)\n        DO UPDATE SET\n            quantity_on_hand = warehouse_inventory_balances.quantity_on_hand + EXCLUDED.quantity_on_hand,\n            updated_at = NOW()\n        RETURNING *\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "organization_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "item_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "warehouse_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "location_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 5,
+        "name": "quantity_on_hand",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 6,
+        "name": "quantity_allocated",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 7,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "unit_cost",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Numeric"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "18f8f9831a86fc1c981cf3c3ee1a68c1b9bba124c619eea8ef029401642020e3"
+}

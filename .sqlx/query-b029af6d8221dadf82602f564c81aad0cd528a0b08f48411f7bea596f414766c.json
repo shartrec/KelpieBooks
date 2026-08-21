@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            je.id,\n            je.transaction_id,\n            je.account_id,\n            a.name as account_name,\n            je.debit,\n            je.credit,\n            je.description,\n            je.created_at\n        FROM journal_entries je\n        JOIN accounts a ON je.account_id = a.id\n        WHERE je.transaction_id = $1\n        ORDER BY je.debit DESC, je.credit\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "transaction_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "account_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "account_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "debit",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 5,
+        "name": "credit",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 6,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "b029af6d8221dadf82602f564c81aad0cd528a0b08f48411f7bea596f414766c"
+}

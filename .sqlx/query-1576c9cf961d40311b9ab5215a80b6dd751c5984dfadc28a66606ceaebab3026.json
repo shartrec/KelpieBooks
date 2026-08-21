@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM item_warehouse_profiles WHERE item_id = $1 AND organization_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "item_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "organization_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "weight_kg",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 3,
+        "name": "length_cm",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 4,
+        "name": "width_cm",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 5,
+        "name": "height_cm",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 6,
+        "name": "reorder_point",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 7,
+        "name": "safety_stock",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 8,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "1576c9cf961d40311b9ab5215a80b6dd751c5984dfadc28a66606ceaebab3026"
+}

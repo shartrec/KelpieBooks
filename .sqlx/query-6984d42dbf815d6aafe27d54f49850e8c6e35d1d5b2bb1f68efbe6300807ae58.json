@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE vendor_invoices\n        SET amount_remaining = amount_remaining + $1\n        WHERE id = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Numeric",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6984d42dbf815d6aafe27d54f49850e8c6e35d1d5b2bb1f68efbe6300807ae58"
+}

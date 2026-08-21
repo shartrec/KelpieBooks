@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE sales_orders\n            SET payment_status = $1::payment_status\n            WHERE id = $2 and amount_remaining = 0.0\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "payment_status",
+            "kind": {
+              "Enum": [
+                "unpaid",
+                "partially_paid",
+                "paid",
+                "refunded"
+              ]
+            }
+          }
+        },
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e81dfbc2dc07566c11c75848a322840a3f1f014cc04b8e605e4389c0d3afe02a"
+}

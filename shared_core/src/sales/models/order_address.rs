@@ -26,7 +26,7 @@ pub enum AddressType {
     Shipping,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct OrderAddress {
     pub id: Uuid,

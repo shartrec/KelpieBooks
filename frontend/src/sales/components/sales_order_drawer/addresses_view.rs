@@ -8,15 +8,14 @@
 
 use shared_core::sales::models::{
     order_address::AddressType,
-    sales_order::SalesOrder,
 };
 use yew::prelude::*;
-
+use shared_core::sales::dtos::sales_order_dto::SalesOrderDto;
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct AddressesViewProps {
-    pub order: SalesOrder,
+    pub order: SalesOrderDto,
 }
 
 #[function_component(AddressesView)]

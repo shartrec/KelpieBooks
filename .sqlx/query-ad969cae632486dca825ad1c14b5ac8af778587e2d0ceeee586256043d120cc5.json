@@ -1,0 +1,203 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO sales_orders (\n            organization_id, partner_id, warehouse_id, order_number, order_date, due_date,\n            fulfillment_status, payment_status, document_status,\n            billing_address_id, shipping_address_id,\n            subtotal, tax_total, total_amount\n        )\n        VALUES (\n            $1, $2, $3, $4, $5, $6,\n            $7::fulfillment_status, $8::payment_status, $9::sales_document_status,\n            $10, $11,\n            $12, $13, $14\n        )\n        RETURNING\n            id, organization_id as org_id, partner_id, warehouse_id, null as warehouse_name, order_number, order_date, due_date,\n            fulfillment_status as \"fulfillment_status: FulfillmentStatus\",\n            payment_status as \"payment_status: PaymentStatus\",\n            document_status as \"document_status: SalesDocumentStatus\",\n            billing_address_id, shipping_address_id,\n            subtotal, tax_total, total_amount, amount_remaining\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "org_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "partner_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "warehouse_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "warehouse_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "order_number",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "order_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 7,
+        "name": "due_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 8,
+        "name": "fulfillment_status: FulfillmentStatus",
+        "type_info": {
+          "Custom": {
+            "name": "fulfillment_status",
+            "kind": {
+              "Enum": [
+                "unfulfilled",
+                "partially_fulfilled",
+                "fulfilled",
+                "not_required"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "payment_status: PaymentStatus",
+        "type_info": {
+          "Custom": {
+            "name": "payment_status",
+            "kind": {
+              "Enum": [
+                "unpaid",
+                "partially_paid",
+                "paid",
+                "refunded"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "document_status: SalesDocumentStatus",
+        "type_info": {
+          "Custom": {
+            "name": "sales_document_status",
+            "kind": {
+              "Enum": [
+                "draft",
+                "open",
+                "completed",
+                "cancelled"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "billing_address_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 12,
+        "name": "shipping_address_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 13,
+        "name": "subtotal",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 14,
+        "name": "tax_total",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 15,
+        "name": "total_amount",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 16,
+        "name": "amount_remaining",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Date",
+        "Date",
+        {
+          "Custom": {
+            "name": "fulfillment_status",
+            "kind": {
+              "Enum": [
+                "unfulfilled",
+                "partially_fulfilled",
+                "fulfilled",
+                "not_required"
+              ]
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "payment_status",
+            "kind": {
+              "Enum": [
+                "unpaid",
+                "partially_paid",
+                "paid",
+                "refunded"
+              ]
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "sales_document_status",
+            "kind": {
+              "Enum": [
+                "draft",
+                "open",
+                "completed",
+                "cancelled"
+              ]
+            }
+          }
+        },
+        "Uuid",
+        "Uuid",
+        "Numeric",
+        "Numeric",
+        "Numeric"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ad969cae632486dca825ad1c14b5ac8af778587e2d0ceeee586256043d120cc5"
+}
