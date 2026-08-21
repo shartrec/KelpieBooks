@@ -204,8 +204,8 @@ pub(crate) fn generate_trial_balance_typst(
     typst_content.push_str(&format!(
         "  [*{}*], align(right)[*{}*], align(right)[*{}*],\n",
         i18n.t("common-total"),
-        total_debit,
-        total_credit
+        i18n.format_money_typ(total_debit),
+        i18n.format_money_typ(total_credit)
     ));
     typst_content.push_str(")\n");
 
