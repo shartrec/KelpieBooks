@@ -24,10 +24,10 @@ pub async fn get_tax_categories(
 
 pub async fn get_tax_category(
     pool: &mut Connection<DbKelpie>,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<Option<TaxCategory>, sqlx::Error> {
-    tax_db::get(pool, id, org_id).await
+    tax_db::get(pool, org_id, id).await
 }
 
 pub async fn create_tax_category(
@@ -40,17 +40,17 @@ pub async fn create_tax_category(
 
 pub async fn update_tax_category(
     pool: &mut Connection<DbKelpie>,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     tax_category: &TaxCategory,
 ) -> Result<TaxCategory, sqlx::Error> {
-    tax_db::update(pool, id, org_id, tax_category).await
+    tax_db::update(pool, org_id, id, tax_category).await
 }
 
 pub async fn delete_tax_category(
     pool: &mut Connection<DbKelpie>,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<u64, sqlx::Error> {
-    tax_db::delete(pool, id, org_id).await.map(|n| n)
+    tax_db::delete(pool, org_id, id).await.map(|n| n)
 }

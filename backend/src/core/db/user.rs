@@ -161,8 +161,8 @@ const SQL: &'static str = r#"SELECT u.id, u.organization_id, u.email, u.password
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<Option<UserWithOrg>, sqlx::Error> {
     let row =
         sqlx::query(format!("{} {} ", SQL, "WHERE u.id = $1 AND u.organization_id = $2").as_str())

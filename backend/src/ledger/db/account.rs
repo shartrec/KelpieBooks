@@ -27,8 +27,8 @@ use uuid::Uuid;
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<Option<Account>, sqlx::Error> {
     sqlx::query_as!(
         Account,
@@ -112,8 +112,8 @@ pub(crate) async fn insert(
 
 pub(crate) async fn update(
     pool: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     req: &UpdateAccountRequest,
 ) -> Result<Account, sqlx::Error> {
     let account = sqlx::query_as!(
@@ -155,8 +155,8 @@ pub(crate) async fn has_journal_entries(
 
 pub(crate) async fn delete(
     pool: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<u64, sqlx::Error> {
     let result = sqlx::query!(
         "DELETE FROM accounts WHERE id = $1 AND organization_id = $2",

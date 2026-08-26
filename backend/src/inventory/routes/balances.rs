@@ -70,7 +70,7 @@ async fn get_item_profile(
     _guard: RequirePrivilege<UseInventory>,
 ) -> Result<Json<ItemWarehouseProfile>, ApiError> {
     let profile =
-        inventory_service::get_item_warehouse_profile(&mut pool, *item_id, user.organization_id)
+        inventory_service::get_item_warehouse_profile(&mut pool, user.organization_id, *item_id)
             .await?
             .ok_or_else(|| {
                 ApiError::NotFound("Item warehouse configuration profile not found".to_string())
@@ -103,7 +103,7 @@ async fn get_item_balances(
     _guard: RequirePrivilege<UseInventory>,
 ) -> Result<Json<ItemStockBalancesResponse>, ApiError> {
     let balances =
-        inventory_service::get_balances_by_item(&mut pool, *item_id, user.organization_id).await?;
+        inventory_service::get_balances_by_item(&mut pool, user.organization_id, *item_id).await?;
     Ok(Json(balances))
 }
 

@@ -64,7 +64,7 @@ async fn get_warehouse(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseInventory>,
 ) -> Result<Json<Warehouse>, ApiError> {
-    let warehouse = warehouse_service::get_warehouse(&mut pool, *id, user.organization_id)
+    let warehouse = warehouse_service::get_warehouse(&mut pool, user.organization_id, *id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Warehouse not found".to_string()))?;
     Ok(Json(warehouse))
@@ -90,7 +90,7 @@ async fn update_warehouse(
     _guard: RequirePrivilege<ManageInventory>,
 ) -> Result<Json<Warehouse>, ApiError> {
     let updated_wh =
-        warehouse_service::update_warehouse(&mut pool, *id, user.organization_id, &wh).await?;
+        warehouse_service::update_warehouse(&mut pool, user.organization_id, *id, &wh).await?;
     Ok(Json(updated_wh))
 }
 
@@ -102,7 +102,7 @@ async fn delete_warehouse(
     _guard: RequirePrivilege<ManageInventory>,
 ) -> Result<&'static str, ApiError> {
     let rows_affected =
-        warehouse_service::delete_warehouse(&mut pool, *id, user.organization_id).await?;
+        warehouse_service::delete_warehouse(&mut pool, user.organization_id, *id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Warehouse not found.".to_string()));
     }

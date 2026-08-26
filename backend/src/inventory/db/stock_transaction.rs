@@ -62,8 +62,8 @@ pub async fn log_transaction(
 /// Queries recent movement history for a specific item in a warehouse.
 pub async fn get_history_for_item(
     conn: &mut PgConnection,
-    item_id: Uuid,
     org_id: Uuid,
+    item_id: Uuid,
     limit: i64,
 ) -> Result<Vec<StockTransaction>, sqlx::Error> {
     sqlx::query_as!(

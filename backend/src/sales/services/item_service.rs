@@ -43,8 +43,8 @@ pub async fn get_items(
 
 pub async fn get_item(
     pool: &mut Connection<DbKelpie>,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<Option<Item>, sqlx::Error> {
     item_db::get(pool, org_id, id).await
 }
@@ -59,19 +59,19 @@ pub async fn create_item(
 
 pub async fn update_item(
     pool: &mut Connection<DbKelpie>,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     item: &Item,
 ) -> Result<Item, sqlx::Error> {
-    item_db::update(pool, id, org_id, item).await
+    item_db::update(pool, org_id, id, item).await
 }
 
 pub async fn delete_item(
     pool: &mut Connection<DbKelpie>,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<u64, ApiError> {
-    let rows_affected = item_db::delete(pool, id, org_id).await?;
+    let rows_affected = item_db::delete(pool, org_id, id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Account not found.".to_string()));
     }

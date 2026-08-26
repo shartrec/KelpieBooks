@@ -18,23 +18,23 @@ use crate::{
 
 pub async fn get_tax_rates_for_category(
     pool: &mut Connection<DbKelpie>,
+    org_id: Uuid,
     category_id: Uuid,
-    organization_id: Uuid,
 ) -> Result<Vec<TaxRate>, ApiError> {
-    let rates = tax_rate::get_tax_rates_for_category(pool, category_id, organization_id).await?;
+    let rates = tax_rate::get_tax_rates_for_category(pool, org_id, category_id).await?;
     Ok(rates)
 }
 
 pub async fn get_current_tax_rate_for_category(
     pool: &mut Connection<DbKelpie>,
+    org_id: Uuid,
     category_id: Uuid,
-    organization_id: Uuid,
     effective_date: NaiveDate,
 ) -> Result<Option<TaxRate>, ApiError> {
     let rate = tax_rate::get_current_tax_rate_for_category(
         pool,
+        org_id,
         category_id,
-        organization_id,
         effective_date,
     )
     .await?;
@@ -43,10 +43,10 @@ pub async fn get_current_tax_rate_for_category(
 
 pub async fn update_tax_rates_for_category(
     pool: &mut Connection<DbKelpie>,
+    org_id: Uuid,
     category_id: Uuid,
-    organization_id: Uuid,
     rates: &[TaxRate],
 ) -> Result<(), ApiError> {
-    tax_rate::update_tax_rates_for_category(pool, category_id, organization_id, rates).await?;
+    tax_rate::update_tax_rates_for_category(pool, org_id, category_id, rates).await?;
     Ok(())
 }

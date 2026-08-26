@@ -73,7 +73,7 @@ async fn get_tax_category(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseSales>,
 ) -> Result<Json<TaxCategory>, ApiError> {
-    let tax_category = tax_category_service::get_tax_category(&mut pool, *id, user.organization_id)
+    let tax_category = tax_category_service::get_tax_category(&mut pool, user.organization_id, *id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Tax Category not found".to_string()))?;
     Ok(Json(tax_category))
@@ -102,8 +102,8 @@ async fn update_tax_category(
 ) -> Result<Json<TaxCategory>, ApiError> {
     let updated_tax_category = tax_category_service::update_tax_category(
         &mut pool,
-        *id,
         user.organization_id,
+        *id,
         &tax_category,
     )
     .await?;
@@ -118,7 +118,7 @@ async fn delete_tax_category(
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<&'static str, ApiError> {
     let rows_affected =
-        tax_category_service::delete_tax_category(&mut pool, *id, user.organization_id).await?;
+        tax_category_service::delete_tax_category(&mut pool, user.organization_id, *id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Tax Category not found.".to_string()));
     }
@@ -133,7 +133,7 @@ async fn get_tax_rates_for_category(
     _guard: RequirePrivilege<UseSales>,
 ) -> Result<Json<Vec<TaxRate>>, ApiError> {
     let rates =
-        tax_rate_service::get_tax_rates_for_category(&mut pool, *id, user.organization_id).await?;
+        tax_rate_service::get_tax_rates_for_category(&mut pool, user.organization_id, *id).await?;
     Ok(Json(rates))
 }
 
@@ -150,8 +150,8 @@ async fn get_current_tax_rate_for_category_route(
         .unwrap_or_else(|| chrono::Local::now().naive_local().date());
     let rate = tax_rate_service::get_current_tax_rate_for_category(
         &mut pool,
-        *id,
         user.organization_id,
+        *id,
         date,
     )
     .await?;
@@ -166,7 +166,7 @@ async fn update_tax_rates_for_category(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<&'static str, ApiError> {
-    tax_rate_service::update_tax_rates_for_category(&mut pool, *id, user.organization_id, &rates)
+    tax_rate_service::update_tax_rates_for_category(&mut pool, user.organization_id, *id, &rates)
         .await?;
     Ok("Tax rates updated successfully.")
 }

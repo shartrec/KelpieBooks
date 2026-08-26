@@ -87,7 +87,7 @@ pub(crate) async fn add_user(
     )
     .await?;
 
-    let user_with_org = user::get(&mut *pool, new_user.id, auth_user.organization_id)
+    let user_with_org = user::get(&mut *pool, auth_user.organization_id, new_user.id)
         .await?
         .unwrap();
 
@@ -113,7 +113,7 @@ pub(crate) async fn update_user(
     let auth_user = guard.0;
     let i18n = LocaleContext::new(&auth_user.locale);
 
-    let original_user = user::get(&mut *pool, *id, auth_user.organization_id)
+    let original_user = user::get(&mut *pool, auth_user.organization_id, *id)
         .await?
         .ok_or_else(|| ApiError::NotFound("User not found".to_string()))?;
 
@@ -140,7 +140,7 @@ pub(crate) async fn update_user(
 
     tx.commit().await?;
 
-    let user_with_org = user::get(&mut *pool, updated_user.id, auth_user.organization_id)
+    let user_with_org = user::get(&mut *pool, auth_user.organization_id, updated_user.id)
         .await?
         .unwrap();
 
@@ -162,7 +162,7 @@ pub(crate) async fn update_me(
     auth_user: AuthenticatedUser,
     update_data: Json<UpdateUserRequest>,
 ) -> Result<Json<AuthUserDetail>, ApiError> {
-    let original_user = user::get(&mut *pool, auth_user.user_id, auth_user.organization_id)
+    let original_user = user::get(&mut *pool, auth_user.organization_id, auth_user.user_id)
         .await?
         .ok_or_else(|| ApiError::NotFound("User not found".to_string()))?;
 
@@ -178,7 +178,7 @@ pub(crate) async fn update_me(
     )
     .await?;
 
-    let user_with_org = user::get(&mut *pool, updated_user.id, auth_user.organization_id)
+    let user_with_org = user::get(&mut *pool, auth_user.organization_id, updated_user.id)
         .await?
         .unwrap();
     let role = user_with_org.role.as_ref().map(|r| r.name.clone());
@@ -206,7 +206,7 @@ pub(crate) async fn update_password(
     auth_user: AuthenticatedUser,
     password_data: Json<PasswordUpdateData>,
 ) -> Result<&'static str, ApiError> {
-    let original_user = user::get(&mut *pool, auth_user.user_id, auth_user.organization_id)
+    let original_user = user::get(&mut *pool, auth_user.organization_id, auth_user.user_id)
         .await?
         .ok_or_else(|| ApiError::NotFound("User not found".to_string()))?;
 
@@ -251,7 +251,7 @@ pub(crate) async fn get_user(
 ) -> Result<Json<UserDetail>, ApiError> {
     let user = guard.0;
 
-    match user::get(&mut *pool, *id, user.organization_id).await? {
+    match user::get(&mut *pool, user.organization_id, *id).await? {
         Some(user) => {
             let user_detail = UserDetail {
                 id: user.id,

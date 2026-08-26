@@ -69,7 +69,7 @@ async fn get_transaction(
 ) -> Result<Json<TransactionDetail>, ApiError> {
     let user = guard.0;
 
-    let transaction = transaction::get(&mut pool, *id, user.organization_id)
+    let transaction = transaction::get(&mut pool, user.organization_id, *id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 
@@ -88,7 +88,7 @@ async fn delete_transaction(
     id: PathUuid,
 ) -> Result<&'static str, ApiError> {
     let user = guard.0;
-    let transaction = transaction::get(&mut pool, *id, user.organization_id)
+    let transaction = transaction::get(&mut pool, user.organization_id, *id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 
@@ -110,7 +110,7 @@ async fn delete_transaction(
         ));
     }
 
-    transaction::delete(&mut pool, *id, user.organization_id).await?;
+    transaction::delete(&mut pool, user.organization_id, *id).await?;
 
     Ok("Transaction deleted successfully.")
 }
@@ -137,7 +137,7 @@ async fn update_transaction(
         .await?
         .ok_or_else(|| ApiError::NotFound("Organization not found".to_string()))?;
 
-    let original_transaction = transaction::get(&mut pool, *id, user.organization_id)
+    let original_transaction = transaction::get(&mut pool, user.organization_id, *id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 
@@ -159,7 +159,7 @@ async fn update_transaction(
 
     let mut tx = pool.begin().await?;
 
-    transaction::delete(&mut tx, *id, user.organization_id).await?;
+    transaction::delete(&mut tx, user.organization_id, *id).await?;
 
     let transaction_id = transaction::insert(
         &mut tx,
@@ -195,7 +195,7 @@ async fn reverse_transaction(
     req: Json<ReverseTransactionRequest>,
 ) -> Result<&'static str, ApiError> {
     let user = guard.0;
-    let original_transaction = transaction::get(&mut pool, *id, user.organization_id)
+    let original_transaction = transaction::get(&mut pool, user.organization_id, *id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 

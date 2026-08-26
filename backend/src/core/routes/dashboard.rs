@@ -89,7 +89,7 @@ async fn get_financial_health(
     let bank_account_id = system_accounts.get(&SystemTag::CashAtBank).cloned();
 
     let accounts_receivable_balance = if let Some(id) = ar_account_id {
-        get_account_with_balance(&mut db, id, user.organization_id)
+        get_account_with_balance(&mut db, user.organization_id, id)
             .await
             .map(|a| a.balance)
             .unwrap_or(dec!(-999.00))
@@ -97,7 +97,7 @@ async fn get_financial_health(
         dec!(0.00)
     };
     let accounts_payable_balance = if let Some(id) = ap_account_id {
-        get_account_with_balance(&mut db, id, user.organization_id)
+        get_account_with_balance(&mut db, user.organization_id, id)
             .await
             .map(|a| a.balance)
             .unwrap_or(dec!(-999.00))
@@ -106,7 +106,7 @@ async fn get_financial_health(
     };
 
     let bank_balance = if let Some(id) = bank_account_id {
-        get_account_with_balance(&mut db, id, user.organization_id)
+        get_account_with_balance(&mut db, user.organization_id, id)
             .await
             .map(|a| a.balance)
             .unwrap_or(dec!(-999.00))

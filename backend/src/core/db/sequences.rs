@@ -28,6 +28,7 @@ pub(crate) async fn get_next_order_number(
     let row = sqlx::query!(
         r#"
         SELECT prefix, next_value
+
         FROM organization_sequences
         WHERE org_id = $1 AND document_type = $2
         FOR UPDATE

@@ -95,10 +95,10 @@ impl InventorySystemAccounts {
 
 pub async fn get_item_warehouse_profile(
     pool: &mut Connection<DbKelpie>,
-    item_id: Uuid,
     org_id: Uuid,
+    item_id: Uuid,
 ) -> Result<Option<ItemWarehouseProfile>, sqlx::Error> {
-    inventory_db::get_warehouse_profile(pool, item_id, org_id).await
+    inventory_db::get_warehouse_profile(pool, org_id, item_id).await
 }
 
 pub async fn save_item_warehouse_profile(
@@ -115,25 +115,25 @@ pub async fn save_item_warehouse_profile(
 
 pub async fn get_balances_by_item(
     pool: &mut Connection<DbKelpie>,
-    item_id: Uuid,
     org_id: Uuid,
+    item_id: Uuid,
 ) -> Result<ItemStockBalancesResponse, Error> {
     inventory_db::get_item_stock_balances(pool, org_id, item_id).await
 }
 
 pub async fn get_balance_at_location(
     pool: &mut Connection<DbKelpie>,
+    org_id: Uuid,
     item_id: Uuid,
     location_id: Uuid,
-    org_id: Uuid,
 ) -> Result<Option<WarehouseInventoryBalance>, sqlx::Error> {
-    inventory_db::get_balance_for_location(pool, item_id, location_id, org_id).await
+    inventory_db::get_balance_for_location(pool, org_id, item_id, location_id).await
 }
 
 pub async fn update_stock_levels(
     pool: &mut Connection<DbKelpie>,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     qty_on_hand: Decimal,
     qty_allocated: Decimal,
 ) -> Result<WarehouseInventoryBalance, ApiError> {
@@ -145,7 +145,7 @@ pub async fn update_stock_levels(
     }
 
     let balance =
-        inventory_db::update_inventory_quantities(pool, id, org_id, qty_on_hand, qty_allocated)
+        inventory_db::update_inventory_quantities(pool, org_id, id, qty_on_hand, qty_allocated)
             .await?;
 
     Ok(balance)
@@ -252,9 +252,9 @@ pub async fn adjust_stock(
 
         let old_balance = match get_balance_for_location(
             &mut *tx,
+            org_id,
             line.item_id,
             line.location_id,
-            org_id,
         )
         .await
         {

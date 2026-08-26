@@ -350,7 +350,7 @@ async fn export_general_ledger(
     //Validate the accounts are valid and in user organization
     if let Some(ref ids) = account_ids {
         for id in ids {
-            let account = account::get(&mut pool, *id, user.organization_id).await?;
+            let account = account::get(&mut pool, user.organization_id, *id).await?;
             if let Some(acc) = account {
                 if acc.organization_id != user.organization_id {
                     return Err(ApiError::NotFound(i18n.t("coa-error-not-found")));

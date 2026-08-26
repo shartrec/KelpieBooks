@@ -72,17 +72,17 @@ pub(crate) async fn get_accounts_by_category(
 
 pub(crate) async fn get_account_with_balance(
     pool: &mut PgConnection,
+    org_id: Uuid,
     account_id: Uuid,
-    organization_id: Uuid,
 ) -> Result<AccountWithBalance, ApiError> {
-    let account = get(pool, account_id, organization_id)
+    let account = get(pool, org_id, account_id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Account not found".to_string()))?;
 
     let balance = journal_entry::get_balance_up_to_date(
         pool,
+        org_id,
         account_id,
-        organization_id,
         Local::now().date_naive(),
     )
     .await?;
@@ -184,15 +184,15 @@ pub(crate) async fn get_payment_methods(
 
 pub(crate) async fn get_journal_entries_with_running_balance(
     pool: &mut PgConnection,
-    account_id: Uuid,
     org_id: Uuid,
+    account_id: Uuid,
     start_date: NaiveDate,
     end_date: NaiveDate,
 ) -> Result<Vec<JournalEntryWithBalance>, ApiError> {
     let opening_balance =
-        journal_entry::get_balance_before_date(pool, account_id, org_id, start_date).await?;
+        journal_entry::get_balance_before_date(pool, org_id, account_id, start_date).await?;
     let entries = journal_entry::get_all_by_account_in_date_range(
-        pool, account_id, org_id, start_date, end_date,
+        pool, org_id, account_id, start_date, end_date,
     )
     .await?;
 

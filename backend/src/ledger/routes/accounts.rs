@@ -139,7 +139,7 @@ async fn get_account(
 ) -> Result<Json<Account>, ApiError> {
     let user = guard.0;
 
-    let account = account_db::get(&mut pool, *id, user.organization_id)
+    let account = account_db::get(&mut pool, user.organization_id, *id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Account not found".to_string()))?;
     Ok(Json(account))
@@ -161,8 +161,8 @@ async fn get_account_entries(
         .map_err(|_| ApiError::BadRequest("Invalid end date".to_string()))?;
     let entries = account_service::get_journal_entries_with_running_balance(
         &mut pool,
-        *id,
         user.organization_id,
+        *id,
         start_date,
         end_date,
     )
@@ -202,7 +202,7 @@ async fn update_account(
 ) -> Result<Json<AccountWithBalance>, ApiError> {
     let user = guard.0;
 
-    let updated_account = account_db::update(&mut pool, *id, user.organization_id, &req).await?;
+    let updated_account = account_db::update(&mut pool, user.organization_id, *id, &req).await?;
     Ok(Json(AccountWithBalance {
         id: updated_account.id,
         organization_id: updated_account.organization_id,
@@ -232,7 +232,7 @@ async fn delete_account(
         ));
     }
 
-    let rows_affected = account_db::delete(&mut pool, *id, user.organization_id).await?;
+    let rows_affected = account_db::delete(&mut pool, user.organization_id, *id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Account not found.".to_string()));
     }
@@ -259,12 +259,12 @@ async fn export_account_ledger(
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
         .map_err(|_| ApiError::BadRequest("Invalid end date".to_string()))?;
 
-    let account = account_db::get(&mut pool, *id, user.organization_id).await?;
+    let account = account_db::get(&mut pool, user.organization_id, *id).await?;
     if let Some(account) = account {
         let entries = account_service::get_journal_entries_with_running_balance(
             &mut pool,
-            *id,
             user.organization_id,
+            *id,
             start_date,
             end_date,
         )

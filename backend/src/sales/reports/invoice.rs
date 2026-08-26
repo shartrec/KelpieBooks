@@ -86,7 +86,7 @@ async fn gather_order_dictionary(conn: &mut Connection<DbKelpie>, user: &Authent
         return Err(ApiError::Forbidden("Organization ID does not exist".into()));
     }
 
-    let order = get_sales_order(conn, order_id, user.organization_id).await?;
+    let order = get_sales_order(conn, user.organization_id, order_id).await?;
 
     if let Some(order_dto) = order {
         let order = order_dto.order;
@@ -185,16 +185,16 @@ async fn gather_order_dictionary(conn: &mut Connection<DbKelpie>, user: &Authent
 
             #[cfg(feature = "inventory")]
             {
-                let it = get_item(conn, line.item_id, order.org_id).await?;
+                let it = get_item(conn, order.org_id, line.item_id).await?;
                 if let Some(it) = it {
-                    let uom = get_uom(conn, it.uom_id, order.org_id).await?;
+                    let uom = get_uom(conn, order.org_id, it.uom_id).await?;
                     if let Some(uom) = uom {
                         item.insert("uom".into(), Value::Str(uom.name.into()));
                     }
                 }
                 let wib = get_first_balance_for_item_warehouse(conn, order.org_id, line.item_id, order.warehouse_id).await?;
                 if let Some(wib) = wib {
-                    let wl = get_location(conn, wib.location_id, order.org_id).await?;
+                    let wl = get_location(conn, order.org_id, wib.location_id).await?;
                     if let Some(wl) = wl {
                         item.insert("location".into(), Value::Str(wl.display_label.into()));
                     }

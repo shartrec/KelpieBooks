@@ -59,7 +59,7 @@ pub(crate) async fn create_order(
     // Generate the next order number using the SalesOrder sequence
     let order_number = get_next_order_number(&mut tx, org_id, &SeqType::SalesOrder).await?;
 
-    let mut order = sales_order_db::create_draft_order(&mut tx, req, org_id, &order_number).await?;
+    let mut order = sales_order_db::create_draft_order(&mut tx, org_id, req, &order_number).await?;
 
     for line in &req.lines {
         if line.item_id == Uuid::nil() {
@@ -73,8 +73,8 @@ pub(crate) async fn create_order(
 
     sales_order_db::update_sales_order_totals(
         &mut tx,
-        order.id,
         org_id,
+        order.id,
         order.subtotal,
         order.tax_total,
         order.total_amount,
@@ -89,10 +89,10 @@ pub(crate) async fn create_order(
 
 pub(crate) async fn get_sales_order(
     pool: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<SalesOrderDto, ApiError> {
-    let mut order = sales_order_db::get_sales_order(pool, id, org_id)
+    let mut order = sales_order_db::get_sales_order(pool, org_id, id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Sales order not found.".to_string()))?;
 
@@ -142,14 +142,14 @@ pub(crate) async fn list_sales_orders(
 
 pub(crate) async fn confirm_order(
     pool: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     user_id: Uuid,
 ) -> Result<SalesOrderDto, ApiError> {
     let mut tx = pool.begin().await?;
 
     // Load and verify order status
-    let order = sales_order_db::get_sales_order(&mut tx, id, org_id)
+    let order = sales_order_db::get_sales_order(&mut tx, org_id, id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Sales order not found.".to_string()))?;
 
@@ -210,7 +210,7 @@ pub(crate) async fn confirm_order(
     }
 
     // Mark order as Confirmed
-    sales_order_db::update_sales_order_status(&mut tx, id, org_id, SalesDocumentStatus::Open)
+    sales_order_db::update_sales_order_status(&mut tx, org_id, id, SalesDocumentStatus::Open)
         .await?;
 
     tx.commit().await?;
@@ -220,10 +220,10 @@ pub(crate) async fn confirm_order(
 
 pub(crate) async fn cancel_order(
     pool: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<(), ApiError> {
-    let order = sales_order_db::get_sales_order(pool, id, org_id)
+    let order = sales_order_db::get_sales_order(pool, org_id, id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Sales order not found.".to_string()))?;
 
@@ -235,7 +235,7 @@ pub(crate) async fn cancel_order(
         ));
     }
 
-    sales_order_db::update_sales_order_status(pool, id, org_id, SalesDocumentStatus::Cancelled)
+    sales_order_db::update_sales_order_status(pool, org_id, id, SalesDocumentStatus::Cancelled)
         .await?;
 
     Ok(())

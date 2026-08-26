@@ -54,8 +54,8 @@ async fn get_locations(
 ) -> Result<Json<Vec<WarehouseLocation>>, ApiError> {
     let locations = location_service::get_locations_for_warehouse(
         &mut pool,
-        *warehouse_id,
         user.organization_id,
+        *warehouse_id,
     )
     .await?;
     Ok(Json(locations))
@@ -73,7 +73,7 @@ async fn generate_locations(
     _guard: RequirePrivilege<ManageInventory>,
 ) -> Result<Json<Vec<WarehouseLocation>>, ApiError> {
     let new_locations =
-        location_service::generate_locations(&mut pool, *warehouse_id, user.organization_id, &req)
+        location_service::generate_locations(&mut pool, user.organization_id, *warehouse_id, &req)
             .await?;
     Ok(Json(new_locations))
 }
@@ -85,7 +85,7 @@ async fn get_location(
     _guard: RequirePrivilege<UseInventory>,
 ) -> Result<Json<WarehouseLocation>, ApiError> {
     let location =
-        crate::inventory::services::locations::get_location(&mut pool, *id, user.organization_id)
+        crate::inventory::services::locations::get_location(&mut pool, user.organization_id, *id)
             .await?
             .ok_or_else(|| ApiError::NotFound("Warehouse location not found".to_string()))?;
     Ok(Json(location))
@@ -117,8 +117,8 @@ async fn update_location(
 ) -> Result<Json<WarehouseLocation>, ApiError> {
     let updated_loc = crate::inventory::services::locations::update_location(
         &mut pool,
-        *id,
         user.organization_id,
+        *id,
         &loc,
     )
     .await?;

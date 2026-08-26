@@ -32,8 +32,8 @@ pub async fn all_warehouses(
 
 pub async fn get_warehouse(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<Option<Warehouse>, sqlx::Error> {
     sqlx::query_as!(
         Warehouse,
@@ -65,8 +65,8 @@ pub async fn create_warehouse(
 
 pub async fn update_warehouse(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     wh: &Warehouse,
 ) -> Result<Warehouse, sqlx::Error> {
     sqlx::query_as!(
@@ -84,8 +84,8 @@ pub async fn update_warehouse(
 
 pub async fn delete_warehouse(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
     sqlx::query!(
         "DELETE FROM warehouses WHERE id = $1 AND organization_id = $2",

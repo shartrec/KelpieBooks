@@ -21,18 +21,18 @@ use crate::{
 
 pub async fn get_locations_for_warehouse(
     pool: &mut Connection<DbKelpie>,
-    warehouse_id: Uuid,
     org_id: Uuid,
+    warehouse_id: Uuid,
 ) -> Result<Vec<WarehouseLocation>, sqlx::Error> {
-    location_db::all_by_warehouse(pool, warehouse_id, org_id).await
+    location_db::all_by_warehouse(pool, org_id, warehouse_id).await
 }
 
 pub async fn get_location(
     pool: &mut Connection<DbKelpie>,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<Option<WarehouseLocation>, sqlx::Error> {
-    crate::inventory::db::location::get_location(pool, id, org_id).await
+    crate::inventory::db::location::get_location(pool, org_id, id).await
 }
 
 pub async fn create_location(
@@ -45,17 +45,17 @@ pub async fn create_location(
 
 pub async fn update_location(
     pool: &mut Connection<DbKelpie>,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     loc: &WarehouseLocation,
 ) -> Result<WarehouseLocation, sqlx::Error> {
-    crate::inventory::db::location::update_location(pool, id, org_id, loc).await
+    crate::inventory::db::location::update_location(pool, org_id, id, loc).await
 }
 
 pub async fn generate_locations(
     pool: &mut Connection<DbKelpie>,
-    warehouse_id: Uuid,
     org_id: Uuid,
+    warehouse_id: Uuid,
     req: &BulkLocationGenerateRequest,
 ) -> Result<Vec<WarehouseLocation>, ApiError> {
     let mut generated = Vec::new();

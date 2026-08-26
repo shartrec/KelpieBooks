@@ -55,8 +55,8 @@ fn from_row_to_sales_order_list_item(row: &sqlx::postgres::PgRow) -> SalesOrder 
 
 pub(crate) async fn create_draft_order(
     conn: &mut PgConnection,
-    request: &CreateSalesOrderRequest,
     org_id: Uuid,
+    request: &CreateSalesOrderRequest,
     order_number: &str,
 ) -> Result<SalesOrder, sqlx::Error> {
     let mut tx = conn.begin().await?;
@@ -247,8 +247,8 @@ pub(crate) async fn get_sales_order_address(
 
 pub(crate) async fn get_sales_order(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<Option<SalesOrderDto>, sqlx::Error> {
     let order_row = sqlx::query_as!(
         SalesOrder,
@@ -365,8 +365,8 @@ pub(crate) async fn list_sales_orders(
 
 pub(crate) async fn update_sales_order_totals(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     subtotal: Decimal,
     tax_total: Decimal,
     total_amount: Decimal,
@@ -392,8 +392,8 @@ pub(crate) async fn update_sales_order_totals(
 
 pub(crate) async fn update_sales_order_status(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     new_status: SalesDocumentStatus,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(

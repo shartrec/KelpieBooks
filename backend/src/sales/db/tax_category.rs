@@ -26,8 +26,8 @@ pub async fn all(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<TaxCategor
 
 pub async fn get(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<Option<TaxCategory>, sqlx::Error> {
     sqlx::query_as!(
         TaxCategory,
@@ -61,8 +61,8 @@ pub async fn create(
 
 pub async fn update(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     tax_category: &TaxCategory,
 ) -> Result<TaxCategory, sqlx::Error> {
     sqlx::query_as!(
@@ -79,7 +79,7 @@ pub async fn update(
     .await
 }
 
-pub async fn delete(conn: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<u64, sqlx::Error> {
+pub async fn delete(conn: &mut PgConnection, org_id: Uuid, id: Uuid) -> Result<u64, sqlx::Error> {
     let result = sqlx::query!(
         "DELETE FROM tax_categories WHERE id = $1 AND organization_id = $2",
         id,

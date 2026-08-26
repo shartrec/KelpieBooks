@@ -54,7 +54,7 @@ async fn get_uom(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseSales>,
 ) -> Result<Json<UnitOfMeasure>, ApiError> {
-    let uom = uom_service::get_uom(&mut pool, *id, user.organization_id)
+    let uom = uom_service::get_uom(&mut pool, user.organization_id, *id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Unit of Measure not found".to_string()))?;
     Ok(Json(uom))
@@ -79,7 +79,7 @@ async fn update_uom(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<Json<UnitOfMeasure>, ApiError> {
-    let updated_uom = uom_service::update_uom(&mut pool, *id, user.organization_id, &uom).await?;
+    let updated_uom = uom_service::update_uom(&mut pool, user.organization_id, *id, &uom).await?;
     Ok(Json(updated_uom))
 }
 
@@ -90,7 +90,7 @@ async fn delete_uom(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<&'static str, ApiError> {
-    let rows_affected = uom_service::delete_uom(&mut pool, *id, user.organization_id).await?;
+    let rows_affected = uom_service::delete_uom(&mut pool, user.organization_id, *id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Unit of Measure not found.".to_string()));
     }

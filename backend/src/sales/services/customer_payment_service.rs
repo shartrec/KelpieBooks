@@ -45,7 +45,7 @@ pub(crate) async fn get_customer_order_payments(
     organization_id: Uuid,
     order_id: Uuid,
 ) -> Result<Vec<CustomerPayment>, ApiError> {
-    let _order = sales_order_db::get_sales_order(pool, order_id, organization_id)
+    let _order = sales_order_db::get_sales_order(pool, organization_id, order_id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Order not found.".to_string()))?;
     let payments = customer_payment_db::get_all_by_order(pool, order_id).await?;

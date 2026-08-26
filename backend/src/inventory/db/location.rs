@@ -16,8 +16,8 @@ use uuid::Uuid;
 
 pub async fn all_by_warehouse(
     conn: &mut PgConnection,
-    warehouse_id: Uuid,
     org_id: Uuid,
+    warehouse_id: Uuid,
 ) -> Result<Vec<WarehouseLocation>, sqlx::Error> {
     sqlx::query_as!(
         WarehouseLocation,
@@ -36,8 +36,8 @@ pub async fn all_by_warehouse(
 
 pub async fn get_location(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<Option<WarehouseLocation>, sqlx::Error> {
     sqlx::query_as!(
         WarehouseLocation,
@@ -74,8 +74,8 @@ pub async fn create_location(
 
 pub async fn update_location(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     loc: &WarehouseLocation,
 ) -> Result<WarehouseLocation, sqlx::Error> {
     sqlx::query_as!(

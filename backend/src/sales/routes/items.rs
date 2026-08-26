@@ -72,7 +72,7 @@ async fn get_item(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseSales>,
 ) -> Result<Json<Option<Item>>, ApiError> {
-    let item = item_service::get_item(&mut pool, *id, user.organization_id).await?;
+    let item = item_service::get_item(&mut pool, user.organization_id, *id).await?;
     Ok(Json(item))
 }
 
@@ -96,7 +96,7 @@ async fn update_item(
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<Json<Item>, ApiError> {
     let updated_item =
-        item_service::update_item(&mut pool, *id, user.organization_id, &item).await?;
+        item_service::update_item(&mut pool, user.organization_id, *id, &item).await?;
     Ok(Json(updated_item))
 }
 
@@ -107,6 +107,6 @@ async fn delete_item(
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<Json<u64>, ApiError> {
-    let rows_affected = item_service::delete_item(&mut pool, *id, user.organization_id).await?;
+    let rows_affected = item_service::delete_item(&mut pool, user.organization_id, *id).await?;
     Ok(Json(rows_affected))
 }

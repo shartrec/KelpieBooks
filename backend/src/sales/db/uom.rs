@@ -27,8 +27,8 @@ pub async fn all(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<UnitOfMeas
 
 pub async fn get(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<Option<UnitOfMeasure>, sqlx::Error> {
     sqlx::query_as!(
         UnitOfMeasure,
@@ -63,8 +63,8 @@ pub async fn create(
 
 pub async fn update(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     uom: &UnitOfMeasure,
 ) -> Result<UnitOfMeasure, sqlx::Error> {
     sqlx::query_as!(
@@ -83,8 +83,8 @@ pub async fn update(
 
 pub async fn delete(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
     sqlx::query!(
         "DELETE FROM units_of_measure WHERE id = $1 AND organization_id = $2",

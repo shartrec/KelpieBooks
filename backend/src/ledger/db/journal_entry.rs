@@ -101,8 +101,8 @@ pub(crate) async fn insert(
 
 pub(crate) async fn get_balance_before_date(
     pool: &mut PgConnection,
-    account_id: Uuid,
     org_id: Uuid,
+    account_id: Uuid,
     date: NaiveDate,
 ) -> Result<Decimal, sqlx::Error> {
     let result = sqlx::query_scalar!(
@@ -125,8 +125,8 @@ pub(crate) async fn get_balance_before_date(
 
 pub(crate) async fn get_all_by_account_in_date_range(
     pool: &mut PgConnection,
-    account_id: Uuid,
     org_id: Uuid,
+    account_id: Uuid,
     start_date: NaiveDate,
     end_date: NaiveDate,
 ) -> Result<Vec<JournalEntryWithDate>, sqlx::Error> {
@@ -159,8 +159,8 @@ pub(crate) async fn get_all_by_account_in_date_range(
 
 pub(crate) async fn get_balance_up_to_date(
     pool: &mut PgConnection,
-    account_id: Uuid,
     org_id: Uuid,
+    account_id: Uuid,
     date: NaiveDate,
 ) -> Result<Decimal, sqlx::Error> {
     let result = sqlx::query_scalar!(

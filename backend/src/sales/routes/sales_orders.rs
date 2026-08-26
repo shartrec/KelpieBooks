@@ -73,7 +73,7 @@ async fn get_sales_order(
     id: PathUuid,
 ) -> Result<Json<SalesOrderDto>, ApiError> {
     let user = guard.0;
-    let order = sales_order_service::get_sales_order(&mut pool, *id, user.organization_id).await?;
+    let order = sales_order_service::get_sales_order(&mut pool, user.organization_id, *id).await?;
     Ok(Json(order))
 }
 
@@ -96,7 +96,7 @@ async fn confirm_sales_order(
 ) -> Result<Json<SalesOrderDto>, ApiError> {
     let user = guard.0;
     let order =
-        sales_order_service::confirm_order(&mut pool, *id, user.organization_id, user.user_id)
+        sales_order_service::confirm_order(&mut pool, user.organization_id, *id, user.user_id)
             .await?;
     Ok(Json(order))
 }
@@ -108,7 +108,7 @@ async fn cancel_sales_order(
     id: PathUuid,
 ) -> Result<Status, ApiError> {
     let user = guard.0;
-    sales_order_service::cancel_order(&mut pool, *id, user.organization_id).await?;
+    sales_order_service::cancel_order(&mut pool, user.organization_id, *id).await?;
     Ok(Status::NoContent)
 }
 
@@ -121,7 +121,7 @@ async fn print_sales_invoice(
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
 
-    if let Some(order) = crate::sales::db::sales_order::get_sales_order(&mut pool, *id, user.organization_id).await? {
+    if let Some(order) = crate::sales::db::sales_order::get_sales_order(&mut pool, user.organization_id, *id).await? {
         let name = format!("Invoice-{}.pdf", order.order.order_number);
 
         let invoice_pdf =
@@ -140,7 +140,7 @@ async fn print_picking_list(
     id: PathUuid,
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
-    if let Some(order) = crate::sales::db::sales_order::get_sales_order(&mut pool, *id, user.organization_id).await? {
+    if let Some(order) = crate::sales::db::sales_order::get_sales_order(&mut pool, user.organization_id, *id).await? {
         let name = format!("Picklist-{}.pdf", order.order.order_number);
         let picklist_pdf =
             reports::invoice::generate_picklist(&mut pool, user, config, *id).await?;

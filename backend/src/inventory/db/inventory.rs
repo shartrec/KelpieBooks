@@ -31,8 +31,8 @@ use crate::util::ApiError;
 
 pub async fn get_warehouse_profile(
     conn: &mut PgConnection,
-    item_id: Uuid,
     org_id: Uuid,
+    item_id: Uuid,
 ) -> Result<Option<ItemWarehouseProfile>, sqlx::Error> {
     sqlx::query_as!(
         ItemWarehouseProfile,
@@ -153,9 +153,9 @@ pub async fn get_item_stock_balances(
 
 pub async fn get_balance_for_location(
     conn: &mut PgConnection,
+    org_id: Uuid,
     item_id: Uuid,
     location_id: Uuid,
-    org_id: Uuid,
 ) -> Result<Option<WarehouseInventoryBalance>, sqlx::Error> {
     sqlx::query_as!(
         WarehouseInventoryBalance,
@@ -187,8 +187,8 @@ pub async fn get_first_balance_for_item_warehouse(
 
 pub async fn update_inventory_quantities(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     qty_on_hand: rust_decimal::Decimal,
     qty_allocated: rust_decimal::Decimal,
 ) -> Result<WarehouseInventoryBalance, sqlx::Error> {

@@ -16,8 +16,8 @@ use uuid::Uuid;
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<Option<Transaction>, sqlx::Error> {
     sqlx::query_as!(
         Transaction,
@@ -31,13 +31,13 @@ pub(crate) async fn get(
 
 pub(crate) async fn get_recent_transactions(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    org_id: Uuid,
     limit: i64,
 ) -> Result<Vec<Transaction>, sqlx::Error> {
     sqlx::query_as!(
             Transaction,
             "SELECT * FROM transactions WHERE organization_id = $1 ORDER BY date DESC, created_at DESC LIMIT $2",
-            organization_id,
+            org_id,
             limit
         )
         .fetch_all(pool)
@@ -46,14 +46,14 @@ pub(crate) async fn get_recent_transactions(
 
 pub(crate) async fn insert(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    org_id: Uuid,
     date: NaiveDate,
     description: &Option<String>,
     reference: &Option<String>,
 ) -> Result<Uuid, sqlx::Error> {
     let row = sqlx::query!(
         "INSERT INTO transactions (organization_id, date, description, reference) VALUES ($1, $2, $3, $4) RETURNING id",
-        organization_id,
+        org_id,
         date,
         description.as_deref(),
         reference.as_deref(),
@@ -65,8 +65,8 @@ pub(crate) async fn insert(
 
 pub(crate) async fn delete(
     pool: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "DELETE FROM transactions WHERE id = $1 and organization_id = $2",

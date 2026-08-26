@@ -28,10 +28,10 @@ pub async fn get_uoms(
 
 pub async fn get_uom(
     pool: &mut Connection<DbKelpie>,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<Option<UnitOfMeasure>, sqlx::Error> {
-    uom_db::get(pool, id, org_id).await
+    uom_db::get(pool, org_id, id).await
 }
 
 pub async fn create_uom(
@@ -44,17 +44,17 @@ pub async fn create_uom(
 
 pub async fn update_uom(
     pool: &mut Connection<DbKelpie>,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     uom: &UnitOfMeasure,
 ) -> Result<UnitOfMeasure, sqlx::Error> {
-    uom_db::update(pool, id, org_id, uom).await
+    uom_db::update(pool, org_id, id, uom).await
 }
 
 pub async fn delete_uom(
     pool: &mut Connection<DbKelpie>,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
 ) -> Result<u64, ApiError> {
     if item_db::is_uom_in_use(pool, id).await? {
         return Err(ApiError::Conflict(
@@ -62,6 +62,6 @@ pub async fn delete_uom(
         ));
     }
 
-    let result = uom_db::delete(pool, id, org_id).await?;
+    let result = uom_db::delete(pool, org_id, id).await?;
     Ok(result.rows_affected())
 }

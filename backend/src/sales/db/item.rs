@@ -161,8 +161,8 @@ pub async fn create(
 
 pub async fn update(
     conn: &mut PgConnection,
-    id: Uuid,
     org_id: Uuid,
+    id: Uuid,
     item: &Item,
 ) -> Result<Item, sqlx::Error> {
     sqlx::query_as!(
@@ -210,7 +210,7 @@ pub async fn update(
     .await
 }
 
-pub async fn delete(conn: &mut PgConnection, id: Uuid, org_id: Uuid) -> Result<u64, sqlx::Error> {
+pub async fn delete(conn: &mut PgConnection, org_id: Uuid, id: Uuid) -> Result<u64, sqlx::Error> {
     let result = sqlx::query!(
         "DELETE FROM items WHERE id = $1 AND organization_id = $2",
         &id,
