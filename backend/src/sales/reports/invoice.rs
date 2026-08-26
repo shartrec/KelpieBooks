@@ -5,8 +5,9 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use std::borrow::Cow;
 use std::fs;
-
+use std::path::{Path, PathBuf};
 use rocket::State;
 use rocket_db_pools::Connection;
 use typst_as_lib::{
@@ -34,15 +35,47 @@ use crate::{
     DbKelpie,
     TemplateConfig,
 };
+use crate::inventory::db::inventory::get_first_balance_for_item_warehouse;
+use crate::inventory::db::location::get_location;
+use crate::sales::services::item_service::get_item;
+use crate::sales::services::uom_service::get_uom;
 
-pub(crate) async fn generate_order(
+pub(crate) async fn generate_invoice(
     conn: &mut Connection<DbKelpie>,
     user: AuthenticatedUser,
     config: &State<TemplateConfig>,
     order_id: Uuid,
 ) -> Result<Vec<u8>, ApiError> {
-    let i18n = LocaleContext::new(&user.locale);
+
+    let dict = gather_order_dictionary(conn, &user, config, order_id).await?;
+
     let template_dir = config.root_directory.to_string_lossy();
+
+    let path = Path::new(&*template_dir).join("invoice_template.typ");
+
+    build_order_pdf(dict, path)
+
+}
+pub(crate) async fn generate_picklist(
+    conn: &mut Connection<DbKelpie>,
+    user: AuthenticatedUser,
+    config: &State<TemplateConfig>,
+    order_id: Uuid,
+) -> Result<Vec<u8>, ApiError> {
+
+    let dict = gather_order_dictionary(conn, &user, config, order_id).await?;
+
+    let template_dir = config.root_directory.to_string_lossy();
+
+    let path = Path::new(&*template_dir).join("picklist_template.typ");
+
+    build_order_pdf(dict, path)
+
+}
+
+async fn gather_order_dictionary(conn: &mut Connection<DbKelpie>, user: &AuthenticatedUser, config: &State<TemplateConfig>, order_id: Uuid) -> Result<Dict, ApiError> {
+    let i18n = LocaleContext::new(&user.locale);
+
 
     // Gather the audit details and generate a structure to pass to the Typst template.
     let mut dict = Dict::new();
@@ -150,14 +183,33 @@ pub(crate) async fn generate_order(
             let gross = i18n.format_money_typ(line.net_amount.round_dp(2));
             item.insert("gross".into(), Value::Str(gross.into()));
 
+            #[cfg(feature = "inventory")]
+            {
+                let it = get_item(conn, line.item_id, order.org_id).await?;
+                if let Some(it) = it {
+                    let uom = get_uom(conn, it.uom_id, order.org_id).await?;
+                    if let Some(uom) = uom {
+                        item.insert("uom".into(), Value::Str(uom.name.into()));
+                    }
+                }
+                let wib = get_first_balance_for_item_warehouse(conn, order.org_id, line.item_id, order.warehouse_id).await?;
+                if let Some(wib) = wib {
+                    let wl = get_location(conn, wib.location_id, order.org_id).await?;
+                    if let Some(wl) = wl {
+                        item.insert("location".into(), Value::Str(wl.display_label.into()));
+                    }
+                }
+            }
+
             lines.push(Value::Dict(item));
         }
         dict.insert("lines".into(), Value::Array(lines));
     }
-    build_order_pdf(dict, &*template_dir)
+    Ok(dict)
 }
 
-fn build_order_pdf(order: Dict, template_path: &str) -> Result<Vec<u8>, ApiError> {
+fn build_order_pdf(order: Dict, template_path: PathBuf) -> Result<Vec<u8>, ApiError> {
+
     let template_source = fs::read_to_string(template_path)
         .map_err(|e| ApiError::Internal(format!("Failed to read template file: {}", e)))?;
 

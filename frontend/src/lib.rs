@@ -5,6 +5,8 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use serde::Deserialize;
+
 #[cfg(feature = "inventory")]
 pub mod inventory;
 #[cfg(feature = "ledger")]
@@ -21,3 +23,8 @@ pub mod contexts;
 pub mod core;
 pub mod router;
 pub mod services;
+
+#[derive(Deserialize)]
+pub struct BackendError {
+    pub error: String,
+}

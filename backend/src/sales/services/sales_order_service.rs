@@ -36,6 +36,7 @@ use crate::{
     },
     inventory::db::{
         inventory as inventory_db,
+        location as location_db,
         stock_transaction::{
             log_transaction,
             NewStockTransaction,
@@ -101,7 +102,7 @@ pub(crate) async fn get_sales_order(
         if let Some(item) = item {
             if item.is_stocked() {
                 let balances =
-                    inventory_db::get_item_stock_balances(pool, line.item_id, org_id).await?;
+                    inventory_db::get_item_stock_balances(pool, org_id, line.item_id).await?;
                 // Sum available across only the locations in the order's warehouse
                 let warehouse_available: Decimal = balances
                     .location_balances
@@ -152,65 +153,58 @@ pub(crate) async fn confirm_order(
         .await?
         .ok_or_else(|| ApiError::NotFound("Sales order not found.".to_string()))?;
 
-    if order.order.document_status != SalesDocumentStatus::Open {
+    if order.order.document_status != SalesDocumentStatus::Draft {
         return Err(ApiError::BadRequest(
-            "Only Open orders can be confirmed.".to_string(),
+            "Only Draft orders can be confirmed.".to_string(),
         ));
     }
 
-    // Find the first picking location in the order's warehouse
-    let picking_location = sqlx::query(
-        r#"
-        SELECT id, warehouse_id
-        FROM warehouse_locations
-        WHERE warehouse_id = $1 AND organization_id = $2 AND is_picking_location = true
-        ORDER BY display_label
-        LIMIT 1
-        "#,
-    )
-    .bind(order.order.warehouse_id)
-    .bind(org_id)
-    .fetch_optional(&mut *tx)
-    .await?;
-
-    let picking_location_id: Option<Uuid> = picking_location.as_ref().map(|r| r.get("id"));
-
+    let warehouse_id = order.order.warehouse_id.clone();
     // For each stocked line: adjust allocated quantity and log a stock transaction
     for line in &order.items {
         let item = item_db::get(&mut tx, org_id, line.item_id).await?;
         if let Some(item) = item {
             if item.is_stocked() {
-                let loc_id = picking_location_id.ok_or_else(|| {
-                    ApiError::BadRequest(
-                        "No picking location found in the selected warehouse. Cannot allocate stock.".to_string(),
-                    )
-                })?;
 
-                inventory_db::adjust_allocated(
+                let item_bal = inventory_db::get_first_balance_for_item_warehouse(
                     &mut tx,
-                    loc_id,
-                    line.item_id,
                     org_id,
-                    line.quantity,
-                )
-                .await?;
+                    line.item_id,
+                    warehouse_id
+                ).await?;
 
-                log_transaction(
-                    &mut tx,
-                    NewStockTransaction {
-                        organization_id: org_id,
-                        warehouse_id: order.order.warehouse_id,
-                        location_id: loc_id,
-                        item_id: line.item_id,
-                        transaction_type: TransactionType::Allocation,
-                        quantity_change: line.quantity,
-                        reference_type: Some(ReferenceType::SalesOrder),
-                        reference_id: Some(order.order.id),
-                        notes: Some("Allocated on sales order confirmation"),
-                        created_by: user_id,
-                    },
-                )
-                .await?;
+                if let Some(bal) = item_bal {
+                    inventory_db::adjust_allocated(
+                        &mut tx,
+                        org_id,
+                        warehouse_id,
+                        bal.location_id,
+                        line.item_id,
+                        line.quantity,
+                    )
+                        .await?;
+
+                    log_transaction(
+                        &mut tx,
+                        NewStockTransaction {
+                            organization_id: org_id,
+                            warehouse_id: order.order.warehouse_id,
+                            location_id: bal.location_id,
+                            item_id: line.item_id,
+                            transaction_type: TransactionType::Allocation,
+                            quantity_change: line.quantity,
+                            reference_type: Some(ReferenceType::SalesOrder),
+                            reference_id: Some(order.order.id),
+                            notes: Some("Allocated on sales order confirmation"),
+                            created_by: user_id,
+                        },
+                    )
+                        .await?;
+                } else {
+                    return Err(ApiError::BadRequest(
+                        format!("Item {} has no stocking location configured", item.name),
+                    ));
+                }
             }
         }
     }

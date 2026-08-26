@@ -20,17 +20,13 @@ use shared_core::{
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
-use crate::{
-    api::Api,
-    contexts::{
-        auth_context::use_user_context,
-        locale_context::use_locale,
-    },
-    sales::components::sales_order_drawer::{
-        addresses_view::AddressesView,
-        lines_view::LinesView,
-    },
-};
+use crate::{api::Api, contexts::{
+    auth_context::use_user_context,
+    locale_context::use_locale,
+}, sales::components::sales_order_drawer::{
+    addresses_view::AddressesView,
+    lines_view::LinesView,
+}, BackendError};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum DrawerTab {
@@ -59,7 +55,7 @@ pub fn sales_order_drawer(props: &SalesOrderDrawerProps) -> Html {
 
     let order_id = props.order.order.id;
     let can_manage = user_ctx.has_privilege(&SystemPrivilege::ManageSales);
-    let is_open = props.order.order.document_status == SalesDocumentStatus::Open;
+    let is_draft = props.order.order.document_status == SalesDocumentStatus::Draft;
 
     let on_close = {
         let on_close = props.on_close.clone();
@@ -96,10 +92,16 @@ pub fn sales_order_drawer(props: &SalesOrderDrawerProps) -> Html {
                             &fluent_args!["error" => e.to_string()],
                         ))),
                     },
-                    Ok(r) => confirm_error.set(Some(i18n.t_args(
-                        "sales-orders-drawer-error-confirm",
-                        &fluent_args!["status" => r.status().to_string()],
-                    ))),
+                    Ok(r) => {
+                        let error_message = match r.json::<BackendError>().await {
+                            Ok(api_err) => api_err.error,
+                            Err(_) => r.text().await.unwrap_or_else(|_| r.status_text()),
+                        };
+                        confirm_error.set(Some(i18n.t_args(
+                            "sales-orders-drawer-error-confirm",
+                            &fluent_args!["status" => error_message],  // I want the message text here
+                        )))
+                    },
                     Err(e) => confirm_error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],
@@ -221,14 +223,14 @@ pub fn sales_order_drawer(props: &SalesOrderDrawerProps) -> Html {
                 </div>
 
                 // Footer with action buttons
+                if let Some(e) = &*confirm_error {
+                    <div class="error">{ e }</div>
+                }
+                if let Some(e) = &*cancel_error {
+                    <div class="error">{ e }</div>
+                }
                 <footer class="drawer__footer">
-                    if let Some(e) = &*confirm_error {
-                        <div class="error">{ e }</div>
-                    }
-                    if let Some(e) = &*cancel_error {
-                        <div class="error">{ e }</div>
-                    }
-                    { if is_open && can_manage {
+                    { if is_draft && can_manage {
                         html! {
                             <>
                                 <button

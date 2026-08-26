@@ -20,13 +20,14 @@
 #set page(
   paper: "a4",
   margin: (x: 1.2cm, top: 2.0cm, bottom: 2.5cm),
+  flipped: true,
   header: align(right)[
 #grid(  columns: (auto,  1fr),
   align(left)[
     #text(size: 20pt, weight: "bold", fill: brand_color)[#company-name]
   ],
   align(right)[
-    #text(size: 14pt, weight: "bold", fill: brand_color)[Tax Invoice]
+    #text(size: 14pt, weight: "bold", fill: brand_color)[Picking Slip]
   ],
 )],
   footer: context [
@@ -37,7 +38,7 @@
       align: (right, right),
       [],
       [#align(center)[
-            Thank you for your business! | Payment terms: Net 30 days \
+            Thank you for your business! \
             Kelpie Books Ltd · 123 Accounting Lane, Suite 400 · support\@kelpiebooks.com
         ]
       ],
@@ -65,9 +66,8 @@
       columns: (auto, auto),
       gutter: 8pt,
       align: (right, right),
-      [*Invoice No:*], [#order-num],
+      [*Order No:*], [#order-num],
       [*Date:*], [#order-date],
-      [*Due Date:*], [#due-date],
     )
   ]
 )
@@ -123,61 +123,20 @@
 
 
 #table(
-  columns: (1fr, auto, auto, auto, auto, auto),
+  columns: (1fr, auto, auto, auto, auto),
   align: (left, right, right, right, right, right),
-  stroke: (x, y) => if y == 0 { (bottom: 2pt + brand_color) } else { none },
+  stroke: (x, y) => if y == 0 { (bottom: 2pt + brand_color) } else { 0.5pt },
   fill: (x, y) => if y == 0 { shadow_color } else if calc.even(y) { shadow_color.lighten(60%) } else { none },
   inset: 10pt,
 
   // Header definition
-  [*Description*], [*Qty*], [*Unit*], [*Net*], [*Tax*], [*Amount*],
+  [*Description*], [*Qty*], [*UoM*], [*Location*], [picked],
 
   ..lines.map(line => (
     // Row lines (Description, Qty, Unit Price, Extension)
-    [#line.at("code") - #line.at("name")], [#line.at("qty")], [\$#line.at("unit_price")], [\$#line.at("net")], [\$#line.at("tax")], [\$#line.at("gross")],
+    [#line.at("code") - #line.at("name")], [#line.at("qty")], [#line.at("uom", default: "")], [#line.at("location", default: "")], [ ],
   )).flatten()
 )
 
 #v(15pt)
 
-// --- Financial Aggregates Breakdown Summary ---
-#align(right)[
-  #block(width: 40%, breakable: false)[
-    #grid(
-      columns: (1fr, auto),
-      gutter: 10pt,
-      align: (left, right),
-      [Subtotal:], [\$#order-net],
-      [Tax (GST 10%):], [\$#order-tax],
-      grid.hline(stroke: 1pt + line_color),
-      [],[],
-      text(weight: "bold")[Total Amount Due:], text(weight: "bold", fill: brand_color)[\$#order-gross]
-    )
-  ]
-]
-
-#v(40pt)
-
-// --- Remittance Advice / Payment Information ---
-#block(
-  breakable: false,
-  fill: shadow_color.lighten(60%),
-  inset: 12pt,
-  radius: 5%,
-  stroke: 1pt + line_color,
-  width: 100%,
-  above: 1fr
-)[
-  #text(weight: "bold", fill: brand_color)[How to Pay:] \
-  #v(2pt)
-  Please remit bank transfer payments directly to the account details below, citing your invoice number as the reference descriptor:
-  #v(4pt)
-  #grid(
-    columns: (auto, auto),
-    gutter: 6pt,
-    [*Bank:*], [Global Enterprise Bank Australia],
-    [*BSB:*], [123-456],
-    [*Account No:*], [9876 5432 10],
-    [*Reference:*], [#order-num]
-  )
-]

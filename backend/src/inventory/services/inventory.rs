@@ -118,7 +118,7 @@ pub async fn get_balances_by_item(
     item_id: Uuid,
     org_id: Uuid,
 ) -> Result<ItemStockBalancesResponse, Error> {
-    inventory_db::get_item_stock_balances(pool, item_id, org_id).await
+    inventory_db::get_item_stock_balances(pool, org_id, item_id).await
 }
 
 pub async fn get_balance_at_location(

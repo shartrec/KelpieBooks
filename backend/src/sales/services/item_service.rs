@@ -46,7 +46,7 @@ pub async fn get_item(
     id: Uuid,
     org_id: Uuid,
 ) -> Result<Option<Item>, sqlx::Error> {
-    item_db::get(pool, id, org_id).await
+    item_db::get(pool, org_id, id).await
 }
 
 pub async fn create_item(
