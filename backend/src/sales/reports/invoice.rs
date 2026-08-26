@@ -5,7 +5,6 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use std::borrow::Cow;
 use std::fs;
 use std::path::{Path, PathBuf};
 use rocket::State;
@@ -47,7 +46,7 @@ pub(crate) async fn generate_invoice(
     order_id: Uuid,
 ) -> Result<Vec<u8>, ApiError> {
 
-    let dict = gather_order_dictionary(conn, &user, config, order_id).await?;
+    let dict = gather_order_dictionary(conn, &user, order_id).await?;
 
     let template_dir = config.root_directory.to_string_lossy();
 
@@ -63,7 +62,7 @@ pub(crate) async fn generate_picklist(
     order_id: Uuid,
 ) -> Result<Vec<u8>, ApiError> {
 
-    let dict = gather_order_dictionary(conn, &user, config, order_id).await?;
+    let dict = gather_order_dictionary(conn, &user, order_id).await?;
 
     let template_dir = config.root_directory.to_string_lossy();
 
@@ -73,7 +72,7 @@ pub(crate) async fn generate_picklist(
 
 }
 
-async fn gather_order_dictionary(conn: &mut Connection<DbKelpie>, user: &AuthenticatedUser, config: &State<TemplateConfig>, order_id: Uuid) -> Result<Dict, ApiError> {
+async fn gather_order_dictionary(conn: &mut Connection<DbKelpie>, user: &AuthenticatedUser, order_id: Uuid) -> Result<Dict, ApiError> {
     let i18n = LocaleContext::new(&user.locale);
 
 

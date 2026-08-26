@@ -9,7 +9,6 @@
 use rocket_db_pools::sqlx::{
     self,
     PgConnection,
-    Row,
 };
 use rust_decimal::Decimal;
 use shared_core::{
@@ -36,7 +35,6 @@ use crate::{
     },
     inventory::db::{
         inventory as inventory_db,
-        location as location_db,
         stock_transaction::{
             log_transaction,
             NewStockTransaction,
