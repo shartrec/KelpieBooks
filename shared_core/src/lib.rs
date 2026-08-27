@@ -5,15 +5,12 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use uuid::Uuid;
 #[cfg(feature = "backend")]
 use rocket::{
     form::{
         self,
-        FromFormField,
         ValueField,
     },
-    request::FromParam,
 };
 
 #[cfg(feature = "inventory")]
@@ -52,6 +49,7 @@ pub mod util;
 ///
 /// Defining a new entity identifier:
 /// ```rust
+/// use shared_core::define_id;
 /// define_id!(OrgId);
 /// define_id!(OrderId);
 ///
@@ -60,10 +58,8 @@ pub mod util;
 ///
 /// // Transparently dereferences to Uuid:
 /// println!("Organization UUID string: {}", org_id.to_string());
-/// ```
 ///
-/// Type safety in function signatures:
-/// ```rust
+/// // Type safety in function signatures:
 /// fn process_order(org_id: OrgId, order_id: OrderId) {
 ///     // ...
 /// }
@@ -101,25 +97,25 @@ macro_rules! define_id {
 
         impl Default for $name {
             fn default() -> Self {
-                Self(Uuid::new_v4())
+                Self(uuid::Uuid::new_v4())
             }
         }
 
         #[cfg(feature = "backend")]
-        impl<'r> FromParam<'r> for $name {
+        impl<'r> rocket::request::FromParam<'r> for $name {
             type Error = uuid::Error;
 
             fn from_param(param: &'r str) -> Result<Self, Self::Error> {
-                Uuid::parse_str(param).map($name)
+                uuid::Uuid::parse_str(param).map($name)
             }
         }
 
         #[cfg(feature = "backend")]
-        impl<'r> FromFormField<'r> for $name {
-            fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
-                match Uuid::parse_str(field.value) {
+        impl<'r> rocket::form::FromFormField<'r> for $name {
+            fn from_value(field: rocket::form::ValueField<'r>) -> rocket::form::Result<'r, Self> {
+                match uuid::Uuid::parse_str(field.value) {
                     Ok(uuid) => Ok($name{0: uuid}),
-                    Err(e) => Err(form::Error::validation(format!("{}", e)).into()),
+                    Err(e) => Err(rocket::form::Error::validation(format!("{}", e)).into()),
                 }
             }
         }
