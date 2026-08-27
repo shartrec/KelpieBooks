@@ -14,14 +14,13 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
 
 use crate::core::models::role::Role;
-use crate::OrgId;
+use crate::{OrgId, UserId};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct UserWithOrg {
-    pub id: Uuid,
+    pub id: UserId,
     pub organization_id: OrgId,
     pub email: String,
     pub full_name: String,

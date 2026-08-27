@@ -32,8 +32,49 @@ pub mod i18n;
 pub mod util;
 
 
+/// Generates a strongly-typed wrapper around a [`uuid::Uuid`] (Newtype pattern).
+///
+/// This macro creates a type-safe identifier to prevent parameter-ordering bugs
+/// (e.g., accidentally passing an `OrderId` into an `OrgId` parameter) at compile time,
+/// while maintaining zero runtime overhead.
+///
+/// # Derived Traits & Features
+/// Each generated type automatically implements:
+/// - Common identity/comparison traits: `Debug`, `Clone`, `Copy`, `PartialEq`, `Eq`, `Hash`, `Ord`, `PartialOrd`.
+/// - `Serialize` and `Deserialize` (via `serde`).
+/// - `sqlx::Type` with `#[sqlx(transparent)]` when the `backend` feature is active, allowing
+///   the type to bind directly to PostgreSQL `UUID` database columns.
+/// - `Deref<Target = Uuid>` for seamless access to underlying [`Uuid`] methods.
+/// - `From<Uuid>` and `From<$name> for Uuid` for easy conversion.
+/// - [`Display`](std::fmt::Display) for direct string formatting.
+///
+/// # Examples
+///
+/// Defining a new entity identifier:
+/// ```rust
+/// define_id!(OrgId);
+/// define_id!(OrderId);
+///
+/// let org_id = OrgId::from(uuid::Uuid::new_v4());
+/// let order_id = OrderId::from(uuid::Uuid::new_v4());
+///
+/// // Transparently dereferences to Uuid:
+/// println!("Organization UUID string: {}", org_id.to_string());
+/// ```
+///
+/// Type safety in function signatures:
+/// ```rust
+/// fn process_order(org_id: OrgId, order_id: OrderId) {
+///     // ...
+/// }
+///
+/// // process_order(order_id, org_id);
+/// // ❌ Fails at compile-time: expected `OrgId`, found `OrderId`
+/// ```
+#[macro_export]
 macro_rules! define_id {
     ($name:ident) => {
+        #[doc = concat!("A strongly-typed wrapper around [`uuid::Uuid`] representing a unique `", stringify!($name), "` identifier.")]
         #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize)]
         #[cfg_attr(feature = "backend", derive(sqlx::Type))]
         #[cfg_attr(feature = "backend", sqlx(transparent))]
@@ -74,7 +115,6 @@ macro_rules! define_id {
         }
 
         #[cfg(feature = "backend")]
-        #[cfg_attr(feature = "backend", rocket::async_trait)]
         impl<'r> FromFormField<'r> for $name {
             fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
                 match Uuid::parse_str(field.value) {
@@ -90,6 +130,7 @@ macro_rules! define_id {
 // Instantiate all entity keys in 1 line each:
 // These are all just well typed Uuids. Some, e.g. addresses may be reused in different contexts
 // referring to different database tables.
+// They all implement Deref, so use *org_id for instance would be a direct reference to the Uuid.
 
 define_id!(OrgId);
 define_id!(RoleId);

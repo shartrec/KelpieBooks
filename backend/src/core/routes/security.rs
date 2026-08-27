@@ -75,7 +75,7 @@ use shared_core::core::{
     requests::auth::LoginRequest,
 };
 use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{OrgId, UserId};
 #[cfg(feature = "email")]
 use crate::config::load_config;
 #[cfg(feature = "password-reset")]
@@ -267,7 +267,7 @@ async fn reset_password(
 }
 
 pub(crate) struct AuthenticatedUser {
-    pub(crate) user_id: Uuid,
+    pub(crate) user_id: UserId,
     pub(crate) organization_id: OrgId,
     pub(crate) strict_audit_mode: bool,
     pub(crate) username: String,
@@ -377,7 +377,6 @@ pub(crate) async fn validate_session_token(token: &str) -> Option<AuthenticatedU
 
     if let Ok(data) = token_data {
         if data.claims.exp > Utc::now().timestamp() as usize {
-            let org_id = Uuid::parse_str(&data.claims.organization_id).unwrap();
             let role_id = Uuid::parse_str(&data.claims.role_id).unwrap_or_default();
 
             // 💡 Safely parse strings back to your SystemPrivilege enum variants
@@ -392,8 +391,8 @@ pub(crate) async fn validate_session_token(token: &str) -> Option<AuthenticatedU
                 .collect();
 
             return Some(AuthenticatedUser {
-                user_id: Uuid::parse_str(&data.claims.user_id).unwrap(),
-                organization_id: OrgId{0: org_id},
+                user_id: Uuid::parse_str(&data.claims.user_id).map(UserId).unwrap(),
+                organization_id: Uuid::parse_str(&data.claims.organization_id).map(OrgId).unwrap(),
                 strict_audit_mode: data.claims.strict_audit_mode,
                 username: data.claims.username,
                 full_name: data.claims.full_name,

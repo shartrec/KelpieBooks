@@ -10,15 +10,14 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::OrgId;
+use crate::{OrgId, UserId};
 
 /// A Data Transfer Object representing the user details that are safe
 /// to send to the frontend. This struct explicitly omits sensitive
 /// information like the password hash.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct UserDetail {
-    pub id: Uuid,
+    pub id: UserId,
     pub email: String,
     pub full_name: String,
     pub display_name: Option<String>,
@@ -28,7 +27,7 @@ pub struct UserDetail {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AuthUserDetail {
-    pub id: Uuid,
+    pub id: UserId,
     pub email: String,
     pub full_name: String,
     pub display_name: Option<String>,

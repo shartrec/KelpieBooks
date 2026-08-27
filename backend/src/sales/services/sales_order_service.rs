@@ -21,7 +21,7 @@ use shared_core::{inventory::models::stock_balance::{
         sales_order::SalesOrder,
     },
     requests::sales_order::CreateSalesOrderRequest,
-}, OrgId};
+}, OrgId, UserId};
 use sqlx::Acquire;
 use uuid::Uuid;
 
@@ -139,7 +139,7 @@ pub(crate) async fn confirm_order(
     pool: &mut PgConnection,
     org_id: OrgId,
     id: Uuid,
-    user_id: Uuid,
+    user_id: UserId,
 ) -> Result<SalesOrderDto, ApiError> {
     let mut tx = pool.begin().await?;
 

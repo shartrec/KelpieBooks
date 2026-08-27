@@ -28,7 +28,7 @@ use shared_core::core::{
     },
 };
 use sqlx::Acquire;
-
+use shared_core::{UserId};
 use crate::{
     core::{
         db::user,
@@ -43,7 +43,6 @@ use crate::{
     },
     util::{
         locale_context::LocaleContext,
-        types::PathUuid,
         ApiError,
     },
     DbKelpie,
@@ -105,7 +104,7 @@ pub(crate) async fn add_user(
 
 #[put("/api/users/<id>", data = "<update_data>")]
 pub(crate) async fn update_user(
-    id: PathUuid,
+    id: UserId,
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageUsers>,
     update_data: Json<UpdateUserRequest>,
@@ -113,7 +112,7 @@ pub(crate) async fn update_user(
     let auth_user = guard.0;
     let i18n = LocaleContext::new(&auth_user.locale);
 
-    let original_user = user::get(&mut *pool, auth_user.organization_id, *id)
+    let original_user = user::get(&mut *pool, auth_user.organization_id, id)
         .await?
         .ok_or_else(|| ApiError::NotFound("User not found".to_string()))?;
 
@@ -121,7 +120,7 @@ pub(crate) async fn update_user(
 
     let updated_user = user::update(
         &mut *tx,
-        *id,
+        id,
         &update_data.email,
         &original_user.password_hash,
         &update_data.full_name,
@@ -245,13 +244,13 @@ pub(crate) async fn get_all_users(
 
 #[get("/api/users/<id>")]
 pub(crate) async fn get_user(
-    id: PathUuid,
+    id: UserId,
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageUsers>,
 ) -> Result<Json<UserDetail>, ApiError> {
     let user = guard.0;
 
-    match user::get(&mut *pool, user.organization_id, *id).await? {
+    match user::get(&mut *pool, user.organization_id, id).await? {
         Some(user) => {
             let user_detail = UserDetail {
                 id: user.id,
@@ -269,7 +268,7 @@ pub(crate) async fn get_user(
 
 #[delete("/api/users/<id>")]
 pub(crate) async fn delete_user(
-    id: PathUuid,
+    id: UserId,
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageUsers>,
 ) -> Result<&'static str, ApiError> {
@@ -278,7 +277,7 @@ pub(crate) async fn delete_user(
 
     let mut tx = pool.begin().await?;
 
-    user::delete(&mut *tx, *id).await?;
+    user::delete(&mut *tx, id).await?;
     // You can't delete the last administrator.
     user::check_security_admin_remains(&mut *tx, auth_user.organization_id, &i18n).await?;
 

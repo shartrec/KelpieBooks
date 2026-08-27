@@ -17,7 +17,7 @@ use shared_core::core::models::{
     user_with_org::UserWithOrg,
 };
 use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{OrgId, UserId};
 use crate::util::{
     locale_context::LocaleContext,
     ApiError,
@@ -77,7 +77,7 @@ pub(crate) async fn insert(
 
 pub(crate) async fn update(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: UserId,
     email: &str,
     password_hash: &str,
     full_name: &str,
@@ -92,7 +92,7 @@ pub(crate) async fn update(
         full_name,
         display_name,
         role_id,
-        id
+        *id
     )
     .fetch_one(pool)
     .await?;
@@ -101,21 +101,21 @@ pub(crate) async fn update(
 
 pub(crate) async fn update_password(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: UserId,
     password_hash: &str,
 ) -> Result<(), sqlx::Error> {
     let _ = sqlx::query!(
         "UPDATE users SET password_hash=$1 WHERE id = $2",
         password_hash,
-        id
+        *id
     )
     .execute(pool)
     .await?;
     Ok(())
 }
 
-pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, ApiError> {
-    let result = sqlx::query!("DELETE FROM users WHERE id = $1", id)
+pub(crate) async fn delete(pool: &mut PgConnection, id: UserId) -> Result<u64, ApiError> {
+    let result = sqlx::query!("DELETE FROM users WHERE id = $1", *id)
         .execute(pool)
         .await?;
 
@@ -134,7 +134,7 @@ pub(crate) async fn check_security_admin_remains(
             WHERE rp.privilege_id = $1
             AND u.organization_id = $2
         "#,
-        SystemPrivilege::SecurityAdmin as i64,
+        SystemPrivilege::SecurityAdmin as SystemPrivilege,
         *org_id,
     )
     .fetch_one(pool)
@@ -162,7 +162,7 @@ const SQL: &'static str = r#"SELECT u.id, u.organization_id, u.email, u.password
 pub(crate) async fn get(
     pool: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: UserId,
 ) -> Result<Option<UserWithOrg>, sqlx::Error> {
     let row =
         sqlx::query(format!("{} {} ", SQL, "WHERE u.id = $1 AND u.organization_id = $2").as_str())

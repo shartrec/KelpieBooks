@@ -15,7 +15,7 @@ use shared_core::core::{
 };
 use uuid::Uuid;
 use yew::prelude::*;
-
+use shared_core::UserId;
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
@@ -23,7 +23,7 @@ pub struct EditUserModalProps {
     pub user: UserDetail,
     pub roles: Vec<Role>,
     pub on_close: Callback<()>,
-    pub on_submit: Callback<(Uuid, UpdateUserRequest)>,
+    pub on_submit: Callback<(UserId, UpdateUserRequest)>,
 }
 
 #[function_component(EditUserModal)]

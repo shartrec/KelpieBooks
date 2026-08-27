@@ -36,7 +36,7 @@ use shared_core::{inventory::{
         CreateTransactionRequest,
         JournalEntryLine,
     },
-}, OrgId};
+}, OrgId, UserId};
 use sqlx::{
     Acquire,
     Error,
@@ -151,7 +151,7 @@ pub async fn update_stock_levels(
 pub async fn receive_vendor_stock(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    user_id: Uuid,
+    user_id: UserId,
     req: &ReceiveStockRequest,
 ) -> Result<Vec<WarehouseInventoryBalance>, ApiError> {
     if req.items.is_empty() {
@@ -230,7 +230,7 @@ pub async fn receive_vendor_stock(
 pub async fn adjust_stock(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    user_id: Uuid,
+    user_id: UserId,
     req: &StockAdjustmentRequest,
 ) -> Result<Vec<WarehouseInventoryBalance>, ApiError> {
     if req.items.is_empty() {

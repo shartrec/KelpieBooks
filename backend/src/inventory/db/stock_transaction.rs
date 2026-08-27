@@ -14,7 +14,7 @@ use shared_core::inventory::models::stock_balance::{
 };
 use sqlx::PgConnection;
 use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{OrgId, UserId};
 
 pub struct NewStockTransaction<'a> {
     pub organization_id: OrgId,
@@ -26,7 +26,7 @@ pub struct NewStockTransaction<'a> {
     pub reference_type: Option<ReferenceType>,
     pub reference_id: Option<Uuid>,
     pub notes: Option<&'a str>,
-    pub created_by: Uuid,
+    pub created_by: UserId,
 }
 
 /// Inserts an immutable transaction record into the audit ledger.
@@ -54,7 +54,7 @@ pub async fn log_transaction(
         entry.reference_type as Option<ReferenceType>,
         entry.reference_id,
         entry.notes,
-        entry.created_by
+        *entry.created_by
     )
         .fetch_one(conn)
         .await

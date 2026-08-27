@@ -17,10 +17,9 @@ use shared_core::core::{
         UpdateUserRequest,
     },
 };
-use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-
+use shared_core::UserId;
 use crate::{
     api::Api,
     contexts::{
@@ -198,7 +197,7 @@ pub fn users_page() -> Html {
         let i18n = i18n.clone();
         let navigator = navigator.clone();
         let show_edit_modal = show_edit_modal.clone();
-        Callback::from(move |(user_id, req): (Uuid, UpdateUserRequest)| {
+        Callback::from(move |(user_id, req): (UserId, UpdateUserRequest)| {
             let fetch_users = fetch_users.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();

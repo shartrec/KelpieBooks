@@ -17,14 +17,14 @@ use sqlx::{
 use uuid::Uuid;
 
 pub struct PasswordResetToken {
-    pub user_id: Uuid,
+    pub user_id: UserId,
     pub token_hash: String,
     pub expires_at: DateTime<Utc>,
 }
 
 pub async fn save_reset_token(
     pool: &mut PgConnection,
-    user_id: Uuid,
+    user_id: UserId,
     token_hash: &str,
     expires_at: DateTime<Utc>,
 ) -> Result<i32, sqlx::Error> {
