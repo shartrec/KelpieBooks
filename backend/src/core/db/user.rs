@@ -17,7 +17,7 @@ use shared_core::core::models::{
     user_with_org::UserWithOrg,
 };
 use uuid::Uuid;
-use shared_core::{OrgId, UserId};
+use shared_core::{OrgId, RoleId, UserId};
 use crate::util::{
     locale_context::LocaleContext,
     ApiError,
@@ -57,18 +57,28 @@ pub(crate) async fn insert(
     password_hash: &str,
     full_name: &str,
     display_name: Option<&str>,
-    role_id: Option<Uuid>,
+    role_id: Option<RoleId>,
 ) -> Result<User, sqlx::Error> {
+
     let user = sqlx::query_as!(
         User,
-        "INSERT INTO users (organization_id, email, password_hash, full_name, display_name, role_id)
-            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+        r#"INSERT INTO users (organization_id, email, password_hash, full_name, display_name, role_id)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING
+               id as "id: UserId",
+               organization_id as "organization_id: OrgId",
+               email,
+               full_name,
+               display_name,
+               password_hash,
+               role_id as "role_id: RoleId",
+               created_at"#,
         *org_id,
         email,
         password_hash,
         full_name,
         display_name,
-        role_id
+        role_id.map(|id| *id),
     )
     .fetch_one(pool)
     .await?;
@@ -82,16 +92,25 @@ pub(crate) async fn update(
     password_hash: &str,
     full_name: &str,
     display_name: Option<&str>,
-    role_id: Option<Uuid>,
+    role_id: Option<RoleId>,
 ) -> Result<User, sqlx::Error> {
     let user = sqlx::query_as!(
         User,
-        "UPDATE users SET email=$1, password_hash=$2, full_name=$3, display_name=$4, role_id=$5 WHERE id = $6 RETURNING *",
+        r#"UPDATE users SET email=$1, password_hash=$2, full_name=$3, display_name=$4, role_id=$5 WHERE id = $6
+           RETURNING
+               id as "id: UserId",
+               organization_id as "organization_id: OrgId",
+               email,
+               full_name,
+               display_name,
+               password_hash,
+               role_id as "role_id: RoleId",
+               created_at"#,
         email,
         password_hash,
         full_name,
         display_name,
-        role_id,
+        role_id.map(|id| *id),
         *id
     )
     .fetch_one(pool)
@@ -231,7 +250,7 @@ pub(crate) async fn get_all(
 }
 /* backend/src/db/user.rs */
 
-async fn get_privileges_for_role(pool: &mut PgConnection, role_id: Uuid) -> Vec<SystemPrivilege> {
+async fn get_privileges_for_role(pool: &mut PgConnection, role_id: RoleId) -> Vec<SystemPrivilege> {
     sqlx::query("SELECT privilege_id FROM role_privileges WHERE role_id = $1")
         .bind(role_id)
         .fetch_all(pool)

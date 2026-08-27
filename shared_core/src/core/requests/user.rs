@@ -10,7 +10,7 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
+use crate::RoleId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateUserRequest {
@@ -18,7 +18,7 @@ pub struct CreateUserRequest {
     pub full_name: String,
     pub display_name: Option<String>,
     pub password: String,
-    pub role_id: Option<Uuid>,
+    pub role_id: Option<RoleId>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -26,5 +26,5 @@ pub struct UpdateUserRequest {
     pub email: String,
     pub full_name: String,
     pub display_name: Option<String>,
-    pub role_id: Option<Uuid>,
+    pub role_id: Option<RoleId>,
 }

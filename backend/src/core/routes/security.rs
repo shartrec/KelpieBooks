@@ -75,7 +75,7 @@ use shared_core::core::{
     requests::auth::LoginRequest,
 };
 use uuid::Uuid;
-use shared_core::{OrgId, UserId};
+use shared_core::{OrgId, RoleId, UserId};
 #[cfg(feature = "email")]
 use crate::config::load_config;
 #[cfg(feature = "password-reset")]
@@ -377,7 +377,7 @@ pub(crate) async fn validate_session_token(token: &str) -> Option<AuthenticatedU
 
     if let Ok(data) = token_data {
         if data.claims.exp > Utc::now().timestamp() as usize {
-            let role_id = Uuid::parse_str(&data.claims.role_id).unwrap_or_default();
+            let role_id = Uuid::parse_str(&data.claims.role_id).map(RoleId).unwrap_or_default();
 
             // 💡 Safely parse strings back to your SystemPrivilege enum variants
             use std::str::FromStr;

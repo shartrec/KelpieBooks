@@ -15,8 +15,7 @@ use sqlx::{
     Result,
     Row,
 };
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{OrgId, RoleId};
 
 pub(crate) async fn find_all_for_org(conn: &mut PgConnection, org_id: OrgId) -> Result<Vec<Role>> {
     let rows = sqlx::query(
@@ -51,7 +50,7 @@ pub(crate) async fn find_all_for_org(conn: &mut PgConnection, org_id: OrgId) -> 
 pub(crate) async fn find_by_id(
     conn: &mut PgConnection,
     org_id: OrgId,
-    role_id: Uuid,
+    role_id: RoleId,
 ) -> Result<Option<Role>> {
     let row = sqlx::query(
         r#"
@@ -77,7 +76,7 @@ pub(crate) async fn find_by_id(
     }))
 }
 
-pub(crate) async fn create(conn: &mut PgConnection, org_id: OrgId, name: &str) -> Result<Uuid> {
+pub(crate) async fn create(conn: &mut PgConnection, org_id: OrgId, name: &str) -> Result<RoleId> {
     let role_id =
         sqlx::query("INSERT INTO roles (organization_id, name) VALUES ($1, $2) RETURNING id")
             .bind(org_id)
@@ -87,7 +86,7 @@ pub(crate) async fn create(conn: &mut PgConnection, org_id: OrgId, name: &str) -
             .get("id");
     Ok(role_id)
 }
-pub(crate) async fn update(conn: &mut PgConnection, role_id: Uuid, name: &str) -> Result<()> {
+pub(crate) async fn update(conn: &mut PgConnection, role_id: RoleId, name: &str) -> Result<()> {
     let _ = sqlx::query("UPDATE roles SET name = $1 WHERE id = $2")
         .bind(name)
         .bind(role_id)
@@ -96,7 +95,7 @@ pub(crate) async fn update(conn: &mut PgConnection, role_id: Uuid, name: &str) -
     Ok(())
 }
 
-pub(crate) async fn delete(conn: &mut PgConnection, org_id: OrgId, role_id: Uuid) -> Result<u64> {
+pub(crate) async fn delete(conn: &mut PgConnection, org_id: OrgId, role_id: RoleId) -> Result<u64> {
     let result = sqlx::query("DELETE FROM roles WHERE id = $1 AND organization_id = $2")
         .bind(role_id)
         .bind(org_id)
@@ -108,7 +107,7 @@ pub(crate) async fn delete(conn: &mut PgConnection, org_id: OrgId, role_id: Uuid
 
 pub(crate) async fn add_privileges(
     conn: &mut PgConnection,
-    role_id: Uuid,
+    role_id: RoleId,
     privileges: Vec<SystemPrivilege>,
 ) -> Result<()> {
     for privilege in privileges {
@@ -129,7 +128,7 @@ pub(crate) async fn add_privileges(
 
 pub(crate) async fn remove_privilege(
     conn: &mut PgConnection,
-    role_id: Uuid,
+    role_id: RoleId,
     privileges: Vec<SystemPrivilege>,
 ) -> Result<()> {
     for privilege in privileges {
@@ -142,7 +141,7 @@ pub(crate) async fn remove_privilege(
     Ok(())
 }
 
-pub(crate) async fn clear_privileges(conn: &mut PgConnection, role_id: Uuid) -> Result<()> {
+pub(crate) async fn clear_privileges(conn: &mut PgConnection, role_id: RoleId) -> Result<()> {
     sqlx::query("DELETE FROM role_privileges WHERE role_id =  $1")
         .bind(role_id)
         .execute(&mut *conn)

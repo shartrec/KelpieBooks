@@ -24,7 +24,7 @@ use shared_core::core::{
     },
 };
 use sqlx::Acquire;
-
+use shared_core::RoleId;
 use crate::{
     core::db::{
         roles,
@@ -78,7 +78,7 @@ pub(crate) async fn create_role(
 
 #[put("/api/roles/<id>", data = "<req>")]
 pub(crate) async fn update_role(
-    id: PathUuid,
+    id: RoleId,
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<SecurityAdmin>,
     req: Json<UpdateRoleRequest>,
@@ -87,10 +87,10 @@ pub(crate) async fn update_role(
     let i18n = LocaleContext::new(&auth_user.locale);
 
     let mut tx = pool.begin().await?;
-    let _ = roles::update(&mut tx, *id, &req.name).await?;
+    let _ = roles::update(&mut tx, id, &req.name).await?;
 
-    roles::clear_privileges(&mut tx, *id).await?;
-    roles::add_privileges(&mut tx, *id, req.privileges.clone()).await?;
+    roles::clear_privileges(&mut tx, id).await?;
+    roles::add_privileges(&mut tx, id, req.privileges.clone()).await?;
 
     // Check we haven't accidentally deleted our admin
     let _ =
@@ -98,7 +98,7 @@ pub(crate) async fn update_role(
 
     tx.commit().await?;
 
-    let role = roles::find_by_id(&mut pool, auth_user.organization_id, *id)
+    let role = roles::find_by_id(&mut pool, auth_user.organization_id, id)
         .await?
         .unwrap();
     Ok(Json(role))
@@ -106,7 +106,7 @@ pub(crate) async fn update_role(
 
 #[delete("/api/roles/<id>")]
 pub(crate) async fn delete_role(
-    id: PathUuid,
+    id: RoleId,
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<SecurityAdmin>,
 ) -> Result<&'static str, ApiError> {
@@ -115,7 +115,7 @@ pub(crate) async fn delete_role(
 
     let mut tx = pool.begin().await?;
 
-    roles::delete(&mut *tx, auth_user.organization_id, *id).await?;
+    roles::delete(&mut *tx, auth_user.organization_id, id).await?;
     // Check we haven't accidentally deleted our admin
     let _ =
         db_user::check_security_admin_remains(&mut tx, auth_user.organization_id, &i18n).await?;

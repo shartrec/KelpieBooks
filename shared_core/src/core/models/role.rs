@@ -10,13 +10,13 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
 
 use crate::core::models::auth::SystemPrivilege;
+use crate::RoleId;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Role {
-    pub id: Uuid,
+    pub id: RoleId,
     pub name: String,
     pub privileges: Vec<SystemPrivilege>,
 }

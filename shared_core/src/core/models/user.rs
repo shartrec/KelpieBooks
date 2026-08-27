@@ -14,8 +14,7 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::{OrgId, UserId};
+use crate::{OrgId, RoleId, UserId};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {
@@ -25,6 +24,6 @@ pub struct User {
     pub full_name: String,
     pub display_name: Option<String>,
     pub password_hash: String,
-    pub role_id: Option<Uuid>,
+    pub role_id: Option<RoleId>,
     pub created_at: DateTime<Utc>,
 }
