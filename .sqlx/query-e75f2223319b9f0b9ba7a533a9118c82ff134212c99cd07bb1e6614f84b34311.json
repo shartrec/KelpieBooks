@@ -1,0 +1,73 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE warehouse_inventory_balances\n        SET quantity_allocated = quantity_allocated + $1,\n            updated_at = NOW()\n        WHERE warehouse_id = $2 AND item_id = $3 AND organization_id = $4\n        RETURNING *\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "organization_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "item_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "warehouse_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "location_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 5,
+        "name": "quantity_on_hand",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 6,
+        "name": "quantity_allocated",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 7,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "unit_cost",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Numeric",
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e75f2223319b9f0b9ba7a533a9118c82ff134212c99cd07bb1e6614f84b34311"
+}

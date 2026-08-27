@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT prefix, next_value\n        FROM organization_sequences\n        WHERE org_id = $1 AND document_type = $2\n        FOR UPDATE\n        ",
+  "query": "\n        SELECT prefix, next_value\n\n        FROM organization_sequences\n        WHERE org_id = $1 AND document_type = $2\n        FOR UPDATE\n        ",
   "describe": {
     "columns": [
       {
@@ -25,5 +25,5 @@
       false
     ]
   },
-  "hash": "d61570ab17907839a00ce0eb21dec03b8d4f5e8da2d3f14b33d10156f56bfed4"
+  "hash": "7c5595c11d19d93fd761622b2d515a85004ae0e3e5750b910c768d14de4b8319"
 }
