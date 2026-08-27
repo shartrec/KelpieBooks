@@ -9,7 +9,7 @@ use chrono::NaiveDate;
 use rocket_db_pools::Connection;
 use shared_core::sales::models::tax::TaxRate;
 use uuid::Uuid;
-
+use shared_core::OrgId;
 use crate::{
     sales::db::tax_rate,
     util::ApiError,
@@ -18,7 +18,7 @@ use crate::{
 
 pub async fn get_tax_rates_for_category(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     category_id: Uuid,
 ) -> Result<Vec<TaxRate>, ApiError> {
     let rates = tax_rate::get_tax_rates_for_category(pool, org_id, category_id).await?;
@@ -27,7 +27,7 @@ pub async fn get_tax_rates_for_category(
 
 pub async fn get_current_tax_rate_for_category(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     category_id: Uuid,
     effective_date: NaiveDate,
 ) -> Result<Option<TaxRate>, ApiError> {
@@ -43,7 +43,7 @@ pub async fn get_current_tax_rate_for_category(
 
 pub async fn update_tax_rates_for_category(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     category_id: Uuid,
     rates: &[TaxRate],
 ) -> Result<(), ApiError> {

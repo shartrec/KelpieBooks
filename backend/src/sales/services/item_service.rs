@@ -15,7 +15,7 @@ use shared_core::sales::{
     requests::item::CreateItemRequest,
 };
 use uuid::Uuid;
-
+use shared_core::OrgId;
 use crate::{
     sales::db::item as item_db,
     util::ApiError,
@@ -24,7 +24,7 @@ use crate::{
 
 pub async fn get_items(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     search_term: Option<String>,
     item_type: Option<ItemType>,
     include_inactive: bool,
@@ -43,7 +43,7 @@ pub async fn get_items(
 
 pub async fn get_item(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<Option<Item>, sqlx::Error> {
     item_db::get(pool, org_id, id).await
@@ -51,7 +51,7 @@ pub async fn get_item(
 
 pub async fn create_item(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     item: &CreateItemRequest,
 ) -> Result<Item, sqlx::Error> {
     item_db::create(pool, org_id, item).await
@@ -59,7 +59,7 @@ pub async fn create_item(
 
 pub async fn update_item(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
     item: &Item,
 ) -> Result<Item, sqlx::Error> {
@@ -68,7 +68,7 @@ pub async fn update_item(
 
 pub async fn delete_item(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<u64, ApiError> {
     let rows_affected = item_db::delete(pool, org_id, id).await?;

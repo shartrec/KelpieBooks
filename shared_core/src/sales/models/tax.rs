@@ -12,13 +12,14 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
+use crate::OrgId;
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct TaxCategory {
     pub id: Uuid,
     #[cfg_attr(feature = "backend", sqlx(rename = "organization_id"))]
-    pub org_id: Uuid,
+    pub org_id: OrgId,
     pub name: String,
     pub description: Option<String>,
     pub is_active: bool,
@@ -29,7 +30,7 @@ pub struct TaxCategory {
 pub struct TaxRate {
     pub id: Uuid,
     #[cfg_attr(feature = "backend", sqlx(rename = "organization_id"))]
-    pub org_id: Uuid,
+    pub org_id: OrgId,
     pub tax_category_id: Uuid,
     pub name: String,
     pub rate: Decimal,
@@ -42,7 +43,7 @@ impl Default for TaxRate {
     fn default() -> Self {
         Self {
             id: Uuid::new_v4(),
-            org_id: Uuid::nil(),
+            org_id: OrgId::default(),
             tax_category_id: Uuid::nil(),
             name: String::new(),
             rate: Decimal::new(0, 4),

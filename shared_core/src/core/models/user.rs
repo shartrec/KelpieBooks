@@ -15,11 +15,12 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
+use crate::OrgId;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub organization_id: OrgId,
     pub email: String,
     pub full_name: String,
     pub display_name: Option<String>,

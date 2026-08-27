@@ -17,29 +17,26 @@ use rust_decimal::{
     dec,
     Decimal,
 };
-use shared_core::{
-    ledger::{
-        models::system_tag::SystemTag,
-        requests::transaction::{
-            CreateTransactionRequest,
-            JournalEntryLine,
-        },
+use shared_core::{ledger::{
+    models::system_tag::SystemTag,
+    requests::transaction::{
+        CreateTransactionRequest,
+        JournalEntryLine,
     },
-    payables::{
-        dtos::{
-            vendor_invoice_dto::VendorInvoiceDto,
-            vendor_invoice_list_item::VendorInvoiceListItem,
-        },
-        models::{
-            invoice_status::InvoiceStatus,
-            vendor_invoice_item::VendorInvoiceItem,
-        },
-        requests::vendor_invoice::{
-            CreateVendorInvoiceRequest,
-            UpdateVendorInvoiceRequest,
-        },
+}, payables::{
+    dtos::{
+        vendor_invoice_dto::VendorInvoiceDto,
+        vendor_invoice_list_item::VendorInvoiceListItem,
     },
-};
+    models::{
+        invoice_status::InvoiceStatus,
+        vendor_invoice_item::VendorInvoiceItem,
+    },
+    requests::vendor_invoice::{
+        CreateVendorInvoiceRequest,
+        UpdateVendorInvoiceRequest,
+    },
+}, OrgId};
 use sqlx::Acquire;
 use uuid::Uuid;
 
@@ -54,7 +51,7 @@ use crate::{
 
 pub(crate) async fn get_vendor_invoices(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     start_date: Option<NaiveDate>,
     end_date: Option<NaiveDate>,
     partner_id: Option<Uuid>,
@@ -80,7 +77,7 @@ pub(crate) async fn get_vendor_invoices(
 
 pub(crate) async fn get_vendor_invoice(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     id: Uuid,
 ) -> Result<VendorInvoiceDto, ApiError> {
     let invoice = vendor_invoice_db::get(pool, id)
@@ -97,7 +94,7 @@ pub(crate) async fn get_vendor_invoice(
 
 pub(crate) async fn create_vendor_invoice(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     req: &CreateVendorInvoiceRequest,
 ) -> Result<VendorInvoiceDto, ApiError> {
     if vendor_invoice_db::is_duplicate(pool, organization_id, req.partner_id, &req.invoice_number)
@@ -181,7 +178,7 @@ pub(crate) async fn create_vendor_invoice(
 
 pub(crate) async fn update_vendor_invoice(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     id: Uuid,
     req: &UpdateVendorInvoiceRequest,
 ) -> Result<VendorInvoiceDto, ApiError> {
@@ -200,7 +197,7 @@ pub(crate) async fn update_vendor_invoice(
 
 pub(crate) async fn update_vendor_invoice_items(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     id: Uuid,
     items: &Vec<VendorInvoiceItem>,
 ) -> Result<Vec<VendorInvoiceItem>, ApiError> {

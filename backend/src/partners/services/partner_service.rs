@@ -20,7 +20,7 @@ use shared_core::partners::{
     },
 };
 use uuid::Uuid;
-
+use shared_core::OrgId;
 use crate::{
     partners::db::partner as partner_db,
     util::ApiError,
@@ -28,7 +28,7 @@ use crate::{
 
 pub(crate) async fn get_partners(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
 ) -> Result<Vec<PartnerListItem>, ApiError> {
     let partners = partner_db::get_all_by_org(pool, organization_id).await?;
     Ok(partners)
@@ -36,7 +36,7 @@ pub(crate) async fn get_partners(
 
 pub(crate) async fn search_partners(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     term: &str,
 ) -> Result<Vec<PartnerListItem>, ApiError> {
     let partners = partner_db::search(pool, organization_id, term).await?;
@@ -69,26 +69,26 @@ pub(crate) async fn get_partner_contacts(
 
 pub(crate) async fn create_partner(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    org_id: OrgId,
     req: &CreatePartnerRequest,
 ) -> Result<Partner, ApiError> {
-    let new_partner = partner_db::insert(pool, organization_id, req).await?;
+    let new_partner = partner_db::insert(pool, org_id, req).await?;
     Ok(new_partner)
 }
 
 pub(crate) async fn update_partner(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    org_id: OrgId,
     partner_id: Uuid,
     req: &UpdatePartnerRequest,
 ) -> Result<Partner, ApiError> {
-    let updated_partner = partner_db::update(pool, organization_id, partner_id, req).await?;
+    let updated_partner = partner_db::update(pool, org_id, partner_id, req).await?;
     Ok(updated_partner)
 }
 
 pub(crate) async fn delete_partner(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     partner_id: Uuid,
 ) -> Result<u64, ApiError> {
     let rows_affected = partner_db::delete(pool, org_id, partner_id).await?;
@@ -97,7 +97,7 @@ pub(crate) async fn delete_partner(
 
 pub(crate) async fn create_address(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     partner_id: Uuid,
     address: &PartnerAddress,
 ) -> Result<PartnerAddress, ApiError> {
@@ -108,7 +108,7 @@ pub(crate) async fn create_address(
 
 pub(crate) async fn update_address(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     address_id: Uuid,
     address: &PartnerAddress,
 ) -> Result<PartnerAddress, ApiError> {
@@ -119,7 +119,7 @@ pub(crate) async fn update_address(
 
 pub(crate) async fn delete_address(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     address_id: Uuid,
 ) -> Result<u64, ApiError> {
     let rows_affected = partner_db::delete_address(pool, organization_id, address_id).await?;
@@ -128,7 +128,7 @@ pub(crate) async fn delete_address(
 
 pub(crate) async fn create_contact(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     partner_id: Uuid,
     contact: &PartnerContact,
 ) -> Result<PartnerContact, ApiError> {
@@ -139,7 +139,7 @@ pub(crate) async fn create_contact(
 
 pub(crate) async fn update_contact(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     contact_id: Uuid,
     contact: &PartnerContact,
 ) -> Result<PartnerContact, ApiError> {
@@ -150,7 +150,7 @@ pub(crate) async fn update_contact(
 
 pub(crate) async fn delete_contact(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     contact_id: Uuid,
 ) -> Result<u64, ApiError> {
     let rows_affected = partner_db::delete_contact(pool, organization_id, contact_id).await?;

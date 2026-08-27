@@ -17,11 +17,12 @@ use serde::{
 use uuid::Uuid;
 
 use crate::core::models::role::Role;
+use crate::OrgId;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct UserWithOrg {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub organization_id: OrgId,
     pub email: String,
     pub full_name: String,
     pub display_name: Option<String>,

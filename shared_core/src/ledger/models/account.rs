@@ -20,6 +20,7 @@ use crate::ledger::models::{
     account_category::AccountCategory,
     system_tag::SystemTag,
 };
+use crate::OrgId;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
@@ -29,7 +30,7 @@ use crate::ledger::models::{
 )]
 pub struct Account {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub organization_id: OrgId,
     pub parent_id: Option<Uuid>,
     pub code: String,
     pub name: String,

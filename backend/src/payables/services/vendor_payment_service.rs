@@ -11,19 +11,16 @@ use rocket_db_pools::sqlx::{
     PgConnection,
 };
 use rust_decimal::dec;
-use shared_core::{
-    ledger::{
-        models::system_tag::SystemTag,
-        requests::transaction::{
-            CreateTransactionRequest,
-            JournalEntryLine,
-        },
+use shared_core::{ledger::{
+    models::system_tag::SystemTag,
+    requests::transaction::{
+        CreateTransactionRequest,
+        JournalEntryLine,
     },
-    payables::{
-        models::vendor_payment::VendorPayment,
-        requests::vendor_payment::CreateVendorPaymentRequest,
-    },
-};
+}, payables::{
+    models::vendor_payment::VendorPayment,
+    requests::vendor_payment::CreateVendorPaymentRequest,
+}, OrgId};
 use sqlx::Acquire;
 use uuid::Uuid;
 
@@ -42,7 +39,7 @@ use crate::{
 
 pub(crate) async fn get_vendor_invoice_payments(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     invoice_id: Uuid,
 ) -> Result<Vec<VendorPayment>, ApiError> {
     let invoice = vendor_invoice_db::get(pool, invoice_id)
@@ -59,7 +56,7 @@ pub(crate) async fn get_vendor_invoice_payments(
 
 pub(crate) async fn create_vendor_payment(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     req: &CreateVendorPaymentRequest,
 ) -> Result<VendorPayment, ApiError> {
     let mut tx = pool.begin().await?;

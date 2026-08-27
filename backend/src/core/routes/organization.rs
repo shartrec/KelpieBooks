@@ -20,7 +20,7 @@ use shared_core::core::{
     },
     models::organization::Organization,
 };
-
+use shared_core::OrgId;
 use crate::{
     core::{
         db,
@@ -31,7 +31,6 @@ use crate::{
         RequirePrivilege,
     },
     util::{
-        types::PathUuid,
         ApiError,
     },
     DbKelpie,
@@ -56,15 +55,14 @@ pub(crate) async fn get_organization(
 async fn set_lock_date(
     mut db: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageOrganization>,
-    id: PathUuid,
+    id: OrgId,
     req: Json<LockDateRequest>,
 ) -> rocket::http::Status {
     let user = guard.0;
-    if *id != user.organization_id {
+    if *id != *user.organization_id {
         return rocket::http::Status::Forbidden;
     }
-
-    match db::organization::set_lock_date(&mut db, *id, req.locked_until).await {
+    match db::organization::set_lock_date(&mut db, id, req.locked_until).await {
         Ok(_) => rocket::http::Status::Ok,
         Err(_) => rocket::http::Status::InternalServerError,
     }
@@ -73,15 +71,15 @@ async fn set_lock_date(
 async fn set_audit_mode(
     mut db: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageOrganization>,
-    id: PathUuid,
+    id: OrgId,
     req: Json<AuditModeRequest>,
 ) -> rocket::http::Status {
     let user = guard.0;
-    if *id != user.organization_id {
+    if *id != *user.organization_id {
         return rocket::http::Status::Forbidden;
     }
 
-    match db::organization::set_audit_mode(&mut db, *id, req.strict_audit_mode).await {
+    match db::organization::set_audit_mode(&mut db, id, req.strict_audit_mode).await {
         Ok(_) => rocket::http::Status::Ok,
         Err(_) => rocket::http::Status::InternalServerError,
     }

@@ -16,6 +16,7 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
+use crate::OrgId;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -48,7 +49,7 @@ pub enum ReferenceType {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StockTransaction {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub organization_id: OrgId,
     pub warehouse_id: Uuid,
     pub location_id: Uuid,
     pub item_id: Uuid,

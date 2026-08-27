@@ -9,7 +9,7 @@
 use rocket_db_pools::Connection;
 use shared_core::sales::models::item::UnitOfMeasure;
 use uuid::Uuid;
-
+use shared_core::OrgId;
 use crate::{
     sales::db::{
         item as item_db,
@@ -21,14 +21,14 @@ use crate::{
 
 pub async fn get_uoms(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
 ) -> Result<Vec<UnitOfMeasure>, sqlx::Error> {
-    uom_db::all(pool, org_id).await
+    uom_db::all(pool, *org_id).await
 }
 
 pub async fn get_uom(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<Option<UnitOfMeasure>, sqlx::Error> {
     uom_db::get(pool, org_id, id).await
@@ -36,7 +36,7 @@ pub async fn get_uom(
 
 pub async fn create_uom(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     uom: &UnitOfMeasure,
 ) -> Result<UnitOfMeasure, sqlx::Error> {
     uom_db::create(pool, org_id, uom).await
@@ -44,7 +44,7 @@ pub async fn create_uom(
 
 pub async fn update_uom(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
     uom: &UnitOfMeasure,
 ) -> Result<UnitOfMeasure, sqlx::Error> {
@@ -53,7 +53,7 @@ pub async fn update_uom(
 
 pub async fn delete_uom(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<u64, ApiError> {
     if item_db::is_uom_in_use(pool, id).await? {

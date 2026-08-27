@@ -10,19 +10,16 @@ use rocket_db_pools::sqlx::{
     PgConnection,
 };
 use rust_decimal::Decimal;
-use shared_core::{
-    inventory::{
-        dtos::inventory::{
-            ItemLocationBalanceDto,
-            ItemStockBalancesResponse,
-        },
-        models::warehouse_profile::{
-            ItemWarehouseProfile,
-            WarehouseInventoryBalance,
-        },
+use shared_core::{inventory::{
+    dtos::inventory::{
+        ItemLocationBalanceDto,
+        ItemStockBalancesResponse,
     },
-    sales::models::item::ItemType,
-};
+    models::warehouse_profile::{
+        ItemWarehouseProfile,
+        WarehouseInventoryBalance,
+    },
+}, sales::models::item::ItemType, OrgId};
 use uuid::Uuid;
 use crate::util::ApiError;
 // =============================================================================
@@ -31,14 +28,14 @@ use crate::util::ApiError;
 
 pub async fn get_warehouse_profile(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     item_id: Uuid,
 ) -> Result<Option<ItemWarehouseProfile>, sqlx::Error> {
     sqlx::query_as!(
         ItemWarehouseProfile,
         "SELECT * FROM item_warehouse_profiles WHERE item_id = $1 AND organization_id = $2",
         item_id,
-        org_id
+        *org_id,
     )
     .fetch_optional(conn)
     .await
@@ -46,7 +43,7 @@ pub async fn get_warehouse_profile(
 
 pub async fn upsert_warehouse_profile(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     profile: &ItemWarehouseProfile,
 ) -> Result<ItemWarehouseProfile, sqlx::Error> {
     sqlx::query_as!(
@@ -64,7 +61,7 @@ pub async fn upsert_warehouse_profile(
             updated_at = NOW()
          RETURNING *",
         profile.item_id,
-        org_id,
+        *org_id,
         profile.weight_kg,
         profile.length_cm,
         profile.width_cm,
@@ -81,7 +78,7 @@ pub async fn upsert_warehouse_profile(
 // =============================================================================
 pub async fn get_item_stock_balances(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     item_id: Uuid,
 ) -> Result<ItemStockBalancesResponse, sqlx::Error> {
     // check the item is a stocked item first
@@ -89,7 +86,7 @@ pub async fn get_item_stock_balances(
         r#"SELECT item_type  AS "type_id: ItemType"  FROM items
             WHERE id = $1 AND organization_id = $2"#,
         item_id,
-        org_id
+        *org_id,
     )
     .fetch_optional(&mut *conn)
     .await?;
@@ -126,8 +123,8 @@ pub async fn get_item_stock_balances(
         WHERE b.organization_id = $1 AND b.item_id = $2
         ORDER BY w.name ASC, loc.display_label ASC
         "#,
-        org_id,
-        item_id
+        *org_id,
+        item_id,
     )
     .fetch_all(conn)
     .await?;
@@ -153,7 +150,7 @@ pub async fn get_item_stock_balances(
 
 pub async fn get_balance_for_location(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     item_id: Uuid,
     location_id: Uuid,
 ) -> Result<Option<WarehouseInventoryBalance>, sqlx::Error> {
@@ -162,7 +159,7 @@ pub async fn get_balance_for_location(
         "SELECT * FROM warehouse_inventory_balances WHERE item_id = $1 AND location_id = $2 AND organization_id = $3",
         item_id,
         location_id,
-        org_id
+        *org_id,
         )
         .fetch_optional(conn)
         .await
@@ -170,7 +167,7 @@ pub async fn get_balance_for_location(
 
 pub async fn get_first_balance_for_item_warehouse(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     item_id: Uuid,
     warehouse_id: Uuid,
 ) -> Result<Option<WarehouseInventoryBalance>, sqlx::Error> {
@@ -179,7 +176,7 @@ pub async fn get_first_balance_for_item_warehouse(
         "SELECT * FROM warehouse_inventory_balances WHERE item_id = $1 AND warehouse_id = $2 AND organization_id = $3",
         item_id,
         warehouse_id,
-        org_id
+        *org_id,
         )
         .fetch_optional(conn)
         .await
@@ -187,7 +184,7 @@ pub async fn get_first_balance_for_item_warehouse(
 
 pub async fn update_inventory_quantities(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
     qty_on_hand: rust_decimal::Decimal,
     qty_allocated: rust_decimal::Decimal,
@@ -201,7 +198,7 @@ pub async fn update_inventory_quantities(
         qty_on_hand,
         qty_allocated,
         id,
-        org_id
+        *org_id,
     )
     .fetch_one(conn)
     .await
@@ -211,7 +208,7 @@ pub async fn update_inventory_quantities(
 /// Creates a new balance record if one doesn't exist for this location/item combination.
 pub async fn adjust_on_hand(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     warehouse_id: Uuid,
     location_id: Uuid,
     item_id: Uuid,
@@ -230,7 +227,7 @@ pub async fn adjust_on_hand(
         RETURNING *
         "#,
         Uuid::new_v4(),
-        org_id,
+        *org_id,
         warehouse_id,
         location_id,
         item_id,
@@ -243,7 +240,7 @@ pub async fn adjust_on_hand(
 /// Adjusts allocated quantities (reserving/unreserving stock for orders).
 pub async fn adjust_allocated(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     warehouse_id: Uuid,
     location_id: Uuid,
     item_id: Uuid,
@@ -262,7 +259,7 @@ pub async fn adjust_allocated(
         delta,
         location_id,
         item_id,
-        org_id
+        *org_id,
     )
     .fetch_optional(&mut *conn)
     .await?;
@@ -283,7 +280,7 @@ pub async fn adjust_allocated(
                     RETURNING *
                         "#,
                 Uuid::new_v4(),
-                org_id,
+                *org_id,
                 warehouse_id,
                 location_id,
                 item_id,

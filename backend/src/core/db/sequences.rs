@@ -7,8 +7,7 @@
  */
 use sqlx::PgConnection;
 use strum::Display;
-use uuid::Uuid;
-
+use shared_core::OrgId;
 use crate::util::ApiError;
 
 #[derive(Display)]
@@ -21,7 +20,7 @@ pub enum SeqType {
 /// Safely increments and formats the next sequential invoice number for an organization without gaps.
 pub(crate) async fn get_next_order_number(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     key: &SeqType,
 ) -> Result<String, ApiError> {
     // 1. Lock ONLY this organization's invoice counter row to prevent race conditions
@@ -33,7 +32,7 @@ pub(crate) async fn get_next_order_number(
         WHERE org_id = $1 AND document_type = $2
         FOR UPDATE
         "#,
-        org_id,
+        *org_id,
         key.to_string()
     )
     .fetch_optional(&mut *conn)
@@ -50,7 +49,7 @@ pub(crate) async fn get_next_order_number(
             let row = sqlx::query!(
                 r#"INSERT INTO organization_sequences
                     (org_id, document_type, next_value) VALUES ($1, $2, 1000) RETURNING prefix, next_value"#,
-                org_id,
+                *org_id,
                 key.to_string()
             )
             .fetch_one(&mut *conn).await?;
@@ -67,7 +66,7 @@ pub(crate) async fn get_next_order_number(
         SET next_value = next_value + 1
         WHERE org_id = $1 AND document_type = $2
         "#,
-        org_id,
+        *org_id,
         key.to_string()
     )
     .execute(&mut *conn)

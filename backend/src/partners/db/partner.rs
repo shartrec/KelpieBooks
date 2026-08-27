@@ -24,6 +24,7 @@ use shared_core::partners::{
     },
 };
 use uuid::Uuid;
+use shared_core::OrgId;
 
 fn from_row_to_partner(row: &sqlx::postgres::PgRow) -> Partner {
     Partner {
@@ -102,7 +103,7 @@ pub(crate) async fn get(pool: &mut PgConnection, id: Uuid) -> Result<Option<Part
 
 pub(crate) async fn search(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     term: &str,
 ) -> Result<Vec<PartnerListItem>, sqlx::Error> {
     sqlx::query(
@@ -193,7 +194,7 @@ pub(crate) async fn get_contacts(
 
 pub(crate) async fn get_all_by_org(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
 ) -> Result<Vec<PartnerListItem>, sqlx::Error> {
     sqlx::query(
         r#"
@@ -227,7 +228,7 @@ pub(crate) async fn get_all_by_org(
 
 pub(crate) async fn insert(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     req: &CreatePartnerRequest,
 ) -> Result<Partner, sqlx::Error> {
     let row = sqlx::query(
@@ -252,7 +253,7 @@ pub(crate) async fn insert(
 
 pub(crate) async fn update(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
     req: &UpdatePartnerRequest,
 ) -> Result<Partner, sqlx::Error> {
@@ -280,7 +281,7 @@ pub(crate) async fn update(
 
 pub(crate) async fn delete(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<u64, sqlx::Error> {
     let result = sqlx::query("DELETE FROM partners WHERE id = $1 AND organization_id = $2")
@@ -293,7 +294,7 @@ pub(crate) async fn delete(
 
 pub(crate) async fn insert_address(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     partner_id: Uuid,
     address: &PartnerAddress,
 ) -> Result<PartnerAddress, sqlx::Error> {
@@ -321,7 +322,7 @@ pub(crate) async fn insert_address(
 
 pub(crate) async fn update_address(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     address_id: Uuid,
     address: &PartnerAddress,
 ) -> Result<PartnerAddress, sqlx::Error> {
@@ -350,7 +351,7 @@ pub(crate) async fn update_address(
 
 pub(crate) async fn delete_address(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<u64, sqlx::Error> {
     let result =
@@ -364,7 +365,7 @@ pub(crate) async fn delete_address(
 
 pub(crate) async fn insert_contact(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     partner_id: Uuid,
     contact: &PartnerContact,
 ) -> Result<PartnerContact, sqlx::Error> {
@@ -390,7 +391,7 @@ pub(crate) async fn insert_contact(
 
 pub(crate) async fn update_contact(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     contact_id: Uuid,
     contact: &PartnerContact,
 ) -> Result<PartnerContact, sqlx::Error> {
@@ -417,7 +418,7 @@ pub(crate) async fn update_contact(
 
 pub(crate) async fn delete_contact(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<u64, sqlx::Error> {
     let result = sqlx::query("DELETE FROM partner_contacts WHERE id = $1 AND organization_id = $2")

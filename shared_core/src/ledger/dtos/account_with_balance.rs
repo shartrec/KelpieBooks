@@ -19,13 +19,14 @@ use crate::ledger::models::{
     account_category::AccountCategory,
     system_tag::SystemTag,
 };
+use crate::OrgId;
 
 /// A DTO that combines account data with its calculated balance.
 /// This is the structure that will be sent to the frontend.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AccountWithBalance {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub organization_id: OrgId,
     pub parent_id: Option<Uuid>,
     pub code: String,
     pub name: String,

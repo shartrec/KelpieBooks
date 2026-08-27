@@ -15,6 +15,7 @@ use shared_core::payables::{
     requests::vendor_payment::CreateVendorPaymentRequest,
 };
 use uuid::Uuid;
+use shared_core::OrgId;
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
@@ -54,7 +55,7 @@ pub(crate) async fn get_all_by_invoice(
 
 pub(crate) async fn insert(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    org_id: OrgId,
     transaction_id: Uuid,
     req: &CreateVendorPaymentRequest,
 ) -> Result<VendorPayment, sqlx::Error> {
@@ -73,7 +74,7 @@ pub(crate) async fn insert(
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *
         "#,
-        organization_id,
+        *org_id,
         req.partner_id,
         transaction_id,
         req.payment_date,

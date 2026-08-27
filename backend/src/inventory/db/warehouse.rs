@@ -12,19 +12,19 @@ use rocket_db_pools::sqlx::{
 };
 use shared_core::inventory::models::warehouse::Warehouse;
 use uuid::Uuid;
-
+use shared_core::OrgId;
 // =============================================================================
 // Warehouse Operations
 // =============================================================================
 
 pub async fn all_warehouses(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
 ) -> Result<Vec<Warehouse>, sqlx::Error> {
     sqlx::query_as!(
         Warehouse,
         "SELECT * FROM warehouses WHERE organization_id = $1 ORDER BY code",
-        org_id
+        *org_id,
     )
     .fetch_all(conn)
     .await
@@ -32,14 +32,14 @@ pub async fn all_warehouses(
 
 pub async fn get_warehouse(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<Option<Warehouse>, sqlx::Error> {
     sqlx::query_as!(
         Warehouse,
         "SELECT * FROM warehouses WHERE id = $1 AND organization_id = $2",
         id,
-        org_id
+        *org_id,
     )
     .fetch_optional(conn)
     .await
@@ -47,14 +47,14 @@ pub async fn get_warehouse(
 
 pub async fn create_warehouse(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     wh: &Warehouse,
 ) -> Result<Warehouse, sqlx::Error> {
     sqlx::query_as!(
         Warehouse,
         "INSERT INTO warehouses (id, organization_id, code, name, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING *",
         Uuid::new_v4(),
-        org_id,
+        *org_id,
         &wh.code,
         &wh.name,
         wh.is_active
@@ -65,7 +65,7 @@ pub async fn create_warehouse(
 
 pub async fn update_warehouse(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
     wh: &Warehouse,
 ) -> Result<Warehouse, sqlx::Error> {
@@ -76,7 +76,7 @@ pub async fn update_warehouse(
         &wh.name,
         wh.is_active,
         id,
-        org_id
+        *org_id,
     )
         .fetch_one(conn)
         .await
@@ -84,13 +84,13 @@ pub async fn update_warehouse(
 
 pub async fn delete_warehouse(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
     sqlx::query!(
         "DELETE FROM warehouses WHERE id = $1 AND organization_id = $2",
         id,
-        org_id
+        *org_id,
     )
     .execute(conn)
     .await

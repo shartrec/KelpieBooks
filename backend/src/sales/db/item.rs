@@ -19,16 +19,17 @@ use shared_core::sales::{
     requests::item::CreateItemRequest,
 };
 use uuid::Uuid;
+use shared_core::OrgId;
 
 pub(crate) async fn get_active_uoms(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
 ) -> Result<Vec<UnitOfMeasure>, sqlx::Error> {
     sqlx::query_as!(
         UnitOfMeasure,
         r#"SELECT id, organization_id as org_id ,code, name, is_active FROM units_of_measure
                              WHERE organization_id = $1 AND is_active = true ORDER BY name ASC"#,
-        org_id,
+        *org_id,
     )
     .fetch_all(conn)
     .await
@@ -36,7 +37,7 @@ pub(crate) async fn get_active_uoms(
 
 pub async fn all(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     search_term: Option<String>,
     item_type: Option<ItemType>,
     include_inactive: bool,
@@ -91,7 +92,7 @@ pub async fn all(
 
 pub async fn get(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<Option<Item>, sqlx::Error> {
     sqlx::query_as!(
@@ -112,7 +113,7 @@ pub async fn get(
         FROM items WHERE id = $1 AND organization_id = $2
         "#,
         id,
-        org_id,
+        *org_id,
     )
     .fetch_optional(conn)
     .await
@@ -120,7 +121,7 @@ pub async fn get(
 
 pub async fn create(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     item: &CreateItemRequest,
 ) -> Result<Item, sqlx::Error> {
     sqlx::query_as!(
@@ -143,7 +144,7 @@ pub async fn create(
                    created_at
                "#,
         Uuid::new_v4(),
-        org_id,
+        *org_id,
         item.code,
         item.name,
         item.description,
@@ -161,7 +162,7 @@ pub async fn create(
 
 pub async fn update(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
     item: &Item,
 ) -> Result<Item, sqlx::Error> {
@@ -204,17 +205,17 @@ pub async fn update(
         item.tax_category_id,
         item.is_active,
         id,
-        org_id,
+        *org_id,
     )
     .fetch_one(conn)
     .await
 }
 
-pub async fn delete(conn: &mut PgConnection, org_id: Uuid, id: Uuid) -> Result<u64, sqlx::Error> {
+pub async fn delete(conn: &mut PgConnection, org_id: OrgId, id: Uuid) -> Result<u64, sqlx::Error> {
     let result = sqlx::query!(
         "DELETE FROM items WHERE id = $1 AND organization_id = $2",
         &id,
-        &org_id
+        *org_id
     )
     .execute(conn)
     .await?;

@@ -9,14 +9,14 @@
 use std::rc::Rc;
 
 use chrono::NaiveDate;
-use uuid::Uuid;
 use yew::prelude::*;
+use shared_core::OrgId;
 
 pub type OrgContextHandle = UseReducerHandle<OrgState>;
 
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct OrgState {
-    pub id: Uuid,
+    pub id: OrgId,
     pub name: String,
     pub strict_audit_mode: bool,
     pub locked_until: Option<NaiveDate>,

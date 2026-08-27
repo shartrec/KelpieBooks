@@ -11,19 +11,16 @@ use rocket_db_pools::sqlx::{
     PgConnection,
 };
 use rust_decimal::dec;
-use shared_core::{
-    ledger::{
-        models::system_tag::SystemTag,
-        requests::transaction::{
-            CreateTransactionRequest,
-            JournalEntryLine,
-        },
+use shared_core::{ledger::{
+    models::system_tag::SystemTag,
+    requests::transaction::{
+        CreateTransactionRequest,
+        JournalEntryLine,
     },
-    sales::{
-        models::customer_payment::CustomerPayment,
-        requests::customer_payment::CreateCustomerPaymentRequest,
-    },
-};
+}, sales::{
+    models::customer_payment::CustomerPayment,
+    requests::customer_payment::CreateCustomerPaymentRequest,
+}, OrgId};
 use sqlx::Acquire;
 use uuid::Uuid;
 
@@ -42,7 +39,7 @@ use crate::{
 
 pub(crate) async fn get_customer_order_payments(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     order_id: Uuid,
 ) -> Result<Vec<CustomerPayment>, ApiError> {
     let _order = sales_order_db::get_sales_order(pool, organization_id, order_id)
@@ -54,7 +51,7 @@ pub(crate) async fn get_customer_order_payments(
 
 pub(crate) async fn create_customer_payment(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     req: &CreateCustomerPaymentRequest,
 ) -> Result<CustomerPayment, ApiError> {
     let mut tx = pool.begin().await?;

@@ -13,33 +13,30 @@ use rust_decimal::{
     prelude::FromPrimitive,
     Decimal,
 };
-use shared_core::{
-    inventory::{
-        dtos::inventory::{
-            AdjustmentReason,
-            ItemStockBalancesResponse,
-            ReceiveStockRequest,
-            StockAdjustmentRequest,
+use shared_core::{inventory::{
+    dtos::inventory::{
+        AdjustmentReason,
+        ItemStockBalancesResponse,
+        ReceiveStockRequest,
+        StockAdjustmentRequest,
+    },
+    models::{
+        stock_balance::{
+            ReferenceType,
+            TransactionType,
         },
-        models::{
-            stock_balance::{
-                ReferenceType,
-                TransactionType,
-            },
-            warehouse_profile::{
-                ItemWarehouseProfile,
-                WarehouseInventoryBalance,
-            },
+        warehouse_profile::{
+            ItemWarehouseProfile,
+            WarehouseInventoryBalance,
         },
     },
-    ledger::{
-        models::system_tag::SystemTag,
-        requests::transaction::{
-            CreateTransactionRequest,
-            JournalEntryLine,
-        },
+}, ledger::{
+    models::system_tag::SystemTag,
+    requests::transaction::{
+        CreateTransactionRequest,
+        JournalEntryLine,
     },
-};
+}, OrgId};
 use sqlx::{
     Acquire,
     Error,
@@ -95,7 +92,7 @@ impl InventorySystemAccounts {
 
 pub async fn get_item_warehouse_profile(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     item_id: Uuid,
 ) -> Result<Option<ItemWarehouseProfile>, sqlx::Error> {
     inventory_db::get_warehouse_profile(pool, org_id, item_id).await
@@ -103,7 +100,7 @@ pub async fn get_item_warehouse_profile(
 
 pub async fn save_item_warehouse_profile(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     profile: &ItemWarehouseProfile,
 ) -> Result<ItemWarehouseProfile, sqlx::Error> {
     inventory_db::upsert_warehouse_profile(pool, org_id, profile).await
@@ -115,7 +112,7 @@ pub async fn save_item_warehouse_profile(
 
 pub async fn get_balances_by_item(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     item_id: Uuid,
 ) -> Result<ItemStockBalancesResponse, Error> {
     inventory_db::get_item_stock_balances(pool, org_id, item_id).await
@@ -123,7 +120,7 @@ pub async fn get_balances_by_item(
 
 pub async fn get_balance_at_location(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     item_id: Uuid,
     location_id: Uuid,
 ) -> Result<Option<WarehouseInventoryBalance>, sqlx::Error> {
@@ -132,7 +129,7 @@ pub async fn get_balance_at_location(
 
 pub async fn update_stock_levels(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
     qty_on_hand: Decimal,
     qty_allocated: Decimal,
@@ -153,7 +150,7 @@ pub async fn update_stock_levels(
 
 pub async fn receive_vendor_stock(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     user_id: Uuid,
     req: &ReceiveStockRequest,
 ) -> Result<Vec<WarehouseInventoryBalance>, ApiError> {
@@ -232,7 +229,7 @@ pub async fn receive_vendor_stock(
 
 pub async fn adjust_stock(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     user_id: Uuid,
     req: &StockAdjustmentRequest,
 ) -> Result<Vec<WarehouseInventoryBalance>, ApiError> {
@@ -335,7 +332,7 @@ pub async fn adjust_stock(
 
 pub async fn post_receive_journal_entry(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     total_value: Decimal, // quantity * unit_cost
     reference: &str,
 ) -> Result<Uuid, ApiError> {
@@ -381,7 +378,7 @@ pub async fn post_receive_journal_entry(
 
 pub async fn post_adjustment_journal_entry(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     adjustment_value: Decimal, // positive = stock gain, negative = stock loss
     reference: &str,
 ) -> Result<Uuid, ApiError> {

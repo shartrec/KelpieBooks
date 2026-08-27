@@ -12,7 +12,7 @@ use shared_core::inventory::{
     models::warehouse::WarehouseLocation,
 };
 use uuid::Uuid;
-
+use shared_core::OrgId;
 use crate::{
     inventory::db::location as location_db,
     util::ApiError,
@@ -21,7 +21,7 @@ use crate::{
 
 pub async fn get_locations_for_warehouse(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     warehouse_id: Uuid,
 ) -> Result<Vec<WarehouseLocation>, sqlx::Error> {
     location_db::all_by_warehouse(pool, org_id, warehouse_id).await
@@ -29,7 +29,7 @@ pub async fn get_locations_for_warehouse(
 
 pub async fn get_location(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<Option<WarehouseLocation>, sqlx::Error> {
     crate::inventory::db::location::get_location(pool, org_id, id).await
@@ -37,7 +37,7 @@ pub async fn get_location(
 
 pub async fn create_location(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     loc: &WarehouseLocation,
 ) -> Result<WarehouseLocation, sqlx::Error> {
     crate::inventory::db::location::create_location(pool, org_id, loc).await
@@ -45,7 +45,7 @@ pub async fn create_location(
 
 pub async fn update_location(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
     loc: &WarehouseLocation,
 ) -> Result<WarehouseLocation, sqlx::Error> {
@@ -54,7 +54,7 @@ pub async fn update_location(
 
 pub async fn generate_locations(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     warehouse_id: Uuid,
     req: &BulkLocationGenerateRequest,
 ) -> Result<Vec<WarehouseLocation>, ApiError> {

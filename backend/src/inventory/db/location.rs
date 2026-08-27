@@ -13,10 +13,11 @@ use sqlx::{
     QueryBuilder,
 };
 use uuid::Uuid;
+use shared_core::OrgId;
 
 pub async fn all_by_warehouse(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     warehouse_id: Uuid,
 ) -> Result<Vec<WarehouseLocation>, sqlx::Error> {
     sqlx::query_as!(
@@ -28,7 +29,7 @@ pub async fn all_by_warehouse(
         ORDER BY zone, aisle, shelf, bin
         "#,
         warehouse_id,
-        org_id
+        *org_id,
     )
         .fetch_all(conn)
         .await
@@ -36,14 +37,14 @@ pub async fn all_by_warehouse(
 
 pub async fn get_location(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<Option<WarehouseLocation>, sqlx::Error> {
     sqlx::query_as!(
         WarehouseLocation,
         "SELECT * FROM warehouse_locations WHERE id = $1 AND organization_id = $2",
         id,
-        org_id
+        *org_id,
     )
     .fetch_optional(conn)
     .await
@@ -51,7 +52,7 @@ pub async fn get_location(
 
 pub async fn create_location(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     loc: &WarehouseLocation,
 ) -> Result<WarehouseLocation, sqlx::Error> {
     sqlx::query_as!(
@@ -59,7 +60,7 @@ pub async fn create_location(
         "INSERT INTO warehouse_locations (id, organization_id, warehouse_id, zone, aisle, shelf, bin, display_label, is_picking_location)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
         Uuid::new_v4(),
-        org_id,
+        *org_id,
         loc.warehouse_id,
         loc.zone,
         loc.aisle,
@@ -74,7 +75,7 @@ pub async fn create_location(
 
 pub async fn update_location(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
     loc: &WarehouseLocation,
 ) -> Result<WarehouseLocation, sqlx::Error> {
@@ -89,7 +90,7 @@ pub async fn update_location(
         loc.display_label,
         loc.is_picking_location,
         id,
-        org_id
+        *org_id,
     )
         .fetch_one(conn)
         .await

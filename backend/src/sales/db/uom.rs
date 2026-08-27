@@ -12,6 +12,7 @@ use rocket_db_pools::sqlx::{
 };
 use shared_core::sales::models::item::UnitOfMeasure;
 use uuid::Uuid;
+use shared_core::OrgId;
 
 pub async fn all(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<UnitOfMeasure>, sqlx::Error> {
     sqlx::query_as!(
@@ -27,7 +28,7 @@ pub async fn all(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<UnitOfMeas
 
 pub async fn get(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<Option<UnitOfMeasure>, sqlx::Error> {
     sqlx::query_as!(
@@ -36,7 +37,7 @@ pub async fn get(
             FROM units_of_measure
             WHERE id = $1 AND organization_id = $2 ORDER BY code"#,
         id,
-        org_id,
+        *org_id,
     )
     .fetch_optional(conn)
     .await
@@ -44,7 +45,7 @@ pub async fn get(
 
 pub async fn create(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     uom: &UnitOfMeasure,
 ) -> Result<UnitOfMeasure, sqlx::Error> {
     sqlx::query_as!(
@@ -52,7 +53,7 @@ pub async fn create(
         r#"INSERT INTO units_of_measure (id, organization_id, code, name, is_active) VALUES ($1, $2, $3, $4, $5)
                       RETURNING id, organization_id as org_id, code, name, is_active"#,
         Uuid::new_v4(),
-        org_id,
+        *org_id,
         &uom.code,
         &uom.name,
         uom.is_active,
@@ -63,7 +64,7 @@ pub async fn create(
 
 pub async fn update(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
     uom: &UnitOfMeasure,
 ) -> Result<UnitOfMeasure, sqlx::Error> {
@@ -75,7 +76,7 @@ pub async fn update(
         uom.name,
         uom.is_active,
         id,
-        org_id,
+        *org_id,
     )
     .fetch_one(conn)
     .await
@@ -83,13 +84,13 @@ pub async fn update(
 
 pub async fn delete(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
     sqlx::query!(
         "DELETE FROM units_of_measure WHERE id = $1 AND organization_id = $2",
         id,
-        org_id,
+        *org_id,
     )
     .execute(conn)
     .await

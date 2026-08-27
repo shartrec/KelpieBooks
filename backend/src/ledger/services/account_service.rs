@@ -37,7 +37,7 @@ use shared_core::ledger::{
 };
 use sqlx::Acquire;
 use uuid::Uuid;
-
+use shared_core::OrgId;
 use crate::{
     core::db,
     ledger::db::{
@@ -55,7 +55,7 @@ use crate::{
 
 pub(crate) async fn get_accounts(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
 ) -> Result<Vec<Account>, ApiError> {
     let accounts = get_all_by_org(pool, organization_id).await?;
 
@@ -63,7 +63,7 @@ pub(crate) async fn get_accounts(
 }
 pub(crate) async fn get_accounts_by_category(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     category: AccountCategory,
 ) -> Result<Vec<Account>, ApiError> {
     let accounts = get_all_by_category(pool, organization_id, &[category]).await?;
@@ -72,7 +72,7 @@ pub(crate) async fn get_accounts_by_category(
 
 pub(crate) async fn get_account_with_balance(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     account_id: Uuid,
 ) -> Result<AccountWithBalance, ApiError> {
     let account = get(pool, org_id, account_id)
@@ -104,7 +104,7 @@ pub(crate) async fn get_account_with_balance(
 
 pub(crate) async fn get_accounts_with_balances(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
 ) -> Result<Vec<AccountWithBalance>, ApiError> {
     let accounts = get_all_by_org(pool, organization_id).await?;
     let entries = journal_entry::get_all_by_org(pool, organization_id).await?;
@@ -172,7 +172,7 @@ pub(crate) async fn get_accounts_with_balances(
 
 pub(crate) async fn get_payment_methods(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
 ) -> Result<Vec<Account>, ApiError> {
     let accounts = get_all_by_org(pool, organization_id).await?;
     let payment_methods = accounts
@@ -184,7 +184,7 @@ pub(crate) async fn get_payment_methods(
 
 pub(crate) async fn get_journal_entries_with_running_balance(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     account_id: Uuid,
     start_date: NaiveDate,
     end_date: NaiveDate,
@@ -238,14 +238,14 @@ pub(crate) async fn get_journal_entries_with_running_balance(
 
 pub(crate) async fn get_system_accounts(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
 ) -> Result<HashMap<SystemTag, Uuid>, ApiError> {
     Ok(account::get_system_accounts(pool, organization_id).await?)
 }
 
 pub(crate) async fn update_system_accounts(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     system_accounts: &HashMap<SystemTag, Uuid>,
 ) -> Result<HashMap<SystemTag, Uuid>, ApiError> {
     let mut tx = pool.begin().await?;
@@ -258,7 +258,7 @@ pub(crate) async fn update_system_accounts(
 
 pub(crate) async fn update_configuration(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     req: &UpdateConfigurationRequest,
 ) -> Result<(), ApiError> {
     let mut tx = pool.begin().await?;
@@ -273,7 +273,7 @@ pub(crate) async fn update_configuration(
 
 pub(crate) async fn create_transaction(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     req: &CreateTransactionRequest,
 ) -> Result<Uuid, ApiError> {
     let total_debits: Decimal = req.entries.iter().map(|e| e.debit).sum();

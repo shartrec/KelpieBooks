@@ -13,8 +13,7 @@ use shared_core::ledger::models::{
     account_category::AccountCategory,
     system_tag::SystemTag,
 };
-use uuid::Uuid;
-
+use shared_core::OrgId;
 use crate::{
     core::db::organization,
     ledger::db::{
@@ -28,7 +27,7 @@ use crate::{
 
 pub(crate) async fn close_financial_year(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     year_end: NaiveDate,
 ) -> Result<(), ApiError> {
     let mut total_credits = dec!(0.00);

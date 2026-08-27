@@ -18,6 +18,7 @@ use shared_core::ledger::models::{
     system_tag::SystemTag,
 };
 use uuid::Uuid;
+use shared_core::OrgId;
 
 /// Represents the top-level structure of a TOML template file.
 #[derive(Debug, Deserialize)]
@@ -39,7 +40,7 @@ pub(crate) struct AccountImport {
 
 pub(crate) async fn import_default_accounts(
     tx: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     accounts: Vec<AccountImport>,
 ) -> Result<(), sqlx::Error> {
     let mut code_to_id_map = HashMap::new();
@@ -84,7 +85,7 @@ pub(crate) async fn import_default_accounts(
 
 async fn insert_account(
     tx: &mut PgConnection,
-    organization_id: Uuid,
+    org_id: OrgId,
     parent_id: Option<Uuid>,
     template: &AccountImport,
 ) -> Result<Uuid, sqlx::Error> {
@@ -94,7 +95,7 @@ async fn insert_account(
         VALUES ($1, $2, $3, $4, $5::account_category, $6, $7::system_tag)
         RETURNING id
         "#,
-            organization_id,
+            *org_id,
             parent_id,
             &template.code,
             &template.name,

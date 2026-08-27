@@ -15,13 +15,13 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
-
+use crate::OrgId;
 use crate::partners::models::address_type::AddressType;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct PartnerAddress {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub organization_id: OrgId,
     pub partner_id: Uuid,
     pub address_type: AddressType,
     pub is_primary: bool,

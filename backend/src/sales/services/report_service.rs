@@ -15,7 +15,7 @@ use shared_core::sales::{
 };
 use sqlx::PgConnection;
 use uuid::Uuid;
-
+use shared_core::OrgId;
 use crate::{
     sales::db::sales_order::list_sales_orders,
     util::ApiError,
@@ -23,7 +23,7 @@ use crate::{
 
 pub(crate) async fn get_trial_balance(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     date: NaiveDate,
 ) -> Result<Vec<AgedReceivableSummary>, ApiError> {
     let orders = list_sales_orders(

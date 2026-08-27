@@ -14,9 +14,10 @@ use shared_core::inventory::models::stock_balance::{
 };
 use sqlx::PgConnection;
 use uuid::Uuid;
+use shared_core::OrgId;
 
 pub struct NewStockTransaction<'a> {
-    pub organization_id: Uuid,
+    pub organization_id: OrgId,
     pub warehouse_id: Uuid,
     pub location_id: Uuid,
     pub item_id: Uuid,
@@ -44,7 +45,7 @@ pub async fn log_transaction(
                   transaction_type as "transaction_type: TransactionType", quantity_change, reference_type as "reference_type: ReferenceType", reference_id, notes, created_by, created_at
         "#,
          Uuid::new_v4(),
-        entry.organization_id,
+        *entry.organization_id,
         entry.warehouse_id,
         entry.location_id,
         entry.item_id,
@@ -62,7 +63,7 @@ pub async fn log_transaction(
 /// Queries recent movement history for a specific item in a warehouse.
 pub async fn get_history_for_item(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     item_id: Uuid,
     limit: i64,
 ) -> Result<Vec<StockTransaction>, sqlx::Error> {
@@ -77,7 +78,7 @@ pub async fn get_history_for_item(
         LIMIT $3
         "#,
         item_id,
-       org_id,
+       *org_id,
        limit
     )
         .fetch_all(conn)

@@ -17,11 +17,12 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
+use crate::OrgId;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct VendorPayment {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub organization_id: OrgId,
     pub partner_id: Uuid,
 
     // Links this payment back to the transaction that cleared the cash account

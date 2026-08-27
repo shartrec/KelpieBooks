@@ -15,11 +15,12 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
+use crate::OrgId;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct PartnerContact {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub organization_id: OrgId,
     pub partner_id: Uuid,
     pub is_primary: bool,
     pub full_name: String,

@@ -47,7 +47,7 @@ pub(crate) async fn insert(
         VALUES ($1, $2, $3, $4)
         RETURNING *
         "#,
-        req.organization_id,
+        *req.organization_id,
         req.sales_order_id,
         customer_payment_id,
         req.allocated_amount,

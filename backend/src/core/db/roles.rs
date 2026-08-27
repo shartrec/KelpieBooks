@@ -16,8 +16,9 @@ use sqlx::{
     Row,
 };
 use uuid::Uuid;
+use shared_core::OrgId;
 
-pub(crate) async fn find_all_for_org(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<Role>> {
+pub(crate) async fn find_all_for_org(conn: &mut PgConnection, org_id: OrgId) -> Result<Vec<Role>> {
     let rows = sqlx::query(
         r#"
         SELECT r.id, r.name, COALESCE(array_agg(rp.privilege_id) FILTER (WHERE rp.privilege_id IS NOT NULL), '{}') as privileges
@@ -28,7 +29,7 @@ pub(crate) async fn find_all_for_org(conn: &mut PgConnection, org_id: Uuid) -> R
         ORDER BY r.name
         "#,
     )
-    .bind(org_id)
+    .bind(*org_id)
     .fetch_all(conn)
     .await?;
 
@@ -49,7 +50,7 @@ pub(crate) async fn find_all_for_org(conn: &mut PgConnection, org_id: Uuid) -> R
 
 pub(crate) async fn find_by_id(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     role_id: Uuid,
 ) -> Result<Option<Role>> {
     let row = sqlx::query(
@@ -76,7 +77,7 @@ pub(crate) async fn find_by_id(
     }))
 }
 
-pub(crate) async fn create(conn: &mut PgConnection, org_id: Uuid, name: &str) -> Result<Uuid> {
+pub(crate) async fn create(conn: &mut PgConnection, org_id: OrgId, name: &str) -> Result<Uuid> {
     let role_id =
         sqlx::query("INSERT INTO roles (organization_id, name) VALUES ($1, $2) RETURNING id")
             .bind(org_id)
@@ -95,7 +96,7 @@ pub(crate) async fn update(conn: &mut PgConnection, role_id: Uuid, name: &str) -
     Ok(())
 }
 
-pub(crate) async fn delete(conn: &mut PgConnection, org_id: Uuid, role_id: Uuid) -> Result<u64> {
+pub(crate) async fn delete(conn: &mut PgConnection, org_id: OrgId, role_id: Uuid) -> Result<u64> {
     let result = sqlx::query("DELETE FROM roles WHERE id = $1 AND organization_id = $2")
         .bind(role_id)
         .bind(org_id)

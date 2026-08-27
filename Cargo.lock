@@ -4503,6 +4503,7 @@ dependencies = [
  "icu_provider 2.2.0",
  "icu_provider_blob 2.2.0",
  "include_dir",
+ "rocket",
  "rust_decimal",
  "serde",
  "sqlx",

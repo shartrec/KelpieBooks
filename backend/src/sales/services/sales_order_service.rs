@@ -11,20 +11,17 @@ use rocket_db_pools::sqlx::{
     PgConnection,
 };
 use rust_decimal::Decimal;
-use shared_core::{
-    inventory::models::stock_balance::{
-        ReferenceType,
-        TransactionType,
+use shared_core::{inventory::models::stock_balance::{
+    ReferenceType,
+    TransactionType,
+}, sales::{
+    dtos::sales_order_dto::SalesOrderDto,
+    models::{
+        sales_document_status::SalesDocumentStatus,
+        sales_order::SalesOrder,
     },
-    sales::{
-        dtos::sales_order_dto::SalesOrderDto,
-        models::{
-            sales_document_status::SalesDocumentStatus,
-            sales_order::SalesOrder,
-        },
-        requests::sales_order::CreateSalesOrderRequest,
-    },
-};
+    requests::sales_order::CreateSalesOrderRequest,
+}, OrgId};
 use sqlx::Acquire;
 use uuid::Uuid;
 
@@ -49,7 +46,7 @@ use crate::{
 
 pub(crate) async fn create_order(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     req: &CreateSalesOrderRequest,
 ) -> Result<SalesOrder, ApiError> {
     let mut tx = pool.begin().await?;
@@ -87,7 +84,7 @@ pub(crate) async fn create_order(
 
 pub(crate) async fn get_sales_order(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<SalesOrderDto, ApiError> {
     let mut order = sales_order_db::get_sales_order(pool, org_id, id)
@@ -118,7 +115,7 @@ pub(crate) async fn get_sales_order(
 
 pub(crate) async fn list_sales_orders(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     start_date: Option<chrono::NaiveDate>,
     end_date: Option<chrono::NaiveDate>,
     partner_id: Option<Uuid>,
@@ -140,7 +137,7 @@ pub(crate) async fn list_sales_orders(
 
 pub(crate) async fn confirm_order(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
     user_id: Uuid,
 ) -> Result<SalesOrderDto, ApiError> {
@@ -218,7 +215,7 @@ pub(crate) async fn confirm_order(
 
 pub(crate) async fn cancel_order(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<(), ApiError> {
     let order = sales_order_db::get_sales_order(pool, org_id, id)

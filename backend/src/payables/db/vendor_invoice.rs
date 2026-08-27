@@ -28,6 +28,7 @@ use shared_core::payables::{
     },
 };
 use uuid::Uuid;
+use shared_core::OrgId;
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
@@ -66,7 +67,7 @@ pub(crate) async fn get_items(
 
 pub(crate) async fn get_by_org(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     start_date: Option<NaiveDate>,
     end_date: Option<NaiveDate>,
     partner_id: Option<Uuid>,
@@ -133,7 +134,7 @@ pub(crate) async fn get_by_org(
 
 pub(crate) async fn get_top_payables(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    org_id: OrgId,
     due_date_before: &NaiveDate,
 ) -> Result<Vec<TopPayable>, sqlx::Error> {
     sqlx::query_as!(
@@ -151,7 +152,7 @@ pub(crate) async fn get_top_payables(
         ORDER BY vi.amount_remaining DESC
         LIMIT 5
         "#,
-        organization_id,
+        *org_id,
         due_date_before,
         InvoiceStatus::Open as InvoiceStatus,
         InvoiceStatus::PartiallyPaid as InvoiceStatus
@@ -162,7 +163,7 @@ pub(crate) async fn get_top_payables(
 
 pub(crate) async fn insert(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     transaction_id: Uuid,
     req: &CreateVendorInvoiceRequest,
 ) -> Result<VendorInvoice, sqlx::Error> {
@@ -176,7 +177,7 @@ pub(crate) async fn insert(
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING id, organization_id, partner_id, transaction_id, invoice_number, status as "status: InvoiceStatus", issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at
         "#,
-        org_id,
+        *org_id,
         req.partner_id,
         transaction_id,
         req.invoice_number,
@@ -300,7 +301,7 @@ pub(crate) async fn delete_items(
 
 pub(crate) async fn is_duplicate(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    org_id: OrgId,
     partner_id: Uuid,
     invoice_number: &str,
 ) -> Result<bool, sqlx::Error> {
@@ -310,7 +311,7 @@ pub(crate) async fn is_duplicate(
         FROM vendor_invoices
         WHERE organization_id = $1 AND partner_id = $2 AND invoice_number = $3
         "#,
-        organization_id,
+        *org_id,
         partner_id,
         invoice_number
     )

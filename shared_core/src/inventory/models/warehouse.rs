@@ -14,12 +14,13 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
+use crate::OrgId;
 
 #[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct Warehouse {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub organization_id: OrgId,
     pub code: String, // e.g., "WH-SYD"
     pub name: String,
     pub is_active: bool,
@@ -30,7 +31,7 @@ pub struct Warehouse {
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct WarehouseLocation {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub organization_id: OrgId,
     pub warehouse_id: Uuid,
     pub zone: Option<String>,  // e.g., "Bulk"
     pub aisle: Option<String>, // e.g., "A1"

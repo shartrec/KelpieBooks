@@ -16,11 +16,12 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
+use crate::OrgId;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CustomerPaymentAllocation {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub organization_id: OrgId,
     pub sales_order_id: Uuid,
     pub customer_payment_id: Uuid,
     pub allocated_amount: Decimal,

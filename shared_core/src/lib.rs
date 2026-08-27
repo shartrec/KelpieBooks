@@ -5,6 +5,16 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use uuid::Uuid;
+#[cfg(feature = "backend")]
+use rocket::{
+    form::{
+        self,
+        FromFormField,
+        ValueField,
+    },
+    request::FromParam,
+};
 
 #[cfg(feature = "inventory")]
 pub mod inventory;
@@ -49,8 +59,31 @@ macro_rules! define_id {
         }
 
         impl Default for $name {
-            Self(Uuid::new_v4())
+            fn default() -> Self {
+                Self(Uuid::new_v4())
+            }
         }
+
+        #[cfg(feature = "backend")]
+        impl<'r> FromParam<'r> for $name {
+            type Error = uuid::Error;
+
+            fn from_param(param: &'r str) -> Result<Self, Self::Error> {
+                Uuid::parse_str(param).map($name)
+            }
+        }
+
+        #[cfg(feature = "backend")]
+        #[cfg_attr(feature = "backend", rocket::async_trait)]
+        impl<'r> FromFormField<'r> for $name {
+            fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
+                match Uuid::parse_str(field.value) {
+                    Ok(uuid) => Ok($name{0: uuid}),
+                    Err(e) => Err(form::Error::validation(format!("{}", e)).into()),
+                }
+            }
+        }
+
     };
 }
 

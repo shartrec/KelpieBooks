@@ -15,7 +15,7 @@ use shared_core::payables::{
 };
 use sqlx::PgConnection;
 use uuid::Uuid;
-
+use shared_core::OrgId;
 use crate::{
     payables::db::vendor_invoice::get_by_org,
     util::ApiError,
@@ -23,7 +23,7 @@ use crate::{
 
 pub(crate) async fn get_aged_payables(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     date: NaiveDate,
 ) -> Result<Vec<AgedPayableSummary>, ApiError> {
     let invoices = get_by_org(

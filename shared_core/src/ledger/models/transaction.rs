@@ -16,11 +16,12 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
+use crate::OrgId;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Transaction {
     pub id: Uuid,
-    pub organization_id: Uuid,
+    pub organization_id: OrgId,
     pub date: NaiveDate,
     pub description: Option<String>,
     pub reference: Option<String>,

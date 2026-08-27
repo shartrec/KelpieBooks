@@ -17,7 +17,7 @@ use shared_core::core::models::{
     user_with_org::UserWithOrg,
 };
 use uuid::Uuid;
-
+use shared_core::OrgId;
 use crate::util::{
     locale_context::LocaleContext,
     ApiError,
@@ -52,7 +52,7 @@ fn from_row_to_user_with_org(row: &sqlx::postgres::PgRow) -> UserWithOrg {
 
 pub(crate) async fn insert(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    org_id: OrgId,
     email: &str,
     password_hash: &str,
     full_name: &str,
@@ -63,7 +63,7 @@ pub(crate) async fn insert(
         User,
         "INSERT INTO users (organization_id, email, password_hash, full_name, display_name, role_id)
             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-        organization_id,
+        *org_id,
         email,
         password_hash,
         full_name,
@@ -124,7 +124,7 @@ pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, Api
 
 pub(crate) async fn check_security_admin_remains(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     i18n: &LocaleContext<'_>,
 ) -> Result<(), ApiError> {
     let admin_count = sqlx::query!(
@@ -135,7 +135,7 @@ pub(crate) async fn check_security_admin_remains(
             AND u.organization_id = $2
         "#,
         SystemPrivilege::SecurityAdmin as i64,
-        org_id,
+        *org_id,
     )
     .fetch_one(pool)
     .await;
@@ -161,7 +161,7 @@ const SQL: &'static str = r#"SELECT u.id, u.organization_id, u.email, u.password
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<Option<UserWithOrg>, sqlx::Error> {
     let row =
@@ -205,7 +205,7 @@ pub(crate) async fn get_by_email(
 
 pub(crate) async fn get_all(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
 ) -> Result<Vec<UserWithOrg>, sqlx::Error> {
     let rows = sqlx::query(
         format!(

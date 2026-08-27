@@ -6,7 +6,7 @@ edition = "2021"
 [features]
 default = ["ledger", "partners", "payables", "sales", "receivables", "inventory"]
 
-backend = ["dep:sqlx"]
+backend = ["dep:sqlx", "dep:rocket"]
 
 # 💡 Define a specialized feature boundary for server targets
 ledger = []
@@ -33,6 +33,8 @@ serde = { version = "1.0", features = ["derive"] }
 
 # Make sqlx optional so it remains omitted from default WASM builds
 sqlx = { workspace = true, optional = true }
+# Make rocket optional so it remains omitted from default WASM builds
+rocket = { version = "0.5.1", features = ["json", "secrets"], optional = true }
 
 strum = { version = "0.28", features = ["derive"] }
 unic-langid = { version = "0.9", features = ["serde", "macros"] }

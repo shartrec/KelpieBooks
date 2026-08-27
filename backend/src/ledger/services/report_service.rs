@@ -29,7 +29,7 @@ use shared_core::ledger::{
     models::account_category::AccountCategory,
 };
 use uuid::Uuid;
-
+use shared_core::OrgId;
 use crate::{
     ledger::db::account::get_all_by_org,
     util::ApiError,
@@ -37,7 +37,7 @@ use crate::{
 
 pub(crate) async fn get_profit_loss(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     start_date: NaiveDate,
     end_date: NaiveDate,
 ) -> Result<Vec<AccountWithBalance>, ApiError> {
@@ -123,7 +123,7 @@ pub(crate) async fn get_profit_loss(
 
 pub(crate) async fn get_expense_breakdown(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     start_date: NaiveDate,
     end_date: NaiveDate,
 ) -> Result<Vec<AccountWithBalance>, ApiError> {
@@ -207,7 +207,7 @@ pub(crate) async fn get_expense_breakdown(
 
 pub(crate) async fn get_balance_sheet(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     date: NaiveDate,
 ) -> Result<BalanceSheet, ApiError> {
     let accounts = get_all_by_org(pool, organization_id).await?;
@@ -328,7 +328,7 @@ pub(crate) async fn get_balance_sheet(
 
 pub(crate) async fn get_trial_balance(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     date: NaiveDate,
 ) -> Result<Vec<AccountWithBalance>, ApiError> {
     let accounts = get_all_by_org(pool, organization_id).await?;
@@ -378,7 +378,7 @@ pub(crate) async fn get_trial_balance(
 
 pub(crate) async fn get_general_ledger(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    organization_id: OrgId,
     start_date: NaiveDate,
     end_date: NaiveDate,
     account_ids: Option<Vec<Uuid>>,

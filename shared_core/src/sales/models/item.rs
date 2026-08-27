@@ -19,6 +19,7 @@ use strum::{
     EnumString,
 };
 use uuid::Uuid;
+use crate::OrgId;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, EnumString, Display, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -43,7 +44,7 @@ impl Default for ItemType {
 pub struct UnitOfMeasure {
     pub id: Uuid,
     #[cfg_attr(feature = "backend", sqlx(rename = "organization_id"))]
-    pub org_id: Uuid,
+    pub org_id: OrgId,
     pub code: String, // e.g., "EA", "HR"
     pub name: String, // e.g., "Each", "Hour"
     pub is_active: bool,
@@ -55,7 +56,7 @@ pub struct UnitOfMeasure {
 pub struct Item {
     pub id: Uuid,
     #[cfg_attr(feature = "backend", sqlx(rename = "organization_id"))]
-    pub org_id: Uuid,
+    pub org_id: OrgId,
     pub code: String,
     pub name: String,
     pub description: Option<String>,

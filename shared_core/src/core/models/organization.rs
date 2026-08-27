@@ -15,11 +15,11 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
+use crate::OrgId;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Organization {
-    pub id: Uuid,
+    pub id: OrgId,
     pub name: String,
     pub strict_audit_mode: bool,
     pub created_at: DateTime<Utc>,

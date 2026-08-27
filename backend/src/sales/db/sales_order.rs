@@ -29,6 +29,7 @@ use shared_core::sales::{
 };
 use sqlx::Acquire;
 use uuid::Uuid;
+use shared_core::OrgId;
 
 fn from_row_to_sales_order_list_item(row: &sqlx::postgres::PgRow) -> SalesOrder {
     SalesOrder {
@@ -55,7 +56,7 @@ fn from_row_to_sales_order_list_item(row: &sqlx::postgres::PgRow) -> SalesOrder 
 
 pub(crate) async fn create_draft_order(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     request: &CreateSalesOrderRequest,
     order_number: &str,
 ) -> Result<SalesOrder, sqlx::Error> {
@@ -84,7 +85,7 @@ pub(crate) async fn create_draft_order(
             billing_address_id, shipping_address_id,
             subtotal, tax_total, total_amount, amount_remaining
         "#,
-        org_id,
+        *org_id,
         request.partner_id,
         request.warehouse_id,
         order_number,
@@ -247,7 +248,7 @@ pub(crate) async fn get_sales_order_address(
 
 pub(crate) async fn get_sales_order(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<Option<SalesOrderDto>, sqlx::Error> {
     let order_row = sqlx::query_as!(
@@ -267,7 +268,7 @@ pub(crate) async fn get_sales_order(
         WHERE so.id = $1 AND so.organization_id = $2
         "#,
         id,
-        org_id,
+        *org_id,
     )
     .fetch_optional(&mut *conn)
     .await?;
@@ -289,7 +290,7 @@ pub(crate) async fn get_sales_order(
 
 pub(crate) async fn list_sales_orders(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     start_date: Option<NaiveDate>,
     end_date: Option<NaiveDate>,
     partner_id: Option<Uuid>,
@@ -365,7 +366,7 @@ pub(crate) async fn list_sales_orders(
 
 pub(crate) async fn update_sales_order_totals(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
     subtotal: Decimal,
     tax_total: Decimal,
@@ -383,7 +384,7 @@ pub(crate) async fn update_sales_order_totals(
         total_amount,
         amount_remaining,
         id,
-        org_id,
+        *org_id,
     )
     .execute(conn)
     .await?;
@@ -392,7 +393,7 @@ pub(crate) async fn update_sales_order_totals(
 
 pub(crate) async fn update_sales_order_status(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
     new_status: SalesDocumentStatus,
 ) -> Result<(), sqlx::Error> {
@@ -404,7 +405,7 @@ pub(crate) async fn update_sales_order_status(
         "#,
         new_status as SalesDocumentStatus,
         id,
-        org_id,
+        *org_id,
     )
     .execute(conn)
     .await?;

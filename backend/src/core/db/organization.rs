@@ -11,16 +11,16 @@ use rocket_db_pools::sqlx::{
     PgConnection,
 };
 use shared_core::core::models::organization::Organization;
-use uuid::Uuid;
+use shared_core::OrgId;
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: OrgId,
 ) -> Result<Option<Organization>, sqlx::Error> {
     sqlx::query_as!(
         Organization,
         "SELECT * FROM organizations WHERE id = $1",
-        id
+        *id
     )
     .fetch_optional(pool)
     .await
@@ -28,13 +28,13 @@ pub(crate) async fn get(
 
 pub(crate) async fn set_lock_date(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: OrgId,
     date: Option<NaiveDate>,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE organizations SET locked_until = $1 WHERE id = $2",
         date,
-        id
+        *id
     )
     .execute(pool)
     .await?;
@@ -42,13 +42,13 @@ pub(crate) async fn set_lock_date(
 }
 pub(crate) async fn set_audit_mode(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: OrgId,
     mode: bool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE organizations SET strict_audit_mode = $1 WHERE id = $2",
         mode,
-        id
+        *id
     )
     .execute(pool)
     .await?;

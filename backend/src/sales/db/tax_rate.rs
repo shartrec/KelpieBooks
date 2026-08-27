@@ -13,10 +13,11 @@ use sqlx::{
     PgConnection,
 };
 use uuid::Uuid;
+use shared_core::OrgId;
 
 pub async fn get_tax_rates_for_category(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     category_id: Uuid,
 ) -> Result<Vec<TaxRate>, sqlx::Error> {
     let rows = sqlx::query_as!(
@@ -28,7 +29,7 @@ pub async fn get_tax_rates_for_category(
         ORDER BY valid_from DESC
         "#,
         category_id,
-        org_id,
+        *org_id,
     )
         .fetch_all(conn)
         .await;
@@ -37,7 +38,7 @@ pub async fn get_tax_rates_for_category(
 
 pub async fn get_current_tax_rate_for_category(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     category_id: Uuid,
     effective_date: NaiveDate,
 ) -> Result<Option<TaxRate>, sqlx::Error> {
@@ -54,7 +55,7 @@ pub async fn get_current_tax_rate_for_category(
         LIMIT 1
         "#,
         category_id,
-        org_id,
+        *org_id,
         effective_date,
     )
         .fetch_optional(conn)
@@ -64,7 +65,7 @@ pub async fn get_current_tax_rate_for_category(
 
 pub async fn update_tax_rates_for_category(
     conn: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     category_id: Uuid,
     rates: &[TaxRate],
 ) -> Result<(), sqlx::Error> {
@@ -74,7 +75,7 @@ pub async fn update_tax_rates_for_category(
     sqlx::query!(
         "DELETE FROM tax_rates WHERE tax_category_id = $1 AND organization_id = $2",
         category_id,
-        org_id,
+        *org_id,
     )
     .execute(&mut *tx)
     .await?;
@@ -87,7 +88,7 @@ pub async fn update_tax_rates_for_category(
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             "#,
             rate.id,
-            org_id,
+            *org_id,
             category_id,
             rate.name,
             rate.rate,

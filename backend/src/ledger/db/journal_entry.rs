@@ -21,6 +21,7 @@ use shared_core::ledger::{
     models::journal_entry::JournalEntry,
 };
 use uuid::Uuid;
+use shared_core::OrgId;
 
 pub(crate) struct JournalEntryWithDate {
     pub(crate) id: Uuid,
@@ -35,7 +36,7 @@ pub(crate) struct JournalEntryWithDate {
 
 pub(crate) async fn get_all_by_org(
     pool: &mut PgConnection,
-    organization_id: Uuid,
+    org_id: OrgId,
 ) -> Result<Vec<JournalEntry>, sqlx::Error> {
     sqlx::query_as!(
         JournalEntry,
@@ -45,7 +46,7 @@ pub(crate) async fn get_all_by_org(
         JOIN transactions t ON je.transaction_id = t.id
         WHERE t.organization_id = $1
         "#,
-        organization_id
+        *org_id
     )
     .fetch_all(pool)
     .await
@@ -101,7 +102,7 @@ pub(crate) async fn insert(
 
 pub(crate) async fn get_balance_before_date(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     account_id: Uuid,
     date: NaiveDate,
 ) -> Result<Decimal, sqlx::Error> {
@@ -114,7 +115,7 @@ pub(crate) async fn get_balance_before_date(
         WHERE je.account_id = $1 AND a.organization_id = $2 AND t.date < $3
         "#,
         account_id,
-        org_id,
+        *org_id,
         date
     )
     .fetch_one(pool)
@@ -125,7 +126,7 @@ pub(crate) async fn get_balance_before_date(
 
 pub(crate) async fn get_all_by_account_in_date_range(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     account_id: Uuid,
     start_date: NaiveDate,
     end_date: NaiveDate,
@@ -149,7 +150,7 @@ pub(crate) async fn get_all_by_account_in_date_range(
         ORDER BY t.date, je.created_at
         "#,
         account_id,
-        org_id,
+        *org_id,
         start_date,
         end_date
     )
@@ -159,7 +160,7 @@ pub(crate) async fn get_all_by_account_in_date_range(
 
 pub(crate) async fn get_balance_up_to_date(
     pool: &mut PgConnection,
-    org_id: Uuid,
+    org_id: OrgId,
     account_id: Uuid,
     date: NaiveDate,
 ) -> Result<Decimal, sqlx::Error> {
@@ -172,7 +173,7 @@ pub(crate) async fn get_balance_up_to_date(
         WHERE je.account_id = $1  AND a.organization_id = $2 AND t.date <= $3
         "#,
         account_id,
-        org_id,
+        *org_id,
         date
     )
     .fetch_one(pool)

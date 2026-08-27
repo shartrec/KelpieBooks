@@ -9,7 +9,7 @@
 use rocket_db_pools::Connection;
 use shared_core::inventory::models::warehouse::Warehouse;
 use uuid::Uuid;
-
+use shared_core::OrgId;
 use crate::{
     inventory::db::{
         location as locations_db,
@@ -24,14 +24,14 @@ use crate::{
 
 pub async fn get_warehouses(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
 ) -> Result<Vec<Warehouse>, sqlx::Error> {
     warehouse_db::all_warehouses(pool, org_id).await
 }
 
 pub async fn get_warehouse(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<Option<Warehouse>, sqlx::Error> {
     warehouse_db::get_warehouse(pool, org_id, id).await
@@ -39,7 +39,7 @@ pub async fn get_warehouse(
 
 pub async fn create_warehouse(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     wh: &Warehouse,
 ) -> Result<Warehouse, sqlx::Error> {
     warehouse_db::create_warehouse(pool, org_id, wh).await
@@ -47,7 +47,7 @@ pub async fn create_warehouse(
 
 pub async fn update_warehouse(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
     wh: &Warehouse,
 ) -> Result<Warehouse, sqlx::Error> {
@@ -56,7 +56,7 @@ pub async fn update_warehouse(
 
 pub async fn delete_warehouse(
     pool: &mut Connection<DbKelpie>,
-    org_id: Uuid,
+    org_id: OrgId,
     id: Uuid,
 ) -> Result<u64, ApiError> {
     // 💡 Business Guard: Prevent removing a warehouse if locations are nested under it

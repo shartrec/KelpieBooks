@@ -75,7 +75,7 @@ use shared_core::core::{
     requests::auth::LoginRequest,
 };
 use uuid::Uuid;
-
+use shared_core::OrgId;
 #[cfg(feature = "email")]
 use crate::config::load_config;
 #[cfg(feature = "password-reset")]
@@ -268,7 +268,7 @@ async fn reset_password(
 
 pub(crate) struct AuthenticatedUser {
     pub(crate) user_id: Uuid,
-    pub(crate) organization_id: Uuid,
+    pub(crate) organization_id: OrgId,
     pub(crate) strict_audit_mode: bool,
     pub(crate) username: String,
     pub(crate) full_name: String,
@@ -393,7 +393,7 @@ pub(crate) async fn validate_session_token(token: &str) -> Option<AuthenticatedU
 
             return Some(AuthenticatedUser {
                 user_id: Uuid::parse_str(&data.claims.user_id).unwrap(),
-                organization_id: org_id,
+                organization_id: OrgId{0: org_id},
                 strict_audit_mode: data.claims.strict_audit_mode,
                 username: data.claims.username,
                 full_name: data.claims.full_name,
