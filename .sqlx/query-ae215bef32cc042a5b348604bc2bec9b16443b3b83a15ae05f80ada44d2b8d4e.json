@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE users SET email=$1, password_hash=$2, full_name=$3, display_name=$4, role_id=$5 WHERE id = $6 RETURNING *",
+  "query": "SELECT id,  organization_id, date, description, reference, created_at\n                FROM transactions WHERE organization_id = $1 ORDER BY date DESC, created_at DESC LIMIT $2",
   "describe": {
     "columns": [
       {
@@ -15,48 +15,32 @@
       },
       {
         "ordinal": 2,
-        "name": "email",
-        "type_info": "Text"
+        "name": "date",
+        "type_info": "Date"
       },
       {
         "ordinal": 3,
-        "name": "password_hash",
+        "name": "description",
         "type_info": "Text"
       },
       {
         "ordinal": 4,
-        "name": "full_name",
+        "name": "reference",
         "type_info": "Text"
       },
       {
         "ordinal": 5,
-        "name": "display_name",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 6,
-        "name": "role_id",
-        "type_info": "Uuid"
-      },
-      {
-        "ordinal": 7,
         "name": "created_at",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
       "Left": [
-        "Text",
-        "Text",
-        "Text",
-        "Text",
         "Uuid",
-        "Uuid"
+        "Int8"
       ]
     },
     "nullable": [
-      false,
-      false,
       false,
       false,
       false,
@@ -65,5 +49,5 @@
       false
     ]
   },
-  "hash": "adfab5d2af3b27f4fd5f26171c09f4442d110c1e11bfc7db40ff46f70aa37a36"
+  "hash": "ae215bef32cc042a5b348604bc2bec9b16443b3b83a15ae05f80ada44d2b8d4e"
 }

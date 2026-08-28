@@ -21,11 +21,11 @@ use shared_core::ledger::{
     models::journal_entry::JournalEntry,
 };
 use uuid::Uuid;
-use shared_core::{AccountId, OrgId};
+use shared_core::{AccountId, OrgId, TransactionId};
 
 pub(crate) struct JournalEntryWithDate {
     pub(crate) id: Uuid,
-    pub(crate) transaction_id: Uuid,
+    pub(crate) transaction_id: TransactionId,
     pub(crate) account_id: AccountId,
     pub(crate) debit: Decimal,
     pub(crate) credit: Decimal,
@@ -54,7 +54,7 @@ pub(crate) async fn get_all_by_org(
 
 pub(crate) async fn get_all_by_transaction(
     pool: &mut PgConnection,
-    transaction_id: Uuid,
+    transaction_id: TransactionId,
 ) -> Result<Vec<JournalEntryDetail>, sqlx::Error> {
     sqlx::query_as!(
         JournalEntryDetail,
@@ -73,7 +73,7 @@ pub(crate) async fn get_all_by_transaction(
         WHERE je.transaction_id = $1
         ORDER BY je.debit DESC, je.credit
         "#,
-        transaction_id
+        *transaction_id
     )
     .fetch_all(pool)
     .await
@@ -81,7 +81,7 @@ pub(crate) async fn get_all_by_transaction(
 
 pub(crate) async fn insert(
     pool: &mut PgConnection,
-    transaction_id: Uuid,
+    transaction_id: TransactionId,
     account_id: AccountId,
     debit: Decimal,
     credit: Decimal,
@@ -89,7 +89,7 @@ pub(crate) async fn insert(
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "INSERT INTO journal_entries (transaction_id, account_id, debit, credit, description) VALUES ($1, $2, $3, $4, $5)",
-        transaction_id,
+        *transaction_id,
         *account_id,
         debit,
         credit,

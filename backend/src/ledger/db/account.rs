@@ -23,7 +23,6 @@ use shared_core::ledger::{
         UpdateAccountRequest,
     },
 };
-use uuid::Uuid;
 use shared_core::{AccountId, OrgId};
 
 pub(crate) async fn get(
@@ -114,7 +113,7 @@ pub(crate) async fn insert(
 pub(crate) async fn update(
     pool: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: AccountId,
     req: &UpdateAccountRequest,
 ) -> Result<Account, sqlx::Error> {
     let account = sqlx::query_as!(
@@ -133,7 +132,7 @@ pub(crate) async fn update(
         req.is_group,
         req.is_bank_account,
         req.system_tag.clone() as Option<SystemTag>,
-        id,
+        *id,
         *org_id,
     )
     .fetch_one(pool)
@@ -157,11 +156,11 @@ pub(crate) async fn has_journal_entries(
 pub(crate) async fn delete(
     pool: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: AccountId,
 ) -> Result<u64, sqlx::Error> {
     let result = sqlx::query!(
         "DELETE FROM accounts WHERE id = $1 AND organization_id = $2",
-        id,
+        *id,
         *org_id,
     )
     .execute(pool)

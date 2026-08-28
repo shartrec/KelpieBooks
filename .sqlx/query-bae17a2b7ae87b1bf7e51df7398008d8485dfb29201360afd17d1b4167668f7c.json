@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        UPDATE accounts\n        SET name = $1, code = $2, category = $3::account_category, is_group = $4, is_bank_account = $5, system_tag = $6::system_tag\n        WHERE id = $7\n        AND organization_id = $8\n        RETURNING id, organization_id, parent_id, code, name, category as \"category: AccountCategory\",\n            is_group, is_bank_account, system_tag as \"system_tag: SystemTag\", created_at\n        ",
+  "query": "\n        UPDATE accounts\n        SET name = $1, code = $2, category = $3::account_category, is_group = $4, is_bank_account = $5, system_tag = $6::system_tag\n        WHERE id = $7\n        AND organization_id = $8\n        RETURNING id, organization_id, parent_id as \"parent_id: AccountId\", code, name, category as \"category: AccountCategory\",\n            is_group, is_bank_account, system_tag as \"system_tag: SystemTag\", created_at\n        ",
   "describe": {
     "columns": [
       {
@@ -15,7 +15,7 @@
       },
       {
         "ordinal": 2,
-        "name": "parent_id",
+        "name": "parent_id: AccountId",
         "type_info": "Uuid"
       },
       {
@@ -145,5 +145,5 @@
       false
     ]
   },
-  "hash": "4c80fde2d43294feff9bfcfda3826bf2c20a3e5a3aef271c29c878aa8e794725"
+  "hash": "bae17a2b7ae87b1bf7e51df7398008d8485dfb29201360afd17d1b4167668f7c"
 }

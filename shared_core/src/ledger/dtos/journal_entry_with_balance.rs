@@ -13,13 +13,13 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
-use crate::AccountId;
+use crate::{AccountId, TransactionId};
 
 /// A DTO representing a journal entry with its running balance at that point in time.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct JournalEntryWithBalance {
     pub id: Uuid,
-    pub transaction_id: Uuid,
+    pub transaction_id: TransactionId,
     pub account_id: AccountId,
     pub date: NaiveDate,
     pub description: Option<String>,

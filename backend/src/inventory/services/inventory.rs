@@ -36,7 +36,7 @@ use shared_core::{inventory::{
         CreateTransactionRequest,
         JournalEntryLine,
     },
-}, AccountId, OrgId, UserId};
+}, AccountId, OrgId, TransactionId, UserId};
 use sqlx::{
     Acquire,
     Error,
@@ -335,9 +335,9 @@ pub async fn post_receive_journal_entry(
     org_id: OrgId,
     total_value: Decimal, // quantity * unit_cost
     reference: &str,
-) -> Result<Uuid, ApiError> {
+) -> Result<TransactionId, ApiError> {
     if total_value <= Decimal::ZERO {
-        return Ok(Uuid::nil()); // Skip 0-value postings
+        return Ok(TransactionId::default()); // Skip 0-value postings
     }
 
     // 1. Fetch system account mappings
@@ -381,9 +381,9 @@ pub async fn post_adjustment_journal_entry(
     org_id: OrgId,
     adjustment_value: Decimal, // positive = stock gain, negative = stock loss
     reference: &str,
-) -> Result<Uuid, ApiError> {
+) -> Result<TransactionId, ApiError> {
     if adjustment_value.is_zero() {
-        return Ok(Uuid::nil());
+        return Ok(TransactionId::default());
     }
 
     let system_accounts_map = get_system_accounts(conn, org_id).await?;

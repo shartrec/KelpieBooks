@@ -17,8 +17,7 @@ use shared_core::{core::models::auth::SystemPrivilege, ledger::{
     dtos::journal_entry_with_balance::JournalEntryWithBalance,
     models::account::Account,
     requests::transaction::ReverseTransactionRequest,
-}, AccountId};
-use uuid::Uuid;
+}, AccountId, TransactionId};
 use yew::prelude::*;
 use yew_router::prelude::*;
 
@@ -287,7 +286,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
 
     let on_edit_click = {
         let navigator = navigator.clone();
-        Callback::from(move |id: Uuid| {
+        Callback::from(move |id: TransactionId| {
             let query = NewTransactionQuery {
                 edit_id: Some(id),
                 ..Default::default()
@@ -312,7 +311,7 @@ pub fn account_ledger_page(props: &AccountLedgerPageProps) -> Html {
     };
 
     let transaction_groups = use_memo(entries.clone(), |entries| {
-        let mut groups: HashMap<Uuid, TransactionGroup> = HashMap::new();
+        let mut groups: HashMap<TransactionId, TransactionGroup> = HashMap::new();
         for entry in entries.iter() {
             if entry.description != Some(i18n.t("ledger-opening-balance")) {
                 groups.insert(

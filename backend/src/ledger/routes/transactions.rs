@@ -29,7 +29,7 @@ use shared_core::ledger::{
     },
 };
 use sqlx::Acquire;
-
+use shared_core::TransactionId;
 use crate::{
     core::db,
     ledger::{
@@ -45,7 +45,6 @@ use crate::{
         UseTransactions,
     },
     util::{
-        types::PathUuid,
         ApiError,
     },
     DbKelpie,
@@ -64,16 +63,16 @@ pub(crate) fn routes() -> Vec<Route> {
 #[get("/api/transactions/<id>")]
 async fn get_transaction(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: TransactionId,
     guard: RequirePrivilege<UseTransactions>,
 ) -> Result<Json<TransactionDetail>, ApiError> {
     let user = guard.0;
 
-    let transaction = transaction::get(&mut pool, user.organization_id, *id)
+    let transaction = transaction::get(&mut pool, user.organization_id, id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 
-    let entries = journal_entry::get_all_by_transaction(&mut pool, *id).await?;
+    let entries = journal_entry::get_all_by_transaction(&mut pool, id).await?;
 
     Ok(Json(TransactionDetail {
         transaction,
@@ -85,10 +84,10 @@ async fn get_transaction(
 async fn delete_transaction(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageTransactions>,
-    id: PathUuid,
+    id: TransactionId,
 ) -> Result<&'static str, ApiError> {
     let user = guard.0;
-    let transaction = transaction::get(&mut pool, user.organization_id, *id)
+    let transaction = transaction::get(&mut pool, user.organization_id, id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 
@@ -110,7 +109,7 @@ async fn delete_transaction(
         ));
     }
 
-    transaction::delete(&mut pool, user.organization_id, *id).await?;
+    transaction::delete(&mut pool, user.organization_id, id).await?;
 
     Ok("Transaction deleted successfully.")
 }
@@ -119,7 +118,7 @@ async fn delete_transaction(
 async fn update_transaction(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageTransactions>,
-    id: PathUuid,
+    id: TransactionId,
     req: Json<UpdateTransactionRequest>,
 ) -> Result<&'static str, ApiError> {
     let user = guard.0;
@@ -137,7 +136,7 @@ async fn update_transaction(
         .await?
         .ok_or_else(|| ApiError::NotFound("Organization not found".to_string()))?;
 
-    let original_transaction = transaction::get(&mut pool, user.organization_id, *id)
+    let original_transaction = transaction::get(&mut pool, user.organization_id, id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 
@@ -159,7 +158,7 @@ async fn update_transaction(
 
     let mut tx = pool.begin().await?;
 
-    transaction::delete(&mut tx, user.organization_id, *id).await?;
+    transaction::delete(&mut tx, user.organization_id, id).await?;
 
     let transaction_id = transaction::insert(
         &mut tx,
@@ -191,11 +190,11 @@ async fn update_transaction(
 async fn reverse_transaction(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageTransactions>,
-    id: PathUuid,
+    id: TransactionId,
     req: Json<ReverseTransactionRequest>,
 ) -> Result<&'static str, ApiError> {
     let user = guard.0;
-    let original_transaction = transaction::get(&mut pool, user.organization_id, *id)
+    let original_transaction = transaction::get(&mut pool, user.organization_id, id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Transaction not found".to_string()))?;
 
@@ -213,7 +212,7 @@ async fn reverse_transaction(
         original_transaction.date
     };
 
-    let original_entries = journal_entry::get_all_by_transaction(&mut pool, *id).await?;
+    let original_entries = journal_entry::get_all_by_transaction(&mut pool, id).await?;
 
     let mut tx = pool.begin().await?;
 

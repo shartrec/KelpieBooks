@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT system_tag as \"system_tag: SystemTag\", id\n        FROM accounts\n        WHERE organization_id = $1 AND system_tag IS NOT NULL\n        ",
+  "query": "\n        SELECT system_tag as \"system_tag: SystemTag\", id as \"id: AccountId\"\n        FROM accounts\n        WHERE organization_id = $1 AND system_tag IS NOT NULL\n        ",
   "describe": {
     "columns": [
       {
@@ -30,7 +30,7 @@
       },
       {
         "ordinal": 1,
-        "name": "id",
+        "name": "id: AccountId",
         "type_info": "Uuid"
       }
     ],
@@ -44,5 +44,5 @@
       false
     ]
   },
-  "hash": "8dfe6012728a8fb5a1247ba7478121b58fd6881a1b88cdc058d5c06ef5b10c4f"
+  "hash": "13c3443386e5e46d1d6d76c27c6b52f0c0fa9d1a213f7c2bf7127633fa30594b"
 }

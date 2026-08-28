@@ -11,10 +11,9 @@ use shared_core::ledger::dtos::{
     journal_entry_with_balance::JournalEntryWithBalance,
     transaction_detail::TransactionDetail,
 };
-use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-
+use shared_core::TransactionId;
 use crate::{
     contexts::{
         locale_context::use_locale,
@@ -26,7 +25,7 @@ use crate::{
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TransactionGroup {
-    pub transaction_id: Uuid,
+    pub transaction_id: TransactionId,
     pub date: chrono::NaiveDate,
     pub description: Option<String>,
     pub primary_entry: JournalEntryWithBalance,
@@ -36,7 +35,7 @@ pub struct TransactionGroup {
 pub struct TransactionRowProps {
     pub transaction_group: TransactionGroup,
     pub on_reverse: Callback<JournalEntryWithBalance>,
-    pub on_edit: Callback<Uuid>,
+    pub on_edit: Callback<TransactionId>,
     pub on_delete: Callback<JournalEntryWithBalance>,
     pub org_ctx: OrgContextHandle,
 }

@@ -15,7 +15,7 @@ use shared_core::sales::{
     requests::customer_payment::CreateCustomerPaymentRequest,
 };
 use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{OrgId, TransactionId};
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
@@ -56,7 +56,7 @@ pub(crate) async fn get_all_by_order(
 pub(crate) async fn insert(
     pool: &mut PgConnection,
     org_id: OrgId,
-    transaction_id: Uuid,
+    transaction_id: TransactionId,
     req: &CreateCustomerPaymentRequest,
 ) -> Result<CustomerPayment, sqlx::Error> {
     let row = sqlx::query_as!(
@@ -76,7 +76,7 @@ pub(crate) async fn insert(
         "#,
         *org_id,
         req.partner_id,
-        transaction_id,
+        *transaction_id,
         req.payment_date,
         *req.bank_account_id,
         req.amount,

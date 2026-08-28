@@ -30,7 +30,7 @@ use shared_core::ledger::{
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::AccountId;
+use shared_core::{AccountId, TransactionId};
 use crate::{
     api::Api,
     contexts::{
@@ -50,10 +50,10 @@ pub struct NewTransactionQuery {
     pub from_account: Option<AccountId>,
     #[serde(default)]
     #[serde(rename = "duplicate_from")]
-    pub duplicate_from: Option<Uuid>,
+    pub duplicate_from: Option<TransactionId>,
     #[serde(default)]
     #[serde(rename = "edit_id")]
-    pub edit_id: Option<Uuid>,
+    pub edit_id: Option<TransactionId>,
 }
 
 #[function_component(NewTransactionPage)]
@@ -61,7 +61,7 @@ pub fn new_transaction_page() -> Html {
     let user_ctx = use_user_context();
     let i18n = use_locale();
     let request = use_state(CreateTransactionRequest::default);
-    let edit_id = use_state(|| None::<Uuid>);
+    let edit_id = use_state(|| None::<TransactionId>);
     let focus_index = use_state(|| None::<usize>);
     let postable_accounts = use_state(Vec::new);
     let from_account = use_state(|| None::<Account>);

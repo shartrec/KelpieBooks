@@ -59,7 +59,6 @@ use crate::{
             compile_typst_to_pdf,
             DownloadFile,
         },
-        types::PathUuid,
         ApiError,
     },
     DbKelpie,
@@ -197,13 +196,13 @@ async fn create_account(
 #[put("/api/accounts/<id>", data = "<req>")]
 async fn update_account(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: AccountId,
     req: Json<UpdateAccountRequest>,
     guard: RequirePrivilege<ManageAccounts>,
 ) -> Result<Json<AccountWithBalance>, ApiError> {
     let user = guard.0;
 
-    let updated_account = account_db::update(&mut pool, user.organization_id, *id, &req).await?;
+    let updated_account = account_db::update(&mut pool, user.organization_id, id, &req).await?;
     Ok(Json(AccountWithBalance {
         id: updated_account.id,
         organization_id: updated_account.organization_id,
@@ -233,7 +232,7 @@ async fn delete_account(
         ));
     }
 
-    let rows_affected = account_db::delete(&mut pool, user.organization_id, *id).await?;
+    let rows_affected = account_db::delete(&mut pool, user.organization_id, id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Account not found.".to_string()));
     }

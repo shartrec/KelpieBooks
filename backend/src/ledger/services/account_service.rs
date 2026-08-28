@@ -37,7 +37,7 @@ use shared_core::ledger::{
 };
 use sqlx::Acquire;
 use uuid::Uuid;
-use shared_core::{AccountId, OrgId};
+use shared_core::{AccountId, OrgId, TransactionId};
 use crate::{
     core::db,
     ledger::db::{
@@ -202,7 +202,7 @@ pub(crate) async fn get_journal_entries_with_running_balance(
     // Add an opening balance entry
     result.push(JournalEntryWithBalance {
         id: Uuid::new_v4(), // Bogus ID
-        transaction_id: Uuid::new_v4(),
+        transaction_id: TransactionId::default(),
         account_id,
         date: start_date,
         description: Some("Opening Balance".to_string()),
@@ -275,7 +275,7 @@ pub(crate) async fn create_transaction(
     pool: &mut PgConnection,
     organization_id: OrgId,
     req: &CreateTransactionRequest,
-) -> Result<Uuid, ApiError> {
+) -> Result<TransactionId, ApiError> {
     let total_debits: Decimal = req.entries.iter().map(|e| e.debit).sum();
     let total_credits: Decimal = req.entries.iter().map(|e| e.credit).sum();
 

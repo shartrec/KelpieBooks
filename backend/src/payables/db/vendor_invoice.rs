@@ -28,7 +28,7 @@ use shared_core::payables::{
     },
 };
 use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{OrgId, TransactionId};
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
@@ -164,7 +164,7 @@ pub(crate) async fn get_top_payables(
 pub(crate) async fn insert(
     pool: &mut PgConnection,
     org_id: OrgId,
-    transaction_id: Uuid,
+    transaction_id: TransactionId,
     req: &CreateVendorInvoiceRequest,
 ) -> Result<VendorInvoice, sqlx::Error> {
     let net_amount = req.items.iter().map(|i| i.net_amount).sum::<Decimal>();
@@ -179,7 +179,7 @@ pub(crate) async fn insert(
         "#,
         *org_id,
         req.partner_id,
-        transaction_id,
+        *transaction_id,
         req.invoice_number,
         req.issue_date,
         req.due_date,

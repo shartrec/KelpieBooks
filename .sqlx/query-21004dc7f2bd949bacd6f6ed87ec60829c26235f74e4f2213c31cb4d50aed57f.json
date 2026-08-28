@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT\n            id,\n            organization_id,\n            parent_id,\n            code,\n            name,\n            category as \"category: AccountCategory\",\n            is_group,\n            is_bank_account,\n            system_tag as \"system_tag: SystemTag\",\n            created_at\n        FROM accounts\n        WHERE organization_id = $1\n        ORDER BY name\n        ",
+  "query": "\n        SELECT\n            id,\n            organization_id,\n            parent_id as \"parent_id: AccountId\",\n            code,\n            name,\n            category as \"category: AccountCategory\",\n            is_group,\n            is_bank_account,\n            system_tag as \"system_tag: SystemTag\",\n            created_at\n        FROM accounts\n        WHERE id = $1\n        AND organization_id = $2\n        ",
   "describe": {
     "columns": [
       {
@@ -15,7 +15,7 @@
       },
       {
         "ordinal": 2,
-        "name": "parent_id",
+        "name": "parent_id: AccountId",
         "type_info": "Uuid"
       },
       {
@@ -89,6 +89,7 @@
     ],
     "parameters": {
       "Left": [
+        "Uuid",
         "Uuid"
       ]
     },
@@ -105,5 +106,5 @@
       false
     ]
   },
-  "hash": "41e8a4b066195414bd4b59bd18e20c515742d68fdf499b0aaff95a097876f7a9"
+  "hash": "21004dc7f2bd949bacd6f6ed87ec60829c26235f74e4f2213c31cb4d50aed57f"
 }

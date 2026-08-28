@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO accounts (organization_id, name, code, category, parent_id, is_group, is_bank_account, system_tag)\n        VALUES ($1, $2, $3, $4::account_category, $5, $6, $7, $8::system_tag)\n        RETURNING id, organization_id, parent_id, code, name, category as \"category: AccountCategory\",\n            is_group, is_bank_account, system_tag as \"system_tag: SystemTag\", created_at\n        ",
+  "query": "\n        SELECT\n            id,\n            organization_id,\n            parent_id as \"parent_id: AccountId\",\n            code,\n            name,\n            category as \"category: AccountCategory\",\n            is_group,\n            is_bank_account,\n            system_tag as \"system_tag: SystemTag\",\n            created_at\n        FROM accounts\n        WHERE organization_id = $1 AND system_tag = $2::system_tag\n        ",
   "describe": {
     "columns": [
       {
@@ -15,7 +15,7 @@
       },
       {
         "ordinal": 2,
-        "name": "parent_id",
+        "name": "parent_id: AccountId",
         "type_info": "Uuid"
       },
       {
@@ -90,25 +90,6 @@
     "parameters": {
       "Left": [
         "Uuid",
-        "Text",
-        "Text",
-        {
-          "Custom": {
-            "name": "account_category",
-            "kind": {
-              "Enum": [
-                "asset",
-                "liability",
-                "equity",
-                "revenue",
-                "expense"
-              ]
-            }
-          }
-        },
-        "Uuid",
-        "Bool",
-        "Bool",
         {
           "Custom": {
             "name": "system_tag",
@@ -145,5 +126,5 @@
       false
     ]
   },
-  "hash": "c57306dcd7acab4d05b209195c1974b32e0e783f473de85f4156137e38568ea8"
+  "hash": "f1d12063d1b4779729cbffc96b4cb4073c3196eff14f10983931a7ba56e87982"
 }
