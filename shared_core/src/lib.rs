@@ -5,7 +5,6 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use std::str::FromStr;
 
 #[cfg(feature = "inventory")]
 pub mod inventory;
@@ -95,7 +94,7 @@ macro_rules! define_id {
             }
         }
 
-        impl FromStr for $name {
+        impl std::str::FromStr for $name {
             type Err = ::uuid::Error;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
