@@ -12,13 +12,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::{AccountId, TransactionId};
+use crate::{AccountId, JournalEntryId, TransactionId};
 
 /// A DTO representing a journal entry line, including the name of the account.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct JournalEntryDetail {
-    pub id: Uuid,
+    pub id: JournalEntryId,
     pub transaction_id: TransactionId,
     pub account_id: AccountId,
     pub account_name: String, // The joined account name

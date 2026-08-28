@@ -15,12 +15,11 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::{AccountId, TransactionId};
+use crate::{AccountId, JournalEntryId, TransactionId};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct JournalEntry {
-    pub id: Uuid,
+    pub id: JournalEntryId,
     pub transaction_id: TransactionId,
     pub account_id: AccountId,
     pub debit: Decimal,

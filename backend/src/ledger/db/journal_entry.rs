@@ -20,11 +20,10 @@ use shared_core::ledger::{
     dtos::journal_entry_detail::JournalEntryDetail,
     models::journal_entry::JournalEntry,
 };
-use uuid::Uuid;
-use shared_core::{AccountId, OrgId, TransactionId};
+use shared_core::{AccountId, JournalEntryId, OrgId, TransactionId};
 
 pub(crate) struct JournalEntryWithDate {
-    pub(crate) id: Uuid,
+    pub(crate) id: JournalEntryId,
     pub(crate) transaction_id: TransactionId,
     pub(crate) account_id: AccountId,
     pub(crate) debit: Decimal,

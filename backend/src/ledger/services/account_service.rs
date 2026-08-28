@@ -37,7 +37,7 @@ use shared_core::ledger::{
 };
 use sqlx::Acquire;
 use uuid::Uuid;
-use shared_core::{AccountId, OrgId, TransactionId};
+use shared_core::{AccountId, JournalEntryId, OrgId, TransactionId};
 use crate::{
     core::db,
     ledger::db::{
@@ -201,7 +201,7 @@ pub(crate) async fn get_journal_entries_with_running_balance(
 
     // Add an opening balance entry
     result.push(JournalEntryWithBalance {
-        id: Uuid::new_v4(), // Bogus ID
+        id: JournalEntryId(Uuid::new_v4()), // Bogus ID
         transaction_id: TransactionId::default(),
         account_id,
         date: start_date,
