@@ -13,8 +13,7 @@ use shared_core::ledger::{
     dtos::account_with_balance::AccountWithBalance,
     models::account_category::AccountCategory,
 };
-use uuid::Uuid;
-
+use shared_core::AccountId;
 use crate::{
     core::routes::security::AuthenticatedUser,
     util::{
@@ -30,8 +29,8 @@ pub(crate) struct AccountNode {
 }
 
 fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
-    let mut acc_map: HashMap<Uuid, AccountWithBalance> = HashMap::new();
-    let mut pc_map: HashMap<Uuid, Vec<Uuid>> = HashMap::new();
+    let mut acc_map: HashMap<AccountId, AccountWithBalance> = HashMap::new();
+    let mut pc_map: HashMap<AccountId, Vec<AccountId>> = HashMap::new();
 
     for acc in accounts.iter() {
         acc_map.insert(acc.id, acc.clone());
@@ -41,9 +40,9 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
     }
 
     fn build_node(
-        acc_id: Uuid,
-        acc_map: &HashMap<Uuid, AccountWithBalance>,
-        pc_map: &HashMap<Uuid, Vec<Uuid>>,
+        acc_id: AccountId,
+        acc_map: &HashMap<AccountId, AccountWithBalance>,
+        pc_map: &HashMap<AccountId, Vec<AccountId>>,
     ) -> AccountNode {
         let acc = acc_map.get(&acc_id).unwrap();
         let children = pc_map

@@ -23,6 +23,7 @@ use rocket::{
 };
 use rocket_db_pools::Connection;
 use rust_decimal::dec;
+use shared_core::AccountId;
 use shared_core::ledger::{
     dtos::{
         account_with_balance::AccountWithBalance,
@@ -134,12 +135,12 @@ async fn get_payment_methods(
 #[get("/api/accounts/<id>")]
 async fn get_account(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: AccountId,
     guard: RequirePrivilege<UseAccounts>,
 ) -> Result<Json<Account>, ApiError> {
     let user = guard.0;
 
-    let account = account_db::get(&mut pool, user.organization_id, *id)
+    let account = account_db::get(&mut pool, user.organization_id, id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Account not found".to_string()))?;
     Ok(Json(account))
@@ -148,7 +149,7 @@ async fn get_account(
 #[get("/api/accounts/<id>/entries?<start>&<end>")]
 async fn get_account_entries(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: AccountId,
     start: String,
     end: String,
     guard: RequirePrivilege<UseAccounts>,
@@ -162,7 +163,7 @@ async fn get_account_entries(
     let entries = account_service::get_journal_entries_with_running_balance(
         &mut pool,
         user.organization_id,
-        *id,
+        id,
         start_date,
         end_date,
     )
@@ -221,12 +222,12 @@ async fn update_account(
 #[delete("/api/accounts/<id>")]
 async fn delete_account(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: AccountId,
     guard: RequirePrivilege<ManageAccounts>,
 ) -> Result<&'static str, ApiError> {
     let user = guard.0;
 
-    if account_db::has_journal_entries(&mut pool, *id).await? {
+    if account_db::has_journal_entries(&mut pool, id).await? {
         return Err(ApiError::Conflict(
             "Cannot delete an account with journal entries.".to_string(),
         ));
@@ -245,7 +246,7 @@ async fn export_account_ledger(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseAccounts>,
     config: &State<TemplateConfig>,
-    id: PathUuid,
+    id: AccountId,
     format: String,
     start: String,
     end: String,
@@ -259,12 +260,12 @@ async fn export_account_ledger(
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
         .map_err(|_| ApiError::BadRequest("Invalid end date".to_string()))?;
 
-    let account = account_db::get(&mut pool, user.organization_id, *id).await?;
+    let account = account_db::get(&mut pool, user.organization_id, id).await?;
     if let Some(account) = account {
         let entries = account_service::get_journal_entries_with_running_balance(
             &mut pool,
             user.organization_id,
-            *id,
+            id,
             start_date,
             end_date,
         )

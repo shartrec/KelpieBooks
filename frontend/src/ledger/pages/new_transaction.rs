@@ -30,7 +30,7 @@ use shared_core::ledger::{
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-
+use shared_core::AccountId;
 use crate::{
     api::Api,
     contexts::{
@@ -47,7 +47,7 @@ use crate::{
 pub struct NewTransactionQuery {
     #[serde(default)]
     #[serde(rename = "from_account")]
-    pub from_account: Option<Uuid>,
+    pub from_account: Option<AccountId>,
     #[serde(default)]
     #[serde(rename = "duplicate_from")]
     pub duplicate_from: Option<Uuid>,

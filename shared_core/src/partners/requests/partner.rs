@@ -10,8 +10,7 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-
+use crate::AccountId;
 use crate::partners::models::{
     partner_address::PartnerAddress,
     partner_contact::PartnerContact,
@@ -24,8 +23,8 @@ pub struct CreatePartnerRequest {
     pub tax_identifier: Option<String>,
     pub is_vendor: bool,
     pub is_customer: bool,
-    pub default_ap_account_id: Option<Uuid>,
-    pub default_ar_account_id: Option<Uuid>,
+    pub default_ap_account_id: Option<AccountId>,
+    pub default_ar_account_id: Option<AccountId>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
@@ -35,8 +34,8 @@ pub struct UpdatePartnerRequest {
     pub tax_identifier: Option<String>,
     pub is_vendor: bool,
     pub is_customer: bool,
-    pub default_ap_account_id: Option<Uuid>,
-    pub default_ar_account_id: Option<Uuid>,
+    pub default_ap_account_id: Option<AccountId>,
+    pub default_ar_account_id: Option<AccountId>,
     pub addresses: Vec<PartnerAddress>,
     pub contacts: Vec<PartnerContact>,
 }

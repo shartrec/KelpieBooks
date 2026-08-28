@@ -37,7 +37,7 @@ use shared_core::ledger::{
 };
 use sqlx::Acquire;
 use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{AccountId, OrgId};
 use crate::{
     core::db,
     ledger::db::{
@@ -73,7 +73,7 @@ pub(crate) async fn get_accounts_by_category(
 pub(crate) async fn get_account_with_balance(
     pool: &mut PgConnection,
     org_id: OrgId,
-    account_id: Uuid,
+    account_id: AccountId,
 ) -> Result<AccountWithBalance, ApiError> {
     let account = get(pool, org_id, account_id)
         .await?
@@ -109,7 +109,7 @@ pub(crate) async fn get_accounts_with_balances(
     let accounts = get_all_by_org(pool, organization_id).await?;
     let entries = journal_entry::get_all_by_org(pool, organization_id).await?;
 
-    let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
+    let mut balances: HashMap<AccountId, Decimal> = HashMap::new();
 
     // 1. Calculate the direct balance for each account from its journal entries.
     for entry in &entries {
@@ -117,8 +117,8 @@ pub(crate) async fn get_accounts_with_balances(
     }
 
     // 2. Build a map of parent to children and child counts for topological sort.
-    let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
-    let mut child_count: HashMap<Uuid, usize> = HashMap::new();
+    let mut parent_map: HashMap<AccountId, AccountId> = HashMap::new();
+    let mut child_count: HashMap<AccountId, usize> = HashMap::new();
 
     for account in &accounts {
         child_count.entry(account.id).or_insert(0);
@@ -129,7 +129,7 @@ pub(crate) async fn get_accounts_with_balances(
     }
 
     // 3. Use Dependency-Driven Roll-up (topological sort from leaves to roots).
-    let mut queue: VecDeque<Uuid> = child_count
+    let mut queue: VecDeque<AccountId> = child_count
         .iter()
         .filter(|(_, &count)| count == 0)
         .map(|(&id, _)| id)
@@ -185,7 +185,7 @@ pub(crate) async fn get_payment_methods(
 pub(crate) async fn get_journal_entries_with_running_balance(
     pool: &mut PgConnection,
     org_id: OrgId,
-    account_id: Uuid,
+    account_id: AccountId,
     start_date: NaiveDate,
     end_date: NaiveDate,
 ) -> Result<Vec<JournalEntryWithBalance>, ApiError> {
@@ -239,15 +239,15 @@ pub(crate) async fn get_journal_entries_with_running_balance(
 pub(crate) async fn get_system_accounts(
     pool: &mut PgConnection,
     organization_id: OrgId,
-) -> Result<HashMap<SystemTag, Uuid>, ApiError> {
+) -> Result<HashMap<SystemTag, AccountId>, ApiError> {
     Ok(account::get_system_accounts(pool, organization_id).await?)
 }
 
 pub(crate) async fn update_system_accounts(
     pool: &mut PgConnection,
     organization_id: OrgId,
-    system_accounts: &HashMap<SystemTag, Uuid>,
-) -> Result<HashMap<SystemTag, Uuid>, ApiError> {
+    system_accounts: &HashMap<SystemTag, AccountId>,
+) -> Result<HashMap<SystemTag, AccountId>, ApiError> {
     let mut tx = pool.begin().await?;
     account::update_system_accounts(&mut tx, organization_id, system_accounts).await?;
     let resp = get_system_accounts(&mut tx, organization_id).await?;

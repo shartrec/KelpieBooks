@@ -14,13 +14,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
 
 use crate::ledger::models::{
     account_category::AccountCategory,
     system_tag::SystemTag,
 };
-use crate::OrgId;
+use crate::{AccountId, OrgId};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
@@ -29,9 +28,9 @@ use crate::OrgId;
     sqlx(type_name = "accounts", rename_all = "snake_case")
 )]
 pub struct Account {
-    pub id: Uuid,
+    pub id: AccountId,
     pub organization_id: OrgId,
-    pub parent_id: Option<Uuid>,
+    pub parent_id: Option<AccountId>,
     pub code: String,
     pub name: String,
     pub category: AccountCategory,

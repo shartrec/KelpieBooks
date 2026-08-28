@@ -15,7 +15,7 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
-use crate::OrgId;
+use crate::{AccountId, OrgId};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Partner {
@@ -26,8 +26,8 @@ pub struct Partner {
     pub tax_identifier: Option<String>,
     pub is_vendor: bool,
     pub is_customer: bool,
-    pub default_ap_account_id: Option<Uuid>,
-    pub default_ar_account_id: Option<Uuid>,
+    pub default_ap_account_id: Option<AccountId>,
+    pub default_ar_account_id: Option<AccountId>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }

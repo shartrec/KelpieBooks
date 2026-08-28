@@ -17,9 +17,8 @@ use shared_core::{
             tax::TaxCategory,
         },
         requests::item::CreateItemRequest,
-    },
+    }
 };
-use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
@@ -128,19 +127,23 @@ pub fn add_item_modal(props: &AddItemModalProps) -> Html {
         })
     };
 
-    let on_select = |field_updater: fn(&mut CreateItemRequest, Uuid)| {
-        let state = request.clone();
+    fn make_on_select<T: std::str::FromStr + 'static>(
+        state: &UseStateHandle<CreateItemRequest>,
+        field_updater: fn(&mut CreateItemRequest, T),
+    ) -> Callback<Event> {
+        let state = state.clone();
         Callback::from(move |e: Event| {
             let mut info = (*state).clone();
             let value = e
                 .target_unchecked_into::<web_sys::HtmlSelectElement>()
                 .value();
-            if let Ok(id) = Uuid::parse_str(&value) {
+
+            if let Ok(id) = T::from_str(&value) {
                 field_updater(&mut info, id);
                 state.set(info);
             }
         })
-    };
+    }
 
     let on_item_type_change = {
         let state = request.clone();
@@ -208,7 +211,7 @@ pub fn add_item_modal(props: &AddItemModalProps) -> Html {
                     </select>
 
                     <label>{i18n.t("item-uom-label")}</label>
-                    <select onchange={on_select(|r, v| r.uom_id = v)}>
+                    <select onchange={make_on_select(&request, |r, v| r.income_account_id = v)}>
                         <option value="" disabled=true selected={request.uom_id.is_nil()}>{i18n.t("item-select-uom")}</option>
                         { for (*uoms).iter().map(|uom| html! {
                             <option value={uom.id.to_string()} selected={request.uom_id == uom.id}>{&uom.name}</option>
@@ -230,7 +233,7 @@ pub fn add_item_modal(props: &AddItemModalProps) -> Html {
                     />
 
                     <label>{i18n.t("item-income-account-label")}</label>
-                    <select onchange={on_select(|r, v| r.income_account_id = v)}>
+                    <select onchange={make_on_select(&request, |r, v| r.income_account_id = v)}>
                         <option value="" disabled=true selected={request.income_account_id.is_nil()}>{i18n.t("item-select-income-account")}</option>
                         { for (*income_accounts).iter().map(|acc| html! {
                             <option value={acc.id.to_string()} selected={request.income_account_id == acc.id}>{&acc.name}</option>
@@ -238,7 +241,7 @@ pub fn add_item_modal(props: &AddItemModalProps) -> Html {
                     </select>
 
                     <label>{i18n.t("item-tax-category-label")}</label>
-                    <select onchange={on_select(|r, v| r.tax_category_id = Some(v))}>
+                    <select onchange={make_on_select(&request, |r, v| r.tax_category_id = Some(v))}>
                         <option value="" disabled=true selected={request.tax_category_id.is_none()}>{i18n.t("item-select-tax-category")}</option>
                         { for (*tax_categories).iter().map(|tax| html! {
                             <option value={tax.id.to_string()} selected={request.tax_category_id == Some(tax.id)}>{&tax.name}</option>

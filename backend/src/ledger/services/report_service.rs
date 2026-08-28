@@ -28,8 +28,7 @@ use shared_core::ledger::{
     },
     models::account_category::AccountCategory,
 };
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{AccountId, OrgId};
 use crate::{
     ledger::db::account::get_all_by_org,
     util::ApiError,
@@ -58,7 +57,7 @@ pub(crate) async fn get_profit_loss(
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
 
-    let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
+    let mut balances: HashMap<AccountId, Decimal> = HashMap::new();
 
     for entry in &entries {
         *balances
@@ -67,8 +66,8 @@ pub(crate) async fn get_profit_loss(
             entry.get::<Decimal, _>("debit") - entry.get::<Decimal, _>("credit");
     }
 
-    let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
-    let mut child_count: HashMap<Uuid, usize> = HashMap::new();
+    let mut parent_map: HashMap<AccountId, AccountId> = HashMap::new();
+    let mut child_count: HashMap<AccountId, usize> = HashMap::new();
 
     for account in &accounts {
         child_count.entry(account.id).or_insert(0);
@@ -78,7 +77,7 @@ pub(crate) async fn get_profit_loss(
         }
     }
 
-    let mut queue: VecDeque<Uuid> = child_count
+    let mut queue: VecDeque<AccountId> = child_count
         .iter()
         .filter(|(_, &count)| count == 0)
         .map(|(&id, _)| id)
@@ -144,7 +143,7 @@ pub(crate) async fn get_expense_breakdown(
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
 
-    let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
+    let mut balances: HashMap<AccountId, Decimal> = HashMap::new();
 
     for entry in &entries {
         *balances
@@ -153,8 +152,8 @@ pub(crate) async fn get_expense_breakdown(
             entry.get::<Decimal, _>("debit") - entry.get::<Decimal, _>("credit");
     }
 
-    let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
-    let mut child_count: HashMap<Uuid, usize> = HashMap::new();
+    let mut parent_map: HashMap<AccountId, AccountId> = HashMap::new();
+    let mut child_count: HashMap<AccountId, usize> = HashMap::new();
 
     for account in &accounts {
         child_count.entry(account.id).or_insert(0);
@@ -164,7 +163,7 @@ pub(crate) async fn get_expense_breakdown(
         }
     }
 
-    let mut queue: VecDeque<Uuid> = child_count
+    let mut queue: VecDeque<AccountId> = child_count
         .iter()
         .filter(|(_, &count)| count == 0)
         .map(|(&id, _)| id)
@@ -226,7 +225,7 @@ pub(crate) async fn get_balance_sheet(
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
 
-    let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
+    let mut balances: HashMap<AccountId, Decimal> = HashMap::new();
 
     for entry in &entries {
         let debit: Decimal = entry.get("debit");
@@ -236,8 +235,8 @@ pub(crate) async fn get_balance_sheet(
             .or_insert(dec!(0.00)) += debit - credit;
     }
 
-    let mut parent_map: HashMap<Uuid, Uuid> = HashMap::new();
-    let mut child_count: HashMap<Uuid, usize> = HashMap::new();
+    let mut parent_map: HashMap<AccountId, AccountId> = HashMap::new();
+    let mut child_count: HashMap<AccountId, usize> = HashMap::new();
 
     for account in &accounts {
         child_count.entry(account.id).or_insert(0);
@@ -247,7 +246,7 @@ pub(crate) async fn get_balance_sheet(
         }
     }
 
-    let mut queue: VecDeque<Uuid> = child_count
+    let mut queue: VecDeque<AccountId> = child_count
         .iter()
         .filter(|(_, &count)| count == 0)
         .map(|(&id, _)| id)
@@ -347,7 +346,7 @@ pub(crate) async fn get_trial_balance(
     .await
     .map_err(|e| ApiError::Internal(e.to_string()))?;
 
-    let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
+    let mut balances: HashMap<AccountId, Decimal> = HashMap::new();
 
     for entry in &entries {
         *balances
@@ -381,7 +380,7 @@ pub(crate) async fn get_general_ledger(
     organization_id: OrgId,
     start_date: NaiveDate,
     end_date: NaiveDate,
-    account_ids: Option<Vec<Uuid>>,
+    account_ids: Option<Vec<AccountId>>,
     min_amount: Option<Decimal>,
 ) -> Result<Vec<GeneralLedgerLine>, ApiError> {
     let account_ids = account_ids.unwrap_or_default();
@@ -423,7 +422,7 @@ pub(crate) async fn get_general_ledger(
     .map_err(|e| ApiError::Internal(e.to_string()))?;
 
     let mut result = Vec::new();
-    let mut balances: HashMap<Uuid, Decimal> = HashMap::new();
+    let mut balances: HashMap<AccountId, Decimal> = HashMap::new();
 
     for row in rows {
         let balance = balances.entry(row.get("account_id")).or_insert(dec!(0.00));

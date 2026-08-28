@@ -36,7 +36,6 @@ use crate::{
     },
     util::{
         locale_context::LocaleContext,
-        types::PathUuid,
         ApiError,
     },
     DbKelpie,

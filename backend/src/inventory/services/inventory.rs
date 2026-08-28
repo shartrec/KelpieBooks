@@ -36,7 +36,7 @@ use shared_core::{inventory::{
         CreateTransactionRequest,
         JournalEntryLine,
     },
-}, OrgId, UserId};
+}, AccountId, OrgId, UserId};
 use sqlx::{
     Acquire,
     Error,
@@ -63,14 +63,14 @@ use crate::{
 };
 
 pub struct InventorySystemAccounts {
-    pub inventory_asset_id: Uuid,
-    pub received_not_invoiced_id: Uuid,
-    pub inventory_adjustment_id: Uuid,
-    pub cogs_id: Uuid,
+    pub inventory_asset_id: AccountId,
+    pub received_not_invoiced_id: AccountId,
+    pub inventory_adjustment_id: AccountId,
+    pub cogs_id: AccountId,
 }
 
 impl InventorySystemAccounts {
-    pub fn from_map(map: &HashMap<SystemTag, Uuid>) -> Result<Self, ApiError> {
+    pub fn from_map(map: &HashMap<SystemTag, AccountId>) -> Result<Self, ApiError> {
         let get_account = |tag: SystemTag| {
             map.get(&tag).copied().ok_or_else(|| {
                 ApiError::NotFound(format!("Missing system account mapping for tag: {:?}", tag))

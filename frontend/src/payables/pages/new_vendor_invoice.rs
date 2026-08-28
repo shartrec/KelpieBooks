@@ -13,14 +13,10 @@ use chrono::{
 };
 use fluent::fluent_args;
 use rust_decimal::dec;
-use shared_core::{
-    ledger::models::account_category::AccountCategory,
-    partners::dtos::partner_list_item::PartnerListItem,
-    payables::{
-        models::vendor_invoice_item::VendorInvoiceItem,
-        requests::vendor_invoice::CreateVendorInvoiceRequest,
-    },
-};
+use shared_core::{ledger::models::account_category::AccountCategory, partners::dtos::partner_list_item::PartnerListItem, payables::{
+    models::vendor_invoice_item::VendorInvoiceItem,
+    requests::vendor_invoice::CreateVendorInvoiceRequest,
+}, AccountId};
 use uuid::Uuid;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -51,7 +47,7 @@ pub fn new_vendor_invoice_page() -> Html {
             items: vec![VendorInvoiceItem {
                 id: Uuid::new_v4(),
                 vendor_invoice_id: Uuid::nil(),
-                account_id: Uuid::nil(),
+                account_id: AccountId::default(),
                 description: None,
                 net_amount: dec!(0.00),
                 tax_amount: dec!(0.00),
@@ -185,7 +181,7 @@ pub fn new_vendor_invoice_page() -> Html {
         let request = request.clone();
         Callback::from(move |_| {
             let mut req = (*request).clone();
-            let last_account_id = req.items.last().map_or(Uuid::nil(), |item| item.account_id);
+            let last_account_id = req.items.last().map_or(AccountId::default(), |item| item.account_id);
             req.items.push(VendorInvoiceItem {
                 id: Uuid::new_v4(),
                 vendor_invoice_id: Uuid::nil(),

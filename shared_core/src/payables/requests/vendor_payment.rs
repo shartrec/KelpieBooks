@@ -13,14 +13,14 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
-
+use crate::AccountId;
 use crate::payables::models::vendor_payment_allocation::VendorPaymentAllocation;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct CreateVendorPaymentRequest {
     pub partner_id: Uuid,
     pub payment_date: NaiveDate,
-    pub bank_account_id: Uuid,
+    pub bank_account_id: AccountId,
     pub amount: Decimal,
     pub reference: Option<String>,
     pub allocations: Vec<VendorPaymentAllocation>,

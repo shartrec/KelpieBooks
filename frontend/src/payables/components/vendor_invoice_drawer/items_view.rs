@@ -8,13 +8,10 @@
 use chrono::Utc;
 use fluent::fluent_args;
 use rust_decimal::dec;
-use shared_core::{
-    ledger::models::account_category::AccountCategory,
-    payables::{
-        dtos::vendor_invoice_dto::VendorInvoiceDto,
-        models::vendor_invoice_item::VendorInvoiceItem,
-    },
-};
+use shared_core::{ledger::models::account_category::AccountCategory, payables::{
+    dtos::vendor_invoice_dto::VendorInvoiceDto,
+    models::vendor_invoice_item::VendorInvoiceItem,
+}, AccountId};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
@@ -146,7 +143,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
             item_to_edit.set(Some(VendorInvoiceItem {
                 id: Uuid::new_v4(),
                 vendor_invoice_id: invoice_id,
-                account_id: Uuid::nil(),
+                account_id: AccountId::default(),
                 description: None,
                 net_amount: dec!(0.00),
                 tax_amount: dec!(0.00),

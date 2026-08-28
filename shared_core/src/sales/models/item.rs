@@ -19,7 +19,7 @@ use strum::{
     EnumString,
 };
 use uuid::Uuid;
-use crate::OrgId;
+use crate::{AccountId, OrgId};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, EnumString, Display, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -65,7 +65,7 @@ pub struct Item {
     pub unit_price: Decimal, // 💡 Scaled to 4 decimal places (e.g. 1245 = $0.1245)
     #[cfg_attr(feature = "backend", sqlx(rename = "purchase_unit_cost"))]
     pub unit_cost: Decimal, // 💡 Scaled to 4 decimal places (e.g. 1245 = $0.1245)
-    pub income_account_id: Uuid,
+    pub income_account_id: AccountId,
     pub tax_category_id: Option<Uuid>,
     pub is_active: bool,
     pub created_at: Option<DateTime<Utc>>,

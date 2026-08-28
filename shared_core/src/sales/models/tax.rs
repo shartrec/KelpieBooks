@@ -12,7 +12,7 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
-use crate::OrgId;
+use crate::{AccountId, OrgId};
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
@@ -34,7 +34,7 @@ pub struct TaxRate {
     pub tax_category_id: Uuid,
     pub name: String,
     pub rate: Decimal,
-    pub liability_account_id: Uuid,
+    pub liability_account_id: AccountId,
     pub valid_from: NaiveDate,
     pub valid_to: Option<NaiveDate>,
 }
@@ -47,7 +47,7 @@ impl Default for TaxRate {
             tax_category_id: Uuid::nil(),
             name: String::new(),
             rate: Decimal::new(0, 4),
-            liability_account_id: Uuid::nil(),
+            liability_account_id: AccountId::default(),
             valid_from: chrono::Local::now().naive_local().date(),
             valid_to: None,
         }

@@ -24,7 +24,7 @@ use shared_core::ledger::dtos::{
     general_ledger_line::GeneralLedgerLine,
 };
 use uuid::Uuid;
-
+use shared_core::AccountId;
 use crate::{
     ledger::{
         db::account,
@@ -141,9 +141,9 @@ async fn get_general_ledger(
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
         .map_err(|_| ApiError::BadRequest("Invalid end date".to_string()))?;
 
-    let account_ids: Option<Vec<Uuid>> = accounts.map(|s| {
+    let account_ids: Option<Vec<AccountId>> = accounts.map(|s| {
         s.split(',')
-            .filter_map(|id| id.parse::<Uuid>().ok())
+            .filter_map(|id| id.parse::<Uuid>().map(AccountId).ok())
             .collect()
     });
 
@@ -341,9 +341,9 @@ async fn export_general_ledger(
     let end_date = NaiveDate::parse_from_str(&end, "%Y-%m-%d")
         .map_err(|_| ApiError::BadRequest("Invalid end date".to_string()))?;
 
-    let account_ids: Option<Vec<Uuid>> = accounts.map(|s| {
+    let account_ids: Option<Vec<AccountId>> = accounts.map(|s| {
         s.split(',')
-            .filter_map(|id| id.parse::<Uuid>().ok())
+            .filter_map(|id| id.parse::<Uuid>().map(AccountId).ok())
             .collect()
     });
 

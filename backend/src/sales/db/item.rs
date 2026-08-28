@@ -152,7 +152,7 @@ pub async fn create(
         item.uom_id,
         item.unit_price,
         item.unit_cost,
-        item.income_account_id,
+        *item.income_account_id,
         item.tax_category_id,
         true,
         )
@@ -201,7 +201,7 @@ pub async fn update(
         item.uom_id,
         item.unit_price,
         item.unit_cost,
-        item.income_account_id,
+        *item.income_account_id,
         item.tax_category_id,
         item.is_active,
         id,

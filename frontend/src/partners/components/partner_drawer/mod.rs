@@ -21,10 +21,9 @@ use shared_core::partners::{
     },
     requests::partner::UpdatePartnerRequest,
 };
-use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-
+use shared_core::AccountId;
 use crate::{
     api::Api,
     contexts::{
@@ -52,8 +51,8 @@ pub struct PartnerDrawerProps {
     pub partner_contacts: Vec<PartnerContact>,
     pub on_close: Callback<()>,
     pub on_change: Callback<()>,
-    pub ap_accounts: Vec<(Uuid, String)>,
-    pub ar_accounts: Vec<(Uuid, String)>,
+    pub ap_accounts: Vec<(AccountId, String)>,
+    pub ar_accounts: Vec<(AccountId, String)>,
 }
 
 #[function_component(PartnerDrawer)]

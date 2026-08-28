@@ -5,23 +5,22 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
+use std::str::FromStr;
 use gloo_timers::callback::Timeout;
 use shared_core::partners::{
     models::partner::Partner,
     requests::partner::UpdatePartnerRequest,
 };
-use uuid::Uuid;
 use yew::prelude::*;
-
+use shared_core::AccountId;
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
 pub struct GeneralViewProps {
     pub partner: Partner,
     pub on_submit: Callback<UpdatePartnerRequest>,
-    pub ap_accounts: Vec<(Uuid, String)>,
-    pub ar_accounts: Vec<(Uuid, String)>,
+    pub ap_accounts: Vec<(AccountId, String)>,
+    pub ar_accounts: Vec<(AccountId, String)>,
 }
 
 #[function_component(GeneralView)]
@@ -65,19 +64,19 @@ pub fn general_view(props: &GeneralViewProps) -> Html {
         })
     };
 
-    let on_select_change = |field_updater: fn(&mut UpdatePartnerRequest, Option<Uuid>)| {
+    let on_select_change = |field_updater: fn(&mut UpdatePartnerRequest, Option<AccountId>)| {
         let request = request.clone();
         Callback::from(move |e: Event| {
             let mut req = (*request).clone();
             let value = e
                 .target_unchecked_into::<web_sys::HtmlSelectElement>()
                 .value();
-            let uuid = if value.is_empty() {
+            let account_id = if value.is_empty() {
                 None
             } else {
-                Uuid::parse_str(&value).ok()
+                AccountId::from_str(&value).ok()
             };
-            field_updater(&mut req, uuid);
+            field_updater(&mut req, account_id);
             request.set(req);
         })
     };

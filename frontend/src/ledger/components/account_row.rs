@@ -9,11 +9,7 @@
 use std::collections::HashSet;
 
 use rust_decimal::dec;
-use shared_core::{
-    core::models::auth::SystemPrivilege,
-    ledger::dtos::account_with_balance::AccountWithBalance,
-};
-use uuid::Uuid;
+use shared_core::{core::models::auth::SystemPrivilege, ledger::dtos::account_with_balance::AccountWithBalance, AccountId};
 use yew::prelude::*;
 use yew_router::prelude::*;
 
@@ -35,7 +31,7 @@ pub struct AccountNode {
 pub struct AccountRowProps {
     pub node: AccountNode,
     pub depth: usize,
-    pub collapsed_nodes: UseStateHandle<HashSet<Uuid>>,
+    pub collapsed_nodes: UseStateHandle<HashSet<AccountId>>,
     pub on_edit: Callback<AccountWithBalance>,
     pub on_delete: Callback<AccountWithBalance>,
 }

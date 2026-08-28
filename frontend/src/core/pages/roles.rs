@@ -16,10 +16,9 @@ use shared_core::core::{
         UpdateRoleRequest,
     },
 };
-use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-
+use shared_core::RoleId;
 use crate::{
     api::Api,
     contexts::{
@@ -157,7 +156,7 @@ pub fn roles_page() -> Html {
         let i18n = i18n.clone();
         let navigator = navigator.clone();
         let show_edit_modal = show_edit_modal.clone();
-        Callback::from(move |(role_id, req): (Uuid, UpdateRoleRequest)| {
+        Callback::from(move |(role_id, req): (RoleId, UpdateRoleRequest)| {
             let fetch_roles = fetch_roles.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();
@@ -198,7 +197,7 @@ pub fn roles_page() -> Html {
         let i18n = i18n.clone();
         let navigator = navigator.clone();
         let role_to_delete = role_to_delete.clone();
-        Callback::from(move |role_id: Uuid| {
+        Callback::from(move |role_id: RoleId| {
             let fetch_roles = fetch_roles.clone();
             let error = error.clone();
             let user_ctx = user_ctx.clone();

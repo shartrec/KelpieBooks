@@ -13,16 +13,15 @@ use shared_core::core::{
     },
     requests::role::UpdateRoleRequest,
 };
-use uuid::Uuid;
 use yew::prelude::*;
-
+use shared_core::RoleId;
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
 pub struct EditRoleModalProps {
     pub role: Role,
     pub on_close: Callback<()>,
-    pub on_submit: Callback<(Uuid, UpdateRoleRequest)>,
+    pub on_submit: Callback<(RoleId, UpdateRoleRequest)>,
 }
 
 #[function_component(EditRoleModal)]

@@ -20,8 +20,7 @@ use shared_core::ledger::{
     models::system_tag::SystemTag,
     requests::configuration::UpdateConfigurationRequest,
 };
-use uuid::Uuid;
-
+use shared_core::AccountId;
 use crate::{
     ledger::services::account_service,
     security::{
@@ -44,7 +43,7 @@ pub(crate) fn routes() -> Vec<rocket::Route> {
 async fn get_system_accounts(
     mut db: Connection<DbKelpie>,
     guard: RequirePrivilege<UseAccounts>,
-) -> Result<Json<HashMap<SystemTag, Uuid>>, rocket::http::Status> {
+) -> Result<Json<HashMap<SystemTag, AccountId>>, rocket::http::Status> {
     let user = guard.0;
     match account_service::get_system_accounts(&mut db, user.organization_id).await {
         Ok(accounts) => Ok(Json(accounts)),
@@ -56,8 +55,8 @@ async fn get_system_accounts(
 async fn set_system_accounts(
     mut db: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageAccounts>,
-    system_accounts: Json<HashMap<SystemTag, Uuid>>,
-) -> Result<Json<HashMap<SystemTag, Uuid>>, rocket::http::Status> {
+    system_accounts: Json<HashMap<SystemTag, AccountId>>,
+) -> Result<Json<HashMap<SystemTag, AccountId>>, rocket::http::Status> {
     let user = guard.0;
     match account_service::update_system_accounts(
         &mut db,

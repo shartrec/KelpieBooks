@@ -14,14 +14,14 @@ use shared_core::ledger::{
 };
 use uuid::Uuid;
 use yew::prelude::*;
-
+use shared_core::AccountId;
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
 pub struct AddAccountModalProps {
     pub on_close: Callback<()>,
     pub on_submit: Callback<CreateAccountRequest>,
-    pub parent_accounts: Vec<(Uuid, String)>, // Vec of (id, name) for the dropdown
+    pub parent_accounts: Vec<(AccountId, String)>, // Vec of (id, name) for the dropdown
 }
 
 #[function_component(AddAccountModal)]
@@ -72,7 +72,7 @@ pub fn add_account_modal(props: &AddAccountModalProps) -> Html {
             info.parent_id = if val.is_empty() {
                 None
             } else {
-                Uuid::from_str(&val).ok()
+                Uuid::from_str(&val).map(AccountId).ok()
             };
             state.set(info);
         })

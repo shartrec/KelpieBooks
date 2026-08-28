@@ -272,7 +272,7 @@ pub(crate) async fn insert_item(
         "#,
         item.id,
         vendor_invoice_id,
-        item.account_id,
+        *item.account_id,
         item.description,
         item.net_amount,
         item.tax_amount,

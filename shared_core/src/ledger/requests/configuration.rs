@@ -12,12 +12,11 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-
+use crate::AccountId;
 use crate::ledger::models::system_tag::SystemTag;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateConfigurationRequest {
-    pub system_accounts: HashMap<SystemTag, Uuid>,
+    pub system_accounts: HashMap<SystemTag, AccountId>,
     pub strict_audit_mode: bool,
 }

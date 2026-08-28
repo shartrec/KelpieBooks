@@ -13,13 +13,14 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
+use crate::AccountId;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct GeneralLedgerLine {
     pub transaction_id: Uuid,
     pub journal_entry_id: Uuid,
     pub date: NaiveDate,
-    pub account_id: Uuid,
+    pub account_id: AccountId,
     pub account_name: String,
     pub code: String,
     pub description: Option<String>,

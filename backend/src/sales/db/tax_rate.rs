@@ -92,7 +92,7 @@ pub async fn update_tax_rates_for_category(
             category_id,
             rate.name,
             rate.rate,
-            rate.liability_account_id,
+            *rate.liability_account_id,
             rate.valid_from,
             rate.valid_to,
         )

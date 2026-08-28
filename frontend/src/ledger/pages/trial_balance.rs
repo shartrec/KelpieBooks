@@ -20,13 +20,12 @@ use shared_core::ledger::{
     dtos::account_with_balance::AccountWithBalance,
     models::account_category::AccountCategory,
 };
-use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::{
     use_navigator,
     Link,
 };
-
+use shared_core::AccountId;
 use crate::{
     api::Api,
     contexts::{
@@ -55,8 +54,8 @@ pub struct AccountNode {
 
 // Helper function to build the hierarchical account nodes
 fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
-    let mut acc_map: HashMap<Uuid, AccountWithBalance> = HashMap::new();
-    let mut pc_map: HashMap<Uuid, Vec<Uuid>> = HashMap::new();
+    let mut acc_map: HashMap<AccountId, AccountWithBalance> = HashMap::new();
+    let mut pc_map: HashMap<AccountId, Vec<AccountId>> = HashMap::new();
 
     for acc in accounts.iter() {
         acc_map.insert(acc.id, acc.clone());
@@ -66,9 +65,9 @@ fn build_account_nodes(accounts: &[AccountWithBalance]) -> Vec<AccountNode> {
     }
 
     fn build_node(
-        acc_id: Uuid,
-        acc_map: &HashMap<Uuid, AccountWithBalance>,
-        pc_map: &HashMap<Uuid, Vec<Uuid>>,
+        acc_id: AccountId,
+        acc_map: &HashMap<AccountId, AccountWithBalance>,
+        pc_map: &HashMap<AccountId, Vec<AccountId>>,
     ) -> AccountNode {
         let acc = acc_map.get(&acc_id).unwrap();
         let children = pc_map
@@ -105,7 +104,7 @@ pub fn trial_balance_page() -> Html {
     let accounts = use_state(|| Rc::new(Vec::<AccountWithBalance>::new()));
     let loading = use_state(|| true);
     let error = use_state(|| None::<String>);
-    let collapsed_nodes = use_state(HashSet::<Uuid>::new);
+    let collapsed_nodes = use_state(HashSet::<AccountId>::new);
 
     let memoized_data = use_memo(accounts.clone(), |accounts| {
         let account_nodes = build_account_nodes(accounts);
@@ -204,7 +203,7 @@ pub fn trial_balance_page() -> Html {
         i18n: LocaleContext,
         node: &AccountNode,
         depth: usize,
-        collapsed: &UseStateHandle<HashSet<Uuid>>,
+        collapsed: &UseStateHandle<HashSet<AccountId>>,
     ) -> Html {
         let is_parent = !node.children.is_empty();
         let is_collapsed = collapsed.contains(&node.account.id);

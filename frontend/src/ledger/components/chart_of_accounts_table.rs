@@ -13,17 +13,13 @@ use std::collections::{
 
 use fluent::fluent_args;
 use log::info;
-use shared_core::{
-    core::models::auth::SystemPrivilege,
-    ledger::{
-        dtos::account_with_balance::AccountWithBalance,
-        requests::account::{
-            CreateAccountRequest,
-            UpdateAccountRequest,
-        },
+use shared_core::{core::models::auth::SystemPrivilege, ledger::{
+    dtos::account_with_balance::AccountWithBalance,
+    requests::account::{
+        CreateAccountRequest,
+        UpdateAccountRequest,
     },
-};
-use uuid::Uuid;
+}, AccountId};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
@@ -241,9 +237,9 @@ pub fn chart_of_accounts_table() -> Html {
     };
 
     let root_nodes = use_memo((*accounts).clone(), |accounts: &Vec<AccountWithBalance>| {
-        let accounts_map: HashMap<Uuid, AccountWithBalance> =
+        let accounts_map: HashMap<AccountId, AccountWithBalance> =
             accounts.iter().map(|acc| (acc.id, acc.clone())).collect();
-        let mut parent_to_children: HashMap<Uuid, Vec<Uuid>> = HashMap::new();
+        let mut parent_to_children: HashMap<AccountId, Vec<AccountId>> = HashMap::new();
         for acc in accounts.iter() {
             if let Some(parent_id) = acc.parent_id {
                 parent_to_children
@@ -254,8 +250,8 @@ pub fn chart_of_accounts_table() -> Html {
         }
         fn build_node(
             acc: &AccountWithBalance,
-            map: &HashMap<Uuid, AccountWithBalance>,
-            pc_map: &HashMap<Uuid, Vec<Uuid>>,
+            map: &HashMap<AccountId, AccountWithBalance>,
+            pc_map: &HashMap<AccountId, Vec<AccountId>>,
         ) -> AccountNode {
             let mut children = Vec::new();
             if let Some(child_ids) = pc_map.get(&acc.id) {
@@ -281,7 +277,7 @@ pub fn chart_of_accounts_table() -> Html {
         roots
     });
 
-    let parent_accounts: Vec<(Uuid, String)> = (*accounts)
+    let parent_accounts: Vec<(AccountId, String)> = (*accounts)
         .iter()
         .filter(|a| a.is_group)
         .map(|a| (a.id, a.name.clone()))
@@ -297,7 +293,7 @@ pub fn chart_of_accounts_table() -> Html {
     fn render_nodes(
         nodes: &[AccountNode],
         depth: usize,
-        collapsed: &UseStateHandle<HashSet<Uuid>>,
+        collapsed: &UseStateHandle<HashSet<AccountId>>,
         on_edit: &Callback<AccountWithBalance>,
         on_delete: &Callback<AccountWithBalance>,
     ) -> Vec<Html> {

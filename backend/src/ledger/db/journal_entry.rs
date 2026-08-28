@@ -21,12 +21,12 @@ use shared_core::ledger::{
     models::journal_entry::JournalEntry,
 };
 use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{AccountId, OrgId};
 
 pub(crate) struct JournalEntryWithDate {
     pub(crate) id: Uuid,
     pub(crate) transaction_id: Uuid,
-    pub(crate) account_id: Uuid,
+    pub(crate) account_id: AccountId,
     pub(crate) debit: Decimal,
     pub(crate) credit: Decimal,
     pub(crate) description: Option<String>,
@@ -82,7 +82,7 @@ pub(crate) async fn get_all_by_transaction(
 pub(crate) async fn insert(
     pool: &mut PgConnection,
     transaction_id: Uuid,
-    account_id: Uuid,
+    account_id: AccountId,
     debit: Decimal,
     credit: Decimal,
     description: Option<&str>,
@@ -90,7 +90,7 @@ pub(crate) async fn insert(
     sqlx::query!(
         "INSERT INTO journal_entries (transaction_id, account_id, debit, credit, description) VALUES ($1, $2, $3, $4, $5)",
         transaction_id,
-        account_id,
+        *account_id,
         debit,
         credit,
         description
@@ -103,7 +103,7 @@ pub(crate) async fn insert(
 pub(crate) async fn get_balance_before_date(
     pool: &mut PgConnection,
     org_id: OrgId,
-    account_id: Uuid,
+    account_id: AccountId,
     date: NaiveDate,
 ) -> Result<Decimal, sqlx::Error> {
     let result = sqlx::query_scalar!(
@@ -114,7 +114,7 @@ pub(crate) async fn get_balance_before_date(
         JOIN accounts a ON je.account_id = a.id
         WHERE je.account_id = $1 AND a.organization_id = $2 AND t.date < $3
         "#,
-        account_id,
+        *account_id,
         *org_id,
         date
     )
@@ -127,7 +127,7 @@ pub(crate) async fn get_balance_before_date(
 pub(crate) async fn get_all_by_account_in_date_range(
     pool: &mut PgConnection,
     org_id: OrgId,
-    account_id: Uuid,
+    account_id: AccountId,
     start_date: NaiveDate,
     end_date: NaiveDate,
 ) -> Result<Vec<JournalEntryWithDate>, sqlx::Error> {
@@ -149,7 +149,7 @@ pub(crate) async fn get_all_by_account_in_date_range(
         WHERE je.account_id = $1  AND a.organization_id = $2 AND t.date >= $3 AND t.date <= $4
         ORDER BY t.date, je.created_at
         "#,
-        account_id,
+        *account_id,
         *org_id,
         start_date,
         end_date
@@ -161,7 +161,7 @@ pub(crate) async fn get_all_by_account_in_date_range(
 pub(crate) async fn get_balance_up_to_date(
     pool: &mut PgConnection,
     org_id: OrgId,
-    account_id: Uuid,
+    account_id: AccountId,
     date: NaiveDate,
 ) -> Result<Decimal, sqlx::Error> {
     let result = sqlx::query_scalar!(
@@ -172,7 +172,7 @@ pub(crate) async fn get_balance_up_to_date(
         JOIN accounts a ON je.account_id = a.id
         WHERE je.account_id = $1  AND a.organization_id = $2 AND t.date <= $3
         "#,
-        account_id,
+        *account_id,
         *org_id,
         date
     )

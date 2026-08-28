@@ -6,10 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use rust_decimal::Decimal;
-use shared_core::{
-    ledger::models::account::Account,
-    payables::models::vendor_invoice_item::VendorInvoiceItem,
-};
+use shared_core::{ledger::models::account::Account, payables::models::vendor_invoice_item::VendorInvoiceItem, AccountId};
 use uuid::Uuid;
 use web_sys::{
     HtmlInputElement,
@@ -106,7 +103,7 @@ pub fn item_edit_card(props: &ItemEditCardProps) -> Html {
                     <input type="text" value={item.description.clone()} oninput={on_input(|i, v| i.description = Some(v))} />
 
                     <label>{i18n.t("common-account")}</label>
-                    <select onchange={on_select_change(|i, v| i.account_id = Uuid::parse_str(&v).unwrap_or_default())}>
+                    <select onchange={on_select_change(|i, v| i.account_id = Uuid::parse_str(&v).map(AccountId).unwrap_or_default())}>
                         <option value="" disabled=true selected={item.account_id.is_nil()}>{i18n.t("journal-entry-select-account")}</option>
                         { for props.accounts.iter().map(|account| html! {
                             <option value={account.id.to_string()} selected={item.account_id == account.id}>{&account.name}</option>

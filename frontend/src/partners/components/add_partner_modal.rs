@@ -9,15 +9,15 @@
 use shared_core::partners::requests::partner::CreatePartnerRequest;
 use uuid::Uuid;
 use yew::prelude::*;
-
+use shared_core::AccountId;
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
 pub struct AddPartnerModalProps {
     pub on_close: Callback<()>,
     pub on_submit: Callback<CreatePartnerRequest>,
-    pub ap_accounts: Vec<(Uuid, String)>,
-    pub ar_accounts: Vec<(Uuid, String)>,
+    pub ap_accounts: Vec<(AccountId, String)>,
+    pub ar_accounts: Vec<(AccountId, String)>,
 }
 
 #[function_component(AddPartnerModal)]
@@ -90,7 +90,7 @@ pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
             let value = e
                 .target_unchecked_into::<web_sys::HtmlSelectElement>()
                 .value();
-            info.default_ap_account_id = Uuid::parse_str(&value).ok();
+            info.default_ap_account_id = Uuid::parse_str(&value).map(AccountId).ok();
             state.set(info);
         })
     };
@@ -102,7 +102,7 @@ pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
             let value = e
                 .target_unchecked_into::<web_sys::HtmlSelectElement>()
                 .value();
-            info.default_ar_account_id = Uuid::parse_str(&value).ok();
+            info.default_ar_account_id = Uuid::parse_str(&value).map(AccountId).ok();
             state.set(info);
         })
     };

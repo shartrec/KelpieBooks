@@ -19,12 +19,13 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
+use crate::AccountId;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct JournalEntryLine {
     #[serde(default = "Uuid::new_v4")]
     pub line_id: Uuid, // A unique ID for the frontend to use as a key
-    pub account_id: Uuid,
+    pub account_id: AccountId,
     pub debit: Decimal,
     pub credit: Decimal,
     pub description: Option<String>,
@@ -35,7 +36,7 @@ impl Default for JournalEntryLine {
     fn default() -> Self {
         Self {
             line_id: Uuid::new_v4(),
-            account_id: Uuid::nil(),
+            account_id: AccountId::default(),
             debit: dec!(0.00),
             credit: dec!(0.00),
             description: None,

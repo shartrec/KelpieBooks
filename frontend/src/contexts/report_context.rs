@@ -17,8 +17,8 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
 use yew::prelude::*;
+use shared_core::AccountId;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DateRange {
@@ -40,11 +40,11 @@ impl Default for DateRange {
 #[derive(Clone, Debug, PartialEq)]
 pub enum ReportAction {
     SetDateRange(DateRange),
-    SetSelectedAccounts(HashSet<Uuid>),
+    SetSelectedAccounts(HashSet<AccountId>),
     SetMinAmount(Option<Decimal>),
     SetOnExportCsv(Option<Callback<()>>),
     SetOnExportTypst(Option<Callback<()>>),
-    ToggleAccount(Uuid),
+    ToggleAccount(AccountId),
 }
 
 pub type ReportState = ReportContextData;
@@ -52,7 +52,7 @@ pub type ReportState = ReportContextData;
 #[derive(Clone, Debug, PartialEq)]
 pub struct ReportContextData {
     pub date_range: DateRange,
-    pub selected_accounts: HashSet<Uuid>,
+    pub selected_accounts: HashSet<AccountId>,
     pub min_amount: Option<Decimal>,
     pub on_export_csv: Option<Callback<()>>,
     pub on_export_pdf: Option<Callback<()>>,

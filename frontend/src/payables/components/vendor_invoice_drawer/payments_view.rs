@@ -13,17 +13,14 @@ use chrono::{
 };
 use fluent::fluent_args;
 use rust_decimal::Decimal;
-use shared_core::{
-    ledger::models::account::Account,
-    payables::{
-        models::{
-            vendor_invoice::VendorInvoice,
-            vendor_payment::VendorPayment,
-            vendor_payment_allocation::VendorPaymentAllocation,
-        },
-        requests::vendor_payment::CreateVendorPaymentRequest,
+use shared_core::{ledger::models::account::Account, payables::{
+    models::{
+        vendor_invoice::VendorInvoice,
+        vendor_payment::VendorPayment,
+        vendor_payment_allocation::VendorPaymentAllocation,
     },
-};
+    requests::vendor_payment::CreateVendorPaymentRequest,
+}, AccountId};
 use uuid::Uuid;
 use web_sys::{
     HtmlInputElement,
@@ -60,7 +57,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
         CreateVendorPaymentRequest {
             partner_id: props.invoice.partner_id,
             payment_date: Local::now().date_naive(),
-            bank_account_id: Uuid::nil(),
+            bank_account_id: AccountId::default(),
             amount: props.invoice.amount_remaining,
             reference: None,
             allocations: vec![VendorPaymentAllocation {
@@ -249,7 +246,9 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
                     <input type="date" value={request.payment_date.format("%Y-%m-%d").to_string()} onchange={on_date_change(|r, v| r.payment_date = v)} required=true />
 
                     <label>{i18n.t("payments-view-bank-account-label")}</label>
-                    <select onchange={on_select_change(|r, v| r.bank_account_id = Uuid::parse_str(&v).unwrap_or_default())} required=true>
+                    <select onchange={on_select_change(|r, v| {
+                        r.bank_account_id = Uuid::parse_str(&v).map(AccountId).unwrap_or_default()
+                    })} required=true>
                         <option value="" disabled=true selected=true>{i18n.t("journal-entry-select-account")}</option>
                         { for (*accounts).iter().map(|account| html! {
                             <option value={account.id.to_string()}>{&account.name}</option>

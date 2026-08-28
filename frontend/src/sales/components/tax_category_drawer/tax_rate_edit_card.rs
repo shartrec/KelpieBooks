@@ -5,12 +5,9 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use std::str::FromStr;
 use rust_decimal::Decimal;
-use shared_core::{
-    ledger::models::account::Account,
-    sales::models::tax::TaxRate,
-};
-use uuid::Uuid;
+use shared_core::{ledger::models::account::Account, sales::models::tax::TaxRate, AccountId};
 use web_sys::{
     HtmlInputElement,
     HtmlSelectElement,
@@ -97,7 +94,7 @@ pub fn tax_rate_edit_card(props: &TaxRateEditCardProps) -> Html {
                 <DecimalInput value={rate.rate} on_change={on_rate_change} />
 
                 <label>{i18n.t("common-account")}</label>
-                <select onchange={on_select_change(|r, v| r.liability_account_id = Uuid::parse_str(&v).unwrap_or_default())}>
+                <select onchange={on_select_change(|r, v| r.liability_account_id = AccountId::from_str(&v).unwrap_or_default())}>
                     <option value="" disabled=true selected={rate.liability_account_id.is_nil()}>{i18n.t("journal-entry-select-account")}</option>
                     { for props.accounts.iter().map(|account| html! {
                         <option value={account.id.to_string()} selected={rate.liability_account_id == account.id}>{&account.name}</option>

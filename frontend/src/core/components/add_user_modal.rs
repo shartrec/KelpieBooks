@@ -12,9 +12,8 @@ use shared_core::core::{
     models::role::Role,
     requests::user::CreateUserRequest,
 };
-use uuid::Uuid;
 use yew::prelude::*;
-
+use shared_core::RoleId;
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
@@ -82,7 +81,7 @@ pub fn add_user_modal(props: &AddUserModalProps) -> Html {
             let val = e
                 .target_unchecked_into::<web_sys::HtmlSelectElement>()
                 .value();
-            info.role_id = Uuid::from_str(&val).ok();
+            info.role_id = RoleId::from_str(&val).ok();
             state.set(info);
         })
     };

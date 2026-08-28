@@ -36,7 +36,6 @@ use shared_core::ledger::{
 };
 #[cfg(feature = "payables")]
 use shared_core::payables::dtos::top_payable::TopPayable;
-use uuid::Uuid;
 
 #[cfg(feature = "ledger")]
 use crate::ledger::{
@@ -163,7 +162,7 @@ async fn get_recent_transactions(
 
         recent_transactions.push(RecentTransaction {
             id: tx.id,
-            account_id: account_id.unwrap_or(Uuid::nil()),
+            account_id: account_id.unwrap_or_default(),
             date: tx.date,
             description: tx.description.unwrap_or_default(),
             amount: amount,

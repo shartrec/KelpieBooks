@@ -5,7 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-#[cfg(feature = "backend")]
+use std::str::FromStr;
 
 #[cfg(feature = "inventory")]
 pub mod inventory;
@@ -91,7 +91,15 @@ macro_rules! define_id {
 
         impl Default for $name {
             fn default() -> Self {
-                Self(uuid::Uuid::new_v4())
+                Self(uuid::Uuid::default())
+            }
+        }
+
+        impl FromStr for $name {
+            type Err = ::uuid::Error;
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                ::uuid::Uuid::parse_str(s).map(Self)
             }
         }
 
@@ -100,7 +108,7 @@ macro_rules! define_id {
             type Error = uuid::Error;
 
             fn from_param(param: &'r str) -> Result<Self, Self::Error> {
-                uuid::Uuid::parse_str(param).map($name)
+                uuid::Uuid::parse_str(param).map(Self)
             }
         }
 
@@ -108,7 +116,7 @@ macro_rules! define_id {
         impl<'r> rocket::form::FromFormField<'r> for $name {
             fn from_value(field: rocket::form::ValueField<'r>) -> rocket::form::Result<'r, Self> {
                 match uuid::Uuid::parse_str(field.value) {
-                    Ok(uuid) => Ok($name{0: uuid}),
+                    Ok(uuid) => Ok(Self(uuid)),
                     Err(e) => Err(rocket::form::Error::validation(format!("{}", e)).into()),
                 }
             }

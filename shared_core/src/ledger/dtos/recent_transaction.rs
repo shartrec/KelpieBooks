@@ -13,11 +13,12 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
+use crate::AccountId;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct RecentTransaction {
     pub id: Uuid,
-    pub account_id: Uuid,
+    pub account_id: AccountId,
     pub date: NaiveDate,
     pub description: String,
     pub amount: Decimal,

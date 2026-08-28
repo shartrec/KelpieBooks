@@ -13,21 +13,20 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
 
 use crate::ledger::models::{
     account_category::AccountCategory,
     system_tag::SystemTag,
 };
-use crate::OrgId;
+use crate::{AccountId, OrgId};
 
 /// A DTO that combines account data with its calculated balance.
 /// This is the structure that will be sent to the frontend.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AccountWithBalance {
-    pub id: Uuid,
+    pub id: AccountId,
     pub organization_id: OrgId,
-    pub parent_id: Option<Uuid>,
+    pub parent_id: Option<AccountId>,
     pub code: String,
     pub name: String,
     pub category: AccountCategory,

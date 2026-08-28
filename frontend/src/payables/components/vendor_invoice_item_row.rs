@@ -6,10 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use rust_decimal::Decimal;
-use shared_core::{
-    ledger::models::account::Account,
-    payables::models::vendor_invoice_item::VendorInvoiceItem,
-};
+use shared_core::{ledger::models::account::Account, payables::models::vendor_invoice_item::VendorInvoiceItem, AccountId};
 use uuid::Uuid;
 use yew::prelude::*;
 
@@ -51,7 +48,7 @@ pub fn vendor_invoice_item_row(props: &VendorInvoiceItemRowProps) -> Html {
             let value = e
                 .target_unchecked_into::<web_sys::HtmlSelectElement>()
                 .value();
-            new_item.account_id = Uuid::parse_str(&value).unwrap_or_default();
+            new_item.account_id = Uuid::parse_str(&value).map(AccountId).unwrap_or_default();
             on_change.emit(new_item);
         })
     };

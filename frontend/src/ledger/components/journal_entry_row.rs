@@ -13,7 +13,7 @@ use shared_core::ledger::requests::transaction::JournalEntryLine;
 use uuid::Uuid;
 use web_sys::HtmlSelectElement;
 use yew::prelude::*;
-
+use shared_core::AccountId;
 use crate::{
     contexts::locale_context::use_locale,
     core::components::currency_input::DecimalInput,
@@ -24,7 +24,7 @@ pub struct JournalEntryRowProps {
     pub entry: JournalEntryLine,
     pub on_change: Callback<JournalEntryLine>,
     pub on_delete: Callback<()>,
-    pub accounts: Vec<(Uuid, String)>,
+    pub accounts: Vec<(AccountId, String)>,
     #[prop_or(false)]
     pub should_focus: bool,
 }
@@ -53,7 +53,7 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
         let entry = props.entry.clone();
         Callback::from(move |e: Event| {
             let value = e.target_unchecked_into::<HtmlSelectElement>().value();
-            if let Ok(id) = Uuid::parse_str(&value) {
+            if let Ok(id) = Uuid::parse_str(&value).map(AccountId) {
                 let mut updated_entry = entry.clone();
                 updated_entry.account_id = id;
                 on_change.emit(updated_entry);

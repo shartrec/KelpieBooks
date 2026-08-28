@@ -24,12 +24,12 @@ use shared_core::ledger::{
     },
 };
 use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{AccountId, OrgId};
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: AccountId,
 ) -> Result<Option<Account>, sqlx::Error> {
     sqlx::query_as!(
         Account,
@@ -37,7 +37,7 @@ pub(crate) async fn get(
         SELECT
             id,
             organization_id,
-            parent_id,
+            parent_id as "parent_id: AccountId",
             code,
             name,
             category as "category: AccountCategory",
@@ -49,7 +49,7 @@ pub(crate) async fn get(
         WHERE id = $1
         AND organization_id = $2
         "#,
-        id,
+        *id,
         *org_id,
     )
     .fetch_optional(pool)
@@ -66,7 +66,7 @@ pub(crate) async fn get_all_by_org(
         SELECT
             id,
             organization_id,
-            parent_id,
+            parent_id as "parent_id: AccountId",
             code,
             name,
             category as "category: AccountCategory",
@@ -94,14 +94,14 @@ pub(crate) async fn insert(
         r#"
         INSERT INTO accounts (organization_id, name, code, category, parent_id, is_group, is_bank_account, system_tag)
         VALUES ($1, $2, $3, $4::account_category, $5, $6, $7, $8::system_tag)
-        RETURNING id, organization_id, parent_id, code, name, category as "category: AccountCategory",
+        RETURNING id, organization_id, parent_id as "parent_id: AccountId", code, name, category as "category: AccountCategory",
             is_group, is_bank_account, system_tag as "system_tag: SystemTag", created_at
         "#,
     *org_id,
     &req.name,
     &req.code,
     req.category as AccountCategory,
-    req.parent_id,
+    req.parent_id.map(|id| *id),
     req.is_group,
     req.is_bank_account,
     req.system_tag as Option<SystemTag>,
@@ -124,7 +124,7 @@ pub(crate) async fn update(
         SET name = $1, code = $2, category = $3::account_category, is_group = $4, is_bank_account = $5, system_tag = $6::system_tag
         WHERE id = $7
         AND organization_id = $8
-        RETURNING id, organization_id, parent_id, code, name, category as "category: AccountCategory",
+        RETURNING id, organization_id, parent_id as "parent_id: AccountId", code, name, category as "category: AccountCategory",
             is_group, is_bank_account, system_tag as "system_tag: SystemTag", created_at
         "#,
         &req.name,
@@ -143,11 +143,11 @@ pub(crate) async fn update(
 
 pub(crate) async fn has_journal_entries(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: AccountId,
 ) -> Result<bool, sqlx::Error> {
     let count: Option<i64> = sqlx::query_scalar!(
         "SELECT COUNT(*) FROM journal_entries WHERE account_id = $1",
-        id
+        *id
     )
     .fetch_one(pool)
     .await?;
@@ -218,7 +218,7 @@ pub(crate) async fn get_by_system_tag(
         SELECT
             id,
             organization_id,
-            parent_id,
+            parent_id as "parent_id: AccountId",
             code,
             name,
             category as "category: AccountCategory",
@@ -239,10 +239,10 @@ pub(crate) async fn get_by_system_tag(
 pub(crate) async fn get_system_accounts(
     pool: &mut PgConnection,
     org_id: OrgId,
-) -> Result<HashMap<SystemTag, Uuid>, sqlx::Error> {
+) -> Result<HashMap<SystemTag, AccountId>, sqlx::Error> {
     let rows = sqlx::query!(
         r#"
-        SELECT system_tag as "system_tag: SystemTag", id
+        SELECT system_tag as "system_tag: SystemTag", id as "id: AccountId"
         FROM accounts
         WHERE organization_id = $1 AND system_tag IS NOT NULL
         "#,
@@ -254,7 +254,7 @@ pub(crate) async fn get_system_accounts(
     let mut map = HashMap::new();
     for row in rows.iter() {
         let tag: Option<SystemTag> = row.system_tag;
-        let id: Uuid = row.id;
+        let id: AccountId = row.id;
         if let Some(tag) = tag {
             map.insert(tag, id);
         }
@@ -265,7 +265,7 @@ pub(crate) async fn get_system_accounts(
 pub(crate) async fn update_system_accounts(
     pool: &mut PgConnection,
     org_id: OrgId,
-    system_accounts: &HashMap<SystemTag, Uuid>,
+    system_accounts: &HashMap<SystemTag, AccountId>,
 ) -> Result<(), sqlx::Error> {
     // Clear all existing system tags for the organization
     sqlx::query!(
@@ -288,7 +288,7 @@ pub(crate) async fn update_system_accounts(
             WHERE id = $2 AND organization_id = $3
             "#,
             tag as &SystemTag,
-            account_id,
+            **account_id,
             *org_id,
         )
         .execute(&mut *pool)

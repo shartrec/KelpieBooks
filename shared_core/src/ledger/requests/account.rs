@@ -10,8 +10,7 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-
+use crate::AccountId;
 use crate::ledger::models::{
     account_category::AccountCategory,
     system_tag::SystemTag,
@@ -22,7 +21,7 @@ pub struct CreateAccountRequest {
     pub name: String,
     pub code: String,
     pub category: AccountCategory,
-    pub parent_id: Option<Uuid>,
+    pub parent_id: Option<AccountId>,
     pub is_group: bool,
     pub is_bank_account: bool,
     pub system_tag: Option<SystemTag>,

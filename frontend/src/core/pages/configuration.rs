@@ -9,16 +9,13 @@
 use std::collections::HashMap;
 
 use fluent::fluent_args;
-use shared_core::{
-    core::models::organization::Organization,
-    ledger::{
-        models::{
-            account::Account,
-            system_tag::SystemTag,
-        },
-        requests::configuration::UpdateConfigurationRequest,
+use shared_core::{core::models::organization::Organization, ledger::{
+    models::{
+        account::Account,
+        system_tag::SystemTag,
     },
-};
+    requests::configuration::UpdateConfigurationRequest,
+}, AccountId};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
@@ -87,7 +84,7 @@ pub fn configuration_page() -> Html {
                     (Ok(acc_resp), Ok(sys_resp), Ok(org_resp)) => {
                         if acc_resp.ok() && sys_resp.ok() && org_resp.ok() {
                             let acc_data = acc_resp.json::<Vec<Account>>().await;
-                            let sys_data = sys_resp.json::<HashMap<SystemTag, Uuid>>().await;
+                            let sys_data = sys_resp.json::<HashMap<SystemTag, AccountId>>().await;
                             let org_data = org_resp.json::<Organization>().await;
 
                             match (acc_data, sys_data, org_data) {
@@ -171,7 +168,7 @@ pub fn configuration_page() -> Html {
     let on_select_change = {
         let system_accounts = system_accounts.clone();
         Callback::from(move |(tag, id_str): (SystemTag, String)| {
-            if let Ok(id) = id_str.parse::<Uuid>() {
+            if let Ok(id) = id_str.parse::<Uuid>().map(AccountId) {
                 let mut new_map = (*system_accounts).clone();
                 new_map.insert(tag, id);
                 system_accounts.set(new_map);

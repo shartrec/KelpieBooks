@@ -7,22 +7,18 @@
  */
 
 use fluent::fluent_args;
-use shared_core::{
-    core::models::auth::SystemPrivilege,
-    ledger::models::{
-        account::Account,
-        account_category::AccountCategory,
+use shared_core::{core::models::auth::SystemPrivilege, ledger::models::{
+    account::Account,
+    account_category::AccountCategory,
+}, partners::{
+    dtos::partner_list_item::PartnerListItem,
+    models::{
+        partner::Partner,
+        partner_address::PartnerAddress,
+        partner_contact::PartnerContact,
     },
-    partners::{
-        dtos::partner_list_item::PartnerListItem,
-        models::{
-            partner::Partner,
-            partner_address::PartnerAddress,
-            partner_contact::PartnerContact,
-        },
-        requests::partner::CreatePartnerRequest,
-    },
-};
+    requests::partner::CreatePartnerRequest,
+}, AccountId};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
@@ -324,12 +320,12 @@ pub fn partner_list_table() -> Html {
         })
     };
 
-    let ap_accounts: Vec<(Uuid, String)> = (*accounts)
+    let ap_accounts: Vec<(AccountId, String)> = (*accounts)
         .iter()
         .filter(|a| a.category == AccountCategory::Liability)
         .map(|a| (a.id, a.name.clone()))
         .collect();
-    let ar_accounts: Vec<(Uuid, String)> = (*accounts)
+    let ar_accounts: Vec<(AccountId, String)> = (*accounts)
         .iter()
         .filter(|a| a.category == AccountCategory::Asset)
         .map(|a| (a.id, a.name.clone()))

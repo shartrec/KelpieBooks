@@ -14,10 +14,8 @@ use shared_core::{
         UnitOfMeasure,
     },
 };
-use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-
 use crate::{
     api::Api,
     contexts::{
@@ -99,19 +97,23 @@ pub fn edit_item_modal(props: &EditItemModalProps) -> Html {
         })
     };
 
-    let on_select = |field_updater: fn(&mut Item, Uuid)| {
-        let state = request.clone();
+    fn make_on_select<T: std::str::FromStr + 'static>(
+        state: &UseStateHandle<Item>,
+        field_updater: fn(&mut Item, T),
+    ) -> Callback<Event> {
+        let state = state.clone();
         Callback::from(move |e: Event| {
             let mut info = (*state).clone();
             let value = e
                 .target_unchecked_into::<web_sys::HtmlSelectElement>()
                 .value();
-            if let Ok(id) = Uuid::parse_str(&value) {
+
+            if let Ok(id) = T::from_str(&value) {
                 field_updater(&mut info, id);
                 state.set(info);
             }
         })
-    };
+    }
 
     let on_price_change = {
         let state = request.clone();
@@ -225,7 +227,7 @@ pub fn edit_item_modal(props: &EditItemModalProps) -> Html {
                     </select>
 
                     <label>{i18n.t("item-uom-label")}</label>
-                    <select onchange={on_select(|r, v| r.uom_id = v)}>
+                    <select onchange={make_on_select(&request, |r, v| r.uom_id = v)}>
                         <option value="" disabled=true selected={request.uom_id.is_nil()}>{i18n.t("item-select-uom")}</option>
                         { for (*uoms).iter().map(|uom| html! {
                             <option value={uom.id.to_string()} selected={request.uom_id == uom.id}>{&uom.name}</option>
@@ -247,7 +249,7 @@ pub fn edit_item_modal(props: &EditItemModalProps) -> Html {
                     />
 
                     <label>{i18n.t("item-income-account-label")}</label>
-                    <select onchange={on_select(|r, v| r.income_account_id = v)}>
+                    <select onchange={make_on_select(&request, |r, v| r.income_account_id = v)}>
                         <option value="" disabled=true selected={request.income_account_id.is_nil()}>{i18n.t("item-select-income-account")}</option>
                         { for (*income_accounts).iter().map(|acc| html! {
                             <option value={acc.id.to_string()} selected={request.income_account_id == acc.id}>{&acc.name}</option>

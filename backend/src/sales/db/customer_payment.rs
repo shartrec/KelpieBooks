@@ -78,7 +78,7 @@ pub(crate) async fn insert(
         req.partner_id,
         transaction_id,
         req.payment_date,
-        req.bank_account_id,
+        *req.bank_account_id,
         req.amount,
         req.reference,
     )
@@ -107,7 +107,7 @@ pub(crate) async fn update(
         "#,
         req.partner_id,
         req.payment_date,
-        req.bank_account_id,
+        *req.bank_account_id,
         req.amount,
         req.reference,
         id,

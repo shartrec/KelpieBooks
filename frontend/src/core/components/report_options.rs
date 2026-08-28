@@ -16,10 +16,9 @@ use shared_core::ledger::models::{
     account::Account,
     account_category::AccountCategory,
 };
-use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-
+use shared_core::AccountId;
 use crate::{
     api::Api,
     contexts::{
@@ -209,7 +208,7 @@ pub fn account_filter(props: &AccountFilterProps) -> Html {
     // Callback to update the context when a checkbox is clicked
     let on_account_select = {
         let ctx = report_ctx.clone().unwrap();
-        Callback::from(move |id: Uuid| {
+        Callback::from(move |id: AccountId| {
             ctx.dispatch(ReportAction::ToggleAccount(id));
         })
     };

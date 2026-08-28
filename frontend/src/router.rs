@@ -8,6 +8,7 @@
 
 use uuid::Uuid;
 use yew_router::Routable;
+use shared_core::AccountId;
 
 #[derive(Clone, Routable, PartialEq)]
 pub enum Route {
@@ -50,7 +51,7 @@ pub enum Route {
     GeneralLedger,
     #[at("/accounts/:id")]
     #[cfg(feature = "ledger")]
-    AccountLedger { id: Uuid },
+    AccountLedger { id: AccountId },
     #[at("/transactions/new")]
     #[cfg(feature = "ledger")]
     NewTransaction,
