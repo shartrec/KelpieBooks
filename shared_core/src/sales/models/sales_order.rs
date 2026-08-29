@@ -13,7 +13,7 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
-use crate::OrgId;
+use crate::{OrgId, PartnerId};
 pub use crate::sales::models::sales_order_item::SalesOrderItem;
 use crate::sales::models::{
     fulfillment_status::FulfillmentStatus,
@@ -25,7 +25,7 @@ use crate::sales::models::{
 pub struct SalesOrder {
     pub id: Uuid,
     pub org_id: OrgId,
-    pub partner_id: Uuid,
+    pub partner_id: PartnerId,
     pub partner_name: Option<String>,
     pub warehouse_id: Uuid,
     pub warehouse_name: Option<String>,

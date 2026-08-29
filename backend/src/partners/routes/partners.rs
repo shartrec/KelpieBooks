@@ -16,6 +16,7 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
+use shared_core::{AddressId, ContactId, PartnerId};
 use shared_core::partners::{
     dtos::partner_list_item::PartnerListItem,
     models::{
@@ -37,7 +38,6 @@ use crate::{
         UsePartners,
     },
     util::{
-        types::PathUuid,
         ApiError,
     },
     DbKelpie,
@@ -86,10 +86,10 @@ async fn search_partners(
 #[get("/api/partners/<id>")]
 async fn get_partner(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: PartnerId,
     _guard: RequirePrivilege<UsePartners>,
 ) -> Result<Json<Partner>, ApiError> {
-    let partner = partner_service::get_partner(&mut pool, *id)
+    let partner = partner_service::get_partner(&mut pool, id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Partner not found".to_string()))?;
     Ok(Json(partner))
@@ -98,20 +98,20 @@ async fn get_partner(
 #[get("/api/partners/<id>/addresses")]
 async fn get_partner_addresses(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: PartnerId,
     _guard: RequirePrivilege<UsePartners>,
 ) -> Result<Json<Vec<PartnerAddress>>, ApiError> {
-    let addresses = partner_service::get_partner_addresses(&mut pool, *id).await?;
+    let addresses = partner_service::get_partner_addresses(&mut pool, id).await?;
     Ok(Json(addresses))
 }
 
 #[get("/api/partners/<id>/contacts")]
 async fn get_partner_contacts(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: PartnerId,
     _guard: RequirePrivilege<UsePartners>,
 ) -> Result<Json<Vec<PartnerContact>>, ApiError> {
-    let contacts = partner_service::get_partner_contacts(&mut pool, *id).await?;
+    let contacts = partner_service::get_partner_contacts(&mut pool, id).await?;
     Ok(Json(contacts))
 }
 
@@ -131,25 +131,25 @@ async fn create_partner(
 async fn update_partner(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManagePartners>,
-    id: PathUuid,
+    id: PartnerId,
     req: Json<UpdatePartnerRequest>,
 ) -> Result<Json<Partner>, ApiError> {
     let user = guard.0;
     let updated_partner =
-        partner_service::update_partner(&mut pool, user.organization_id, *id, &req).await?;
+        partner_service::update_partner(&mut pool, user.organization_id, id, &req).await?;
     Ok(Json(updated_partner))
 }
 
 #[delete("/api/partners/<id>")]
 async fn delete_partner(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: PartnerId,
     guard: RequirePrivilege<ManagePartners>,
 ) -> Result<&'static str, ApiError> {
     let user = guard.0;
 
     let rows_affected =
-        partner_service::delete_partner(&mut pool, user.organization_id, *id).await?;
+        partner_service::delete_partner(&mut pool, user.organization_id, id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Partner not found.".to_string()));
     }
@@ -161,12 +161,12 @@ async fn delete_partner(
 async fn create_address(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManagePartners>,
-    partner_id: PathUuid,
+    partner_id: PartnerId,
     address: Json<PartnerAddress>,
 ) -> Result<Json<PartnerAddress>, ApiError> {
     let user = guard.0;
     let new_address =
-        partner_service::create_address(&mut pool, user.organization_id, *partner_id, &address)
+        partner_service::create_address(&mut pool, user.organization_id, partner_id, &address)
             .await?;
     Ok(Json(new_address))
 }
@@ -178,13 +178,13 @@ async fn create_address(
 async fn update_address(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManagePartners>,
-    _partner_id: PathUuid,
-    address_id: PathUuid,
+    _partner_id: PartnerId,
+    address_id: AddressId,
     address: Json<PartnerAddress>,
 ) -> Result<Json<PartnerAddress>, ApiError> {
     let user = guard.0;
     let updated_address =
-        partner_service::update_address(&mut pool, user.organization_id, *address_id, &address)
+        partner_service::update_address(&mut pool, user.organization_id, address_id, &address)
             .await?;
     Ok(Json(updated_address))
 }
@@ -192,13 +192,13 @@ async fn update_address(
 #[delete("/api/partners/<_partner_id>/addresses/<address_id>")]
 async fn delete_address(
     mut pool: Connection<DbKelpie>,
-    _partner_id: PathUuid,
-    address_id: PathUuid,
+    _partner_id: PartnerId,
+    address_id: AddressId,
     guard: RequirePrivilege<ManagePartners>,
 ) -> Result<&'static str, ApiError> {
     let user = guard.0;
     let rows_affected =
-        partner_service::delete_address(&mut pool, user.organization_id, *address_id).await?;
+        partner_service::delete_address(&mut pool, user.organization_id, address_id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Address not found.".to_string()));
     }
@@ -209,12 +209,12 @@ async fn delete_address(
 async fn create_contact(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManagePartners>,
-    partner_id: PathUuid,
+    partner_id: PartnerId,
     contact: Json<PartnerContact>,
 ) -> Result<Json<PartnerContact>, ApiError> {
     let user = guard.0;
     let new_contact =
-        partner_service::create_contact(&mut pool, user.organization_id, *partner_id, &contact)
+        partner_service::create_contact(&mut pool, user.organization_id, partner_id, &contact)
             .await?;
     Ok(Json(new_contact))
 }
@@ -226,13 +226,13 @@ async fn create_contact(
 async fn update_contact(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManagePartners>,
-    _partner_id: PathUuid,
-    contact_id: PathUuid,
+    _partner_id: PartnerId,
+    contact_id: ContactId,
     contact: Json<PartnerContact>,
 ) -> Result<Json<PartnerContact>, ApiError> {
     let user = guard.0;
     let updated_contact =
-        partner_service::update_contact(&mut pool, user.organization_id, *contact_id, &contact)
+        partner_service::update_contact(&mut pool, user.organization_id, contact_id, &contact)
             .await?;
     Ok(Json(updated_contact))
 }
@@ -240,14 +240,14 @@ async fn update_contact(
 #[delete("/api/partners/<_partner_id>/contacts/<contact_id>")]
 async fn delete_contact(
     mut pool: Connection<DbKelpie>,
-    _partner_id: PathUuid,
-    contact_id: PathUuid,
+    _partner_id: PartnerId,
+    contact_id: ContactId,
     guard: RequirePrivilege<ManagePartners>,
 ) -> Result<&'static str, ApiError> {
     let user = guard.0;
 
     let rows_affected =
-        partner_service::delete_contact(&mut pool, user.organization_id, *contact_id).await?;
+        partner_service::delete_contact(&mut pool, user.organization_id, contact_id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Contact not found.".to_string()));
     }

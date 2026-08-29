@@ -75,7 +75,7 @@ pub(crate) async fn insert(
         RETURNING *
         "#,
         *org_id,
-        req.partner_id,
+        *req.partner_id,
         *transaction_id,
         req.payment_date,
         *req.bank_account_id,
@@ -105,7 +105,7 @@ pub(crate) async fn update(
         WHERE id = $6
         RETURNING *
         "#,
-        req.partner_id,
+        *req.partner_id,
         req.payment_date,
         *req.bank_account_id,
         req.amount,

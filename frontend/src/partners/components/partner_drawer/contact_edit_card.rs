@@ -7,9 +7,8 @@
  */
 
 use shared_core::partners::models::partner_contact::PartnerContact;
-use uuid::Uuid;
 use yew::prelude::*;
-use shared_core::OrgId;
+use shared_core::{ContactId, OrgId, PartnerId};
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
@@ -25,9 +24,9 @@ pub fn contact_edit_card(props: &ContactEditCardProps) -> Html {
 
     let contact_state = use_state(|| {
         props.contact.clone().unwrap_or_else(|| PartnerContact {
-            id: Uuid::nil(),
+            id: ContactId::default(),
             organization_id: OrgId::default(),
-            partner_id: Uuid::nil(),
+            partner_id: PartnerId::default(),
             created_at: chrono::Utc::now(),
             updated_at: chrono::Utc::now(),
             is_primary: false,

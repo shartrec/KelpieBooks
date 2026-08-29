@@ -20,7 +20,7 @@ use strum::{
     EnumString,
 };
 use uuid::Uuid;
-use crate::OrgId;
+use crate::{OrgId, PartnerId};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, EnumString, Display, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -49,7 +49,7 @@ pub struct PurchaseOrder {
     pub id: Uuid,
     #[cfg_attr(feature = "backend", sqlx(rename = "organization_id"))]
     pub org_id: OrgId,
-    pub vendor_id: Uuid, // References partner
+    pub vendor_id: PartnerId, // References partner
     pub destination_warehouse_id: Uuid,
     pub po_number: String,
     pub status: PurchaseOrderStatus,

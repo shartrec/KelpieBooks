@@ -14,8 +14,7 @@ use shared_core::sales::{
     models::sales_document_status::SalesDocumentStatus,
 };
 use sqlx::PgConnection;
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{OrgId, PartnerId};
 use crate::{
     sales::db::sales_order::list_sales_orders,
     util::ApiError,
@@ -37,7 +36,7 @@ pub(crate) async fn get_trial_balance(
     )
     .await?;
 
-    let mut summary_map: HashMap<Uuid, AgedReceivableSummary> = HashMap::new();
+    let mut summary_map: HashMap<PartnerId, AgedReceivableSummary> = HashMap::new();
 
     for order in orders {
         let summary =

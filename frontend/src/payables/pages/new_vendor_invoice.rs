@@ -16,7 +16,7 @@ use rust_decimal::dec;
 use shared_core::{ledger::models::account_category::AccountCategory, partners::dtos::partner_list_item::PartnerListItem, payables::{
     models::vendor_invoice_item::VendorInvoiceItem,
     requests::vendor_invoice::CreateVendorInvoiceRequest,
-}, AccountId};
+}, AccountId, PartnerId};
 use uuid::Uuid;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -130,7 +130,7 @@ pub fn new_vendor_invoice_page() -> Html {
             let value = e
                 .target_unchecked_into::<web_sys::HtmlSelectElement>()
                 .value();
-            info.partner_id = Uuid::parse_str(&value).unwrap_or_default();
+            info.partner_id = Uuid::parse_str(&value).map(PartnerId).unwrap_or_default();
             state.set(info);
         })
     };

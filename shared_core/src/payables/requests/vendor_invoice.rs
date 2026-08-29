@@ -12,12 +12,12 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
-
+use crate::PartnerId;
 use crate::payables::models::vendor_invoice_item::VendorInvoiceItem;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct CreateVendorInvoiceRequest {
-    pub partner_id: Uuid,
+    pub partner_id: PartnerId,
     pub invoice_number: String,
     pub issue_date: NaiveDate,
     pub due_date: NaiveDate,

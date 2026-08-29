@@ -10,11 +10,11 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
+use crate::PartnerId;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PartnerListItem {
-    pub id: Uuid,
+    pub id: PartnerId,
     pub legal_name: String,
     pub trade_name: Option<String>,
     pub is_vendor: bool,

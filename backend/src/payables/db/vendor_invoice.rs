@@ -28,7 +28,7 @@ use shared_core::payables::{
     },
 };
 use uuid::Uuid;
-use shared_core::{OrgId, TransactionId};
+use shared_core::{OrgId, PartnerId, TransactionId};
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
@@ -178,7 +178,7 @@ pub(crate) async fn insert(
         RETURNING id, organization_id, partner_id, transaction_id, invoice_number, status as "status: InvoiceStatus", issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at
         "#,
         *org_id,
-        req.partner_id,
+        *req.partner_id,
         *transaction_id,
         req.invoice_number,
         req.issue_date,
@@ -302,7 +302,7 @@ pub(crate) async fn delete_items(
 pub(crate) async fn is_duplicate(
     pool: &mut PgConnection,
     org_id: OrgId,
-    partner_id: Uuid,
+    partner_id: PartnerId,
     invoice_number: &str,
 ) -> Result<bool, sqlx::Error> {
     let count = sqlx::query_scalar!(
@@ -312,7 +312,7 @@ pub(crate) async fn is_duplicate(
         WHERE organization_id = $1 AND partner_id = $2 AND invoice_number = $3
         "#,
         *org_id,
-        partner_id,
+        *partner_id,
         invoice_number
     )
     .fetch_one(pool)

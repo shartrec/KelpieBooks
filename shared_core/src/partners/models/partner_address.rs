@@ -14,15 +14,14 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::OrgId;
+use crate::{AddressId, OrgId, PartnerId};
 use crate::partners::models::address_type::AddressType;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct PartnerAddress {
-    pub id: Uuid,
+    pub id: AddressId,
     pub organization_id: OrgId,
-    pub partner_id: Uuid,
+    pub partner_id: PartnerId,
     pub address_type: AddressType,
     pub is_primary: bool,
     pub address_line1: String,

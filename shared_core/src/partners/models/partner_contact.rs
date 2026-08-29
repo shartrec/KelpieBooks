@@ -14,14 +14,13 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::OrgId;
+use crate::{ContactId, OrgId, PartnerId};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct PartnerContact {
-    pub id: Uuid,
+    pub id: ContactId,
     pub organization_id: OrgId,
-    pub partner_id: Uuid,
+    pub partner_id: PartnerId,
     pub is_primary: bool,
     pub full_name: String,
     pub preferred_name: String,

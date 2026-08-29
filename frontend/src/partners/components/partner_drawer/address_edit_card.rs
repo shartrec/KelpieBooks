@@ -11,9 +11,8 @@ use shared_core::partners::models::{
     partner_address::PartnerAddress,
 };
 use strum::IntoEnumIterator;
-use uuid::Uuid;
 use yew::prelude::*;
-use shared_core::OrgId;
+use shared_core::{AddressId, OrgId, PartnerId};
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
@@ -29,9 +28,9 @@ pub fn address_edit_card(props: &AddressEditCardProps) -> Html {
 
     let address_state = use_state(|| {
         props.address.clone().unwrap_or_else(|| PartnerAddress {
-            id: Uuid::nil(),
+            id: AddressId::default(),
             organization_id: OrgId::default(),
-            partner_id: Uuid::nil(),
+            partner_id: PartnerId::default(),
             created_at: chrono::Utc::now(),
             updated_at: chrono::Utc::now(),
             address_type: AddressType::General,

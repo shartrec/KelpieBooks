@@ -8,10 +8,9 @@
 
 use fluent::fluent_args;
 use shared_core::partners::models::partner_contact::PartnerContact;
-use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-
+use shared_core::{ContactId, PartnerId};
 use crate::{
     api::Api,
     contexts::{
@@ -26,13 +25,13 @@ use crate::{
 enum EditState {
     None,
     Adding,
-    Editing(Uuid),
+    Editing(ContactId),
 }
 
 #[derive(Properties, PartialEq)]
 pub struct ContactsViewProps {
     pub contacts: Vec<PartnerContact>,
-    pub partner_id: Uuid,
+    pub partner_id: PartnerId,
     pub on_change: Callback<()>,
 }
 
@@ -50,7 +49,7 @@ pub fn contacts_view(props: &ContactsViewProps) -> Html {
         Callback::from(move |_| editing_state.set(EditState::Adding))
     };
 
-    let on_edit_click = |id: Uuid| {
+    let on_edit_click = |id: ContactId| {
         let editing_state = editing_state.clone();
         Callback::from(move |_| editing_state.set(EditState::Editing(id)))
     };

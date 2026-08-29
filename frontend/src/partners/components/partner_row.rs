@@ -5,11 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use shared_core::{
-    core::models::auth::SystemPrivilege,
-    partners::dtos::partner_list_item::PartnerListItem,
-};
-use uuid::Uuid;
+use shared_core::{core::models::auth::SystemPrivilege, partners::dtos::partner_list_item::PartnerListItem, PartnerId};
 use yew::prelude::*;
 
 use crate::contexts::{
@@ -20,7 +16,7 @@ use crate::contexts::{
 #[derive(Properties, PartialEq, Clone)]
 pub struct PartnerRowProps {
     pub partner: PartnerListItem,
-    pub on_edit: Callback<Uuid>,
+    pub on_edit: Callback<PartnerId>,
     pub on_delete: Callback<PartnerListItem>,
 }
 

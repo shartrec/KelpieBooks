@@ -18,8 +18,7 @@ use shared_core::{core::models::auth::SystemPrivilege, ledger::models::{
         partner_contact::PartnerContact,
     },
     requests::partner::CreatePartnerRequest,
-}, AccountId};
-use uuid::Uuid;
+}, AccountId, PartnerId};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
@@ -145,7 +144,7 @@ pub fn partner_list_table() -> Html {
         let user_ctx = user_ctx.clone();
         let i18n = i18n.clone();
         let navigator = navigator.clone();
-        Callback::from(move |id: Uuid| {
+        Callback::from(move |id: PartnerId| {
             let partner_to_edit = partner_to_edit.clone();
             let partner_addresses = partner_addresses.clone();
             let partner_contacts = partner_contacts.clone();

@@ -10,10 +10,9 @@ use chrono::Local;
 use fluent::fluent_args;
 use rust_decimal::dec;
 use shared_core::payables::dtos::aged_payable_summary::AgedPayableSummary;
-use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-
+use shared_core::PartnerId;
 use crate::{
     api::Api,
     contexts::{
@@ -85,7 +84,7 @@ pub fn aged_trial_balance_matrix() -> Html {
 
     let toggle_row = {
         let expanded_rows = expanded_rows.clone();
-        Callback::from(move |partner_id: Uuid| {
+        Callback::from(move |partner_id: PartnerId| {
             let mut new_expanded = (*expanded_rows).clone();
             if let Some(pos) = new_expanded.iter().position(|&id| id == partner_id) {
                 new_expanded.remove(pos);

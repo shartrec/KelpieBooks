@@ -12,7 +12,7 @@ use serde::{
     Serialize,
 };
 use uuid::Uuid;
-
+use crate::{AddressId, PartnerId};
 use crate::sales::models::{
     order_address::OrderAddress,
     sales_order_item::SalesOrderItem,
@@ -20,15 +20,15 @@ use crate::sales::models::{
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateSalesOrderRequest {
-    pub partner_id: Uuid,
+    pub partner_id: PartnerId,
     pub warehouse_id: Uuid,
     pub order_date: NaiveDate,
     pub due_date: NaiveDate,
     pub lines: Vec<SalesOrderItem>,
 
     // Optional references to saved partner addresses used to populate the snapshots
-    pub billing_address_id: Option<Uuid>,
-    pub shipping_address_id: Option<Uuid>,
+    pub billing_address_id: Option<AddressId>,
+    pub shipping_address_id: Option<AddressId>,
 
     // Snapshots stored on the order (overridable by user per-order)
     pub bill_to: OrderAddress,

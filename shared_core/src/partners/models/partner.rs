@@ -14,12 +14,11 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::{AccountId, OrgId};
+use crate::{AccountId, OrgId, PartnerId};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Partner {
-    pub id: Uuid,
+    pub id: PartnerId,
     pub organization_id: OrgId,
     pub legal_name: String,
     pub trade_name: Option<String>,

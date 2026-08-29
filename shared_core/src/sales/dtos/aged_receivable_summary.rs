@@ -11,13 +11,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-
+use crate::PartnerId;
 use crate::sales::models::sales_order::SalesOrder;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct AgedReceivableSummary {
-    pub partner_id: Uuid,
+    pub partner_id: PartnerId,
     pub partner_name: String,
     pub current: Decimal,
     pub days_30: Decimal,

@@ -12,24 +12,20 @@ use chrono::{
 };
 use fluent::fluent_args;
 use rust_decimal::Decimal;
-use shared_core::{
-    inventory::models::warehouse::Warehouse,
-    partners::{
-        dtos::partner_list_item::PartnerListItem,
-        models::{
-            address_type::AddressType,
-            partner_address::PartnerAddress,
-        },
+use shared_core::{inventory::models::warehouse::Warehouse, partners::{
+    dtos::partner_list_item::PartnerListItem,
+    models::{
+        address_type::AddressType,
+        partner_address::PartnerAddress,
     },
-    sales::{
-        models::{
-            order_address::OrderAddress,
-            sales_order::SalesOrder,
-            sales_order_item::SalesOrderItem,
-        },
-        requests::sales_order::CreateSalesOrderRequest,
+}, sales::{
+    models::{
+        order_address::OrderAddress,
+        sales_order::SalesOrder,
+        sales_order_item::SalesOrderItem,
     },
-};
+    requests::sales_order::CreateSalesOrderRequest,
+}, AddressId, PartnerId};
 use uuid::Uuid;
 use web_sys::{
     HtmlInputElement,
@@ -69,7 +65,7 @@ pub fn new_sales_order_page() -> Html {
     let request = use_state(|| {
         let today = Local::now().date_naive();
         CreateSalesOrderRequest {
-            partner_id: Uuid::nil(),
+            partner_id: PartnerId::default(),
             warehouse_id: Uuid::nil(),
             order_date: today,
             due_date: today,
@@ -430,7 +426,7 @@ pub fn new_sales_order_page() -> Html {
                     />
                 </div>
             {
-            if request.partner_id != Uuid::nil() {
+            if request.partner_id != PartnerId::default() {
                 html! {
                     <>
                     <div class="data-form">
@@ -479,7 +475,7 @@ pub fn new_sales_order_page() -> Html {
                                             let partner_addresses = partner_addresses.clone();
                                             Callback::from(move |e: Event| {
                                                 let value = e.target_unchecked_into::<HtmlSelectElement>().value();
-                                                if let Ok(id) = Uuid::parse_str(&value) {
+                                                if let Ok(id) = Uuid::parse_str(&value).map(AddressId) {
                                                     if let Some(addr) = (*partner_addresses).iter().find(|a| a.id == id) {
                                                         let mut req = (*state).clone();
                                                         req.billing_address_id = Some(id);
@@ -526,7 +522,7 @@ pub fn new_sales_order_page() -> Html {
                                             let partner_addresses = partner_addresses.clone();
                                             Callback::from(move |e: Event| {
                                                 let value = e.target_unchecked_into::<HtmlSelectElement>().value();
-                                                if let Ok(id) = Uuid::parse_str(&value) {
+                                                if let Ok(id) = Uuid::parse_str(&value).map(AddressId) {
                                                     if let Some(addr) = (*partner_addresses).iter().find(|a| a.id == id) {
                                                         let mut req = (*state).clone();
                                                         req.shipping_address_id = Some(id);

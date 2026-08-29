@@ -11,10 +11,9 @@ use shared_core::partners::models::{
     address_type::AddressType,
     partner_address::PartnerAddress,
 };
-use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-
+use shared_core::{AddressId, PartnerId};
 use crate::{
     api::Api,
     contexts::{
@@ -29,13 +28,13 @@ use crate::{
 enum EditState {
     None,
     Adding,
-    Editing(Uuid),
+    Editing(AddressId),
 }
 
 #[derive(Properties, PartialEq)]
 pub struct AddressesViewProps {
     pub addresses: Vec<PartnerAddress>,
-    pub partner_id: Uuid,
+    pub partner_id: PartnerId,
     pub on_change: Callback<()>,
 }
 
@@ -53,7 +52,7 @@ pub fn addresses_view(props: &AddressesViewProps) -> Html {
         Callback::from(move |_| editing_state.set(EditState::Adding))
     };
 
-    let on_edit_click = |id: Uuid| {
+    let on_edit_click = |id: AddressId| {
         let editing_state = editing_state.clone();
         Callback::from(move |_| editing_state.set(EditState::Editing(id)))
     };

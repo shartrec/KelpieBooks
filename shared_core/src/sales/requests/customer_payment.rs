@@ -12,13 +12,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::AccountId;
+use crate::{AccountId, PartnerId};
 use crate::sales::models::customer_payment_allocation::CustomerPaymentAllocation;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct CreateCustomerPaymentRequest {
-    pub partner_id: Uuid,
+    pub partner_id: PartnerId,
     pub payment_date: NaiveDate,
     pub bank_account_id: AccountId,
     pub amount: Decimal,

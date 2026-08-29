@@ -5,7 +5,6 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use uuid::Uuid;
 
 pub mod about_modal;
 pub mod add_role_modal;
@@ -21,9 +20,12 @@ pub mod report_options;
 pub mod sidebar;
 
 pub trait SearchableItem: Clone + PartialEq + 'static {
-    fn id(&self) -> Uuid;
+    /// The strongly-typed identifier for this item (e.g., AccountId, RoleId).
+    type Id: Copy + Eq + std::hash::Hash + std::fmt::Display + 'static;
+
+    fn id(&self) -> Self::Id;
     fn display_label(&self) -> String;
     fn subtitle(&self) -> Option<String> {
         None
-    } // Optional: For item codes or business details
+    }
 }

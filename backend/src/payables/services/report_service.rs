@@ -14,8 +14,7 @@ use shared_core::payables::{
     models::invoice_status::InvoiceStatus,
 };
 use sqlx::PgConnection;
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{OrgId, PartnerId};
 use crate::{
     payables::db::vendor_invoice::get_by_org,
     util::ApiError,
@@ -37,7 +36,7 @@ pub(crate) async fn get_aged_payables(
     )
     .await?;
 
-    let mut summary_map: HashMap<Uuid, AgedPayableSummary> = HashMap::new();
+    let mut summary_map: HashMap<PartnerId, AgedPayableSummary> = HashMap::new();
 
     for invoice in invoices {
         let summary = summary_map
