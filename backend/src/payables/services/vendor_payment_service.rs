@@ -20,7 +20,7 @@ use shared_core::{ledger::{
 }, payables::{
     models::vendor_payment::VendorPayment,
     requests::vendor_payment::CreateVendorPaymentRequest,
-}, OrgId};
+}, InvoiceId, OrgId};
 use sqlx::Acquire;
 use uuid::Uuid;
 
@@ -40,7 +40,7 @@ use crate::{
 pub(crate) async fn get_vendor_invoice_payments(
     pool: &mut PgConnection,
     organization_id: OrgId,
-    invoice_id: Uuid,
+    invoice_id: InvoiceId,
 ) -> Result<Vec<VendorPayment>, ApiError> {
     let invoice = vendor_invoice_db::get(pool, invoice_id)
         .await?

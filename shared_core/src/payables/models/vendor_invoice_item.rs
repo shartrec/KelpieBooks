@@ -14,13 +14,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::AccountId;
+use crate::{AccountId, InvoiceId, InvoiceItemId};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct VendorInvoiceItem {
-    pub id: Uuid,
-    pub vendor_invoice_id: Uuid,
+    pub id: InvoiceItemId,
+    pub vendor_invoice_id: InvoiceId,
     pub account_id: AccountId, // Target GL Expense Account
     pub description: Option<String>,
     pub net_amount: Decimal,

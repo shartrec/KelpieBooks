@@ -11,8 +11,7 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::PartnerId;
+use crate::{InvoiceId, PartnerId};
 use crate::payables::models::vendor_invoice_item::VendorInvoiceItem;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
@@ -27,7 +26,7 @@ pub struct CreateVendorInvoiceRequest {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct UpdateVendorInvoiceRequest {
-    pub id: Uuid,
+    pub id: InvoiceId,
     pub invoice_number: String,
     pub issue_date: NaiveDate,
     pub due_date: NaiveDate,

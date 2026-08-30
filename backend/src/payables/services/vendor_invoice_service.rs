@@ -36,7 +36,7 @@ use shared_core::{ledger::{
         CreateVendorInvoiceRequest,
         UpdateVendorInvoiceRequest,
     },
-}, OrgId};
+}, InvoiceId, OrgId, PartnerId};
 use sqlx::Acquire;
 use uuid::Uuid;
 
@@ -54,7 +54,7 @@ pub(crate) async fn get_vendor_invoices(
     organization_id: OrgId,
     start_date: Option<NaiveDate>,
     end_date: Option<NaiveDate>,
-    partner_id: Option<Uuid>,
+    partner_id: Option<PartnerId>,
     min_amount: Option<Decimal>,
     status: Option<InvoiceStatus>,
 ) -> Result<Vec<VendorInvoiceListItem>, ApiError> {
@@ -78,7 +78,7 @@ pub(crate) async fn get_vendor_invoices(
 pub(crate) async fn get_vendor_invoice(
     pool: &mut PgConnection,
     organization_id: OrgId,
-    id: Uuid,
+    id: InvoiceId,
 ) -> Result<VendorInvoiceDto, ApiError> {
     let invoice = vendor_invoice_db::get(pool, id)
         .await?
@@ -179,7 +179,7 @@ pub(crate) async fn create_vendor_invoice(
 pub(crate) async fn update_vendor_invoice(
     pool: &mut PgConnection,
     organization_id: OrgId,
-    id: Uuid,
+    id: InvoiceId,
     req: &UpdateVendorInvoiceRequest,
 ) -> Result<VendorInvoiceDto, ApiError> {
     let invoice = vendor_invoice_db::get(pool, id)
@@ -198,7 +198,7 @@ pub(crate) async fn update_vendor_invoice(
 pub(crate) async fn update_vendor_invoice_items(
     pool: &mut PgConnection,
     organization_id: OrgId,
-    id: Uuid,
+    id: InvoiceId,
     items: &Vec<VendorInvoiceItem>,
 ) -> Result<Vec<VendorInvoiceItem>, ApiError> {
     let invoice = vendor_invoice_db::get(pool, id)

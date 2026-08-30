@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT id, organization_id, partner_id, transaction_id, invoice_number, status as \"status: InvoiceStatus\", issue_date,\n               due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at\n        FROM vendor_invoices\n        WHERE id = $1\n        ",
+  "query": "\n        SELECT id, organization_id, partner_id, transaction_id as \"transaction_id: TransactionId\", invoice_number, status as \"status: InvoiceStatus\", issue_date,\n               due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at\n        FROM vendor_invoices\n        WHERE id = $1\n        ",
   "describe": {
     "columns": [
       {
@@ -20,7 +20,7 @@
       },
       {
         "ordinal": 3,
-        "name": "transaction_id",
+        "name": "transaction_id: TransactionId",
         "type_info": "Uuid"
       },
       {
@@ -115,5 +115,5 @@
       false
     ]
   },
-  "hash": "b80198c418c9e312f313bdd0422424c988935e8643aeb07012aa8b1dcf66f8bf"
+  "hash": "a5510b2af76e727f17ad3a5c24d7aa28de8035f5021d0368f228e6cb4b5b5e14"
 }

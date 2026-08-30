@@ -15,15 +15,14 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::OrgId;
+use crate::{AllocationId, InvoiceId, OrgId, PaymentId};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct VendorPaymentAllocation {
-    pub id: Uuid,
+    pub id: AllocationId,
     pub organization_id: OrgId,
-    pub vendor_invoice_id: Uuid,
-    pub vendor_payment_id: Uuid,
+    pub vendor_invoice_id: InvoiceId,
+    pub vendor_payment_id: PaymentId,
     pub allocated_amount: Decimal,
     pub created_at: DateTime<Utc>,
 }

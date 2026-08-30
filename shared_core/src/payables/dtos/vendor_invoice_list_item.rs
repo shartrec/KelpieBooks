@@ -12,15 +12,14 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::PartnerId;
+use crate::{InvoiceId, PartnerId};
 use crate::payables::models::invoice_status::InvoiceStatus;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 #[cfg_attr(feature = "backend", sqlx(rename_all = "snake_case"))]
 pub struct VendorInvoiceListItem {
-    pub id: Uuid,
+    pub id: InvoiceId,
     pub partner_id: PartnerId,
     pub partner_name: String,
     pub invoice_number: String,

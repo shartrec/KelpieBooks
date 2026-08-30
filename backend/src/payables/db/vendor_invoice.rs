@@ -27,22 +27,21 @@ use shared_core::payables::{
         UpdateVendorInvoiceRequest,
     },
 };
-use uuid::Uuid;
-use shared_core::{OrgId, PartnerId, TransactionId};
+use shared_core::{InvoiceId, OrgId, PartnerId, TransactionId};
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: InvoiceId,
 ) -> Result<Option<VendorInvoice>, sqlx::Error> {
     sqlx::query_as!(
         VendorInvoice,
         r#"
-        SELECT id, organization_id, partner_id, transaction_id, invoice_number, status as "status: InvoiceStatus", issue_date,
+        SELECT id, organization_id, partner_id, transaction_id as "transaction_id: TransactionId", invoice_number, status as "status: InvoiceStatus", issue_date,
                due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at
         FROM vendor_invoices
         WHERE id = $1
         "#,
-        id
+        *id
     )
     .fetch_optional(pool)
     .await
@@ -50,7 +49,7 @@ pub(crate) async fn get(
 
 pub(crate) async fn get_items(
     pool: &mut PgConnection,
-    vendor_invoice_id: Uuid,
+    vendor_invoice_id: InvoiceId,
 ) -> Result<Vec<VendorInvoiceItem>, sqlx::Error> {
     sqlx::query_as!(
         VendorInvoiceItem,
@@ -59,7 +58,7 @@ pub(crate) async fn get_items(
         FROM vendor_invoice_items
         WHERE vendor_invoice_id = $1
         "#,
-        vendor_invoice_id
+        *vendor_invoice_id
     )
     .fetch_all(pool)
     .await
@@ -70,7 +69,7 @@ pub(crate) async fn get_by_org(
     organization_id: OrgId,
     start_date: Option<NaiveDate>,
     end_date: Option<NaiveDate>,
-    partner_id: Option<Uuid>,
+    partner_id: Option<PartnerId>,
     min_amount: Option<Decimal>,
     statuses: Vec<&InvoiceStatus>,
 ) -> Result<Vec<VendorInvoiceListItem>, sqlx::Error> {
@@ -175,7 +174,7 @@ pub(crate) async fn insert(
         r#"
         INSERT INTO vendor_invoices (organization_id, partner_id, transaction_id, invoice_number, issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-        RETURNING id, organization_id, partner_id, transaction_id, invoice_number, status as "status: InvoiceStatus", issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at
+        RETURNING id, organization_id, partner_id, transaction_id as "transaction_id: TransactionId", invoice_number, status as "status: InvoiceStatus", issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at
         "#,
         *org_id,
         *req.partner_id,
@@ -196,7 +195,7 @@ pub(crate) async fn insert(
 
 pub(crate) async fn update(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: InvoiceId,
     req: &UpdateVendorInvoiceRequest,
 ) -> Result<VendorInvoice, sqlx::Error> {
     let row = sqlx::query_as!(
@@ -205,13 +204,13 @@ pub(crate) async fn update(
         UPDATE vendor_invoices
         SET invoice_number = $1, issue_date = $2, due_date = $3, notes = $4
         WHERE id = $5
-        RETURNING id, organization_id, partner_id, transaction_id, invoice_number, status as "status: InvoiceStatus", issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at
+        RETURNING id, organization_id, partner_id, transaction_id as "transaction_id: TransactionId", invoice_number, status as "status: InvoiceStatus", issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at
         "#,
         req.invoice_number,
         req.issue_date,
         req.due_date,
         req.notes,
-        id
+        *id
     )
     .fetch_one(pool)
     .await?;
@@ -220,7 +219,7 @@ pub(crate) async fn update(
 
 pub(crate) async fn update_totals(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: InvoiceId,
     net_amount: Decimal,
     tax_amount: Decimal,
     gross_amount: Decimal,
@@ -234,7 +233,7 @@ pub(crate) async fn update_totals(
         net_amount,
         tax_amount,
         gross_amount,
-        id
+        *id
     )
     .execute(pool)
     .await?;
@@ -243,7 +242,7 @@ pub(crate) async fn update_totals(
 
 pub(crate) async fn update_amount_remaining(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: InvoiceId,
     amount: Decimal,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
@@ -253,7 +252,7 @@ pub(crate) async fn update_amount_remaining(
         WHERE id = $2
         "#,
         amount,
-        id
+        *id
     )
     .execute(pool)
     .await?;
@@ -262,7 +261,7 @@ pub(crate) async fn update_amount_remaining(
 
 pub(crate) async fn insert_item(
     pool: &mut PgConnection,
-    vendor_invoice_id: Uuid,
+    vendor_invoice_id: InvoiceId,
     item: &VendorInvoiceItem,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
@@ -270,8 +269,8 @@ pub(crate) async fn insert_item(
         INSERT INTO vendor_invoice_items (id, vendor_invoice_id, account_id, description, net_amount, tax_amount, total_amount)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         "#,
-        item.id,
-        vendor_invoice_id,
+        *item.id,
+        *vendor_invoice_id,
         *item.account_id,
         item.description,
         item.net_amount,
@@ -285,14 +284,14 @@ pub(crate) async fn insert_item(
 
 pub(crate) async fn delete_items(
     pool: &mut PgConnection,
-    vendor_invoice_id: Uuid,
+    vendor_invoice_id: InvoiceId,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         r#"
         DELETE FROM vendor_invoice_items
         WHERE vendor_invoice_id = $1
         "#,
-        vendor_invoice_id
+        *vendor_invoice_id
     )
     .execute(pool)
     .await?;

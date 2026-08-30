@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO vendor_payments (\n            organization_id,\n            partner_id,\n            transaction_id,\n            payment_date,\n            paid_from_account,\n            amount,\n            reference\n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7)\n        RETURNING *\n        ",
+  "query": "\n        UPDATE vendor_payments\n        SET\n            partner_id = $1,\n            payment_date = $2,\n            paid_from_account = $3,\n            amount = $4,\n            reference = $5\n        WHERE id = $6\n        RETURNING  id,\n               organization_id,\n               partner_id,\n               transaction_id as \"transaction_id: TransactionId\",\n               payment_date,\n               paid_from_account,\n               amount,\n               reference,\n               created_at\n        ",
   "describe": {
     "columns": [
       {
@@ -20,7 +20,7 @@
       },
       {
         "ordinal": 3,
-        "name": "transaction_id",
+        "name": "transaction_id: TransactionId",
         "type_info": "Uuid"
       },
       {
@@ -52,12 +52,11 @@
     "parameters": {
       "Left": [
         "Uuid",
-        "Uuid",
-        "Uuid",
         "Date",
         "Uuid",
         "Numeric",
-        "Text"
+        "Text",
+        "Uuid"
       ]
     },
     "nullable": [
@@ -72,5 +71,5 @@
       false
     ]
   },
-  "hash": "7e542d76417e3db2821f11b28ab4c45afc1a5c5c425954b5f93c17870b0a9967"
+  "hash": "fdff38f18d7cfbe6832cac0f88f7ae7244a30bfb796f666532e191714eae0bc0"
 }

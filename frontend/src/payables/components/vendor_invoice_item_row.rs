@@ -6,7 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use rust_decimal::Decimal;
-use shared_core::{ledger::models::account::Account, payables::models::vendor_invoice_item::VendorInvoiceItem, AccountId};
+use shared_core::{ledger::models::account::Account, payables::models::vendor_invoice_item::VendorInvoiceItem, AccountId, InvoiceItemId};
 use uuid::Uuid;
 use yew::prelude::*;
 
@@ -20,7 +20,7 @@ pub struct VendorInvoiceItemRowProps {
     pub item: VendorInvoiceItem,
     pub accounts: Vec<Account>,
     pub on_change: Callback<VendorInvoiceItem>,
-    pub on_delete: Callback<Uuid>,
+    pub on_delete: Callback<InvoiceItemId>,
 }
 
 #[function_component(VendorInvoiceItemRow)]

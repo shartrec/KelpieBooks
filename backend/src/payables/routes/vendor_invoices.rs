@@ -16,6 +16,7 @@ use rocket::{
 };
 use rocket_db_pools::Connection;
 use rust_decimal::Decimal;
+use shared_core::{InvoiceId, PartnerId};
 use shared_core::payables::{
     dtos::{
         vendor_invoice_dto::VendorInvoiceDto,
@@ -45,7 +46,6 @@ use crate::{
         types::{
             FormInvoiceStatus,
             PathDate,
-            PathUuid,
         },
         ApiError,
     },
@@ -69,7 +69,7 @@ async fn get_vendor_invoices(
     guard: RequirePrivilege<UseVendorInvoices>,
     start_date: Option<PathDate>,
     end_date: Option<PathDate>,
-    partner_id: Option<PathUuid>,
+    partner_id: Option<PartnerId>,
     min_amount: Option<Decimal>,
     status: Option<FormInvoiceStatus>,
 ) -> Result<Json<Vec<VendorInvoiceListItem>>, ApiError> {
@@ -79,7 +79,7 @@ async fn get_vendor_invoices(
         user.organization_id,
         start_date.map(|d| *d),
         end_date.map(|d| *d),
-        partner_id.map(|u| *u),
+        partner_id,
         min_amount,
         status.map(|s| *s),
     )
@@ -91,11 +91,11 @@ async fn get_vendor_invoices(
 async fn get_vendor_invoice(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseVendorInvoices>,
-    id: PathUuid,
+    id: InvoiceId,
 ) -> Result<Json<VendorInvoiceDto>, ApiError> {
     let user = guard.0;
     let invoice =
-        vendor_invoice_service::get_vendor_invoice(&mut pool, user.organization_id, *id).await?;
+        vendor_invoice_service::get_vendor_invoice(&mut pool, user.organization_id, id).await?;
     Ok(Json(invoice))
 }
 
@@ -103,13 +103,13 @@ async fn get_vendor_invoice(
 async fn get_vendor_invoice_payments(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseVendorInvoices>,
-    invoice_id: PathUuid,
+    invoice_id: InvoiceId,
 ) -> Result<Json<Vec<VendorPayment>>, ApiError> {
     let user = guard.0;
     let payments = vendor_payment_service::get_vendor_invoice_payments(
         &mut pool,
         user.organization_id,
-        *invoice_id,
+        invoice_id,
     )
     .await?;
     Ok(Json(payments))
@@ -132,12 +132,12 @@ async fn create_vendor_invoice(
 async fn update_vendor_invoice(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageVendorInvoices>,
-    id: PathUuid,
+    id: InvoiceId,
     req: Json<UpdateVendorInvoiceRequest>,
 ) -> Result<Json<VendorInvoiceDto>, ApiError> {
     let user = guard.0;
     let updated_invoice =
-        vendor_invoice_service::update_vendor_invoice(&mut pool, user.organization_id, *id, &req)
+        vendor_invoice_service::update_vendor_invoice(&mut pool, user.organization_id, id, &req)
             .await?;
     Ok(Json(updated_invoice))
 }
@@ -146,14 +146,14 @@ async fn update_vendor_invoice(
 async fn update_vendor_invoice_items(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageVendorInvoices>,
-    id: PathUuid,
+    id: InvoiceId,
     req: Json<Vec<VendorInvoiceItem>>,
 ) -> Result<Json<Vec<VendorInvoiceItem>>, ApiError> {
     let user = guard.0;
     let updated_items = vendor_invoice_service::update_vendor_invoice_items(
         &mut pool,
         user.organization_id,
-        *id,
+        id,
         &req,
     )
     .await?;

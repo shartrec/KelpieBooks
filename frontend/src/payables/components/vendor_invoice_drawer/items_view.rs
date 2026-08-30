@@ -11,7 +11,7 @@ use rust_decimal::dec;
 use shared_core::{ledger::models::account_category::AccountCategory, payables::{
     dtos::vendor_invoice_dto::VendorInvoiceDto,
     models::vendor_invoice_item::VendorInvoiceItem,
-}, AccountId};
+}, AccountId, InvoiceItemId};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
@@ -141,7 +141,7 @@ pub fn items_view(props: &ItemsViewProps) -> Html {
         let item_to_edit = item_to_edit.clone();
         Callback::from(move |_| {
             item_to_edit.set(Some(VendorInvoiceItem {
-                id: Uuid::new_v4(),
+                id: InvoiceItemId(Uuid::new_v4()),
                 vendor_invoice_id: invoice_id,
                 account_id: AccountId::default(),
                 description: None,

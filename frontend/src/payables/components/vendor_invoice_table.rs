@@ -8,17 +8,13 @@
 
 use fluent::fluent_args;
 use rust_decimal::dec;
-use shared_core::{
-    partners::models::partner::Partner,
-    payables::{
-        dtos::{
-            vendor_invoice_dto::VendorInvoiceDto,
-            vendor_invoice_list_item::VendorInvoiceListItem,
-        },
-        models::invoice_status::InvoiceStatus,
+use shared_core::{partners::models::partner::Partner, payables::{
+    dtos::{
+        vendor_invoice_dto::VendorInvoiceDto,
+        vendor_invoice_list_item::VendorInvoiceListItem,
     },
-};
-use uuid::Uuid;
+    models::invoice_status::InvoiceStatus,
+}, InvoiceId};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
@@ -51,7 +47,7 @@ pub fn vendor_invoice_table() -> Html {
     let loading = use_state(|| true);
     let invoice_to_edit = use_state(|| None::<VendorInvoiceDto>);
     let partner_to_edit = use_state(|| None::<Partner>);
-    let show_actions = use_state(|| None::<Uuid>);
+    let show_actions = use_state(|| None::<InvoiceId>);
     let initial_tab = use_state(|| InvoiceDrawerTab::General);
 
     let fetch_invoices = {
@@ -145,7 +141,7 @@ pub fn vendor_invoice_table() -> Html {
         let i18n = i18n.clone();
         let navigator = navigator.clone();
         let initial_tab = initial_tab.clone();
-        Callback::from(move |(id, tab): (Uuid, InvoiceDrawerTab)| {
+        Callback::from(move |(id, tab): (InvoiceId, InvoiceDrawerTab)| {
             let invoice_to_edit = invoice_to_edit.clone();
             let partner_to_edit = partner_to_edit.clone();
             let error = error.clone();

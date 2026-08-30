@@ -16,7 +16,7 @@ use rust_decimal::dec;
 use shared_core::{ledger::models::account_category::AccountCategory, partners::dtos::partner_list_item::PartnerListItem, payables::{
     models::vendor_invoice_item::VendorInvoiceItem,
     requests::vendor_invoice::CreateVendorInvoiceRequest,
-}, AccountId, PartnerId};
+}, AccountId, InvoiceId, InvoiceItemId, PartnerId};
 use uuid::Uuid;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -45,8 +45,8 @@ pub fn new_vendor_invoice_page() -> Html {
             issue_date: today,
             due_date: today,
             items: vec![VendorInvoiceItem {
-                id: Uuid::new_v4(),
-                vendor_invoice_id: Uuid::nil(),
+                id: InvoiceItemId(Uuid::new_v4()),
+                vendor_invoice_id: InvoiceId::default(),
                 account_id: AccountId::default(),
                 description: None,
                 net_amount: dec!(0.00),
@@ -170,7 +170,7 @@ pub fn new_vendor_invoice_page() -> Html {
 
     let on_item_delete = {
         let request = request.clone();
-        Callback::from(move |id: Uuid| {
+        Callback::from(move |id: InvoiceItemId| {
             let mut req = (*request).clone();
             req.items.retain(|i| i.id != id);
             request.set(req);
@@ -183,8 +183,8 @@ pub fn new_vendor_invoice_page() -> Html {
             let mut req = (*request).clone();
             let last_account_id = req.items.last().map_or(AccountId::default(), |item| item.account_id);
             req.items.push(VendorInvoiceItem {
-                id: Uuid::new_v4(),
-                vendor_invoice_id: Uuid::nil(),
+                id: InvoiceItemId(Uuid::new_v4()),
+                vendor_invoice_id: InvoiceId::default(),
                 account_id: last_account_id,
                 description: None,
                 net_amount: dec!(0.00),

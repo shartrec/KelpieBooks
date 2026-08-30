@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO vendor_invoices (organization_id, partner_id, transaction_id, invoice_number, issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes)\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)\n        RETURNING id, organization_id, partner_id, transaction_id, invoice_number, status as \"status: InvoiceStatus\", issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at\n        ",
+  "query": "\n        UPDATE vendor_invoices\n        SET invoice_number = $1, issue_date = $2, due_date = $3, notes = $4\n        WHERE id = $5\n        RETURNING id, organization_id, partner_id, transaction_id as \"transaction_id: TransactionId\", invoice_number, status as \"status: InvoiceStatus\", issue_date, due_date, net_amount, tax_amount, gross_amount, amount_remaining, notes, created_at, updated_at\n        ",
   "describe": {
     "columns": [
       {
@@ -20,7 +20,7 @@
       },
       {
         "ordinal": 3,
-        "name": "transaction_id",
+        "name": "transaction_id: TransactionId",
         "type_info": "Uuid"
       },
       {
@@ -94,17 +94,11 @@
     ],
     "parameters": {
       "Left": [
-        "Uuid",
-        "Uuid",
-        "Uuid",
         "Text",
         "Date",
         "Date",
-        "Numeric",
-        "Numeric",
-        "Numeric",
-        "Numeric",
-        "Text"
+        "Text",
+        "Uuid"
       ]
     },
     "nullable": [
@@ -125,5 +119,5 @@
       false
     ]
   },
-  "hash": "87065b0bbd216e4dd843e0c4f3ad3469bcbe10947b7801d581ff0153bd87ff53"
+  "hash": "52b5855e249482ffb8083208b13ac9c00f2174287c0d45622adec3aa19563d5c"
 }

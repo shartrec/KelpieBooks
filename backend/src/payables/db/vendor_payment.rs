@@ -14,21 +14,28 @@ use shared_core::payables::{
     models::vendor_payment::VendorPayment,
     requests::vendor_payment::CreateVendorPaymentRequest,
 };
-use uuid::Uuid;
-use shared_core::{OrgId, TransactionId};
+use shared_core::{InvoiceId, OrgId, PaymentId, TransactionId};
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: PaymentId,
 ) -> Result<Option<VendorPayment>, sqlx::Error> {
     sqlx::query_as!(
         VendorPayment,
         r#"
-        SELECT *
+        SELECT id,
+               organization_id,
+               partner_id,
+               transaction_id as "transaction_id: TransactionId",
+               payment_date,
+               paid_from_account,
+               amount,
+               reference,
+               created_at
         FROM vendor_payments
         WHERE id = $1
         "#,
-        id
+        *id
     )
     .fetch_optional(pool)
     .await
@@ -36,18 +43,26 @@ pub(crate) async fn get(
 
 pub(crate) async fn get_all_by_invoice(
     pool: &mut PgConnection,
-    invoice_id: Uuid,
+    invoice_id: InvoiceId,
 ) -> Result<Vec<VendorPayment>, sqlx::Error> {
     sqlx::query_as!(
         VendorPayment,
         r#"
-        SELECT vp.*
+        SELECT  vp.id,
+               vp.organization_id,
+               vp.partner_id,
+               vp.transaction_id as "transaction_id: TransactionId",
+               vp.payment_date,
+               vp.paid_from_account,
+               vp.amount,
+               vp.reference,
+               vp.created_at
         FROM vendor_payments vp
         JOIN vendor_payment_allocations vpa ON vp.id = vpa.vendor_payment_id
         WHERE vpa.vendor_invoice_id = $1
         ORDER BY vp.payment_date DESC, vp.created_at DESC
         "#,
-        invoice_id
+        *invoice_id
     )
     .fetch_all(pool)
     .await
@@ -72,7 +87,15 @@ pub(crate) async fn insert(
             reference
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING *
+        RETURNING id,
+               organization_id,
+               partner_id,
+               transaction_id as "transaction_id: TransactionId",
+               payment_date,
+               paid_from_account,
+               amount,
+               reference,
+               created_at
         "#,
         *org_id,
         *req.partner_id,
@@ -89,7 +112,7 @@ pub(crate) async fn insert(
 
 pub(crate) async fn update(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: PaymentId,
     req: &CreateVendorPaymentRequest,
 ) -> Result<VendorPayment, sqlx::Error> {
     let row = sqlx::query_as!(
@@ -103,23 +126,34 @@ pub(crate) async fn update(
             amount = $4,
             reference = $5
         WHERE id = $6
-        RETURNING *
+        RETURNING  id,
+               organization_id,
+               partner_id,
+               transaction_id as "transaction_id: TransactionId",
+               payment_date,
+               paid_from_account,
+               amount,
+               reference,
+               created_at
         "#,
         *req.partner_id,
         req.payment_date,
         *req.bank_account_id,
         req.amount,
         req.reference,
-        id
+        *id
     )
     .fetch_one(pool)
     .await?;
     Ok(row)
 }
 
-pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query!("DELETE FROM vendor_payments WHERE id = $1", id)
-        .execute(pool)
-        .await?;
+pub(crate) async fn delete(pool: &mut PgConnection, id: PaymentId) -> Result<u64, sqlx::Error> {
+    let result = sqlx::query!(
+        "DELETE FROM vendor_payments WHERE id = $1",
+        *id
+    )
+    .execute(pool)
+    .await?;
     Ok(result.rows_affected())
 }

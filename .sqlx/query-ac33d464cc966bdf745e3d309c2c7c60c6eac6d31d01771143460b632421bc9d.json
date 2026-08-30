@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT vp.*\n        FROM vendor_payments vp\n        JOIN vendor_payment_allocations vpa ON vp.id = vpa.vendor_payment_id\n        WHERE vpa.vendor_invoice_id = $1\n        ORDER BY vp.payment_date DESC, vp.created_at DESC\n        ",
+  "query": "\n        SELECT id,\n               organization_id,\n               partner_id,\n               transaction_id as \"transaction_id: TransactionId\",\n               payment_date,\n               paid_from_account,\n               amount,\n               reference,\n               created_at\n        FROM vendor_payments\n        WHERE id = $1\n        ",
   "describe": {
     "columns": [
       {
@@ -20,7 +20,7 @@
       },
       {
         "ordinal": 3,
-        "name": "transaction_id",
+        "name": "transaction_id: TransactionId",
         "type_info": "Uuid"
       },
       {
@@ -66,5 +66,5 @@
       false
     ]
   },
-  "hash": "d202092061014f6d34825726c699229983446631468faf095ca7df995dc413b4"
+  "hash": "ac33d464cc966bdf745e3d309c2c7c60c6eac6d31d01771143460b632421bc9d"
 }

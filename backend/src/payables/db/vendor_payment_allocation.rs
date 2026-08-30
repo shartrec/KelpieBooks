@@ -11,11 +11,11 @@ use rocket_db_pools::sqlx::{
     PgConnection,
 };
 use shared_core::payables::models::vendor_payment_allocation::VendorPaymentAllocation;
-use uuid::Uuid;
+use shared_core::{AllocationId, PaymentId};
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: AllocationId,
 ) -> Result<Option<VendorPaymentAllocation>, sqlx::Error> {
     sqlx::query_as!(
         VendorPaymentAllocation,
@@ -24,7 +24,7 @@ pub(crate) async fn get(
         FROM vendor_payment_allocations
         WHERE id = $1
         "#,
-        id
+        *id
     )
     .fetch_optional(pool)
     .await
@@ -32,7 +32,7 @@ pub(crate) async fn get(
 
 pub(crate) async fn insert(
     pool: &mut PgConnection,
-    vendor_payment_id: Uuid,
+    vendor_payment_id: PaymentId,
     req: &VendorPaymentAllocation,
 ) -> Result<VendorPaymentAllocation, sqlx::Error> {
     let row = sqlx::query_as!(
@@ -48,8 +48,8 @@ pub(crate) async fn insert(
         RETURNING *
         "#,
         *req.organization_id,
-        req.vendor_invoice_id,
-        vendor_payment_id,
+        *req.vendor_invoice_id,
+        *vendor_payment_id,
         req.allocated_amount,
     )
     .fetch_one(pool)
@@ -59,7 +59,7 @@ pub(crate) async fn insert(
 
 pub(crate) async fn update(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: AllocationId,
     req: &VendorPaymentAllocation,
 ) -> Result<VendorPaymentAllocation, sqlx::Error> {
     let row = sqlx::query_as!(
@@ -73,19 +73,22 @@ pub(crate) async fn update(
         WHERE id = $4
         RETURNING *
         "#,
-        req.vendor_invoice_id,
-        req.vendor_payment_id,
+        *req.vendor_invoice_id,
+        *req.vendor_payment_id,
         req.allocated_amount,
-        id
+        *id
     )
     .fetch_one(pool)
     .await?;
     Ok(row)
 }
 
-pub(crate) async fn delete(pool: &mut PgConnection, id: Uuid) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query!("DELETE FROM vendor_payment_allocations WHERE id = $1", id)
-        .execute(pool)
-        .await?;
+pub(crate) async fn delete(pool: &mut PgConnection, id: AllocationId) -> Result<u64, sqlx::Error> {
+    let result = sqlx::query!(
+        "DELETE FROM vendor_payment_allocations WHERE id = $1",
+        *id
+    )
+    .execute(pool)
+    .await?;
     Ok(result.rows_affected())
 }

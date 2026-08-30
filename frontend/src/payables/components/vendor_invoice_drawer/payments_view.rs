@@ -20,7 +20,7 @@ use shared_core::{ledger::models::account::Account, payables::{
         vendor_payment_allocation::VendorPaymentAllocation,
     },
     requests::vendor_payment::CreateVendorPaymentRequest,
-}, AccountId};
+}, AccountId, AllocationId, PaymentId};
 use uuid::Uuid;
 use web_sys::{
     HtmlInputElement,
@@ -61,10 +61,10 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
             amount: props.invoice.amount_remaining,
             reference: None,
             allocations: vec![VendorPaymentAllocation {
-                id: Uuid::new_v4(),
+                id: AllocationId(Uuid::new_v4()),
                 organization_id: user.organization_id,
                 vendor_invoice_id: props.invoice.id,
-                vendor_payment_id: Uuid::nil(),
+                vendor_payment_id: PaymentId::default(),
                 allocated_amount: props.invoice.amount_remaining,
                 created_at: Utc::now(),
             }],

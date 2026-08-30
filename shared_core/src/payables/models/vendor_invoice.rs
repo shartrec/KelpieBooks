@@ -16,16 +16,15 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::{OrgId, PartnerId};
+use crate::{InvoiceId, OrgId, PartnerId, TransactionId};
 use crate::payables::models::invoice_status::InvoiceStatus;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct VendorInvoice {
-    pub id: Uuid,
+    pub id: InvoiceId,
     pub organization_id: OrgId,
     pub partner_id: PartnerId,
-    pub transaction_id: Option<Uuid>,
+    pub transaction_id: Option<TransactionId>,
     pub invoice_number: String,
     pub status: InvoiceStatus,
     pub issue_date: NaiveDate,
