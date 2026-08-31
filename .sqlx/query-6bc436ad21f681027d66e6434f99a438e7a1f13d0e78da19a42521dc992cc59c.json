@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT *\n        FROM customer_payments\n        WHERE id = $1\n        ",
+  "query": "\n        UPDATE warehouse_inventory_balances\n        SET quantity_allocated = quantity_allocated + $1,\n            updated_at = NOW()\n        WHERE warehouse_id = $2 AND location_id = $3 AND item_id = $4 AND organization_id = $5\n        RETURNING *\n        ",
   "describe": {
     "columns": [
       {
@@ -15,42 +15,46 @@
       },
       {
         "ordinal": 2,
-        "name": "partner_id",
+        "name": "item_id",
         "type_info": "Uuid"
       },
       {
         "ordinal": 3,
-        "name": "transaction_id",
+        "name": "warehouse_id",
         "type_info": "Uuid"
       },
       {
         "ordinal": 4,
-        "name": "payment_date",
-        "type_info": "Date"
-      },
-      {
-        "ordinal": 5,
-        "name": "deposited_to_account",
+        "name": "location_id",
         "type_info": "Uuid"
       },
       {
+        "ordinal": 5,
+        "name": "quantity_on_hand",
+        "type_info": "Numeric"
+      },
+      {
         "ordinal": 6,
-        "name": "amount",
+        "name": "quantity_allocated",
         "type_info": "Numeric"
       },
       {
         "ordinal": 7,
-        "name": "reference",
-        "type_info": "Text"
+        "name": "updated_at",
+        "type_info": "Timestamptz"
       },
       {
         "ordinal": 8,
-        "name": "created_at",
-        "type_info": "Timestamptz"
+        "name": "unit_cost",
+        "type_info": "Numeric"
       }
     ],
     "parameters": {
       "Left": [
+        "Numeric",
+        "Uuid",
+        "Uuid",
+        "Uuid",
         "Uuid"
       ]
     },
@@ -58,13 +62,13 @@
       false,
       false,
       false,
-      true,
       false,
       false,
       false,
-      true,
+      false,
+      false,
       false
     ]
   },
-  "hash": "a7e6bf7fe35c3897839a5901532c01f35370e8a0cb36712682afaeb1357396df"
+  "hash": "6bc436ad21f681027d66e6434f99a438e7a1f13d0e78da19a42521dc992cc59c"
 }

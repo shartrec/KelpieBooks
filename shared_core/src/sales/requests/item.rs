@@ -10,8 +10,7 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::AccountId;
+use crate::{AccountId, TaxCategoryId, UomId};
 use crate::sales::models::item::ItemType;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -20,9 +19,9 @@ pub struct CreateItemRequest {
     pub name: String,
     pub description: Option<String>,
     pub item_type: ItemType,
-    pub uom_id: Uuid,
+    pub uom_id: UomId,
     pub unit_price: Decimal,
     pub unit_cost: Decimal,
     pub income_account_id: AccountId,
-    pub tax_category_id: Option<Uuid>,
+    pub tax_category_id: Option<TaxCategoryId>,
 }

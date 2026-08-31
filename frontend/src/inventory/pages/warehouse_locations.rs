@@ -13,7 +13,7 @@ use shared_core::inventory::models::warehouse::{
 };
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-
+use shared_core::WarehouseId;
 use crate::{
     api::Api,
     contexts::{
@@ -29,7 +29,7 @@ use crate::{
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct Props {
-    pub warehouse_id: uuid::Uuid,
+    pub warehouse_id: WarehouseId,
 }
 
 #[function_component(WarehouseLocationsPage)]

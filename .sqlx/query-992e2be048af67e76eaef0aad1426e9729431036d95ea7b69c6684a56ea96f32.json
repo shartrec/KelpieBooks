@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT id, order_id, item_id, code, name, description,\n               quantity, unit_price, tax_category_id, tax_rate,\n               tax_amount, net_amount, sort_order, null as \"quantity_available: Decimal\"\n        FROM sales_order_items soi\n        WHERE order_id = $1\n        ORDER BY sort_order\n        ",
+  "query": "\n        SELECT id, order_id, item_id, code, name, description,\n               quantity, unit_price, tax_category_id as \"tax_category_id: TaxCategoryId\", tax_rate,\n               tax_amount, net_amount, sort_order, null as \"quantity_available: Decimal\"\n        FROM sales_order_items soi\n        WHERE order_id = $1\n        ORDER BY sort_order\n        ",
   "describe": {
     "columns": [
       {
@@ -45,7 +45,7 @@
       },
       {
         "ordinal": 8,
-        "name": "tax_category_id",
+        "name": "tax_category_id: TaxCategoryId",
         "type_info": "Uuid"
       },
       {
@@ -96,5 +96,5 @@
       null
     ]
   },
-  "hash": "753b95c984788dded20c33ba4e9b6e9df039a526110c792d779f76b45fa531ac"
+  "hash": "992e2be048af67e76eaef0aad1426e9729431036d95ea7b69c6684a56ea96f32"
 }

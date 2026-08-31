@@ -14,17 +14,17 @@ use shared_core::inventory::models::stock_balance::{
 };
 use sqlx::PgConnection;
 use uuid::Uuid;
-use shared_core::{OrgId, UserId};
+use shared_core::{ItemId, LocationEntryId, OrgId, UserId, WarehouseId};
 
 pub struct NewStockTransaction<'a> {
     pub organization_id: OrgId,
-    pub warehouse_id: Uuid,
-    pub location_id: Uuid,
-    pub item_id: Uuid,
+    pub warehouse_id: WarehouseId,
+    pub location_id: LocationEntryId,
+    pub item_id: ItemId,
     pub transaction_type: TransactionType,
     pub quantity_change: Decimal,
     pub reference_type: Option<ReferenceType>,
-    pub reference_id: Option<Uuid>,
+    pub reference_id: Option<Uuid>,  // Uuid is used here as the reference may be of many types
     pub notes: Option<&'a str>,
     pub created_by: UserId,
 }
@@ -38,17 +38,16 @@ pub async fn log_transaction(
         StockTransaction,
         r#"
         INSERT INTO stock_transactions
-            (id, organization_id, warehouse_id, location_id, item_id,
+            (organization_id, warehouse_id, location_id, item_id,
              transaction_type, quantity_change, reference_type, reference_id, notes, created_by)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING id, organization_id, warehouse_id, location_id, item_id,
                   transaction_type as "transaction_type: TransactionType", quantity_change, reference_type as "reference_type: ReferenceType", reference_id, notes, created_by, created_at
         "#,
-         Uuid::new_v4(),
         *entry.organization_id,
-        entry.warehouse_id,
-        entry.location_id,
-        entry.item_id,
+        *entry.warehouse_id,
+        *entry.location_id,
+        *entry.item_id,
         entry.transaction_type as TransactionType,
         entry.quantity_change,
         entry.reference_type as Option<ReferenceType>,
@@ -64,7 +63,7 @@ pub async fn log_transaction(
 pub async fn get_history_for_item(
     conn: &mut PgConnection,
     org_id: OrgId,
-    item_id: Uuid,
+    item_id: ItemId,
     limit: i64,
 ) -> Result<Vec<StockTransaction>, sqlx::Error> {
     sqlx::query_as!(
@@ -77,7 +76,7 @@ pub async fn get_history_for_item(
         ORDER BY created_at DESC
         LIMIT $3
         "#,
-        item_id,
+        *item_id,
        *org_id,
        limit
     )

@@ -20,7 +20,7 @@ use shared_core::sales::models::tax::{
     TaxCategory,
     TaxRate,
 };
-
+use shared_core::TaxCategoryId;
 use crate::{
     core::routes::security::AuthenticatedUser,
     sales::services::{
@@ -35,7 +35,6 @@ use crate::{
     util::{
         types::{
             PathDate,
-            PathUuid,
         },
         ApiError,
     },
@@ -69,11 +68,11 @@ async fn get_tax_categories(
 #[get("/api/sales/tax-categories/<id>")]
 async fn get_tax_category(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: TaxCategoryId,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseSales>,
 ) -> Result<Json<TaxCategory>, ApiError> {
-    let tax_category = tax_category_service::get_tax_category(&mut pool, user.organization_id, *id)
+    let tax_category = tax_category_service::get_tax_category(&mut pool, user.organization_id, id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Tax Category not found".to_string()))?;
     Ok(Json(tax_category))
@@ -95,7 +94,7 @@ async fn create_tax_category(
 #[put("/api/sales/tax-categories/<id>", data = "<tax_category>")]
 async fn update_tax_category(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: TaxCategoryId,
     tax_category: Json<TaxCategory>,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
@@ -103,7 +102,7 @@ async fn update_tax_category(
     let updated_tax_category = tax_category_service::update_tax_category(
         &mut pool,
         user.organization_id,
-        *id,
+        id,
         &tax_category,
     )
     .await?;
@@ -113,12 +112,12 @@ async fn update_tax_category(
 #[delete("/api/sales/tax-categories/<id>")]
 async fn delete_tax_category(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: TaxCategoryId,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<&'static str, ApiError> {
     let rows_affected =
-        tax_category_service::delete_tax_category(&mut pool, user.organization_id, *id).await?;
+        tax_category_service::delete_tax_category(&mut pool, user.organization_id, id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Tax Category not found.".to_string()));
     }
@@ -128,19 +127,19 @@ async fn delete_tax_category(
 #[get("/api/sales/tax-categories/<id>/rates")]
 async fn get_tax_rates_for_category(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: TaxCategoryId,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseSales>,
 ) -> Result<Json<Vec<TaxRate>>, ApiError> {
     let rates =
-        tax_rate_service::get_tax_rates_for_category(&mut pool, user.organization_id, *id).await?;
+        tax_rate_service::get_tax_rates_for_category(&mut pool, user.organization_id, id).await?;
     Ok(Json(rates))
 }
 
 #[get("/api/sales/tax-categories/<id>/current-rate?<effective_date>")]
 async fn get_current_tax_rate_for_category_route(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: TaxCategoryId,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseSales>,
     effective_date: Option<PathDate>,
@@ -151,7 +150,7 @@ async fn get_current_tax_rate_for_category_route(
     let rate = tax_rate_service::get_current_tax_rate_for_category(
         &mut pool,
         user.organization_id,
-        *id,
+        id,
         date,
     )
     .await?;
@@ -161,12 +160,12 @@ async fn get_current_tax_rate_for_category_route(
 #[put("/api/sales/tax-categories/<id>/rates", data = "<rates>")]
 async fn update_tax_rates_for_category(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: TaxCategoryId,
     rates: Json<Vec<TaxRate>>,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<&'static str, ApiError> {
-    tax_rate_service::update_tax_rates_for_category(&mut pool, user.organization_id, *id, &rates)
+    tax_rate_service::update_tax_rates_for_category(&mut pool, user.organization_id, id, &rates)
         .await?;
     Ok("Tax rates updated successfully.")
 }

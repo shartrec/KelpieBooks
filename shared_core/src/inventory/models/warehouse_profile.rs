@@ -22,8 +22,7 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::OrgId;
+use crate::{ItemId, LocationEntryId, OrgId, WarehouseBalId, WarehouseId};
 // =============================================================================
 // 1. Warehouse Physical Profile Extensions
 // =============================================================================
@@ -31,7 +30,7 @@ use crate::OrgId;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct ItemWarehouseProfile {
-    pub item_id: Uuid,
+    pub item_id: ItemId,
     pub organization_id: OrgId,
     pub weight_kg: Option<Decimal>,
     pub length_cm: Option<Decimal>,
@@ -49,11 +48,11 @@ pub struct ItemWarehouseProfile {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct WarehouseInventoryBalance {
-    pub id: Uuid,
+    pub id: WarehouseBalId,
     pub organization_id: OrgId,
-    pub item_id: Uuid,
-    pub warehouse_id: Uuid,
-    pub location_id: Uuid,
+    pub item_id: ItemId,
+    pub warehouse_id: WarehouseId,
+    pub location_id: LocationEntryId,
     pub quantity_on_hand: Decimal,
     pub quantity_allocated: Decimal,
     pub unit_cost: Decimal,

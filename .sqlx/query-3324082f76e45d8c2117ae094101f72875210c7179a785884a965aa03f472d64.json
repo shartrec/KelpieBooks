@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO sales_orders (\n            organization_id, partner_id, warehouse_id, order_number, order_date, due_date,\n            fulfillment_status, payment_status, document_status,\n            billing_address_id, shipping_address_id,\n            subtotal, tax_total, total_amount\n        )\n        VALUES (\n            $1, $2, $3, $4, $5, $6,\n            $7::fulfillment_status, $8::payment_status, $9::sales_document_status,\n            $10, $11,\n            $12, $13, $14\n        )\n        RETURNING\n            id, organization_id as org_id, partner_id, null as partner_name, warehouse_id, null as warehouse_name, order_number, order_date, due_date,\n            fulfillment_status as \"fulfillment_status: FulfillmentStatus\",\n            payment_status as \"payment_status: PaymentStatus\",\n            document_status as \"document_status: SalesDocumentStatus\",\n            billing_address_id, shipping_address_id,\n            subtotal, tax_total, total_amount, amount_remaining\n        ",
+  "query": "\n        INSERT INTO sales_orders (\n            organization_id, partner_id, warehouse_id, order_number, order_date, due_date,\n            fulfillment_status, payment_status, document_status,\n            billing_address_id, shipping_address_id,\n            subtotal, tax_total, total_amount\n        )\n        VALUES (\n            $1, $2, $3, $4, $5, $6,\n            $7::fulfillment_status, $8::payment_status, $9::sales_document_status,\n            $10, $11,\n            $12, $13, $14\n        )\n        RETURNING\n            id, organization_id as org_id, partner_id, null as partner_name, warehouse_id, null as warehouse_name, order_number, order_date, due_date,\n            fulfillment_status as \"fulfillment_status: FulfillmentStatus\",\n            payment_status as \"payment_status: PaymentStatus\",\n            document_status as \"document_status: SalesDocumentStatus\",\n            billing_address_id as \"billing_address_id: AddressId\", shipping_address_id as \"shipping_address_id: AddressId\",\n            subtotal, tax_total, total_amount, amount_remaining\n        ",
   "describe": {
     "columns": [
       {
@@ -101,12 +101,12 @@
       },
       {
         "ordinal": 12,
-        "name": "billing_address_id",
+        "name": "billing_address_id: AddressId",
         "type_info": "Uuid"
       },
       {
         "ordinal": 13,
-        "name": "shipping_address_id",
+        "name": "shipping_address_id: AddressId",
         "type_info": "Uuid"
       },
       {
@@ -205,5 +205,5 @@
       false
     ]
   },
-  "hash": "7804991b01cc6fbb36a147e9906dd64136ef1bf00d0e38a2b1c15f47e152bc34"
+  "hash": "3324082f76e45d8c2117ae094101f72875210c7179a785884a965aa03f472d64"
 }

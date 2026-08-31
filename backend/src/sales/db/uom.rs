@@ -11,16 +11,15 @@ use rocket_db_pools::sqlx::{
     PgConnection,
 };
 use shared_core::sales::models::item::UnitOfMeasure;
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{OrgId, UomId};
 
-pub async fn all(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<UnitOfMeasure>, sqlx::Error> {
+pub async fn all(conn: &mut PgConnection, org_id: OrgId) -> Result<Vec<UnitOfMeasure>, sqlx::Error> {
     sqlx::query_as!(
         UnitOfMeasure,
         r#"SELECT id, organization_id as org_id, code, name, is_active
             FROM units_of_measure
             WHERE organization_id = $1 ORDER BY code"#,
-        org_id,
+        *org_id,
     )
     .fetch_all(conn)
     .await
@@ -29,14 +28,14 @@ pub async fn all(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<UnitOfMeas
 pub async fn get(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: UomId,
 ) -> Result<Option<UnitOfMeasure>, sqlx::Error> {
     sqlx::query_as!(
         UnitOfMeasure,
         r#"SELECT id, organization_id as org_id, code, name, is_active
             FROM units_of_measure
             WHERE id = $1 AND organization_id = $2 ORDER BY code"#,
-        id,
+        *id,
         *org_id,
     )
     .fetch_optional(conn)
@@ -50,9 +49,8 @@ pub async fn create(
 ) -> Result<UnitOfMeasure, sqlx::Error> {
     sqlx::query_as!(
         UnitOfMeasure,
-        r#"INSERT INTO units_of_measure (id, organization_id, code, name, is_active) VALUES ($1, $2, $3, $4, $5)
+        r#"INSERT INTO units_of_measure (organization_id, code, name, is_active) VALUES ($1, $2, $3, $4)
                       RETURNING id, organization_id as org_id, code, name, is_active"#,
-        Uuid::new_v4(),
         *org_id,
         &uom.code,
         &uom.name,
@@ -65,7 +63,7 @@ pub async fn create(
 pub async fn update(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: UomId,
     uom: &UnitOfMeasure,
 ) -> Result<UnitOfMeasure, sqlx::Error> {
     sqlx::query_as!(
@@ -75,7 +73,7 @@ pub async fn update(
         uom.code,
         uom.name,
         uom.is_active,
-        id,
+        *id,
         *org_id,
     )
     .fetch_one(conn)
@@ -85,11 +83,11 @@ pub async fn update(
 pub async fn delete(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: UomId,
 ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
     sqlx::query!(
         "DELETE FROM units_of_measure WHERE id = $1 AND organization_id = $2",
-        id,
+        *id,
         *org_id,
     )
     .execute(conn)

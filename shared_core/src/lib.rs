@@ -150,4 +150,5 @@ define_id!(TaxCategoryId);
 define_id!(TaxRateId);
 define_id!(TransactionId);
 define_id!(WarehouseId);
+define_id!(WarehouseBalId);
 define_id!(UomId);

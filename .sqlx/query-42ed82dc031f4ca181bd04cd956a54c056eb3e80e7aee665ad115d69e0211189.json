@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO items (\n               id, organization_id, code, name, description, item_type, uom_id, unit_price, purchase_unit_cost, income_account_id, tax_category_id, is_active)\n               VALUES ($1, $2, $3, $4, $5, $6:: item_type, $7, $8, $9, $10, $11, $12) RETURNING\n                   id,\n                   organization_id as org_id,\n                   code,\n                   name,\n                   description,\n                   item_type AS \"item_type: ItemType\",\n                   uom_id,\n                   unit_price,\n                   purchase_unit_cost as unit_cost,\n                   income_account_id,\n                   tax_category_id,\n                   is_active,\n                   created_at\n               ",
+  "query": "SELECT id,\n               organization_id as org_id,\n               code,\n               name,\n               description,\n               item_type AS \"item_type: ItemType\",\n               uom_id,\n               unit_price,\n               purchase_unit_cost as unit_cost,\n               income_account_id,\n               tax_category_id as \"tax_category_id: TaxCategoryId\",\n               is_active,\n               created_at\n        FROM items WHERE id = $1 AND organization_id = $2\n        ",
   "describe": {
     "columns": [
       {
@@ -66,7 +66,7 @@
       },
       {
         "ordinal": 10,
-        "name": "tax_category_id",
+        "name": "tax_category_id: TaxCategoryId",
         "type_info": "Uuid"
       },
       {
@@ -83,28 +83,7 @@
     "parameters": {
       "Left": [
         "Uuid",
-        "Uuid",
-        "Varchar",
-        "Varchar",
-        "Text",
-        {
-          "Custom": {
-            "name": "item_type",
-            "kind": {
-              "Enum": [
-                "stocked",
-                "non_stocked",
-                "service"
-              ]
-            }
-          }
-        },
-        "Uuid",
-        "Numeric",
-        "Numeric",
-        "Uuid",
-        "Uuid",
-        "Bool"
+        "Uuid"
       ]
     },
     "nullable": [
@@ -123,5 +102,5 @@
       true
     ]
   },
-  "hash": "b29f89bf2d362170ce79c3ed1a71eb9ce39e29a178da46a6e90df57fd4596c47"
+  "hash": "42ed82dc031f4ca181bd04cd956a54c056eb3e80e7aee665ad115d69e0211189"
 }

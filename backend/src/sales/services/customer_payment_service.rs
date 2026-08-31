@@ -20,7 +20,7 @@ use shared_core::{ledger::{
 }, sales::{
     models::customer_payment::CustomerPayment,
     requests::customer_payment::CreateCustomerPaymentRequest,
-}, OrgId};
+}, OrderId, OrgId};
 use sqlx::Acquire;
 use uuid::Uuid;
 
@@ -40,7 +40,7 @@ use crate::{
 pub(crate) async fn get_customer_order_payments(
     pool: &mut PgConnection,
     organization_id: OrgId,
-    order_id: Uuid,
+    order_id: OrderId,
 ) -> Result<Vec<CustomerPayment>, ApiError> {
     let _order = sales_order_db::get_sales_order(pool, organization_id, order_id)
         .await?

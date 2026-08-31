@@ -6,10 +6,7 @@
  * (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::{
-    core::models::auth::SystemPrivilege,
-    inventory::models::warehouse::WarehouseLocation,
-};
+use shared_core::{core::models::auth::SystemPrivilege, inventory::models::warehouse::WarehouseLocation, WarehouseId};
 use yew::prelude::*;
 
 use crate::{
@@ -22,7 +19,7 @@ use crate::{
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct GridProps {
-    pub warehouse_id: uuid::Uuid,
+    pub warehouse_id: WarehouseId,
     pub locations: Vec<WarehouseLocation>,
     pub zone: Option<String>,
     pub aisle: Option<String>,

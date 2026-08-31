@@ -11,20 +11,20 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
+use crate::{ItemId, OrderId, OrderItemId, TaxCategoryId};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct SalesOrderItem {
-    pub id: Uuid,
-    pub order_id: Uuid,
-    pub item_id: Uuid,
+    pub id: OrderItemId,
+    pub order_id: OrderId,
+    pub item_id: ItemId,
     pub code: String,
     pub name: String,
     pub description: Option<String>,
     pub quantity: Decimal,
     pub unit_price: Decimal,
-    pub tax_category_id: Option<Uuid>,
+    pub tax_category_id: Option<TaxCategoryId>,
     pub tax_rate: Decimal,
     pub tax_amount: Decimal,
     pub net_amount: Decimal,

@@ -19,8 +19,7 @@ use shared_core::{inventory::{
         ItemWarehouseProfile,
         WarehouseInventoryBalance,
     },
-}, sales::models::item::ItemType, OrgId};
-use uuid::Uuid;
+}, sales::models::item::ItemType, ItemId, LocationEntryId, OrgId, WarehouseId};
 use crate::util::ApiError;
 // =============================================================================
 // Item Warehouse Profile Operations (Physical Attributes Extension)
@@ -29,12 +28,12 @@ use crate::util::ApiError;
 pub async fn get_warehouse_profile(
     conn: &mut PgConnection,
     org_id: OrgId,
-    item_id: Uuid,
+    item_id: ItemId,
 ) -> Result<Option<ItemWarehouseProfile>, sqlx::Error> {
     sqlx::query_as!(
         ItemWarehouseProfile,
         "SELECT * FROM item_warehouse_profiles WHERE item_id = $1 AND organization_id = $2",
-        item_id,
+        *item_id,
         *org_id,
     )
     .fetch_optional(conn)
@@ -60,7 +59,7 @@ pub async fn upsert_warehouse_profile(
             safety_stock = EXCLUDED.safety_stock,
             updated_at = NOW()
          RETURNING *",
-        profile.item_id,
+        *profile.item_id,
         *org_id,
         profile.weight_kg,
         profile.length_cm,
@@ -79,13 +78,13 @@ pub async fn upsert_warehouse_profile(
 pub async fn get_item_stock_balances(
     conn: &mut PgConnection,
     org_id: OrgId,
-    item_id: Uuid,
+    item_id: ItemId,
 ) -> Result<ItemStockBalancesResponse, sqlx::Error> {
     // check the item is a stocked item first
     let it = sqlx::query_scalar!(
         r#"SELECT item_type  AS "type_id: ItemType"  FROM items
             WHERE id = $1 AND organization_id = $2"#,
-        item_id,
+        *item_id,
         *org_id,
     )
     .fetch_optional(&mut *conn)
@@ -124,7 +123,7 @@ pub async fn get_item_stock_balances(
         ORDER BY w.name ASC, loc.display_label ASC
         "#,
         *org_id,
-        item_id,
+        *item_id,
     )
     .fetch_all(conn)
     .await?;
@@ -151,14 +150,14 @@ pub async fn get_item_stock_balances(
 pub async fn get_balance_for_location(
     conn: &mut PgConnection,
     org_id: OrgId,
-    item_id: Uuid,
-    location_id: Uuid,
+    item_id: ItemId,
+    location_id: LocationEntryId,
 ) -> Result<Option<WarehouseInventoryBalance>, sqlx::Error> {
     sqlx::query_as!(
         WarehouseInventoryBalance,
         "SELECT * FROM warehouse_inventory_balances WHERE item_id = $1 AND location_id = $2 AND organization_id = $3",
-        item_id,
-        location_id,
+        *item_id,
+        *location_id,
         *org_id,
         )
         .fetch_optional(conn)
@@ -168,14 +167,14 @@ pub async fn get_balance_for_location(
 pub async fn get_first_balance_for_item_warehouse(
     conn: &mut PgConnection,
     org_id: OrgId,
-    item_id: Uuid,
-    warehouse_id: Uuid,
+    item_id: ItemId,
+    warehouse_id: WarehouseId,
 ) -> Result<Option<WarehouseInventoryBalance>, sqlx::Error> {
     sqlx::query_as!(
         WarehouseInventoryBalance,
         "SELECT * FROM warehouse_inventory_balances WHERE item_id = $1 AND warehouse_id = $2 AND organization_id = $3",
-        item_id,
-        warehouse_id,
+        *item_id,
+        *warehouse_id,
         *org_id,
         )
         .fetch_optional(conn)
@@ -185,7 +184,7 @@ pub async fn get_first_balance_for_item_warehouse(
 pub async fn update_inventory_quantities(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: ItemId,
     qty_on_hand: rust_decimal::Decimal,
     qty_allocated: rust_decimal::Decimal,
 ) -> Result<WarehouseInventoryBalance, sqlx::Error> {
@@ -197,7 +196,7 @@ pub async fn update_inventory_quantities(
          RETURNING *",
         qty_on_hand,
         qty_allocated,
-        id,
+        *id,
         *org_id,
     )
     .fetch_one(conn)
@@ -209,28 +208,27 @@ pub async fn update_inventory_quantities(
 pub async fn adjust_on_hand(
     conn: &mut PgConnection,
     org_id: OrgId,
-    warehouse_id: Uuid,
-    location_id: Uuid,
-    item_id: Uuid,
+    warehouse_id: WarehouseId,
+    location_id: LocationEntryId,
+    item_id: ItemId,
     delta: Decimal,
 ) -> Result<WarehouseInventoryBalance, sqlx::Error> {
     sqlx::query_as!(
         WarehouseInventoryBalance,
         r#"
         INSERT INTO warehouse_inventory_balances
-            (id, organization_id, warehouse_id, location_id, item_id, quantity_on_hand, quantity_allocated, unit_cost)
-        VALUES ($1, $2, $3, $4, $5, $6, 0.0, 0.0)
+            (organization_id, warehouse_id, location_id, item_id, quantity_on_hand, quantity_allocated, unit_cost)
+        VALUES ($1, $2, $3, $4, $5, 0.0, 0.0)
         ON CONFLICT (location_id, item_id)
         DO UPDATE SET
             quantity_on_hand = warehouse_inventory_balances.quantity_on_hand + EXCLUDED.quantity_on_hand,
             updated_at = NOW()
         RETURNING *
         "#,
-        Uuid::new_v4(),
         *org_id,
-        warehouse_id,
-        location_id,
-        item_id,
+        *warehouse_id,
+        *location_id,
+        *item_id,
         delta
     )
         .fetch_one(conn)
@@ -241,9 +239,9 @@ pub async fn adjust_on_hand(
 pub async fn adjust_allocated(
     conn: &mut PgConnection,
     org_id: OrgId,
-    warehouse_id: Uuid,
-    location_id: Uuid,
-    item_id: Uuid,
+    warehouse_id: WarehouseId,
+    location_id: LocationEntryId,
+    item_id: ItemId,
     delta: Decimal,
 ) -> Result<WarehouseInventoryBalance, ApiError> {
 
@@ -253,16 +251,17 @@ pub async fn adjust_allocated(
         UPDATE warehouse_inventory_balances
         SET quantity_allocated = quantity_allocated + $1,
             updated_at = NOW()
-        WHERE warehouse_id = $2 AND item_id = $3 AND organization_id = $4
+        WHERE warehouse_id = $2 AND location_id = $3 AND item_id = $4 AND organization_id = $5
         RETURNING *
         "#,
         delta,
-        location_id,
-        item_id,
+        *warehouse_id,
+        *location_id,
+        *item_id,
         *org_id,
     )
-    .fetch_optional(&mut *conn)
-    .await?;
+        .fetch_optional(&mut *conn)
+        .await?;
 
     match w_bal {
         Some(w_bal) => Ok(w_bal),
@@ -271,19 +270,18 @@ pub async fn adjust_allocated(
                 WarehouseInventoryBalance,
                 r#"
                     INSERT INTO warehouse_inventory_balances
-                        (id, organization_id, warehouse_id, location_id, item_id, quantity_on_hand, quantity_allocated, unit_cost)
-                    VALUES ($1, $2, $3, $4, $5, $6, 0.0, 0.0)
+                        (organization_id, warehouse_id, location_id, item_id, quantity_on_hand, quantity_allocated, unit_cost)
+                    VALUES ($1, $2, $3, $4, $5, 0.0, 0.0)
                     ON CONFLICT (location_id, item_id)
                     DO UPDATE SET
                     quantity_on_hand = warehouse_inventory_balances.quantity_on_hand + EXCLUDED.quantity_on_hand,
                     updated_at = NOW()
                     RETURNING *
                         "#,
-                Uuid::new_v4(),
                 *org_id,
-                warehouse_id,
-                location_id,
-                item_id,
+                *warehouse_id,
+                *location_id,
+                *item_id,
                 delta
             )
             .fetch_one(&mut *conn)

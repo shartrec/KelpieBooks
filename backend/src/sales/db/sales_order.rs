@@ -28,8 +28,7 @@ use shared_core::sales::{
     requests::sales_order::CreateSalesOrderRequest,
 };
 use sqlx::Acquire;
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{AddressId, OrderId, OrgId, PartnerId, TaxCategoryId};
 
 fn from_row_to_sales_order_list_item(row: &sqlx::postgres::PgRow) -> SalesOrder {
     SalesOrder {
@@ -82,12 +81,12 @@ pub(crate) async fn create_draft_order(
             fulfillment_status as "fulfillment_status: FulfillmentStatus",
             payment_status as "payment_status: PaymentStatus",
             document_status as "document_status: SalesDocumentStatus",
-            billing_address_id, shipping_address_id,
+            billing_address_id as "billing_address_id: AddressId", shipping_address_id as "shipping_address_id: AddressId",
             subtotal, tax_total, total_amount, amount_remaining
         "#,
         *org_id,
         *request.partner_id,
-        request.warehouse_id,
+        *request.warehouse_id,
         order_number,
         request.order_date,
         request.due_date,
@@ -105,7 +104,7 @@ pub(crate) async fn create_draft_order(
     .await?;
 
     let bill_to = OrderAddress {
-        id: Uuid::new_v4(),
+        id: AddressId::default(),
         order_id: row.id,
         name: request.bill_to.name.clone(),
         attention: request.bill_to.attention.clone(),
@@ -119,7 +118,7 @@ pub(crate) async fn create_draft_order(
     insert_sales_order_address(&mut tx, row.id, &bill_to, AddressType::Billing).await?;
 
     let ship_to = OrderAddress {
-        id: Uuid::new_v4(),
+        id: AddressId::default(),
         order_id: row.id,
         name: request.ship_to.name.clone(),
         attention: request.ship_to.attention.clone(),
@@ -140,7 +139,7 @@ pub(crate) async fn create_draft_order(
 pub(crate) async fn insert_sales_order_line(
     conn: &mut PgConnection,
     line: &SalesOrderItem,
-    order_id: Uuid,
+    order_id: OrderId,
 ) -> Result<SalesOrderItem, sqlx::Error> {
     let row = sqlx::query_as!(
         SalesOrderItem,
@@ -151,16 +150,17 @@ pub(crate) async fn insert_sales_order_line(
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         RETURNING id, order_id, item_id, code, name, description,
-            quantity, unit_price, tax_category_id, tax_rate, tax_amount, net_amount, sort_order, null as "quantity_available: Decimal"
+            quantity, unit_price, tax_category_id as "tax_category_id: TaxCategoryId",
+            tax_rate, tax_amount, net_amount, sort_order, null as "quantity_available: Decimal"
         "#,
-        order_id,
-        line.item_id,
+        *order_id,
+        *line.item_id,
         line.code,
         line.name,
         line.description,
         line.quantity,
         line.unit_price,
-        line.tax_category_id,
+        line.tax_category_id.map(|id| *id),
         line.tax_rate,
         line.tax_amount,
         line.net_amount,
@@ -173,7 +173,7 @@ pub(crate) async fn insert_sales_order_line(
 }
 pub(crate) async fn insert_sales_order_address(
     conn: &mut PgConnection,
-    order_id: Uuid,
+    order_id: OrderId,
     addr: &OrderAddress,
     address_type: AddressType,
 ) -> Result<OrderAddress, sqlx::Error> {
@@ -186,7 +186,7 @@ pub(crate) async fn insert_sales_order_address(
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::address_type)
         RETURNING id, order_id, name, attention, line1, line2, city, region, postal_code, country
         "#,
-        order_id,
+        *order_id,
         addr.name,
         addr.attention,
         addr.line1,
@@ -205,19 +205,19 @@ pub(crate) async fn insert_sales_order_address(
 
 pub(crate) async fn get_sales_order_items(
     conn: &mut PgConnection,
-    order_id: Uuid,
+    order_id: OrderId,
 ) -> Result<Vec<SalesOrderItem>, sqlx::Error> {
     let rows = sqlx::query_as!(
         SalesOrderItem,
         r#"
         SELECT id, order_id, item_id, code, name, description,
-               quantity, unit_price, tax_category_id, tax_rate,
+               quantity, unit_price, tax_category_id as "tax_category_id: TaxCategoryId", tax_rate,
                tax_amount, net_amount, sort_order, null as "quantity_available: Decimal"
         FROM sales_order_items soi
         WHERE order_id = $1
         ORDER BY sort_order
         "#,
-        order_id,
+        *order_id,
     )
     .fetch_all(&mut *conn)
     .await?;
@@ -227,7 +227,7 @@ pub(crate) async fn get_sales_order_items(
 
 pub(crate) async fn get_sales_order_address(
     conn: &mut PgConnection,
-    order_id: Uuid,
+    order_id: OrderId,
     address_type: AddressType,
 ) -> Result<OrderAddress, sqlx::Error> {
     let address = sqlx::query_as!(
@@ -237,7 +237,7 @@ pub(crate) async fn get_sales_order_address(
         FROM sales_order_addresses
         WHERE order_id = $1 and type = $2::address_type
         "#,
-        order_id,
+        *order_id,
         address_type as AddressType,
     )
     .fetch_one(&mut *conn)
@@ -249,7 +249,7 @@ pub(crate) async fn get_sales_order_address(
 pub(crate) async fn get_sales_order(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: OrderId,
 ) -> Result<Option<SalesOrderDto>, sqlx::Error> {
     let order_row = sqlx::query_as!(
         SalesOrder,
@@ -258,7 +258,7 @@ pub(crate) async fn get_sales_order(
                so.fulfillment_status as "fulfillment_status: FulfillmentStatus",
                so.payment_status as "payment_status: PaymentStatus",
                so.document_status as "document_status: SalesDocumentStatus",
-               so.billing_address_id, so.shipping_address_id,
+               so.billing_address_id as "billing_address_id: AddressId", so.shipping_address_id as "shipping_address_id: AddressId",
                so.subtotal, so.tax_total, so.total_amount, so.amount_remaining,
                w.name AS warehouse_name,
                p.trade_name as partner_name
@@ -267,7 +267,7 @@ pub(crate) async fn get_sales_order(
         JOIN partners p ON p.id = so.partner_id
         WHERE so.id = $1 AND so.organization_id = $2
         "#,
-        id,
+        *id,
         *org_id,
     )
     .fetch_optional(&mut *conn)
@@ -293,7 +293,7 @@ pub(crate) async fn list_sales_orders(
     org_id: OrgId,
     start_date: Option<NaiveDate>,
     end_date: Option<NaiveDate>,
-    partner_id: Option<Uuid>,
+    partner_id: Option<PartnerId>,
     min_amount: Option<Decimal>,
     statuses: Option<Vec<SalesDocumentStatus>>,
 ) -> Result<Vec<SalesOrder>, sqlx::Error> {
@@ -336,7 +336,7 @@ pub(crate) async fn list_sales_orders(
     }
 
     if let Some(partner_id) = partner_id {
-        query.push(" AND so.partner_id = ").push_bind(partner_id);
+        query.push(" AND so.partner_id = ").push_bind(*partner_id);
     }
 
     if let Some(min_amount) = min_amount {
@@ -367,7 +367,7 @@ pub(crate) async fn list_sales_orders(
 pub(crate) async fn update_sales_order_totals(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: OrderId,
     subtotal: Decimal,
     tax_total: Decimal,
     total_amount: Decimal,
@@ -383,7 +383,7 @@ pub(crate) async fn update_sales_order_totals(
         tax_total,
         total_amount,
         amount_remaining,
-        id,
+        *id,
         *org_id,
     )
     .execute(conn)
@@ -394,7 +394,7 @@ pub(crate) async fn update_sales_order_totals(
 pub(crate) async fn update_sales_order_status(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: OrderId,
     new_status: SalesDocumentStatus,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
@@ -404,7 +404,7 @@ pub(crate) async fn update_sales_order_status(
         WHERE id = $2 AND organization_id = $3
         "#,
         new_status as SalesDocumentStatus,
-        id,
+        *id,
         *org_id,
     )
     .execute(conn)
@@ -414,7 +414,7 @@ pub(crate) async fn update_sales_order_status(
 
 pub(crate) async fn update_amount_remaining(
     pool: &mut PgConnection,
-    id: Uuid,
+    id: OrderId,
     amount: Decimal,
 ) -> Result<(), sqlx::Error> {
     let _result = sqlx::query!(
@@ -424,7 +424,7 @@ pub(crate) async fn update_amount_remaining(
             WHERE id = $2
         "#,
         amount,
-        id
+        *id
     )
     .execute(&mut *pool)
     .await?;
@@ -437,7 +437,7 @@ pub(crate) async fn update_amount_remaining(
             WHERE id = $2 and amount_remaining = 0.0
         "#,
         PaymentStatus::Paid as PaymentStatus,
-        id
+        *id
     )
     .execute(&mut *pool)
     .await?;

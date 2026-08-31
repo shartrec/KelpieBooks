@@ -12,7 +12,7 @@ use shared_core::inventory::dtos::inventory::{
 };
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-
+use shared_core::WarehouseId;
 use crate::{
     api::Api,
     contexts::{
@@ -23,7 +23,7 @@ use crate::{
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct GeneratorProps {
-    pub warehouse_id: uuid::Uuid,
+    pub warehouse_id: WarehouseId,
     pub on_close: Callback<()>,
     pub on_submit: Callback<()>,
 }

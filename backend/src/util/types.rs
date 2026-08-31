@@ -26,39 +26,6 @@ use shared_core::{
         sales_document_status::SalesDocumentStatus,
     }
 };
-use uuid::Uuid;
-
-/// A newtype wrapper for `Uuid` to implement `FromParam` and satisfy the orphan rule.
-/// This allows Rocket to parse `Uuid` values from URL path segments.
-#[derive(Clone, Copy)]
-pub(crate) struct PathUuid(pub(crate) Uuid);
-
-/// Allows `PathUuid` to be used as a `Uuid` via dereferencing (e.g., `*id`).
-impl Deref for PathUuid {
-    type Target = Uuid;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-/// Synchronous implementation of `FromParam` for our `PathUuid` newtype.
-impl<'r> FromParam<'r> for PathUuid {
-    type Error = uuid::Error;
-
-    fn from_param(param: &'r str) -> Result<Self, Self::Error> {
-        Uuid::parse_str(param).map(PathUuid)
-    }
-}
-
-#[rocket::async_trait]
-impl<'r> FromFormField<'r> for PathUuid {
-    fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
-        match Uuid::parse_str(field.value) {
-            Ok(uuid) => Ok(PathUuid(uuid)),
-            Err(e) => Err(form::Error::validation(format!("{}", e)).into()),
-        }
-    }
-}
 
 /// A newtype wrapper for `InvoiceStatus` to implement `FromFormField` and satisfy the orphan rule.
 #[derive(Clone, Copy)]

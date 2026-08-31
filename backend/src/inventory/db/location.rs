@@ -12,13 +12,12 @@ use sqlx::{
     Postgres,
     QueryBuilder,
 };
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{LocationEntryId, OrgId, WarehouseId};
 
 pub async fn all_by_warehouse(
     conn: &mut PgConnection,
     org_id: OrgId,
-    warehouse_id: Uuid,
+    warehouse_id: WarehouseId,
 ) -> Result<Vec<WarehouseLocation>, sqlx::Error> {
     sqlx::query_as!(
         WarehouseLocation,
@@ -28,7 +27,7 @@ pub async fn all_by_warehouse(
         WHERE warehouse_id = $1 AND organization_id = $2
         ORDER BY zone, aisle, shelf, bin
         "#,
-        warehouse_id,
+        *warehouse_id,
         *org_id,
     )
         .fetch_all(conn)
@@ -38,12 +37,12 @@ pub async fn all_by_warehouse(
 pub async fn get_location(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: LocationEntryId,
 ) -> Result<Option<WarehouseLocation>, sqlx::Error> {
     sqlx::query_as!(
         WarehouseLocation,
         "SELECT * FROM warehouse_locations WHERE id = $1 AND organization_id = $2",
-        id,
+        *id,
         *org_id,
     )
     .fetch_optional(conn)
@@ -57,11 +56,10 @@ pub async fn create_location(
 ) -> Result<WarehouseLocation, sqlx::Error> {
     sqlx::query_as!(
         WarehouseLocation,
-        "INSERT INTO warehouse_locations (id, organization_id, warehouse_id, zone, aisle, shelf, bin, display_label, is_picking_location)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
-        Uuid::new_v4(),
+        "INSERT INTO warehouse_locations (organization_id, warehouse_id, zone, aisle, shelf, bin, display_label, is_picking_location)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
         *org_id,
-        loc.warehouse_id,
+        *loc.warehouse_id,
         loc.zone,
         loc.aisle,
         loc.shelf,
@@ -76,7 +74,7 @@ pub async fn create_location(
 pub async fn update_location(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: LocationEntryId,
     loc: &WarehouseLocation,
 ) -> Result<WarehouseLocation, sqlx::Error> {
     sqlx::query_as!(
@@ -89,7 +87,7 @@ pub async fn update_location(
         loc.bin,
         loc.display_label,
         loc.is_picking_location,
-        id,
+        *id,
         *org_id,
     )
         .fetch_one(conn)
@@ -105,11 +103,11 @@ pub async fn bulk_insert(
     }
 
     let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-        "INSERT INTO warehouse_locations (id, warehouse_id, organization_id, zone, aisle, shelf, bin, display_label, is_picking_location) "
+        "INSERT INTO warehouse_locations (warehouse_id, organization_id, zone, aisle, shelf, bin, display_label, is_picking_location) "
     );
 
     query_builder.push_values(locations, |mut b, loc| {
-        b.push_bind(loc.id)
+        b
             .push_bind(loc.warehouse_id)
             .push_bind(loc.organization_id)
             .push_bind(&loc.zone)

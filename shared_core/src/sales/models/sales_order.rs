@@ -12,8 +12,7 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::{OrgId, PartnerId};
+use crate::{AddressId, OrderId, OrgId, PartnerId, WarehouseId};
 pub use crate::sales::models::sales_order_item::SalesOrderItem;
 use crate::sales::models::{
     fulfillment_status::FulfillmentStatus,
@@ -23,11 +22,11 @@ use crate::sales::models::{
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SalesOrder {
-    pub id: Uuid,
+    pub id: OrderId,
     pub org_id: OrgId,
     pub partner_id: PartnerId,
     pub partner_name: Option<String>,
-    pub warehouse_id: Uuid,
+    pub warehouse_id: WarehouseId,
     pub warehouse_name: Option<String>,
     pub order_number: String,
     pub order_date: NaiveDate,
@@ -40,8 +39,8 @@ pub struct SalesOrder {
     pub total_amount: Decimal,
     pub amount_remaining: Decimal,
     // Optional references to saved partner addresses used to populate the snapshots
-    pub billing_address_id: Option<Uuid>,
-    pub shipping_address_id: Option<Uuid>,
+    pub billing_address_id: Option<AddressId>,
+    pub shipping_address_id: Option<AddressId>,
 }
 
 impl SalesOrder {

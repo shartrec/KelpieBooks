@@ -19,8 +19,7 @@ use typst_library::foundations::{
     Dict,
     Value,
 };
-use uuid::Uuid;
-
+use shared_core::OrderId;
 use crate::{
     core::{
         db::organization as db_org,
@@ -43,7 +42,7 @@ pub(crate) async fn generate_invoice(
     conn: &mut Connection<DbKelpie>,
     user: AuthenticatedUser,
     config: &State<TemplateConfig>,
-    order_id: Uuid,
+    order_id: OrderId,
 ) -> Result<Vec<u8>, ApiError> {
 
     let dict = gather_order_dictionary(conn, &user, order_id).await?;
@@ -59,7 +58,7 @@ pub(crate) async fn generate_picklist(
     conn: &mut Connection<DbKelpie>,
     user: AuthenticatedUser,
     config: &State<TemplateConfig>,
-    order_id: Uuid,
+    order_id: OrderId,
 ) -> Result<Vec<u8>, ApiError> {
 
     let dict = gather_order_dictionary(conn, &user, order_id).await?;
@@ -72,7 +71,7 @@ pub(crate) async fn generate_picklist(
 
 }
 
-async fn gather_order_dictionary(conn: &mut Connection<DbKelpie>, user: &AuthenticatedUser, order_id: Uuid) -> Result<Dict, ApiError> {
+async fn gather_order_dictionary(conn: &mut Connection<DbKelpie>, user: &AuthenticatedUser, order_id: OrderId) -> Result<Dict, ApiError> {
     let i18n = LocaleContext::new(&user.locale);
 
 

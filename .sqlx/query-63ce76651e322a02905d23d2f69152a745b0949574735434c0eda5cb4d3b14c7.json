@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        UPDATE warehouse_inventory_balances\n        SET quantity_allocated = quantity_allocated + $1,\n            updated_at = NOW()\n        WHERE warehouse_id = $2 AND item_id = $3 AND organization_id = $4\n        RETURNING *\n        ",
+  "query": "\n        INSERT INTO warehouse_inventory_balances\n            (organization_id, warehouse_id, location_id, item_id, quantity_on_hand, quantity_allocated, unit_cost)\n        VALUES ($1, $2, $3, $4, $5, 0.0, 0.0)\n        ON CONFLICT (location_id, item_id)\n        DO UPDATE SET\n            quantity_on_hand = warehouse_inventory_balances.quantity_on_hand + EXCLUDED.quantity_on_hand,\n            updated_at = NOW()\n        RETURNING *\n        ",
   "describe": {
     "columns": [
       {
@@ -51,10 +51,11 @@
     ],
     "parameters": {
       "Left": [
-        "Numeric",
         "Uuid",
         "Uuid",
-        "Uuid"
+        "Uuid",
+        "Uuid",
+        "Numeric"
       ]
     },
     "nullable": [
@@ -69,5 +70,5 @@
       false
     ]
   },
-  "hash": "e75f2223319b9f0b9ba7a533a9118c82ff134212c99cd07bb1e6614f84b34311"
+  "hash": "63ce76651e322a02905d23d2f69152a745b0949574735434c0eda5cb4d3b14c7"
 }

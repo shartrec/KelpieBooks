@@ -11,8 +11,7 @@ use rocket_db_pools::sqlx::{
     PgConnection,
 };
 use shared_core::inventory::models::warehouse::Warehouse;
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{OrgId, WarehouseId};
 // =============================================================================
 // Warehouse Operations
 // =============================================================================
@@ -33,12 +32,12 @@ pub async fn all_warehouses(
 pub async fn get_warehouse(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: WarehouseId,
 ) -> Result<Option<Warehouse>, sqlx::Error> {
     sqlx::query_as!(
         Warehouse,
         "SELECT * FROM warehouses WHERE id = $1 AND organization_id = $2",
-        id,
+        *id,
         *org_id,
     )
     .fetch_optional(conn)
@@ -52,8 +51,7 @@ pub async fn create_warehouse(
 ) -> Result<Warehouse, sqlx::Error> {
     sqlx::query_as!(
         Warehouse,
-        "INSERT INTO warehouses (id, organization_id, code, name, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        Uuid::new_v4(),
+        "INSERT INTO warehouses (organization_id, code, name, is_active) VALUES ($1, $2, $3, $4) RETURNING *",
         *org_id,
         &wh.code,
         &wh.name,
@@ -66,7 +64,7 @@ pub async fn create_warehouse(
 pub async fn update_warehouse(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: WarehouseId,
     wh: &Warehouse,
 ) -> Result<Warehouse, sqlx::Error> {
     sqlx::query_as!(
@@ -75,7 +73,7 @@ pub async fn update_warehouse(
         &wh.code,
         &wh.name,
         wh.is_active,
-        id,
+        *id,
         *org_id,
     )
         .fetch_one(conn)
@@ -85,11 +83,11 @@ pub async fn update_warehouse(
 pub async fn delete_warehouse(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: WarehouseId,
 ) -> Result<sqlx::postgres::PgQueryResult, sqlx::Error> {
     sqlx::query!(
         "DELETE FROM warehouses WHERE id = $1 AND organization_id = $2",
-        id,
+        *id,
         *org_id,
     )
     .execute(conn)

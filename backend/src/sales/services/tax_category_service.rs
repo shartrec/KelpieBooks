@@ -8,8 +8,7 @@
 
 use rocket_db_pools::Connection;
 use shared_core::sales::models::tax::TaxCategory;
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{OrgId, TaxCategoryId};
 use crate::{
     sales::db::tax_category as tax_db,
     DbKelpie,
@@ -19,13 +18,13 @@ pub async fn get_tax_categories(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
 ) -> Result<Vec<TaxCategory>, sqlx::Error> {
-    tax_db::all(pool, *org_id).await
+    tax_db::all(pool, org_id).await
 }
 
 pub async fn get_tax_category(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    id: Uuid,
+    id: TaxCategoryId,
 ) -> Result<Option<TaxCategory>, sqlx::Error> {
     tax_db::get(pool, org_id, id).await
 }
@@ -41,7 +40,7 @@ pub async fn create_tax_category(
 pub async fn update_tax_category(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    id: Uuid,
+    id: TaxCategoryId,
     tax_category: &TaxCategory,
 ) -> Result<TaxCategory, sqlx::Error> {
     tax_db::update(pool, org_id, id, tax_category).await
@@ -50,7 +49,7 @@ pub async fn update_tax_category(
 pub async fn delete_tax_category(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    id: Uuid,
+    id: TaxCategoryId,
 ) -> Result<u64, sqlx::Error> {
     tax_db::delete(pool, org_id, id).await.map(|n| n)
 }

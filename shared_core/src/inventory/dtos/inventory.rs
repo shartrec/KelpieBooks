@@ -11,8 +11,7 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-
+use crate::{ItemId, LocationEntryId, PartnerId, WarehouseId};
 // =============================================================================
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -64,7 +63,7 @@ pub struct BulkLocationGenerateRequest {
 // =============================================================================
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct LocationContentItem {
-    pub item_id: Uuid,
+    pub item_id: ItemId,
     pub item_code: String,
     pub item_name: String,
     pub uom_code: String,
@@ -75,7 +74,7 @@ pub struct LocationContentItem {
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct LocationContentsResponse {
-    pub location_id: Uuid,
+    pub location_id: LocationEntryId,
     pub display_label: String,
     pub warehouse_code: String,
     pub is_picking_location: bool,
@@ -85,10 +84,10 @@ pub struct LocationContentsResponse {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct ItemLocationBalanceDto {
-    pub warehouse_id: Uuid,
+    pub warehouse_id: WarehouseId,
     pub warehouse_code: String,
     pub warehouse_name: String,
-    pub location_id: Uuid,
+    pub location_id: LocationEntryId,
     pub location_display_label: String,
     pub is_picking_location: bool,
     pub quantity_on_hand: Option<Decimal>,
@@ -98,7 +97,7 @@ pub struct ItemLocationBalanceDto {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ItemStockBalancesResponse {
-    pub item_id: Uuid,
+    pub item_id: ItemId,
     pub total_on_hand: Option<Decimal>,
     pub total_allocated: Option<Decimal>,
     pub total_available: Option<Decimal>,
@@ -109,28 +108,28 @@ pub struct ItemStockBalancesResponse {
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct TransferItemLine {
-    pub item_id: Uuid,
+    pub item_id: ItemId,
     pub quantity: Decimal,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct InterLocationTransferRequest {
-    pub source_location_id: Uuid,
-    pub destination_location_id: Uuid,
+    pub source_location_id: LocationEntryId,
+    pub destination_location_id: LocationEntryId,
     pub items_to_move: Vec<TransferItemLine>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReceiveItemLine {
-    pub item_id: Uuid,
-    pub location_id: Uuid,
+    pub item_id: ItemId,
+    pub location_id: LocationEntryId,
     pub quantity: Decimal,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReceiveStockRequest {
-    pub warehouse_id: Uuid,
-    pub vendor_id: Option<Uuid>,
+    pub warehouse_id: WarehouseId,
+    pub vendor_id: Option<PartnerId>,
     pub po_number: Option<String>,
     pub notes: Option<String>,
     pub items: Vec<ReceiveItemLine>,
@@ -138,8 +137,8 @@ pub struct ReceiveStockRequest {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AdjustStockItemLine {
-    pub location_id: Uuid,
-    pub item_id: Uuid,
+    pub location_id: LocationEntryId,
+    pub item_id: ItemId,
     /// Can be positive (increase stock) or negative (decrease stock)
     pub quantity_delta: Decimal,
     pub reason: AdjustmentReason,
@@ -148,6 +147,6 @@ pub struct AdjustStockItemLine {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StockAdjustmentRequest {
-    pub warehouse_id: Uuid,
+    pub warehouse_id: WarehouseId,
     pub items: Vec<AdjustStockItemLine>,
 }

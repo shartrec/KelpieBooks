@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO tax_categories (id, organization_id, name, description, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING\n                    id, organization_id as org_id, name, description, is_active ",
+  "query": "INSERT INTO warehouses (organization_id, code, name, is_active) VALUES ($1, $2, $3, $4) RETURNING *",
   "describe": {
     "columns": [
       {
@@ -10,28 +10,32 @@
       },
       {
         "ordinal": 1,
-        "name": "org_id",
+        "name": "organization_id",
         "type_info": "Uuid"
       },
       {
         "ordinal": 2,
-        "name": "name",
+        "name": "code",
         "type_info": "Varchar"
       },
       {
         "ordinal": 3,
-        "name": "description",
+        "name": "name",
         "type_info": "Varchar"
       },
       {
         "ordinal": 4,
         "name": "is_active",
         "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid",
         "Uuid",
         "Varchar",
         "Varchar",
@@ -42,9 +46,10 @@
       false,
       false,
       false,
-      true,
+      false,
+      false,
       false
     ]
   },
-  "hash": "a2f41b92a23978a064747d1124a176a62505d6fb787feeb6b91afd9fa8907552"
+  "hash": "3105d0f4feb316c784932536202b55b833ff8750859b1c10abc1809946af7898"
 }

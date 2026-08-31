@@ -16,7 +16,6 @@ use shared_core::core::models::{
     user::User,
     user_with_org::UserWithOrg,
 };
-use uuid::Uuid;
 use shared_core::{OrgId, RoleId, UserId};
 use crate::util::{
     locale_context::LocaleContext,
@@ -26,7 +25,7 @@ use crate::util::{
 /* backend/src/db/user.rs */
 
 fn from_row_to_user_with_org(row: &sqlx::postgres::PgRow) -> UserWithOrg {
-    let role = if row.get::<Option<Uuid>, _>("role_id").is_some() {
+    let role = if row.get::<Option<RoleId>, _>("role_id").is_some() {
         Some(Role {
             id: row.get("role_id"),
             name: row.get("role_name"),
@@ -171,7 +170,7 @@ pub(crate) async fn check_security_admin_remains(
 }
 
 const SQL: &'static str = r#"SELECT u.id, u.organization_id, u.email, u.password_hash, u.created_at as user_created_at,
-       u.full_name, u.display_name, u.role_id , o.name as organisation_name, o.strict_audit_mode,
+       u.full_name, u.display_name, u.role_id, o.name as organisation_name, o.strict_audit_mode,
        r.id as role_id, r.organization_id as role_org, r.name as role_name, r.created_at as role_created_at
         FROM users u
             JOIN organizations o ON u.organization_id = o.id

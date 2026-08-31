@@ -18,8 +18,7 @@ use shared_core::sales::{
     },
     requests::item::CreateItemRequest,
 };
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{ItemId, OrgId, UomId, TaxCategoryId};
 
 pub(crate) async fn get_active_uoms(
     conn: &mut PgConnection,
@@ -93,7 +92,7 @@ pub async fn all(
 pub async fn get(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: ItemId,
 ) -> Result<Option<Item>, sqlx::Error> {
     sqlx::query_as!(
         Item,
@@ -107,12 +106,12 @@ pub async fn get(
                unit_price,
                purchase_unit_cost as unit_cost,
                income_account_id,
-               tax_category_id,
+               tax_category_id as "tax_category_id: TaxCategoryId",
                is_active,
                created_at
         FROM items WHERE id = $1 AND organization_id = $2
         "#,
-        id,
+        *id,
         *org_id,
     )
     .fetch_optional(conn)
@@ -127,8 +126,8 @@ pub async fn create(
     sqlx::query_as!(
         Item,
         r#"INSERT INTO items (
-               id, organization_id, code, name, description, item_type, uom_id, unit_price, purchase_unit_cost, income_account_id, tax_category_id, is_active)
-               VALUES ($1, $2, $3, $4, $5, $6:: item_type, $7, $8, $9, $10, $11, $12) RETURNING
+               organization_id, code, name, description, item_type, uom_id, unit_price, purchase_unit_cost, income_account_id, tax_category_id, is_active)
+               VALUES ($1, $2, $3, $4, $5:: item_type, $6, $7, $8, $9, $10, $11) RETURNING
                    id,
                    organization_id as org_id,
                    code,
@@ -139,21 +138,20 @@ pub async fn create(
                    unit_price,
                    purchase_unit_cost as unit_cost,
                    income_account_id,
-                   tax_category_id,
+                   tax_category_id as "tax_category_id: TaxCategoryId",
                    is_active,
                    created_at
                "#,
-        Uuid::new_v4(),
         *org_id,
         item.code,
         item.name,
         item.description,
         item.item_type as ItemType,
-        item.uom_id,
+        item.uom_id as UomId,
         item.unit_price,
         item.unit_cost,
         *item.income_account_id,
-        item.tax_category_id,
+        item.tax_category_id.map(|id| *id),
         true,
         )
         .fetch_one(conn)
@@ -163,7 +161,7 @@ pub async fn create(
 pub async fn update(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: ItemId,
     item: &Item,
 ) -> Result<Item, sqlx::Error> {
     sqlx::query_as!(
@@ -190,7 +188,7 @@ pub async fn update(
                 unit_price,
                 purchase_unit_cost as unit_cost,
                 income_account_id,
-                tax_category_id,
+                tax_category_id as "tax_category_id: TaxCategoryId",
                 is_active,
                 created_at
            "#,
@@ -198,23 +196,23 @@ pub async fn update(
         item.name,
         item.description,
         item.item_type as ItemType,
-        item.uom_id,
+        *item.uom_id,
         item.unit_price,
         item.unit_cost,
         *item.income_account_id,
-        item.tax_category_id,
+        item.tax_category_id.map(|id| *id),
         item.is_active,
-        id,
+        *id,
         *org_id,
     )
     .fetch_one(conn)
     .await
 }
 
-pub async fn delete(conn: &mut PgConnection, org_id: OrgId, id: Uuid) -> Result<u64, sqlx::Error> {
+pub async fn delete(conn: &mut PgConnection, org_id: OrgId, id: ItemId) -> Result<u64, sqlx::Error> {
     let result = sqlx::query!(
         "DELETE FROM items WHERE id = $1 AND organization_id = $2",
-        &id,
+        *id,
         *org_id
     )
     .execute(conn)
@@ -222,10 +220,10 @@ pub async fn delete(conn: &mut PgConnection, org_id: OrgId, id: Uuid) -> Result<
     Ok(result.rows_affected())
 }
 
-pub async fn is_uom_in_use(conn: &mut PgConnection, uom_id: Uuid) -> Result<bool, sqlx::Error> {
+pub async fn is_uom_in_use(conn: &mut PgConnection, uom_id: UomId) -> Result<bool, sqlx::Error> {
     let exists = sqlx::query_scalar!(
         "SELECT EXISTS (SELECT 1 FROM items WHERE uom_id = $1)",
-        &uom_id
+        *uom_id
     )
     .fetch_one(conn)
     .await?;

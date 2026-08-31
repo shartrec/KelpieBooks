@@ -7,20 +7,17 @@
  */
 
 use rust_decimal::Decimal;
-use shared_core::{
-    inventory::{
-        dtos::inventory::{
-            AdjustStockItemLine,
-            AdjustmentReason,
-            StockAdjustmentRequest,
-        },
-        models::warehouse::{
-            Warehouse,
-            WarehouseLocation,
-        },
+use shared_core::{inventory::{
+    dtos::inventory::{
+        AdjustStockItemLine,
+        AdjustmentReason,
+        StockAdjustmentRequest,
     },
-    sales::models::item::Item,
-};
+    models::warehouse::{
+        Warehouse,
+        WarehouseLocation,
+    },
+}, sales::models::item::Item, LocationEntryId, WarehouseId};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
@@ -36,8 +33,8 @@ use crate::{
 #[derive(Properties, PartialEq, Clone)]
 pub struct StockAdjustmentModalProps {
     pub item: Item,
-    pub target_warehouse_id: Option<Uuid>,
-    pub target_location_id: Option<Uuid>,
+    pub target_warehouse_id: Option<WarehouseId>,
+    pub target_location_id: Option<LocationEntryId>,
     pub on_close: Callback<()>,
     pub on_submit: Callback<()>,
 }
@@ -51,9 +48,9 @@ pub fn stock_adjustment_modal(props: &StockAdjustmentModalProps) -> Html {
     let warehouses = use_state(Vec::<Warehouse>::new);
     let locations = use_state(Vec::<WarehouseLocation>::new);
     let request = use_state(|| StockAdjustmentRequest {
-        warehouse_id: Uuid::nil(),
+        warehouse_id: WarehouseId::default(),
         items: vec![AdjustStockItemLine {
-            location_id: Uuid::nil(),
+            location_id: LocationEntryId::default(),
             item_id: props.item.id,
             quantity_delta: Decimal::ZERO,
             reason: AdjustmentReason::CycleCount,
@@ -108,7 +105,7 @@ pub fn stock_adjustment_modal(props: &StockAdjustmentModalProps) -> Html {
 
         use_effect_with(warehouse_id, move |w_id| {
             let w_id = *w_id;
-            if w_id != Uuid::nil() {
+            if w_id != WarehouseId::default() {
                 wasm_bindgen_futures::spawn_local(async move {
                     let url = format!("/api/inventory/warehouses/{}/locations", w_id);
                     if let Ok(resp) = Api::get(&url, user_ctx, navigator).await {
@@ -183,7 +180,7 @@ pub fn stock_adjustment_modal(props: &StockAdjustmentModalProps) -> Html {
                             let state = request.clone();
                             Callback::from(move |e: Event| {
                                 let val = e.target_unchecked_into::<web_sys::HtmlSelectElement>().value();
-                                if let Ok(id) = Uuid::parse_str(&val) {
+                                if let Ok(id) = Uuid::parse_str(&val).map(WarehouseId) {
                                     let mut req = (*state).clone();
                                     req.warehouse_id = id;
                                     state.set(req);
@@ -205,7 +202,7 @@ pub fn stock_adjustment_modal(props: &StockAdjustmentModalProps) -> Html {
                                 let state = request.clone();
                                 Callback::from(move |e: Event| {
                                     let val = e.target_unchecked_into::<web_sys::HtmlSelectElement>().value();
-                                    if let Ok(loc_id) = Uuid::parse_str(&val) {
+                                    if let Ok(loc_id) = Uuid::parse_str(&val).map(LocationEntryId) {
                                         let mut req = (*state).clone();
                                         if let Some(line) = req.items.get_mut(0) {
                                             line.location_id = loc_id;

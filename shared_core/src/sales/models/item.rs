@@ -18,8 +18,7 @@ use strum::{
     Display,
     EnumString,
 };
-use uuid::Uuid;
-use crate::{AccountId, OrgId};
+use crate::{AccountId, ItemId, OrgId, TaxCategoryId, UomId};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, EnumString, Display, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -42,7 +41,7 @@ impl Default for ItemType {
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct UnitOfMeasure {
-    pub id: Uuid,
+    pub id: UomId,
     #[cfg_attr(feature = "backend", sqlx(rename = "organization_id"))]
     pub org_id: OrgId,
     pub code: String, // e.g., "EA", "HR"
@@ -54,19 +53,19 @@ pub struct UnitOfMeasure {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct Item {
-    pub id: Uuid,
+    pub id: ItemId,
     #[cfg_attr(feature = "backend", sqlx(rename = "organization_id"))]
     pub org_id: OrgId,
     pub code: String,
     pub name: String,
     pub description: Option<String>,
     pub item_type: ItemType,
-    pub uom_id: Uuid,        // 💡 Linked Unit of Measure ID
+    pub uom_id: UomId,        // 💡 Linked Unit of Measure ID
     pub unit_price: Decimal, // 💡 Scaled to 4 decimal places (e.g. 1245 = $0.1245)
     #[cfg_attr(feature = "backend", sqlx(rename = "purchase_unit_cost"))]
     pub unit_cost: Decimal, // 💡 Scaled to 4 decimal places (e.g. 1245 = $0.1245)
     pub income_account_id: AccountId,
-    pub tax_category_id: Option<Uuid>,
+    pub tax_category_id: Option<TaxCategoryId>,
     pub is_active: bool,
     pub created_at: Option<DateTime<Utc>>,
 }

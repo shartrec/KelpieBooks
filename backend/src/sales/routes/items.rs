@@ -16,6 +16,7 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
+use shared_core::ItemId;
 use shared_core::sales::{
     models::item::Item,
     requests::item::CreateItemRequest,
@@ -32,7 +33,6 @@ use crate::{
     util::{
         types::{
             FormItemType,
-            PathUuid,
         },
         ApiError,
     },
@@ -68,11 +68,11 @@ async fn get_items(
 #[get("/api/sales/items/<id>")]
 async fn get_item(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: ItemId,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseSales>,
 ) -> Result<Json<Option<Item>>, ApiError> {
-    let item = item_service::get_item(&mut pool, user.organization_id, *id).await?;
+    let item = item_service::get_item(&mut pool, user.organization_id, id).await?;
     Ok(Json(item))
 }
 
@@ -90,23 +90,23 @@ async fn create_item(
 #[put("/api/sales/items/<id>", data = "<item>")]
 async fn update_item(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: ItemId,
     item: Json<Item>,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<Json<Item>, ApiError> {
     let updated_item =
-        item_service::update_item(&mut pool, user.organization_id, *id, &item).await?;
+        item_service::update_item(&mut pool, user.organization_id, id, &item).await?;
     Ok(Json(updated_item))
 }
 
 #[delete("/api/sales/items/<id>")]
 async fn delete_item(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: ItemId,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageSales>,
 ) -> Result<Json<u64>, ApiError> {
-    let rows_affected = item_service::delete_item(&mut pool, user.organization_id, *id).await?;
+    let rows_affected = item_service::delete_item(&mut pool, user.organization_id, id).await?;
     Ok(Json(rows_affected))
 }

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO warehouse_locations (id, organization_id, warehouse_id, zone, aisle, shelf, bin, display_label, is_picking_location)\n         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+  "query": "INSERT INTO warehouse_locations (organization_id, warehouse_id, zone, aisle, shelf, bin, display_label, is_picking_location)\n         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
   "describe": {
     "columns": [
       {
@@ -58,7 +58,6 @@
       "Left": [
         "Uuid",
         "Uuid",
-        "Uuid",
         "Varchar",
         "Varchar",
         "Varchar",
@@ -80,5 +79,5 @@
       false
     ]
   },
-  "hash": "727aabab7cdd3b40554843a77ad9e0cf2d8114564179ee8a3dc9b57077ac02d5"
+  "hash": "63cea7de09aa3ade89b2e3193b9fd76fc5311613cab98b91dfc681080f6894d8"
 }

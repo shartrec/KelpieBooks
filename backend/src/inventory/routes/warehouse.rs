@@ -17,7 +17,7 @@ use rocket::{
 };
 use rocket_db_pools::Connection;
 use shared_core::inventory::models::warehouse::Warehouse;
-
+use shared_core::WarehouseId;
 use crate::{
     core::routes::security::AuthenticatedUser,
     inventory::services::warehouse as warehouse_service,
@@ -27,7 +27,6 @@ use crate::{
         UseInventory,
     },
     util::{
-        types::PathUuid,
         ApiError,
     },
     DbKelpie,
@@ -60,11 +59,11 @@ async fn get_warehouses(
 #[get("/api/inventory/warehouses/<id>")]
 async fn get_warehouse(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: WarehouseId,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseInventory>,
 ) -> Result<Json<Warehouse>, ApiError> {
-    let warehouse = warehouse_service::get_warehouse(&mut pool, user.organization_id, *id)
+    let warehouse = warehouse_service::get_warehouse(&mut pool, user.organization_id, id)
         .await?
         .ok_or_else(|| ApiError::NotFound("Warehouse not found".to_string()))?;
     Ok(Json(warehouse))
@@ -84,25 +83,25 @@ async fn create_warehouse(
 #[put("/api/inventory/warehouses/<id>", data = "<wh>")]
 async fn update_warehouse(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: WarehouseId,
     wh: Json<Warehouse>,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageInventory>,
 ) -> Result<Json<Warehouse>, ApiError> {
     let updated_wh =
-        warehouse_service::update_warehouse(&mut pool, user.organization_id, *id, &wh).await?;
+        warehouse_service::update_warehouse(&mut pool, user.organization_id, id, &wh).await?;
     Ok(Json(updated_wh))
 }
 
 #[delete("/api/inventory/warehouses/<id>")]
 async fn delete_warehouse(
     mut pool: Connection<DbKelpie>,
-    id: PathUuid,
+    id: WarehouseId,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<ManageInventory>,
 ) -> Result<&'static str, ApiError> {
     let rows_affected =
-        warehouse_service::delete_warehouse(&mut pool, user.organization_id, *id).await?;
+        warehouse_service::delete_warehouse(&mut pool, user.organization_id, id).await?;
     if rows_affected == 0 {
         return Err(ApiError::NotFound("Warehouse not found.".to_string()));
     }

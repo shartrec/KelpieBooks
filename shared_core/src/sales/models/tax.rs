@@ -11,13 +11,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::{AccountId, OrgId};
+use crate::{AccountId, OrgId, TaxCategoryId, TaxRateId};
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct TaxCategory {
-    pub id: Uuid,
+    pub id: TaxCategoryId,
     #[cfg_attr(feature = "backend", sqlx(rename = "organization_id"))]
     pub org_id: OrgId,
     pub name: String,
@@ -28,10 +27,10 @@ pub struct TaxCategory {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct TaxRate {
-    pub id: Uuid,
+    pub id: TaxRateId,
     #[cfg_attr(feature = "backend", sqlx(rename = "organization_id"))]
     pub org_id: OrgId,
-    pub tax_category_id: Uuid,
+    pub tax_category_id: TaxCategoryId,
     pub name: String,
     pub rate: Decimal,
     pub liability_account_id: AccountId,
@@ -42,9 +41,9 @@ pub struct TaxRate {
 impl Default for TaxRate {
     fn default() -> Self {
         Self {
-            id: Uuid::new_v4(),
+            id: TaxRateId::default(),
             org_id: OrgId::default(),
-            tax_category_id: Uuid::nil(),
+            tax_category_id: TaxCategoryId::default(),
             name: String::new(),
             rate: Decimal::new(0, 4),
             liability_account_id: AccountId::default(),

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO customer_payments (\n            organization_id,\n            partner_id,\n            transaction_id,\n            payment_date,\n            deposited_to_account,\n            amount,\n            reference\n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7)\n        RETURNING *\n        ",
+  "query": "\n        SELECT  cp.id,\n               cp.organization_id,\n               cp.partner_id,\n               cp.transaction_id as \"transaction_id: TransactionId\",\n               cp.payment_date,\n               cp.deposited_to_account,\n               cp.amount,\n               cp.reference,\n               cp.created_at\n        FROM customer_payments cp\n        JOIN customer_payment_allocations cpa ON cp.id = cpa.customer_payment_id\n        WHERE cpa.sales_order_id = $1\n        ORDER BY cp.payment_date DESC, cp.created_at DESC\n        ",
   "describe": {
     "columns": [
       {
@@ -20,7 +20,7 @@
       },
       {
         "ordinal": 3,
-        "name": "transaction_id",
+        "name": "transaction_id: TransactionId",
         "type_info": "Uuid"
       },
       {
@@ -51,13 +51,7 @@
     ],
     "parameters": {
       "Left": [
-        "Uuid",
-        "Uuid",
-        "Uuid",
-        "Date",
-        "Uuid",
-        "Numeric",
-        "Text"
+        "Uuid"
       ]
     },
     "nullable": [
@@ -72,5 +66,5 @@
       false
     ]
   },
-  "hash": "ec27f69902e3ea79d7a63f7ad3b72f7d346b6c7aa12ecaa1ea18b6d7c300b295"
+  "hash": "6a8041953a7fd389c6abe7eba2c1ec93a6b49cfc5aa8ceabca739e79fe78fa27"
 }

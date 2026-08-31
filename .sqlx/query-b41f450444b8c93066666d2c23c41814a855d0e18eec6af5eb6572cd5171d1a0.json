@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id,\n               organization_id as org_id,\n               code,\n               name,\n               description,\n               item_type AS \"item_type: ItemType\",\n               uom_id,\n               unit_price,\n               purchase_unit_cost as unit_cost,\n               income_account_id,\n               tax_category_id,\n               is_active,\n               created_at\n        FROM items WHERE id = $1 AND organization_id = $2\n        ",
+  "query": "UPDATE items SET\n                 code = $1,\n                 name = $2,\n                 description = $3,\n                 item_type = $4::item_type,\n                 uom_id = $5,\n                 unit_price = $6,\n                 purchase_unit_cost = $7,\n                 income_account_id = $8,\n                 tax_category_id = $9,\n                 is_active = $10\n             WHERE id = $11 AND organization_id = $12 RETURNING\n                id,\n                organization_id as org_id,\n                code,\n                name,\n                description,\n                item_type AS \"item_type: ItemType\",\n                uom_id,\n                unit_price,\n                purchase_unit_cost as unit_cost,\n                income_account_id,\n                tax_category_id as \"tax_category_id: TaxCategoryId\",\n                is_active,\n                created_at\n           ",
   "describe": {
     "columns": [
       {
@@ -66,7 +66,7 @@
       },
       {
         "ordinal": 10,
-        "name": "tax_category_id",
+        "name": "tax_category_id: TaxCategoryId",
         "type_info": "Uuid"
       },
       {
@@ -82,6 +82,27 @@
     ],
     "parameters": {
       "Left": [
+        "Varchar",
+        "Varchar",
+        "Text",
+        {
+          "Custom": {
+            "name": "item_type",
+            "kind": {
+              "Enum": [
+                "stocked",
+                "non_stocked",
+                "service"
+              ]
+            }
+          }
+        },
+        "Uuid",
+        "Numeric",
+        "Numeric",
+        "Uuid",
+        "Uuid",
+        "Bool",
         "Uuid",
         "Uuid"
       ]
@@ -102,5 +123,5 @@
       true
     ]
   },
-  "hash": "318f26a5a3bb5bc6b9c1269cc768ab844a80d8daec655f6684d5eab6e940c26f"
+  "hash": "b41f450444b8c93066666d2c23c41814a855d0e18eec6af5eb6572cd5171d1a0"
 }

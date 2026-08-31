@@ -6,9 +6,8 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use uuid::Uuid;
 use yew_router::Routable;
-use shared_core::AccountId;
+use shared_core::{AccountId, WarehouseId};
 
 #[derive(Clone, Routable, PartialEq)]
 pub enum Route {
@@ -102,7 +101,7 @@ pub enum Route {
     WarehouseList,
     #[cfg(feature = "inventory")]
     #[at("/warehouse-locations/:id")]
-    WarehouseLocations { id: Uuid },
+    WarehouseLocations { id: WarehouseId },
 
     // Not really a page, but it's a good example of a page that doesn't have a route
     #[at("/style-guide")]

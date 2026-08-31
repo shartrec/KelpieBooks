@@ -14,10 +14,9 @@ use shared_core::sales::{
         sales_order::SalesOrder,
     },
 };
-use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-
+use shared_core::OrderId;
 use crate::{
     api::Api,
     contexts::{
@@ -48,7 +47,7 @@ pub fn sales_orders_page() -> Html {
     let drawer_error = use_state(|| None::<String>);
 
     // Actions drop down
-    let show_actions = use_state(|| None::<uuid::Uuid>);
+    let show_actions = use_state(|| None::<OrderId>);
 
     // Fetch the order list whenever the status filter changes
     let fetch_orders = {
@@ -127,7 +126,7 @@ pub fn sales_orders_page() -> Html {
         let user_ctx = user_ctx.clone();
         let navigator = navigator.clone();
         let i18n = i18n.clone();
-        Callback::from(move |id: Uuid| {
+        Callback::from(move |id: OrderId| {
             let selected_order = selected_order.clone();
             let drawer_error = drawer_error.clone();
             let user_ctx = user_ctx.clone();

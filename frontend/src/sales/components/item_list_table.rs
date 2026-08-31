@@ -7,11 +7,7 @@
  */
 
 use fluent::fluent_args;
-use shared_core::{
-    core::models::auth::SystemPrivilege,
-    sales::models::item::Item,
-};
-use uuid::Uuid;
+use shared_core::{core::models::auth::SystemPrivilege, sales::models::item::Item, LocationEntryId, WarehouseId};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
@@ -49,9 +45,9 @@ pub fn item_list_table() -> Html {
     let item_to_edit = use_state(|| None::<Item>);
 
     #[cfg(feature = "inventory")]
-    let item_to_receive = use_state(|| None::<(Item, Option<Uuid>, Option<Uuid>)>);
+    let item_to_receive = use_state(|| None::<(Item, Option<WarehouseId>, Option<LocationEntryId>)>);
     #[cfg(feature = "inventory")]
-    let item_to_adjust = use_state(|| None::<(Item, Option<Uuid>, Option<Uuid>)>);
+    let item_to_adjust = use_state(|| None::<(Item, Option<WarehouseId>, Option<LocationEntryId>)>);
 
     let fetch_items = {
         let items = items.clone();
@@ -134,7 +130,7 @@ pub fn item_list_table() -> Html {
     #[cfg(feature = "inventory")]
     let on_receive_click = {
         let item_to_receive = item_to_receive.clone();
-        Callback::from(move |item: (Item, Option<Uuid>, Option<Uuid>)| {
+        Callback::from(move |item: (Item, Option<WarehouseId>, Option<LocationEntryId>)| {
             item_to_receive.set(Some(item));
         })
     };
@@ -142,7 +138,7 @@ pub fn item_list_table() -> Html {
     #[cfg(feature = "inventory")]
     let on_adjust_click = {
         let item_to_adjust = item_to_adjust.clone();
-        Callback::from(move |item: (Item, Option<Uuid>, Option<Uuid>)| {
+        Callback::from(move |item: (Item, Option<WarehouseId>, Option<LocationEntryId>)| {
             item_to_adjust.set(Some(item));
         })
     };

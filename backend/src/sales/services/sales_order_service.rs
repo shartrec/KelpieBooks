@@ -21,9 +21,8 @@ use shared_core::{inventory::models::stock_balance::{
         sales_order::SalesOrder,
     },
     requests::sales_order::CreateSalesOrderRequest,
-}, OrgId, UserId};
+}, ItemId, OrderId, OrgId, PartnerId, UserId};
 use sqlx::Acquire;
-use uuid::Uuid;
 
 use crate::{
     core::db::sequences::{
@@ -57,7 +56,7 @@ pub(crate) async fn create_order(
     let mut order = sales_order_db::create_draft_order(&mut tx, org_id, req, &order_number).await?;
 
     for line in &req.lines {
-        if line.item_id == Uuid::nil() {
+        if line.item_id == ItemId::default() {
             continue;
         }
         sales_order_db::insert_sales_order_line(&mut tx, line, order.id).await?;
@@ -85,7 +84,7 @@ pub(crate) async fn create_order(
 pub(crate) async fn get_sales_order(
     pool: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: OrderId,
 ) -> Result<SalesOrderDto, ApiError> {
     let mut order = sales_order_db::get_sales_order(pool, org_id, id)
         .await?
@@ -118,7 +117,7 @@ pub(crate) async fn list_sales_orders(
     org_id: OrgId,
     start_date: Option<chrono::NaiveDate>,
     end_date: Option<chrono::NaiveDate>,
-    partner_id: Option<Uuid>,
+    partner_id: Option<PartnerId>,
     min_amount: Option<rust_decimal::Decimal>,
     statuses: Vec<SalesDocumentStatus>,
 ) -> Result<Vec<SalesOrder>, ApiError> {
@@ -138,7 +137,7 @@ pub(crate) async fn list_sales_orders(
 pub(crate) async fn confirm_order(
     pool: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: OrderId,
     user_id: UserId,
 ) -> Result<SalesOrderDto, ApiError> {
     let mut tx = pool.begin().await?;
@@ -189,7 +188,7 @@ pub(crate) async fn confirm_order(
                             transaction_type: TransactionType::Allocation,
                             quantity_change: line.quantity,
                             reference_type: Some(ReferenceType::SalesOrder),
-                            reference_id: Some(order.order.id),
+                            reference_id: Some(*order.order.id),
                             notes: Some("Allocated on sales order confirmation"),
                             created_by: user_id,
                         },
@@ -216,7 +215,7 @@ pub(crate) async fn confirm_order(
 pub(crate) async fn cancel_order(
     pool: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: OrderId,
 ) -> Result<(), ApiError> {
     let order = sales_order_db::get_sales_order(pool, org_id, id)
         .await?

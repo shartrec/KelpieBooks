@@ -11,8 +11,7 @@ use shared_core::inventory::{
     dtos::inventory::BulkLocationGenerateRequest,
     models::warehouse::WarehouseLocation,
 };
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{LocationEntryId, OrgId, WarehouseId};
 use crate::{
     inventory::db::location as location_db,
     util::ApiError,
@@ -22,7 +21,7 @@ use crate::{
 pub async fn get_locations_for_warehouse(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    warehouse_id: Uuid,
+    warehouse_id: WarehouseId,
 ) -> Result<Vec<WarehouseLocation>, sqlx::Error> {
     location_db::all_by_warehouse(pool, org_id, warehouse_id).await
 }
@@ -30,7 +29,7 @@ pub async fn get_locations_for_warehouse(
 pub async fn get_location(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    id: Uuid,
+    id: LocationEntryId,
 ) -> Result<Option<WarehouseLocation>, sqlx::Error> {
     crate::inventory::db::location::get_location(pool, org_id, id).await
 }
@@ -46,7 +45,7 @@ pub async fn create_location(
 pub async fn update_location(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    id: Uuid,
+    id: LocationEntryId,
     loc: &WarehouseLocation,
 ) -> Result<WarehouseLocation, sqlx::Error> {
     crate::inventory::db::location::update_location(pool, org_id, id, loc).await
@@ -55,7 +54,7 @@ pub async fn update_location(
 pub async fn generate_locations(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    warehouse_id: Uuid,
+    warehouse_id: WarehouseId,
     req: &BulkLocationGenerateRequest,
 ) -> Result<Vec<WarehouseLocation>, ApiError> {
     let mut generated = Vec::new();
@@ -93,7 +92,7 @@ pub async fn generate_locations(
                     .replace("{bin}", bin);
 
                 generated.push(WarehouseLocation {
-                    id: Uuid::new_v4(),
+                    id: LocationEntryId::default(),
                     warehouse_id,
                     organization_id: org_id,
                     zone: Some(req.zone.clone()),

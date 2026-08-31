@@ -5,15 +5,14 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use shared_core::{partners::dtos::partner_list_item::PartnerListItem, sales::models::item::Item, PartnerId};
-use uuid::Uuid;
+use shared_core::{partners::dtos::partner_list_item::PartnerListItem, sales::models::item::Item, ItemId, PartnerId};
 
 use crate::core::components::SearchableItem;
 
 impl SearchableItem for Item {
-    type Id = Uuid;
+    type Id = ItemId;
 
-    fn id(&self) -> Uuid {
+    fn id(&self) -> ItemId {
         self.id
     }
     fn display_label(&self) -> String {

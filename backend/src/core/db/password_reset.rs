@@ -14,7 +14,7 @@ use sqlx::{
     PgConnection,
     Row,
 };
-use uuid::Uuid;
+use shared_core::UserId;
 
 pub struct PasswordResetToken {
     pub user_id: UserId,

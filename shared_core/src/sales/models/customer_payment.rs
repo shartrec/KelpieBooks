@@ -16,20 +16,19 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::{OrgId, PartnerId};
+use crate::{AccountId, OrgId, PartnerId, PaymentId, TransactionId};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CustomerPayment {
-    pub id: Uuid,
+    pub id: PaymentId,
     pub organization_id: OrgId,
     pub partner_id: PartnerId,
 
     // Links this payment back to the transaction that cleared the cash account
-    pub transaction_id: Option<Uuid>,
+    pub transaction_id: Option<TransactionId>,
 
     pub payment_date: NaiveDate,
-    pub deposited_to_account: Uuid, // e.g., "EFT", "Check", "Card"
+    pub deposited_to_account: AccountId, // e.g., "EFT", "Check", "Card"
     pub amount: Decimal,
     pub reference: Option<String>,
 

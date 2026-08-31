@@ -25,7 +25,7 @@ use shared_core::{inventory::models::warehouse::Warehouse, partners::{
         sales_order_item::SalesOrderItem,
     },
     requests::sales_order::CreateSalesOrderRequest,
-}, AddressId, PartnerId};
+}, AddressId, ItemId, OrderId, OrderItemId, PartnerId, WarehouseId};
 use uuid::Uuid;
 use web_sys::{
     HtmlInputElement,
@@ -66,13 +66,13 @@ pub fn new_sales_order_page() -> Html {
         let today = Local::now().date_naive();
         CreateSalesOrderRequest {
             partner_id: PartnerId::default(),
-            warehouse_id: Uuid::nil(),
+            warehouse_id: WarehouseId::default(),
             order_date: today,
             due_date: today,
             lines: vec![SalesOrderItem {
-                id: Uuid::new_v4(),
-                order_id: Uuid::nil(),
-                item_id: Uuid::nil(),
+                id: OrderItemId::default(),
+                order_id: OrderId::default(),
+                item_id: ItemId::default(),
                 description: None,
                 code: String::new(),
                 name: String::new(),
@@ -226,8 +226,8 @@ pub fn new_sales_order_page() -> Html {
                             {
                                 req.billing_address_id = Some(bill.id);
                                 req.bill_to = OrderAddress {
-                                    id: Uuid::new_v4(),
-                                    order_id: Uuid::new_v4(),
+                                    id: AddressId::default(),
+                                    order_id: OrderId::default(),
                                     name: Some(display_name2.clone()),
                                     attention: req.bill_to.attention.clone(),
                                     line1: Some(bill.address_line1.clone()),
@@ -245,8 +245,8 @@ pub fn new_sales_order_page() -> Html {
                             {
                                 req.shipping_address_id = Some(ship.id);
                                 req.ship_to = OrderAddress {
-                                    id: Uuid::new_v4(),
-                                    order_id: Uuid::new_v4(),
+                                    id: AddressId::default(),
+                                    order_id: OrderId::default(),
                                     name: Some(display_name2.clone()),
                                     attention: req.ship_to.attention.clone(),
                                     line1: Some(ship.address_line1.clone()),
@@ -309,7 +309,7 @@ pub fn new_sales_order_page() -> Html {
         let state = request.clone();
         Callback::from(move |e: Event| {
             let value = e.target_unchecked_into::<HtmlSelectElement>().value();
-            if let Ok(id) = Uuid::parse_str(&value) {
+            if let Ok(id) = Uuid::parse_str(&value).map(WarehouseId) {
                 let mut req = (*state).clone();
                 req.warehouse_id = id;
                 state.set(req);
@@ -330,7 +330,7 @@ pub fn new_sales_order_page() -> Html {
 
     let on_item_delete = {
         let request = request.clone();
-        Callback::from(move |id: Uuid| {
+        Callback::from(move |id: OrderItemId| {
             let mut req = (*request).clone();
             req.lines.retain(|i| i.id != id);
             request.set(req);
@@ -342,9 +342,9 @@ pub fn new_sales_order_page() -> Html {
         Callback::from(move |_| {
             let mut req = (*request).clone();
             req.lines.push(SalesOrderItem {
-                id: Uuid::new_v4(),
-                order_id: Uuid::nil(),
-                item_id: Uuid::nil(),
+                id: OrderItemId::default(),
+                order_id: OrderId::default(),
+                item_id: ItemId::default(),
                 code: String::new(),
                 name: String::new(),
                 description: None,
@@ -378,7 +378,7 @@ pub fn new_sales_order_page() -> Html {
             let success = success.clone();
             // Remove any empty order rows
             let mut req = (*request).clone();
-            req.lines.retain(|line| line.item_id != Uuid::nil());
+            req.lines.retain(|line| line.item_id != ItemId::default());
             request.set(req);
 
             wasm_bindgen_futures::spawn_local(async move {
@@ -435,7 +435,7 @@ pub fn new_sales_order_page() -> Html {
 
                         <label>{i18n.t("new-sales-order-warehouse-label")}</label>
                         <select onchange={on_warehouse_change} required=true>
-                            <option value="" selected={request.warehouse_id == Uuid::nil()}>
+                            <option value="" selected={request.warehouse_id == WarehouseId::default()}>
                                 { i18n.t("new-sales-order-select-warehouse") }
                             </option>
                             { for (*warehouses).iter().map(|wh| html! {

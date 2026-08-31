@@ -6,12 +6,7 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use rust_decimal::Decimal;
-use shared_core::{
-    core::models::auth::SystemPrivilege,
-    inventory::dtos::inventory::ItemStockBalancesResponse,
-    sales::models::item::Item,
-};
-use uuid::Uuid;
+use shared_core::{core::models::auth::SystemPrivilege, inventory::dtos::inventory::ItemStockBalancesResponse, sales::models::item::Item, LocationEntryId, WarehouseId};
 use yew::prelude::*;
 use yew_router::hooks::use_navigator;
 
@@ -28,9 +23,9 @@ pub struct ItemRowProps {
     pub item: Item,
     pub on_edit: Callback<Item>,
     #[cfg(feature = "inventory")]
-    pub on_receive: Option<Callback<(Item, Option<Uuid>, Option<Uuid>)>>,
+    pub on_receive: Option<Callback<(Item, Option<WarehouseId>, Option<LocationEntryId>)>>,
     #[cfg(feature = "inventory")]
-    pub on_adjust: Option<Callback<(Item, Option<Uuid>, Option<Uuid>)>>,
+    pub on_adjust: Option<Callback<(Item, Option<WarehouseId>, Option<LocationEntryId>)>>,
 }
 
 #[function_component(ItemRow)]

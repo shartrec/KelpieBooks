@@ -6,14 +6,10 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use fluent::fluent_args;
-use shared_core::{
-    ledger::models::account_category::AccountCategory,
-    sales::models::tax::{
-        TaxCategory,
-        TaxRate,
-    },
-};
-use uuid::Uuid;
+use shared_core::{ledger::models::account_category::AccountCategory, sales::models::tax::{
+    TaxCategory,
+    TaxRate,
+}, TaxRateId};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
@@ -179,7 +175,7 @@ pub fn rates_view(props: &RatesViewProps) -> Html {
         let rate_to_edit = rate_to_edit.clone();
         Callback::from(move |_| {
             rate_to_edit.set(Some(TaxRate {
-                id: Uuid::new_v4(),
+                id: TaxRateId::default(),
                 tax_category_id: category_id,
                 ..TaxRate::default()
             }));

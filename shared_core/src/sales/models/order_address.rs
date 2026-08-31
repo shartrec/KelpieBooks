@@ -11,7 +11,7 @@ use serde::{
     Serialize,
 };
 use strum::Display;
-use uuid::Uuid;
+use crate::{AddressId, OrderId};
 
 #[derive(Clone, Debug, Display, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -27,8 +27,8 @@ pub enum AddressType {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
 pub struct OrderAddress {
-    pub id: Uuid,
-    pub order_id: Uuid,
+    pub id: AddressId,
+    pub order_id: OrderId,
     pub name: Option<String>,
     pub attention: Option<String>,
     pub line1: Option<String>,

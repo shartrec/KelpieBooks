@@ -36,7 +36,7 @@ use shared_core::{inventory::{
         CreateTransactionRequest,
         JournalEntryLine,
     },
-}, AccountId, OrgId, TransactionId, UserId};
+}, AccountId, ItemId, LocationEntryId, OrgId, TransactionId, UserId};
 use sqlx::{
     Acquire,
     Error,
@@ -93,7 +93,7 @@ impl InventorySystemAccounts {
 pub async fn get_item_warehouse_profile(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    item_id: Uuid,
+    item_id: ItemId,
 ) -> Result<Option<ItemWarehouseProfile>, sqlx::Error> {
     inventory_db::get_warehouse_profile(pool, org_id, item_id).await
 }
@@ -113,7 +113,7 @@ pub async fn save_item_warehouse_profile(
 pub async fn get_balances_by_item(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    item_id: Uuid,
+    item_id: ItemId,
 ) -> Result<ItemStockBalancesResponse, Error> {
     inventory_db::get_item_stock_balances(pool, org_id, item_id).await
 }
@@ -121,8 +121,8 @@ pub async fn get_balances_by_item(
 pub async fn get_balance_at_location(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    item_id: Uuid,
-    location_id: Uuid,
+    item_id: ItemId,
+    location_id: LocationEntryId,
 ) -> Result<Option<WarehouseInventoryBalance>, sqlx::Error> {
     inventory_db::get_balance_for_location(pool, org_id, item_id, location_id).await
 }
@@ -130,7 +130,7 @@ pub async fn get_balance_at_location(
 pub async fn update_stock_levels(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    id: Uuid,
+    id: ItemId,
     qty_on_hand: Decimal,
     qty_allocated: Decimal,
 ) -> Result<WarehouseInventoryBalance, ApiError> {
@@ -201,7 +201,7 @@ pub async fn receive_vendor_stock(
                 transaction_type: TransactionType::Receipt,
                 quantity_change: line.quantity,
                 reference_type: Some(ReferenceType::PurchaseOrder),
-                reference_id: req.vendor_id, // Vendor ID tracked as ref target until full PO entity exists
+                reference_id: req.vendor_id.map(|id| *id), // Vendor ID tracked as ref target until full PO entity exists
                 notes: Some(&ref_notes),
                 created_by: user_id,
             },

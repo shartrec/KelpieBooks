@@ -9,6 +9,7 @@
 use rocket::{get, http::Status, post, routes, serde::json::Json, Route, State};
 use rocket::http::ContentType;
 use rocket_db_pools::Connection;
+use shared_core::OrderId;
 use shared_core::sales::{
     dtos::sales_order_dto::SalesOrderDto,
     models::sales_order::SalesOrder,
@@ -22,7 +23,6 @@ use crate::{sales::services::sales_order_service, security::{
 }, util::{
     types::{
         FormSalesOrderStatus,
-        PathUuid,
     },
     ApiError,
 }, DbKelpie, TemplateConfig};
@@ -70,10 +70,10 @@ async fn list_sales_orders(
 async fn get_sales_order(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseSales>,
-    id: PathUuid,
+    id: OrderId,
 ) -> Result<Json<SalesOrderDto>, ApiError> {
     let user = guard.0;
-    let order = sales_order_service::get_sales_order(&mut pool, user.organization_id, *id).await?;
+    let order = sales_order_service::get_sales_order(&mut pool, user.organization_id, id).await?;
     Ok(Json(order))
 }
 
@@ -92,11 +92,11 @@ async fn create_sales_order(
 async fn confirm_sales_order(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageSales>,
-    id: PathUuid,
+    id: OrderId,
 ) -> Result<Json<SalesOrderDto>, ApiError> {
     let user = guard.0;
     let order =
-        sales_order_service::confirm_order(&mut pool, user.organization_id, *id, user.user_id)
+        sales_order_service::confirm_order(&mut pool, user.organization_id, id, user.user_id)
             .await?;
     Ok(Json(order))
 }
@@ -105,10 +105,10 @@ async fn confirm_sales_order(
 async fn cancel_sales_order(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<ManageSales>,
-    id: PathUuid,
+    id: OrderId,
 ) -> Result<Status, ApiError> {
     let user = guard.0;
-    sales_order_service::cancel_order(&mut pool, user.organization_id, *id).await?;
+    sales_order_service::cancel_order(&mut pool, user.organization_id, id).await?;
     Ok(Status::NoContent)
 }
 
@@ -117,15 +117,15 @@ async fn print_sales_invoice(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseSales>,
     config: &State<TemplateConfig>,
-    id: PathUuid,
+    id: OrderId,
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
 
-    if let Some(order) = crate::sales::db::sales_order::get_sales_order(&mut pool, user.organization_id, *id).await? {
+    if let Some(order) = crate::sales::db::sales_order::get_sales_order(&mut pool, user.organization_id, id).await? {
         let name = format!("Invoice-{}.pdf", order.order.order_number);
 
         let invoice_pdf =
-            reports::invoice::generate_invoice(&mut pool, user, config, *id).await?;
+            reports::invoice::generate_invoice(&mut pool, user, config, id).await?;
         Ok(DownloadFile::new(invoice_pdf, name, ContentType::PDF))
     } else {
         Err(ApiError::NotFound(format!("Order {} not found", *id).into()))
@@ -137,13 +137,13 @@ async fn print_picking_list(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseSales>,
     config: &State<TemplateConfig>,
-    id: PathUuid,
+    id: OrderId,
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
-    if let Some(order) = crate::sales::db::sales_order::get_sales_order(&mut pool, user.organization_id, *id).await? {
+    if let Some(order) = crate::sales::db::sales_order::get_sales_order(&mut pool, user.organization_id, id).await? {
         let name = format!("Picklist-{}.pdf", order.order.order_number);
         let picklist_pdf =
-            reports::invoice::generate_picklist(&mut pool, user, config, *id).await?;
+            reports::invoice::generate_picklist(&mut pool, user, config, id).await?;
         Ok(DownloadFile::new(picklist_pdf, name, ContentType::PDF))
     } else {
         Err(ApiError::NotFound(format!("Order {} not found", *id).into()))

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT cp.*\n        FROM customer_payments cp\n        JOIN customer_payment_allocations cpa ON cp.id = cpa.customer_payment_id\n        WHERE cpa.sales_order_id = $1\n        ORDER BY cp.payment_date DESC, cp.created_at DESC\n        ",
+  "query": "\n        SELECT id,\n               organization_id,\n               partner_id,\n               transaction_id as \"transaction_id: TransactionId\",\n               payment_date,\n               deposited_to_account,\n               amount,\n               reference,\n               created_at\n        FROM customer_payments\n        WHERE id = $1\n        ",
   "describe": {
     "columns": [
       {
@@ -20,7 +20,7 @@
       },
       {
         "ordinal": 3,
-        "name": "transaction_id",
+        "name": "transaction_id: TransactionId",
         "type_info": "Uuid"
       },
       {
@@ -66,5 +66,5 @@
       false
     ]
   },
-  "hash": "21714e4ad16df8976fff95ccda735c6064ea48018ef649023f9c6fbfeb88c245"
+  "hash": "7581ac0a8777b164be67e09ab1cace26c13b7e23037b97c248dcf4cc14949556"
 }

@@ -11,8 +11,7 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use uuid::Uuid;
-use crate::{AddressId, PartnerId};
+use crate::{AddressId, PartnerId, WarehouseId};
 use crate::sales::models::{
     order_address::OrderAddress,
     sales_order_item::SalesOrderItem,
@@ -21,7 +20,7 @@ use crate::sales::models::{
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateSalesOrderRequest {
     pub partner_id: PartnerId,
-    pub warehouse_id: Uuid,
+    pub warehouse_id: WarehouseId,
     pub order_date: NaiveDate,
     pub due_date: NaiveDate,
     pub lines: Vec<SalesOrderItem>,

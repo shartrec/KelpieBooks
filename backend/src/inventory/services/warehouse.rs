@@ -8,8 +8,7 @@
 
 use rocket_db_pools::Connection;
 use shared_core::inventory::models::warehouse::Warehouse;
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{OrgId, WarehouseId};
 use crate::{
     inventory::db::{
         location as locations_db,
@@ -32,7 +31,7 @@ pub async fn get_warehouses(
 pub async fn get_warehouse(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    id: Uuid,
+    id: WarehouseId,
 ) -> Result<Option<Warehouse>, sqlx::Error> {
     warehouse_db::get_warehouse(pool, org_id, id).await
 }
@@ -48,7 +47,7 @@ pub async fn create_warehouse(
 pub async fn update_warehouse(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    id: Uuid,
+    id: WarehouseId,
     wh: &Warehouse,
 ) -> Result<Warehouse, sqlx::Error> {
     warehouse_db::update_warehouse(pool, org_id, id, wh).await
@@ -57,7 +56,7 @@ pub async fn update_warehouse(
 pub async fn delete_warehouse(
     pool: &mut Connection<DbKelpie>,
     org_id: OrgId,
-    id: Uuid,
+    id: WarehouseId,
 ) -> Result<u64, ApiError> {
     // 💡 Business Guard: Prevent removing a warehouse if locations are nested under it
     let locations = locations_db::all_by_warehouse(pool, org_id, id).await?;

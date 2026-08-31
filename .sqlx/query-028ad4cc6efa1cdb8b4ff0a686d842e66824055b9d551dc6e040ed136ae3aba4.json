@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT so.id, so.organization_id as org_id, so.partner_id, so.warehouse_id, so.order_number, so.order_date, so.due_date,\n               so.fulfillment_status as \"fulfillment_status: FulfillmentStatus\",\n               so.payment_status as \"payment_status: PaymentStatus\",\n               so.document_status as \"document_status: SalesDocumentStatus\",\n               so.billing_address_id, so.shipping_address_id,\n               so.subtotal, so.tax_total, so.total_amount, so.amount_remaining,\n               w.name AS warehouse_name,\n               p.trade_name as partner_name\n        FROM sales_orders so\n        JOIN warehouses w ON w.id = so.warehouse_id\n        JOIN partners p ON p.id = so.partner_id\n        WHERE so.id = $1 AND so.organization_id = $2\n        ",
+  "query": "\n        SELECT so.id, so.organization_id as org_id, so.partner_id, so.warehouse_id, so.order_number, so.order_date, so.due_date,\n               so.fulfillment_status as \"fulfillment_status: FulfillmentStatus\",\n               so.payment_status as \"payment_status: PaymentStatus\",\n               so.document_status as \"document_status: SalesDocumentStatus\",\n               so.billing_address_id as \"billing_address_id: AddressId\", so.shipping_address_id as \"shipping_address_id: AddressId\",\n               so.subtotal, so.tax_total, so.total_amount, so.amount_remaining,\n               w.name AS warehouse_name,\n               p.trade_name as partner_name\n        FROM sales_orders so\n        JOIN warehouses w ON w.id = so.warehouse_id\n        JOIN partners p ON p.id = so.partner_id\n        WHERE so.id = $1 AND so.organization_id = $2\n        ",
   "describe": {
     "columns": [
       {
@@ -91,12 +91,12 @@
       },
       {
         "ordinal": 10,
-        "name": "billing_address_id",
+        "name": "billing_address_id: AddressId",
         "type_info": "Uuid"
       },
       {
         "ordinal": 11,
-        "name": "shipping_address_id",
+        "name": "shipping_address_id: AddressId",
         "type_info": "Uuid"
       },
       {
@@ -157,5 +157,5 @@
       true
     ]
   },
-  "hash": "d862c2a5c35ccbf6dd19946bce614e46bbebf03c830dfbd8e63abb91c28f42a5"
+  "hash": "028ad4cc6efa1cdb8b4ff0a686d842e66824055b9d551dc6e040ed136ae3aba4"
 }

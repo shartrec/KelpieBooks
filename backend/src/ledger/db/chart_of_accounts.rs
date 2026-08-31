@@ -17,8 +17,7 @@ use shared_core::ledger::models::{
     account_category::AccountCategory,
     system_tag::SystemTag,
 };
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{AccountId, OrgId};
 
 /// Represents the top-level structure of a TOML template file.
 #[derive(Debug, Deserialize)]
@@ -86,9 +85,9 @@ pub(crate) async fn import_default_accounts(
 async fn insert_account(
     tx: &mut PgConnection,
     org_id: OrgId,
-    parent_id: Option<Uuid>,
+    parent_id: Option<AccountId>,
     template: &AccountImport,
-) -> Result<Uuid, sqlx::Error> {
+) -> Result<AccountId, sqlx::Error> {
     let row = sqlx::query!(
         r#"
         INSERT INTO accounts (organization_id, parent_id, code, name, category, is_group, system_tag)
@@ -96,7 +95,7 @@ async fn insert_account(
         RETURNING id
         "#,
             *org_id,
-            parent_id,
+            parent_id.map(|id| *id),
             &template.code,
             &template.name,
             template.category as AccountCategory,
@@ -107,5 +106,5 @@ async fn insert_account(
         .await?;
 
     // Retrieve the 'id' from the row and return it.
-    Ok(row.id)
+    Ok(AccountId(row.id))
 }

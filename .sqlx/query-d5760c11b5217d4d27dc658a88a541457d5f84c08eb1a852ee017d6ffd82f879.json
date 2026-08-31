@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO warehouses (id, organization_id, code, name, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+  "query": "INSERT INTO units_of_measure (organization_id, code, name, is_active) VALUES ($1, $2, $3, $4)\n                      RETURNING id, organization_id as org_id, code, name, is_active",
   "describe": {
     "columns": [
       {
@@ -10,7 +10,7 @@
       },
       {
         "ordinal": 1,
-        "name": "organization_id",
+        "name": "org_id",
         "type_info": "Uuid"
       },
       {
@@ -27,16 +27,10 @@
         "ordinal": 4,
         "name": "is_active",
         "type_info": "Bool"
-      },
-      {
-        "ordinal": 5,
-        "name": "created_at",
-        "type_info": "Timestamptz"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid",
         "Uuid",
         "Varchar",
         "Varchar",
@@ -48,9 +42,8 @@
       false,
       false,
       false,
-      false,
       false
     ]
   },
-  "hash": "0f71309b029ccf8c11684d414e6eb84c2646ec9f3cd0f7a297610ba9e90131d3"
+  "hash": "d5760c11b5217d4d27dc658a88a541457d5f84c08eb1a852ee017d6ffd82f879"
 }

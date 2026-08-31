@@ -12,13 +12,12 @@ use sqlx::{
     Acquire,
     PgConnection,
 };
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{OrgId, TaxCategoryId};
 
 pub async fn get_tax_rates_for_category(
     conn: &mut PgConnection,
     org_id: OrgId,
-    category_id: Uuid,
+    category_id: TaxCategoryId,
 ) -> Result<Vec<TaxRate>, sqlx::Error> {
     let rows = sqlx::query_as!(
         TaxRate,
@@ -28,7 +27,7 @@ pub async fn get_tax_rates_for_category(
         WHERE tax_category_id = $1 AND organization_id = $2
         ORDER BY valid_from DESC
         "#,
-        category_id,
+        *category_id,
         *org_id,
     )
         .fetch_all(conn)
@@ -39,7 +38,7 @@ pub async fn get_tax_rates_for_category(
 pub async fn get_current_tax_rate_for_category(
     conn: &mut PgConnection,
     org_id: OrgId,
-    category_id: Uuid,
+    category_id: TaxCategoryId,
     effective_date: NaiveDate,
 ) -> Result<Option<TaxRate>, sqlx::Error> {
     let row = sqlx::query_as!(
@@ -54,7 +53,7 @@ pub async fn get_current_tax_rate_for_category(
         ORDER BY valid_from DESC
         LIMIT 1
         "#,
-        category_id,
+        *category_id,
         *org_id,
         effective_date,
     )
@@ -66,7 +65,7 @@ pub async fn get_current_tax_rate_for_category(
 pub async fn update_tax_rates_for_category(
     conn: &mut PgConnection,
     org_id: OrgId,
-    category_id: Uuid,
+    category_id: TaxCategoryId,
     rates: &[TaxRate],
 ) -> Result<(), sqlx::Error> {
     let mut tx = conn.begin().await?;
@@ -74,7 +73,7 @@ pub async fn update_tax_rates_for_category(
     // First, delete all existing rates for this category
     sqlx::query!(
         "DELETE FROM tax_rates WHERE tax_category_id = $1 AND organization_id = $2",
-        category_id,
+        *category_id,
         *org_id,
     )
     .execute(&mut *tx)
@@ -87,9 +86,9 @@ pub async fn update_tax_rates_for_category(
             INSERT INTO tax_rates (id, organization_id, tax_category_id, name, rate, liability_account_id, valid_from, valid_to)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             "#,
-            rate.id,
+            *rate.id,
             *org_id,
-            category_id,
+            *category_id,
             rate.name,
             rate.rate,
             *rate.liability_account_id,

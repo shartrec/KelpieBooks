@@ -11,15 +11,14 @@ use rocket_db_pools::sqlx::{
     PgConnection,
 };
 use shared_core::sales::models::tax::TaxCategory;
-use uuid::Uuid;
-use shared_core::OrgId;
+use shared_core::{OrgId, TaxCategoryId};
 
-pub async fn all(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<TaxCategory>, sqlx::Error> {
+pub async fn all(conn: &mut PgConnection, org_id: OrgId) -> Result<Vec<TaxCategory>, sqlx::Error> {
     sqlx::query_as!(
         TaxCategory,
         r#"SELECT c.id, c.organization_id as org_id, c.name, c.description, c.is_active FROM tax_categories c
                        WHERE organization_id = $1"#,
-            org_id,
+            *org_id,
         )
         .fetch_all(conn)
         .await
@@ -28,13 +27,13 @@ pub async fn all(conn: &mut PgConnection, org_id: Uuid) -> Result<Vec<TaxCategor
 pub async fn get(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: TaxCategoryId,
 ) -> Result<Option<TaxCategory>, sqlx::Error> {
     sqlx::query_as!(
         TaxCategory,
         "SELECT c.id, c.organization_id as org_id, c.name, c.description,c.is_active FROM tax_categories c
                        WHERE id = $1 AND organization_id = $2",
-            id,
+            *id,
             *org_id,
         )
         .fetch_optional(conn)
@@ -48,9 +47,8 @@ pub async fn create(
 ) -> Result<TaxCategory, sqlx::Error> {
     sqlx::query_as!(
         TaxCategory,
-        "INSERT INTO tax_categories (id, organization_id, name, description, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING
+        "INSERT INTO tax_categories (organization_id, name, description, is_active) VALUES ($1, $2, $3, $4) RETURNING
                     id, organization_id as org_id, name, description, is_active ",
-        Uuid::new_v4(),
         *org_id,
         tax_category.name,
         tax_category.description,
@@ -63,7 +61,7 @@ pub async fn create(
 pub async fn update(
     conn: &mut PgConnection,
     org_id: OrgId,
-    id: Uuid,
+    id: TaxCategoryId,
     tax_category: &TaxCategory,
 ) -> Result<TaxCategory, sqlx::Error> {
     sqlx::query_as!(
@@ -73,17 +71,17 @@ pub async fn update(
         tax_category.name,
         tax_category.description,
         tax_category.is_active,
-        id,
+        *id,
         *org_id,
     )
     .fetch_one(conn)
     .await
 }
 
-pub async fn delete(conn: &mut PgConnection, org_id: OrgId, id: Uuid) -> Result<u64, sqlx::Error> {
+pub async fn delete(conn: &mut PgConnection, org_id: OrgId, id: TaxCategoryId) -> Result<u64, sqlx::Error> {
     let result = sqlx::query!(
         "DELETE FROM tax_categories WHERE id = $1 AND organization_id = $2",
-        id,
+        *id,
         *org_id,
     )
     .execute(conn)

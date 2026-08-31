@@ -26,7 +26,7 @@ use shared_core::inventory::{
         WarehouseInventoryBalance,
     },
 };
-
+use shared_core::ItemId;
 use crate::{
     core::routes::security::AuthenticatedUser,
     inventory::services::{
@@ -42,7 +42,6 @@ use crate::{
         UseInventory,
     },
     util::{
-        types::PathUuid,
         ApiError,
     },
     DbKelpie,
@@ -65,12 +64,12 @@ pub(crate) fn routes() -> Vec<Route> {
 #[get("/api/inventory/items/<item_id>/profile")]
 async fn get_item_profile(
     mut pool: Connection<DbKelpie>,
-    item_id: PathUuid,
+    item_id: ItemId,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseInventory>,
 ) -> Result<Json<ItemWarehouseProfile>, ApiError> {
     let profile =
-        inventory_service::get_item_warehouse_profile(&mut pool, user.organization_id, *item_id)
+        inventory_service::get_item_warehouse_profile(&mut pool, user.organization_id, item_id)
             .await?
             .ok_or_else(|| {
                 ApiError::NotFound("Item warehouse configuration profile not found".to_string())
@@ -98,12 +97,12 @@ async fn save_item_profile(
 #[get("/api/inventory/items/<item_id>/balances")]
 async fn get_item_balances(
     mut pool: Connection<DbKelpie>,
-    item_id: PathUuid,
+    item_id: ItemId,
     user: AuthenticatedUser,
     _guard: RequirePrivilege<UseInventory>,
 ) -> Result<Json<ItemStockBalancesResponse>, ApiError> {
     let balances =
-        inventory_service::get_balances_by_item(&mut pool, user.organization_id, *item_id).await?;
+        inventory_service::get_balances_by_item(&mut pool, user.organization_id, item_id).await?;
     Ok(Json(balances))
 }
 
