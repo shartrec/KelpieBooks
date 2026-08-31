@@ -5,6 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use std::str::FromStr;
 
 use chrono::{
     Local,
@@ -13,10 +14,18 @@ use chrono::{
 };
 use fluent::fluent_args;
 use rust_decimal::dec;
-use shared_core::{ledger::models::account_category::AccountCategory, partners::dtos::partner_list_item::PartnerListItem, payables::{
-    models::vendor_invoice_item::VendorInvoiceItem,
-    requests::vendor_invoice::CreateVendorInvoiceRequest,
-}, AccountId, InvoiceId, InvoiceItemId, PartnerId};
+use shared_core::{
+    ledger::models::account_category::AccountCategory,
+    partners::dtos::partner_list_item::PartnerListItem,
+    payables::{
+        models::vendor_invoice_item::VendorInvoiceItem,
+        requests::vendor_invoice::CreateVendorInvoiceRequest,
+    },
+    AccountId,
+    InvoiceId,
+    InvoiceItemId,
+    PartnerId,
+};
 use uuid::Uuid;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -130,7 +139,7 @@ pub fn new_vendor_invoice_page() -> Html {
             let value = e
                 .target_unchecked_into::<web_sys::HtmlSelectElement>()
                 .value();
-            info.partner_id = Uuid::parse_str(&value).map(PartnerId).unwrap_or_default();
+            info.partner_id = PartnerId::from_str(&value).unwrap_or_default();
             state.set(info);
         })
     };
@@ -181,7 +190,10 @@ pub fn new_vendor_invoice_page() -> Html {
         let request = request.clone();
         Callback::from(move |_| {
             let mut req = (*request).clone();
-            let last_account_id = req.items.last().map_or(AccountId::default(), |item| item.account_id);
+            let last_account_id = req
+                .items
+                .last()
+                .map_or(AccountId::default(), |item| item.account_id);
             req.items.push(VendorInvoiceItem {
                 id: InvoiceItemId(Uuid::new_v4()),
                 vendor_invoice_id: InvoiceId::default(),

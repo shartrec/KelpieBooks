@@ -15,7 +15,13 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{AllocationId, OrderId, OrgId, PaymentId};
+
+use crate::{
+    AllocationId,
+    OrderId,
+    OrgId,
+    PaymentId,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CustomerPaymentAllocation {

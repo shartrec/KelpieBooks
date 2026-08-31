@@ -20,7 +20,11 @@ use strum::{
     EnumString,
 };
 use uuid::Uuid;
-use crate::{OrgId, PartnerId};
+
+use crate::{
+    OrgId,
+    PartnerId,
+};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, EnumString, Display, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]

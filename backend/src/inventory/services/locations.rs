@@ -7,11 +7,16 @@
  */
 
 use rocket_db_pools::Connection;
-use shared_core::inventory::{
-    dtos::inventory::BulkLocationGenerateRequest,
-    models::warehouse::WarehouseLocation,
+use shared_core::{
+    inventory::{
+        dtos::inventory::BulkLocationGenerateRequest,
+        models::warehouse::WarehouseLocation,
+    },
+    LocationEntryId,
+    OrgId,
+    WarehouseId,
 };
-use shared_core::{LocationEntryId, OrgId, WarehouseId};
+
 use crate::{
     inventory::db::location as location_db,
     util::ApiError,

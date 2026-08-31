@@ -7,14 +7,20 @@
  */
 
 use rust_decimal::Decimal;
-use shared_core::inventory::models::stock_balance::{
-    ReferenceType,
-    StockTransaction,
-    TransactionType,
+use shared_core::{
+    inventory::models::stock_balance::{
+        ReferenceType,
+        StockTransaction,
+        TransactionType,
+    },
+    ItemId,
+    LocationEntryId,
+    OrgId,
+    UserId,
+    WarehouseId,
 };
 use sqlx::PgConnection;
 use uuid::Uuid;
-use shared_core::{ItemId, LocationEntryId, OrgId, UserId, WarehouseId};
 
 pub struct NewStockTransaction<'a> {
     pub organization_id: OrgId,
@@ -24,7 +30,7 @@ pub struct NewStockTransaction<'a> {
     pub transaction_type: TransactionType,
     pub quantity_change: Decimal,
     pub reference_type: Option<ReferenceType>,
-    pub reference_id: Option<Uuid>,  // Uuid is used here as the reference may be of many types
+    pub reference_id: Option<Uuid>, // Uuid is used here as the reference may be of many types
     pub notes: Option<&'a str>,
     pub created_by: UserId,
 }

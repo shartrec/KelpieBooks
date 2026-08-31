@@ -7,13 +7,17 @@
  */
 
 use fluent::fluent_args;
-use shared_core::partners::models::{
-    address_type::AddressType,
-    partner_address::PartnerAddress,
+use shared_core::{
+    partners::models::{
+        address_type::AddressType,
+        partner_address::PartnerAddress,
+    },
+    AddressId,
+    PartnerId,
 };
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::{AddressId, PartnerId};
+
 use crate::{
     api::Api,
     contexts::{

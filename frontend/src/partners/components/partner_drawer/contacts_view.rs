@@ -7,10 +7,14 @@
  */
 
 use fluent::fluent_args;
-use shared_core::partners::models::partner_contact::PartnerContact;
+use shared_core::{
+    partners::models::partner_contact::PartnerContact,
+    ContactId,
+    PartnerId,
+};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::{ContactId, PartnerId};
+
 use crate::{
     api::Api,
     contexts::{

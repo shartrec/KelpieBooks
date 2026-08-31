@@ -6,7 +6,11 @@
  * (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::{core::models::auth::SystemPrivilege, inventory::models::warehouse::WarehouseLocation, WarehouseId};
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    inventory::models::warehouse::WarehouseLocation,
+    WarehouseId,
+};
 use yew::prelude::*;
 
 use crate::{

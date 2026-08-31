@@ -6,9 +6,14 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::partners::models::partner_contact::PartnerContact;
+use shared_core::{
+    partners::models::partner_contact::PartnerContact,
+    ContactId,
+    OrgId,
+    PartnerId,
+};
 use yew::prelude::*;
-use shared_core::{ContactId, OrgId, PartnerId};
+
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]

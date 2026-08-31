@@ -16,16 +16,19 @@ use std::{
 
 use fluent::fluent_args;
 use rust_decimal::dec;
-use shared_core::ledger::{
-    dtos::account_with_balance::AccountWithBalance,
-    models::account_category::AccountCategory,
+use shared_core::{
+    ledger::{
+        dtos::account_with_balance::AccountWithBalance,
+        models::account_category::AccountCategory,
+    },
+    AccountId,
 };
 use yew::prelude::*;
 use yew_router::prelude::{
     use_navigator,
     Link,
 };
-use shared_core::AccountId;
+
 use crate::{
     api::Api,
     contexts::{

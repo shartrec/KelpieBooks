@@ -6,13 +6,17 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use std::str::FromStr;
+
 use gloo_timers::callback::Timeout;
-use shared_core::partners::{
-    models::partner::Partner,
-    requests::partner::UpdatePartnerRequest,
+use shared_core::{
+    partners::{
+        models::partner::Partner,
+        requests::partner::UpdatePartnerRequest,
+    },
+    AccountId,
 };
 use yew::prelude::*;
-use shared_core::AccountId;
+
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]

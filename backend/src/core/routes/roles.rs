@@ -16,15 +16,18 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::core::{
-    models::role::Role,
-    requests::role::{
-        CreateRoleRequest,
-        UpdateRoleRequest,
+use shared_core::{
+    core::{
+        models::role::Role,
+        requests::role::{
+            CreateRoleRequest,
+            UpdateRoleRequest,
+        },
     },
+    RoleId,
 };
 use sqlx::Acquire;
-use shared_core::RoleId;
+
 use crate::{
     core::db::{
         roles,

@@ -16,18 +16,22 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::{AddressId, ContactId, PartnerId};
-use shared_core::partners::{
-    dtos::partner_list_item::PartnerListItem,
-    models::{
-        partner::Partner,
-        partner_address::PartnerAddress,
-        partner_contact::PartnerContact,
+use shared_core::{
+    partners::{
+        dtos::partner_list_item::PartnerListItem,
+        models::{
+            partner::Partner,
+            partner_address::PartnerAddress,
+            partner_contact::PartnerContact,
+        },
+        requests::partner::{
+            CreatePartnerRequest,
+            UpdatePartnerRequest,
+        },
     },
-    requests::partner::{
-        CreatePartnerRequest,
-        UpdatePartnerRequest,
-    },
+    AddressId,
+    ContactId,
+    PartnerId,
 };
 
 use crate::{
@@ -37,9 +41,7 @@ use crate::{
         RequirePrivilege,
         UsePartners,
     },
-    util::{
-        ApiError,
-    },
+    util::ApiError,
     DbKelpie,
 };
 

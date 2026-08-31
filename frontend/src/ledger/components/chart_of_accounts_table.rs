@@ -13,13 +13,17 @@ use std::collections::{
 
 use fluent::fluent_args;
 use log::info;
-use shared_core::{core::models::auth::SystemPrivilege, ledger::{
-    dtos::account_with_balance::AccountWithBalance,
-    requests::account::{
-        CreateAccountRequest,
-        UpdateAccountRequest,
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    ledger::{
+        dtos::account_with_balance::AccountWithBalance,
+        requests::account::{
+            CreateAccountRequest,
+            UpdateAccountRequest,
+        },
     },
-}, AccountId};
+    AccountId,
+};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 

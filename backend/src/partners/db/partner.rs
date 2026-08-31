@@ -11,19 +11,24 @@ use rocket_db_pools::sqlx::{
     PgConnection,
     Row,
 };
-use shared_core::partners::{
-    dtos::partner_list_item::PartnerListItem,
-    models::{
-        partner::Partner,
-        partner_address::PartnerAddress,
-        partner_contact::PartnerContact,
+use shared_core::{
+    partners::{
+        dtos::partner_list_item::PartnerListItem,
+        models::{
+            partner::Partner,
+            partner_address::PartnerAddress,
+            partner_contact::PartnerContact,
+        },
+        requests::partner::{
+            CreatePartnerRequest,
+            UpdatePartnerRequest,
+        },
     },
-    requests::partner::{
-        CreatePartnerRequest,
-        UpdatePartnerRequest,
-    },
+    AddressId,
+    ContactId,
+    OrgId,
+    PartnerId,
 };
-use shared_core::{AddressId, ContactId, OrgId, PartnerId};
 
 fn from_row_to_partner(row: &sqlx::postgres::PgRow) -> Partner {
     Partner {
@@ -86,7 +91,10 @@ fn from_row_to_partner_list_item(row: &sqlx::postgres::PgRow) -> PartnerListItem
     }
 }
 
-pub(crate) async fn get(pool: &mut PgConnection, id: PartnerId) -> Result<Option<Partner>, sqlx::Error> {
+pub(crate) async fn get(
+    pool: &mut PgConnection,
+    id: PartnerId,
+) -> Result<Option<Partner>, sqlx::Error> {
     sqlx::query(
         r#"
         SELECT *

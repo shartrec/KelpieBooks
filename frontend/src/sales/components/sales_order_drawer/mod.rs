@@ -20,13 +20,18 @@ use shared_core::{
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
-use crate::{api::Api, contexts::{
-    auth_context::use_user_context,
-    locale_context::use_locale,
-}, sales::components::sales_order_drawer::{
-    addresses_view::AddressesView,
-    lines_view::LinesView,
-}, BackendError};
+use crate::{
+    api::Api,
+    contexts::{
+        auth_context::use_user_context,
+        locale_context::use_locale,
+    },
+    sales::components::sales_order_drawer::{
+        addresses_view::AddressesView,
+        lines_view::LinesView,
+    },
+    BackendError,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum DrawerTab {
@@ -99,9 +104,9 @@ pub fn sales_order_drawer(props: &SalesOrderDrawerProps) -> Html {
                         };
                         confirm_error.set(Some(i18n.t_args(
                             "sales-orders-drawer-error-confirm",
-                            &fluent_args!["status" => error_message],  // I want the message text here
+                            &fluent_args!["status" => error_message], // I want the message text here
                         )))
-                    },
+                    }
                     Err(e) => confirm_error.set(Some(i18n.t_args(
                         "common-network-error",
                         &fluent_args!["error" => e.to_string()],

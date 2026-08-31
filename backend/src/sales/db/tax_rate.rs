@@ -7,12 +7,15 @@
  */
 use chrono::NaiveDate;
 use rocket_db_pools::sqlx;
-use shared_core::sales::models::tax::TaxRate;
+use shared_core::{
+    sales::models::tax::TaxRate,
+    OrgId,
+    TaxCategoryId,
+};
 use sqlx::{
     Acquire,
     PgConnection,
 };
-use shared_core::{OrgId, TaxCategoryId};
 
 pub async fn get_tax_rates_for_category(
     conn: &mut PgConnection,

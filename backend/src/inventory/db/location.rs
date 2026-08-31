@@ -6,13 +6,17 @@
  * (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::inventory::models::warehouse::WarehouseLocation;
+use shared_core::{
+    inventory::models::warehouse::WarehouseLocation,
+    LocationEntryId,
+    OrgId,
+    WarehouseId,
+};
 use sqlx::{
     PgConnection,
     Postgres,
     QueryBuilder,
 };
-use shared_core::{LocationEntryId, OrgId, WarehouseId};
 
 pub async fn all_by_warehouse(
     conn: &mut PgConnection,
@@ -107,8 +111,7 @@ pub async fn bulk_insert(
     );
 
     query_builder.push_values(locations, |mut b, loc| {
-        b
-            .push_bind(loc.warehouse_id)
+        b.push_bind(loc.warehouse_id)
             .push_bind(loc.organization_id)
             .push_bind(&loc.zone)
             .push_bind(&loc.aisle)

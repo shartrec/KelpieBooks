@@ -11,8 +11,11 @@ use rocket_db_pools::sqlx::{
     self,
     PgConnection,
 };
-use shared_core::ledger::models::transaction::Transaction;
-use shared_core::{OrgId, TransactionId};
+use shared_core::{
+    ledger::models::transaction::Transaction,
+    OrgId,
+    TransactionId,
+};
 
 pub(crate) async fn get(
     pool: &mut PgConnection,

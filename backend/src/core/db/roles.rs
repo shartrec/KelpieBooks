@@ -6,16 +6,19 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::core::models::{
-    auth::SystemPrivilege,
-    role::Role,
+use shared_core::{
+    core::models::{
+        auth::SystemPrivilege,
+        role::Role,
+    },
+    OrgId,
+    RoleId,
 };
 use sqlx::{
     PgConnection,
     Result,
     Row,
 };
-use shared_core::{OrgId, RoleId};
 
 pub(crate) async fn find_all_for_org(conn: &mut PgConnection, org_id: OrgId) -> Result<Vec<Role>> {
     let rows = sqlx::query(

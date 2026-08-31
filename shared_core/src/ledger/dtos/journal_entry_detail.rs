@@ -12,7 +12,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{AccountId, JournalEntryId, TransactionId};
+
+use crate::{
+    AccountId,
+    JournalEntryId,
+    TransactionId,
+};
 
 /// A DTO representing a journal entry line, including the name of the account.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

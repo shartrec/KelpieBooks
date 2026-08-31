@@ -8,8 +8,12 @@
 use rust_decimal::Decimal;
 use serde::Deserialize;
 
-use crate::sales::models::item::ItemType;
-use crate::{AccountId, TaxCategoryId, UomId};
+use crate::{
+    sales::models::item::ItemType,
+    AccountId,
+    TaxCategoryId,
+    UomId,
+};
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct ItemPayload {

@@ -15,11 +15,15 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::inventory::{
-    dtos::inventory::BulkLocationGenerateRequest,
-    models::warehouse::WarehouseLocation,
+use shared_core::{
+    inventory::{
+        dtos::inventory::BulkLocationGenerateRequest,
+        models::warehouse::WarehouseLocation,
+    },
+    LocationEntryId,
+    WarehouseId,
 };
-use shared_core::{LocationEntryId, WarehouseId};
+
 use crate::{
     core::routes::security::AuthenticatedUser,
     inventory::services::locations as location_service,
@@ -28,9 +32,7 @@ use crate::{
         RequirePrivilege,
         UseInventory,
     },
-    util::{
-        ApiError,
-    },
+    util::ApiError,
     DbKelpie,
 };
 

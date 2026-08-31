@@ -10,11 +10,16 @@ use rocket_db_pools::sqlx::{
     self,
     PgConnection,
 };
-use shared_core::sales::{
-    models::customer_payment::CustomerPayment,
-    requests::customer_payment::CreateCustomerPaymentRequest,
+use shared_core::{
+    sales::{
+        models::customer_payment::CustomerPayment,
+        requests::customer_payment::CreateCustomerPaymentRequest,
+    },
+    OrderId,
+    OrgId,
+    PaymentId,
+    TransactionId,
 };
-use shared_core::{OrderId, OrgId, PaymentId, TransactionId};
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
@@ -149,11 +154,8 @@ pub(crate) async fn update(
 }
 
 pub(crate) async fn delete(pool: &mut PgConnection, id: PaymentId) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query!(
-        "DELETE FROM customer_payments WHERE id = $1",
-        *id
-    )
-    .execute(pool)
-    .await?;
+    let result = sqlx::query!("DELETE FROM customer_payments WHERE id = $1", *id)
+        .execute(pool)
+        .await?;
     Ok(result.rows_affected())
 }

@@ -16,11 +16,14 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::sales::models::tax::{
-    TaxCategory,
-    TaxRate,
+use shared_core::{
+    sales::models::tax::{
+        TaxCategory,
+        TaxRate,
+    },
+    TaxCategoryId,
 };
-use shared_core::TaxCategoryId;
+
 use crate::{
     core::routes::security::AuthenticatedUser,
     sales::services::{
@@ -33,9 +36,7 @@ use crate::{
         UseSales,
     },
     util::{
-        types::{
-            PathDate,
-        },
+        types::PathDate,
         ApiError,
     },
     DbKelpie,

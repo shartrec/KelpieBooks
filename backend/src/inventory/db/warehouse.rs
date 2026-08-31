@@ -10,8 +10,11 @@ use rocket_db_pools::sqlx::{
     self,
     PgConnection,
 };
-use shared_core::inventory::models::warehouse::Warehouse;
-use shared_core::{OrgId, WarehouseId};
+use shared_core::{
+    inventory::models::warehouse::Warehouse,
+    OrgId,
+    WarehouseId,
+};
 // =============================================================================
 // Warehouse Operations
 // =============================================================================

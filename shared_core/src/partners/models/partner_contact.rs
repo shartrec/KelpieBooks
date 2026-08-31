@@ -14,7 +14,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{ContactId, OrgId, PartnerId};
+
+use crate::{
+    ContactId,
+    OrgId,
+    PartnerId,
+};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct PartnerContact {

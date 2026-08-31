@@ -8,13 +8,15 @@
 
 use std::str::FromStr;
 
-use shared_core::ledger::{
-    models::account_category::AccountCategory,
-    requests::account::CreateAccountRequest,
+use shared_core::{
+    ledger::{
+        models::account_category::AccountCategory,
+        requests::account::CreateAccountRequest,
+    },
+    AccountId,
 };
-use uuid::Uuid;
 use yew::prelude::*;
-use shared_core::AccountId;
+
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
@@ -72,7 +74,7 @@ pub fn add_account_modal(props: &AddAccountModalProps) -> Html {
             info.parent_id = if val.is_empty() {
                 None
             } else {
-                Uuid::from_str(&val).map(AccountId).ok()
+                AccountId::from_str(&val).ok()
             };
             state.set(info);
         })

@@ -10,8 +10,13 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{AccountId, TaxCategoryId, UomId};
-use crate::sales::models::item::ItemType;
+
+use crate::{
+    sales::models::item::ItemType,
+    AccountId,
+    TaxCategoryId,
+    UomId,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct CreateItemRequest {

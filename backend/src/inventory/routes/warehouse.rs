@@ -16,8 +16,11 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::inventory::models::warehouse::Warehouse;
-use shared_core::WarehouseId;
+use shared_core::{
+    inventory::models::warehouse::Warehouse,
+    WarehouseId,
+};
+
 use crate::{
     core::routes::security::AuthenticatedUser,
     inventory::services::warehouse as warehouse_service,
@@ -26,9 +29,7 @@ use crate::{
         RequirePrivilege,
         UseInventory,
     },
-    util::{
-        ApiError,
-    },
+    util::ApiError,
     DbKelpie,
 };
 

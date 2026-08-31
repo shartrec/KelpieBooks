@@ -12,7 +12,11 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{AccountId, TransactionId};
+
+use crate::{
+    AccountId,
+    TransactionId,
+};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct RecentTransaction {

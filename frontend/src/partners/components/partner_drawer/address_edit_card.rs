@@ -6,13 +6,18 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::partners::models::{
-    address_type::AddressType,
-    partner_address::PartnerAddress,
+use shared_core::{
+    partners::models::{
+        address_type::AddressType,
+        partner_address::PartnerAddress,
+    },
+    AddressId,
+    OrgId,
+    PartnerId,
 };
 use strum::IntoEnumIterator;
 use yew::prelude::*;
-use shared_core::{AddressId, OrgId, PartnerId};
+
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]

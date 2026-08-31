@@ -11,7 +11,11 @@ use serde::{
     Serialize,
 };
 use strum::Display;
-use crate::{AddressId, OrderId};
+
+use crate::{
+    AddressId,
+    OrderId,
+};
 
 #[derive(Clone, Debug, Display, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]

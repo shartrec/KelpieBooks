@@ -11,7 +11,13 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{ItemId, OrderId, OrderItemId, TaxCategoryId};
+
+use crate::{
+    ItemId,
+    OrderId,
+    OrderItemId,
+    TaxCategoryId,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]

@@ -6,28 +6,46 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket::{get, http::Status, post, routes, serde::json::Json, Route, State};
-use rocket::http::ContentType;
+use rocket::{
+    get,
+    http::{
+        ContentType,
+        Status,
+    },
+    post,
+    routes,
+    serde::json::Json,
+    Route,
+    State,
+};
 use rocket_db_pools::Connection;
-use shared_core::OrderId;
-use shared_core::sales::{
-    dtos::sales_order_dto::SalesOrderDto,
-    models::sales_order::SalesOrder,
-    requests::sales_order::CreateSalesOrderRequest,
+use shared_core::{
+    sales::{
+        dtos::sales_order_dto::SalesOrderDto,
+        models::sales_order::SalesOrder,
+        requests::sales_order::CreateSalesOrderRequest,
+    },
+    OrderId,
 };
 
-use crate::{sales::services::sales_order_service, security::{
-    ManageSales,
-    RequirePrivilege,
-    UseSales,
-}, util::{
-    types::{
-        FormSalesOrderStatus,
+use crate::{
+    sales::{
+        reports,
+        services::sales_order_service,
     },
-    ApiError,
-}, DbKelpie, TemplateConfig};
-use crate::sales::reports;
-use crate::util::reports::DownloadFile;
+    security::{
+        ManageSales,
+        RequirePrivilege,
+        UseSales,
+    },
+    util::{
+        reports::DownloadFile,
+        types::FormSalesOrderStatus,
+        ApiError,
+    },
+    DbKelpie,
+    TemplateConfig,
+};
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -121,14 +139,17 @@ async fn print_sales_invoice(
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
 
-    if let Some(order) = crate::sales::db::sales_order::get_sales_order(&mut pool, user.organization_id, id).await? {
+    if let Some(order) =
+        crate::sales::db::sales_order::get_sales_order(&mut pool, user.organization_id, id).await?
+    {
         let name = format!("Invoice-{}.pdf", order.order.order_number);
 
-        let invoice_pdf =
-            reports::invoice::generate_invoice(&mut pool, user, config, id).await?;
+        let invoice_pdf = reports::invoice::generate_invoice(&mut pool, user, config, id).await?;
         Ok(DownloadFile::new(invoice_pdf, name, ContentType::PDF))
     } else {
-        Err(ApiError::NotFound(format!("Order {} not found", *id).into()))
+        Err(ApiError::NotFound(
+            format!("Order {} not found", *id).into(),
+        ))
     }
 }
 
@@ -140,12 +161,15 @@ async fn print_picking_list(
     id: OrderId,
 ) -> Result<DownloadFile, ApiError> {
     let user = guard.0;
-    if let Some(order) = crate::sales::db::sales_order::get_sales_order(&mut pool, user.organization_id, id).await? {
+    if let Some(order) =
+        crate::sales::db::sales_order::get_sales_order(&mut pool, user.organization_id, id).await?
+    {
         let name = format!("Picklist-{}.pdf", order.order.order_number);
-        let picklist_pdf =
-            reports::invoice::generate_picklist(&mut pool, user, config, id).await?;
+        let picklist_pdf = reports::invoice::generate_picklist(&mut pool, user, config, id).await?;
         Ok(DownloadFile::new(picklist_pdf, name, ContentType::PDF))
     } else {
-        Err(ApiError::NotFound(format!("Order {} not found", *id).into()))
+        Err(ApiError::NotFound(
+            format!("Order {} not found", *id).into(),
+        ))
     }
 }

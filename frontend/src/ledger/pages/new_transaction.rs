@@ -18,19 +18,23 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use shared_core::ledger::{
-    dtos::transaction_detail::TransactionDetail,
-    models::account::Account,
-    requests::transaction::{
-        CreateTransactionRequest,
-        JournalEntryLine,
-        UpdateTransactionRequest,
+use shared_core::{
+    ledger::{
+        dtos::transaction_detail::TransactionDetail,
+        models::account::Account,
+        requests::transaction::{
+            CreateTransactionRequest,
+            JournalEntryLine,
+            UpdateTransactionRequest,
+        },
     },
+    AccountId,
+    TransactionId,
 };
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::{AccountId, TransactionId};
+
 use crate::{
     api::Api,
     contexts::{

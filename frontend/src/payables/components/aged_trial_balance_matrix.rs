@@ -9,10 +9,13 @@
 use chrono::Local;
 use fluent::fluent_args;
 use rust_decimal::dec;
-use shared_core::payables::dtos::aged_payable_summary::AgedPayableSummary;
+use shared_core::{
+    payables::dtos::aged_payable_summary::AgedPayableSummary,
+    PartnerId,
+};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::PartnerId;
+
 use crate::{
     api::Api,
     contexts::{

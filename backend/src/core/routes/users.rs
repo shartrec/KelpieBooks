@@ -17,18 +17,21 @@ use rocket::{
 };
 use rocket_db_pools::Connection;
 use serde::Deserialize;
-use shared_core::core::{
-    dtos::user_detail::{
-        AuthUserDetail,
-        UserDetail,
+use shared_core::{
+    core::{
+        dtos::user_detail::{
+            AuthUserDetail,
+            UserDetail,
+        },
+        requests::user::{
+            CreateUserRequest,
+            UpdateUserRequest,
+        },
     },
-    requests::user::{
-        CreateUserRequest,
-        UpdateUserRequest,
-    },
+    UserId,
 };
 use sqlx::Acquire;
-use shared_core::{UserId};
+
 use crate::{
     core::{
         db::user,

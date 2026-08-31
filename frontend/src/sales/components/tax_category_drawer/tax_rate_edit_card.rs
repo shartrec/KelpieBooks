@@ -6,8 +6,13 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use std::str::FromStr;
+
 use rust_decimal::Decimal;
-use shared_core::{ledger::models::account::Account, sales::models::tax::TaxRate, AccountId};
+use shared_core::{
+    ledger::models::account::Account,
+    sales::models::tax::TaxRate,
+    AccountId,
+};
 use web_sys::{
     HtmlInputElement,
     HtmlSelectElement,

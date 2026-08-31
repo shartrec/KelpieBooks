@@ -11,10 +11,15 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{AddressId, PartnerId, WarehouseId};
-use crate::sales::models::{
-    order_address::OrderAddress,
-    sales_order_item::SalesOrderItem,
+
+use crate::{
+    sales::models::{
+        order_address::OrderAddress,
+        sales_order_item::SalesOrderItem,
+    },
+    AddressId,
+    PartnerId,
+    WarehouseId,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

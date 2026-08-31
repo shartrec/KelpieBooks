@@ -8,13 +8,17 @@
 
 use fluent::fluent_args;
 use rust_decimal::dec;
-use shared_core::{partners::models::partner::Partner, payables::{
-    dtos::{
-        vendor_invoice_dto::VendorInvoiceDto,
-        vendor_invoice_list_item::VendorInvoiceListItem,
+use shared_core::{
+    partners::models::partner::Partner,
+    payables::{
+        dtos::{
+            vendor_invoice_dto::VendorInvoiceDto,
+            vendor_invoice_list_item::VendorInvoiceListItem,
+        },
+        models::invoice_status::InvoiceStatus,
     },
-    models::invoice_status::InvoiceStatus,
-}, InvoiceId};
+    InvoiceId,
+};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 

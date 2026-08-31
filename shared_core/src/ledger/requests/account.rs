@@ -10,10 +10,13 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::AccountId;
-use crate::ledger::models::{
-    account_category::AccountCategory,
-    system_tag::SystemTag,
+
+use crate::{
+    ledger::models::{
+        account_category::AccountCategory,
+        system_tag::SystemTag,
+    },
+    AccountId,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

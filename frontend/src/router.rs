@@ -6,8 +6,11 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
+use shared_core::{
+    AccountId,
+    WarehouseId,
+};
 use yew_router::Routable;
-use shared_core::{AccountId, WarehouseId};
 
 #[derive(Clone, Routable, PartialEq)]
 pub enum Route {

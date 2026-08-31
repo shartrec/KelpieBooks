@@ -14,11 +14,14 @@ use serde::{
     Serialize,
 };
 
-use crate::ledger::models::{
-    account_category::AccountCategory,
-    system_tag::SystemTag,
+use crate::{
+    ledger::models::{
+        account_category::AccountCategory,
+        system_tag::SystemTag,
+    },
+    AccountId,
+    OrgId,
 };
-use crate::{AccountId, OrgId};
 
 /// A DTO that combines account data with its calculated balance.
 /// This is the structure that will be sent to the frontend.

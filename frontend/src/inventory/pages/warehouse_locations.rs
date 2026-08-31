@@ -7,13 +7,16 @@
  */
 
 use fluent::fluent_args;
-use shared_core::inventory::models::warehouse::{
-    Warehouse,
-    WarehouseLocation,
+use shared_core::{
+    inventory::models::warehouse::{
+        Warehouse,
+        WarehouseLocation,
+    },
+    WarehouseId,
 };
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::WarehouseId;
+
 use crate::{
     api::Api,
     contexts::{

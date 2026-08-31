@@ -5,7 +5,12 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use shared_core::{partners::dtos::partner_list_item::PartnerListItem, sales::models::item::Item, ItemId, PartnerId};
+use shared_core::{
+    partners::dtos::partner_list_item::PartnerListItem,
+    sales::models::item::Item,
+    ItemId,
+    PartnerId,
+};
 
 use crate::core::components::SearchableItem;
 

@@ -7,8 +7,12 @@
  */
 use chrono::NaiveDate;
 use rocket_db_pools::Connection;
-use shared_core::sales::models::tax::TaxRate;
-use shared_core::{OrgId, TaxCategoryId};
+use shared_core::{
+    sales::models::tax::TaxRate,
+    OrgId,
+    TaxCategoryId,
+};
+
 use crate::{
     sales::db::tax_rate,
     util::ApiError,
@@ -30,13 +34,9 @@ pub async fn get_current_tax_rate_for_category(
     category_id: TaxCategoryId,
     effective_date: NaiveDate,
 ) -> Result<Option<TaxRate>, ApiError> {
-    let rate = tax_rate::get_current_tax_rate_for_category(
-        pool,
-        org_id,
-        category_id,
-        effective_date,
-    )
-    .await?;
+    let rate =
+        tax_rate::get_current_tax_rate_for_category(pool, org_id, category_id, effective_date)
+            .await?;
     Ok(rate)
 }
 

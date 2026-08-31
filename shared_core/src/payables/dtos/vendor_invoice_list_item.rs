@@ -12,8 +12,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{InvoiceId, PartnerId};
-use crate::payables::models::invoice_status::InvoiceStatus;
+
+use crate::{
+    payables::models::invoice_status::InvoiceStatus,
+    InvoiceId,
+    PartnerId,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]

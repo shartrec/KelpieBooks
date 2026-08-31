@@ -5,11 +5,14 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use std::str::FromStr;
 
-use shared_core::partners::requests::partner::CreatePartnerRequest;
-use uuid::Uuid;
+use shared_core::{
+    partners::requests::partner::CreatePartnerRequest,
+    AccountId,
+};
 use yew::prelude::*;
-use shared_core::AccountId;
+
 use crate::contexts::locale_context::use_locale;
 
 #[derive(Properties, PartialEq)]
@@ -90,7 +93,7 @@ pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
             let value = e
                 .target_unchecked_into::<web_sys::HtmlSelectElement>()
                 .value();
-            info.default_ap_account_id = Uuid::parse_str(&value).map(AccountId).ok();
+            info.default_ap_account_id = AccountId::from_str(&value).ok();
             state.set(info);
         })
     };
@@ -102,7 +105,7 @@ pub fn add_partner_modal(props: &AddPartnerModalProps) -> Html {
             let value = e
                 .target_unchecked_into::<web_sys::HtmlSelectElement>()
                 .value();
-            info.default_ar_account_id = Uuid::parse_str(&value).map(AccountId).ok();
+            info.default_ar_account_id = AccountId::from_str(&value).ok();
             state.set(info);
         })
     };

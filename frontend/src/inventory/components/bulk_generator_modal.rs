@@ -5,14 +5,17 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  * (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use shared_core::inventory::dtos::inventory::{
-    AlphaRange,
-    BulkLocationGenerateRequest,
-    NumericRange,
+use shared_core::{
+    inventory::dtos::inventory::{
+        AlphaRange,
+        BulkLocationGenerateRequest,
+        NumericRange,
+    },
+    WarehouseId,
 };
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::WarehouseId;
+
 use crate::{
     api::Api,
     contexts::{

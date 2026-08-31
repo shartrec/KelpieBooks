@@ -9,16 +9,19 @@
 use std::rc::Rc;
 
 use fluent::fluent_args;
-use shared_core::core::{
-    models::role::Role,
-    requests::role::{
-        CreateRoleRequest,
-        UpdateRoleRequest,
+use shared_core::{
+    core::{
+        models::role::Role,
+        requests::role::{
+            CreateRoleRequest,
+            UpdateRoleRequest,
+        },
     },
+    RoleId,
 };
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::RoleId;
+
 use crate::{
     api::Api,
     contexts::{

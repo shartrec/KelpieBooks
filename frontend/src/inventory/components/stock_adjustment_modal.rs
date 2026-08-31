@@ -5,20 +5,25 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  * (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use std::str::FromStr;
 
 use rust_decimal::Decimal;
-use shared_core::{inventory::{
-    dtos::inventory::{
-        AdjustStockItemLine,
-        AdjustmentReason,
-        StockAdjustmentRequest,
+use shared_core::{
+    inventory::{
+        dtos::inventory::{
+            AdjustStockItemLine,
+            AdjustmentReason,
+            StockAdjustmentRequest,
+        },
+        models::warehouse::{
+            Warehouse,
+            WarehouseLocation,
+        },
     },
-    models::warehouse::{
-        Warehouse,
-        WarehouseLocation,
-    },
-}, sales::models::item::Item, LocationEntryId, WarehouseId};
-use uuid::Uuid;
+    sales::models::item::Item,
+    LocationEntryId,
+    WarehouseId,
+};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
@@ -180,7 +185,7 @@ pub fn stock_adjustment_modal(props: &StockAdjustmentModalProps) -> Html {
                             let state = request.clone();
                             Callback::from(move |e: Event| {
                                 let val = e.target_unchecked_into::<web_sys::HtmlSelectElement>().value();
-                                if let Ok(id) = Uuid::parse_str(&val).map(WarehouseId) {
+                                if let Ok(id) = WarehouseId::from_str(&val) {
                                     let mut req = (*state).clone();
                                     req.warehouse_id = id;
                                     state.set(req);
@@ -202,7 +207,7 @@ pub fn stock_adjustment_modal(props: &StockAdjustmentModalProps) -> Html {
                                 let state = request.clone();
                                 Callback::from(move |e: Event| {
                                     let val = e.target_unchecked_into::<web_sys::HtmlSelectElement>().value();
-                                    if let Ok(loc_id) = Uuid::parse_str(&val).map(LocationEntryId) {
+                                    if let Ok(loc_id) = LocationEntryId::from_str(&val) {
                                         let mut req = (*state).clone();
                                         if let Some(line) = req.items.get_mut(0) {
                                             line.location_id = loc_id;

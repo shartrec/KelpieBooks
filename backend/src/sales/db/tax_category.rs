@@ -10,8 +10,11 @@ use rocket_db_pools::sqlx::{
     self,
     PgConnection,
 };
-use shared_core::sales::models::tax::TaxCategory;
-use shared_core::{OrgId, TaxCategoryId};
+use shared_core::{
+    sales::models::tax::TaxCategory,
+    OrgId,
+    TaxCategoryId,
+};
 
 pub async fn all(conn: &mut PgConnection, org_id: OrgId) -> Result<Vec<TaxCategory>, sqlx::Error> {
     sqlx::query_as!(
@@ -78,7 +81,11 @@ pub async fn update(
     .await
 }
 
-pub async fn delete(conn: &mut PgConnection, org_id: OrgId, id: TaxCategoryId) -> Result<u64, sqlx::Error> {
+pub async fn delete(
+    conn: &mut PgConnection,
+    org_id: OrgId,
+    id: TaxCategoryId,
+) -> Result<u64, sqlx::Error> {
     let result = sqlx::query!(
         "DELETE FROM tax_categories WHERE id = $1 AND organization_id = $2",
         *id,

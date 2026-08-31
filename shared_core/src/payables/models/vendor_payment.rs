@@ -16,7 +16,14 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{AccountId, OrgId, PartnerId, PaymentId, TransactionId};
+
+use crate::{
+    AccountId,
+    OrgId,
+    PartnerId,
+    PaymentId,
+    TransactionId,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct VendorPayment {

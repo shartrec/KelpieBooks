@@ -10,15 +10,20 @@ use rocket_db_pools::sqlx::{
     self,
     PgConnection,
 };
-use shared_core::sales::{
-    models::item::{
-        Item,
-        ItemType,
-        UnitOfMeasure,
+use shared_core::{
+    sales::{
+        models::item::{
+            Item,
+            ItemType,
+            UnitOfMeasure,
+        },
+        requests::item::CreateItemRequest,
     },
-    requests::item::CreateItemRequest,
+    ItemId,
+    OrgId,
+    TaxCategoryId,
+    UomId,
 };
-use shared_core::{ItemId, OrgId, UomId, TaxCategoryId};
 
 pub(crate) async fn get_active_uoms(
     conn: &mut PgConnection,
@@ -209,7 +214,11 @@ pub async fn update(
     .await
 }
 
-pub async fn delete(conn: &mut PgConnection, org_id: OrgId, id: ItemId) -> Result<u64, sqlx::Error> {
+pub async fn delete(
+    conn: &mut PgConnection,
+    org_id: OrgId,
+    id: ItemId,
+) -> Result<u64, sqlx::Error> {
     let result = sqlx::query!(
         "DELETE FROM items WHERE id = $1 AND organization_id = $2",
         *id,

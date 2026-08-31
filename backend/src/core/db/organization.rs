@@ -10,8 +10,10 @@ use rocket_db_pools::sqlx::{
     self,
     PgConnection,
 };
-use shared_core::core::models::organization::Organization;
-use shared_core::OrgId;
+use shared_core::{
+    core::models::organization::Organization,
+    OrgId,
+};
 
 pub(crate) async fn get(
     pool: &mut PgConnection,

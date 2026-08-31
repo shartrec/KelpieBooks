@@ -18,7 +18,14 @@ use strum::{
     Display,
     EnumString,
 };
-use crate::{AccountId, ItemId, OrgId, TaxCategoryId, UomId};
+
+use crate::{
+    AccountId,
+    ItemId,
+    OrgId,
+    TaxCategoryId,
+    UomId,
+};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, EnumString, Display, Copy)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -60,7 +67,7 @@ pub struct Item {
     pub name: String,
     pub description: Option<String>,
     pub item_type: ItemType,
-    pub uom_id: UomId,        // 💡 Linked Unit of Measure ID
+    pub uom_id: UomId,       // 💡 Linked Unit of Measure ID
     pub unit_price: Decimal, // 💡 Scaled to 4 decimal places (e.g. 1245 = $0.1245)
     #[cfg_attr(feature = "backend", sqlx(rename = "purchase_unit_cost"))]
     pub unit_cost: Decimal, // 💡 Scaled to 4 decimal places (e.g. 1245 = $0.1245)

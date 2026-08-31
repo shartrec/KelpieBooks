@@ -6,10 +6,14 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use fluent::fluent_args;
-use shared_core::{ledger::models::account_category::AccountCategory, sales::models::tax::{
-    TaxCategory,
-    TaxRate,
-}, TaxRateId};
+use shared_core::{
+    ledger::models::account_category::AccountCategory,
+    sales::models::tax::{
+        TaxCategory,
+        TaxRate,
+    },
+    TaxRateId,
+};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 

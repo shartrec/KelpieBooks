@@ -16,20 +16,23 @@ use rocket::{
 };
 use rocket_db_pools::Connection;
 use rust_decimal::Decimal;
-use shared_core::{InvoiceId, PartnerId};
-use shared_core::payables::{
-    dtos::{
-        vendor_invoice_dto::VendorInvoiceDto,
-        vendor_invoice_list_item::VendorInvoiceListItem,
+use shared_core::{
+    payables::{
+        dtos::{
+            vendor_invoice_dto::VendorInvoiceDto,
+            vendor_invoice_list_item::VendorInvoiceListItem,
+        },
+        models::{
+            vendor_invoice_item::VendorInvoiceItem,
+            vendor_payment::VendorPayment,
+        },
+        requests::vendor_invoice::{
+            CreateVendorInvoiceRequest,
+            UpdateVendorInvoiceRequest,
+        },
     },
-    models::{
-        vendor_invoice_item::VendorInvoiceItem,
-        vendor_payment::VendorPayment,
-    },
-    requests::vendor_invoice::{
-        CreateVendorInvoiceRequest,
-        UpdateVendorInvoiceRequest,
-    },
+    InvoiceId,
+    PartnerId,
 };
 
 use crate::{

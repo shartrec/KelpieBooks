@@ -5,9 +5,10 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use shared_core::OrgId;
 use sqlx::PgConnection;
 use strum::Display;
-use shared_core::OrgId;
+
 use crate::util::ApiError;
 
 #[derive(Display)]

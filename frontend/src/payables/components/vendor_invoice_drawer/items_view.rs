@@ -8,10 +8,15 @@
 use chrono::Utc;
 use fluent::fluent_args;
 use rust_decimal::dec;
-use shared_core::{ledger::models::account_category::AccountCategory, payables::{
-    dtos::vendor_invoice_dto::VendorInvoiceDto,
-    models::vendor_invoice_item::VendorInvoiceItem,
-}, AccountId, InvoiceItemId};
+use shared_core::{
+    ledger::models::account_category::AccountCategory,
+    payables::{
+        dtos::vendor_invoice_dto::VendorInvoiceDto,
+        models::vendor_invoice_item::VendorInvoiceItem,
+    },
+    AccountId,
+    InvoiceItemId,
+};
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;

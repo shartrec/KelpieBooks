@@ -9,8 +9,8 @@
 use std::rc::Rc;
 
 use chrono::NaiveDate;
-use yew::prelude::*;
 use shared_core::OrgId;
+use yew::prelude::*;
 
 pub type OrgContextHandle = UseReducerHandle<OrgState>;
 

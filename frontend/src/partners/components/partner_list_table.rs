@@ -7,18 +7,24 @@
  */
 
 use fluent::fluent_args;
-use shared_core::{core::models::auth::SystemPrivilege, ledger::models::{
-    account::Account,
-    account_category::AccountCategory,
-}, partners::{
-    dtos::partner_list_item::PartnerListItem,
-    models::{
-        partner::Partner,
-        partner_address::PartnerAddress,
-        partner_contact::PartnerContact,
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    ledger::models::{
+        account::Account,
+        account_category::AccountCategory,
     },
-    requests::partner::CreatePartnerRequest,
-}, AccountId, PartnerId};
+    partners::{
+        dtos::partner_list_item::PartnerListItem,
+        models::{
+            partner::Partner,
+            partner_address::PartnerAddress,
+            partner_contact::PartnerContact,
+        },
+        requests::partner::CreatePartnerRequest,
+    },
+    AccountId,
+    PartnerId,
+};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 

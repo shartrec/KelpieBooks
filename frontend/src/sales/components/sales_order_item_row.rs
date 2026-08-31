@@ -8,11 +8,15 @@
 use fluent::fluent_args;
 use log::info;
 use rust_decimal::Decimal;
-use shared_core::{inventory::dtos::inventory::ItemStockBalancesResponse, sales::models::{
-    item::Item,
-    sales_order_item::SalesOrderItem,
-    tax::TaxRate,
-}, OrderItemId};
+use shared_core::{
+    inventory::dtos::inventory::ItemStockBalancesResponse,
+    sales::models::{
+        item::Item,
+        sales_order_item::SalesOrderItem,
+        tax::TaxRate,
+    },
+    OrderItemId,
+};
 use yew::prelude::*;
 use yew_router::hooks::use_navigator;
 

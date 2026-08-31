@@ -9,12 +9,16 @@ use std::collections::HashMap;
 
 use chrono::NaiveDate;
 use rust_decimal::dec;
-use shared_core::sales::{
-    dtos::aged_receivable_summary::AgedReceivableSummary,
-    models::sales_document_status::SalesDocumentStatus,
+use shared_core::{
+    sales::{
+        dtos::aged_receivable_summary::AgedReceivableSummary,
+        models::sales_document_status::SalesDocumentStatus,
+    },
+    OrgId,
+    PartnerId,
 };
 use sqlx::PgConnection;
-use shared_core::{OrgId, PartnerId};
+
 use crate::{
     sales::db::sales_order::list_sales_orders,
     util::ApiError,

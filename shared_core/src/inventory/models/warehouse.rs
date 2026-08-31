@@ -13,7 +13,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{LocationEntryId, OrgId, WarehouseId};
+
+use crate::{
+    LocationEntryId,
+    OrgId,
+    WarehouseId,
+};
 
 #[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]

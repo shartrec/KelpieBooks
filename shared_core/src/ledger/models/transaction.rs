@@ -15,7 +15,11 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{OrgId, TransactionId};
+
+use crate::{
+    OrgId,
+    TransactionId,
+};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Transaction {

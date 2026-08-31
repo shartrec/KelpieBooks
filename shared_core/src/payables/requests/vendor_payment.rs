@@ -12,8 +12,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{AccountId, PartnerId};
-use crate::payables::models::vendor_payment_allocation::VendorPaymentAllocation;
+
+use crate::{
+    payables::models::vendor_payment_allocation::VendorPaymentAllocation,
+    AccountId,
+    PartnerId,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct CreateVendorPaymentRequest {

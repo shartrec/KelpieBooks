@@ -7,8 +7,12 @@
  */
 
 use rocket_db_pools::Connection;
-use shared_core::inventory::models::warehouse::Warehouse;
-use shared_core::{OrgId, WarehouseId};
+use shared_core::{
+    inventory::models::warehouse::Warehouse,
+    OrgId,
+    WarehouseId,
+};
+
 use crate::{
     inventory::db::{
         location as locations_db,

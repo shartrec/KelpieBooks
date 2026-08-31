@@ -21,10 +21,11 @@ use rocket::{
     request::FromParam,
 };
 use shared_core::{
-    payables::models::invoice_status::InvoiceStatus, sales::models::{
+    payables::models::invoice_status::InvoiceStatus,
+    sales::models::{
         item::ItemType,
         sales_document_status::SalesDocumentStatus,
-    }
+    },
 };
 
 /// A newtype wrapper for `InvoiceStatus` to implement `FromFormField` and satisfy the orphan rule.

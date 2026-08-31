@@ -15,8 +15,11 @@ use serde::{
     Serialize,
 };
 
-use crate::core::models::role::Role;
-use crate::{OrgId, UserId};
+use crate::{
+    core::models::role::Role,
+    OrgId,
+    UserId,
+};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct UserWithOrg {

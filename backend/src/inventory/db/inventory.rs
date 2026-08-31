@@ -10,16 +10,24 @@ use rocket_db_pools::sqlx::{
     PgConnection,
 };
 use rust_decimal::Decimal;
-use shared_core::{inventory::{
-    dtos::inventory::{
-        ItemLocationBalanceDto,
-        ItemStockBalancesResponse,
+use shared_core::{
+    inventory::{
+        dtos::inventory::{
+            ItemLocationBalanceDto,
+            ItemStockBalancesResponse,
+        },
+        models::warehouse_profile::{
+            ItemWarehouseProfile,
+            WarehouseInventoryBalance,
+        },
     },
-    models::warehouse_profile::{
-        ItemWarehouseProfile,
-        WarehouseInventoryBalance,
-    },
-}, sales::models::item::ItemType, ItemId, LocationEntryId, OrgId, WarehouseId};
+    sales::models::item::ItemType,
+    ItemId,
+    LocationEntryId,
+    OrgId,
+    WarehouseId,
+};
+
 use crate::util::ApiError;
 // =============================================================================
 // Item Warehouse Profile Operations (Physical Attributes Extension)
@@ -244,7 +252,6 @@ pub async fn adjust_allocated(
     item_id: ItemId,
     delta: Decimal,
 ) -> Result<WarehouseInventoryBalance, ApiError> {
-
     let w_bal = sqlx::query_as!(
         WarehouseInventoryBalance,
         r#"
@@ -260,8 +267,8 @@ pub async fn adjust_allocated(
         *item_id,
         *org_id,
     )
-        .fetch_optional(&mut *conn)
-        .await?;
+    .fetch_optional(&mut *conn)
+    .await?;
 
     match w_bal {
         Some(w_bal) => Ok(w_bal),
@@ -290,5 +297,4 @@ pub async fn adjust_allocated(
 
         }
     }
-
 }

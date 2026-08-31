@@ -10,6 +10,7 @@ use serde::{
     Deserialize,
     Serialize,
 };
+
 use crate::PartnerId;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

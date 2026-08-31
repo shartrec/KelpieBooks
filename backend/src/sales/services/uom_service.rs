@@ -7,8 +7,12 @@
  */
 
 use rocket_db_pools::Connection;
-use shared_core::sales::models::item::UnitOfMeasure;
-use shared_core::{OrgId, UomId};
+use shared_core::{
+    sales::models::item::UnitOfMeasure,
+    OrgId,
+    UomId,
+};
+
 use crate::{
     sales::db::{
         item as item_db,

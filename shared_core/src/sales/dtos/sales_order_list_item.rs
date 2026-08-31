@@ -12,11 +12,15 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{OrderItemId, PartnerId};
-use crate::sales::models::{
-    fulfillment_status::FulfillmentStatus,
-    payment_status::PaymentStatus,
-    sales_document_status::SalesDocumentStatus,
+
+use crate::{
+    sales::models::{
+        fulfillment_status::FulfillmentStatus,
+        payment_status::PaymentStatus,
+        sales_document_status::SalesDocumentStatus,
+    },
+    OrderItemId,
+    PartnerId,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

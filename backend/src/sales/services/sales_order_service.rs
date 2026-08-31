@@ -11,17 +11,25 @@ use rocket_db_pools::sqlx::{
     PgConnection,
 };
 use rust_decimal::Decimal;
-use shared_core::{inventory::models::stock_balance::{
-    ReferenceType,
-    TransactionType,
-}, sales::{
-    dtos::sales_order_dto::SalesOrderDto,
-    models::{
-        sales_document_status::SalesDocumentStatus,
-        sales_order::SalesOrder,
+use shared_core::{
+    inventory::models::stock_balance::{
+        ReferenceType,
+        TransactionType,
     },
-    requests::sales_order::CreateSalesOrderRequest,
-}, ItemId, OrderId, OrgId, PartnerId, UserId};
+    sales::{
+        dtos::sales_order_dto::SalesOrderDto,
+        models::{
+            sales_document_status::SalesDocumentStatus,
+            sales_order::SalesOrder,
+        },
+        requests::sales_order::CreateSalesOrderRequest,
+    },
+    ItemId,
+    OrderId,
+    OrgId,
+    PartnerId,
+    UserId,
+};
 use sqlx::Acquire;
 
 use crate::{
@@ -159,13 +167,13 @@ pub(crate) async fn confirm_order(
         let item = item_db::get(&mut tx, org_id, line.item_id).await?;
         if let Some(item) = item {
             if item.is_stocked() {
-
                 let item_bal = inventory_db::get_first_balance_for_item_warehouse(
                     &mut tx,
                     org_id,
                     line.item_id,
-                    warehouse_id
-                ).await?;
+                    warehouse_id,
+                )
+                .await?;
 
                 if let Some(bal) = item_bal {
                     inventory_db::adjust_allocated(
@@ -176,7 +184,7 @@ pub(crate) async fn confirm_order(
                         line.item_id,
                         line.quantity,
                     )
-                        .await?;
+                    .await?;
 
                     log_transaction(
                         &mut tx,
@@ -193,11 +201,12 @@ pub(crate) async fn confirm_order(
                             created_by: user_id,
                         },
                     )
-                        .await?;
+                    .await?;
                 } else {
-                    return Err(ApiError::BadRequest(
-                        format!("Item {} has no stocking location configured", item.name),
-                    ));
+                    return Err(ApiError::BadRequest(format!(
+                        "Item {} has no stocking location configured",
+                        item.name
+                    )));
                 }
             }
         }

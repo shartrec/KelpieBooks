@@ -5,15 +5,19 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use std::str::FromStr;
+
 use rust_decimal::{
     dec,
     Decimal,
 };
-use shared_core::ledger::requests::transaction::JournalEntryLine;
-use uuid::Uuid;
+use shared_core::{
+    ledger::requests::transaction::JournalEntryLine,
+    AccountId,
+};
 use web_sys::HtmlSelectElement;
 use yew::prelude::*;
-use shared_core::AccountId;
+
 use crate::{
     contexts::locale_context::use_locale,
     core::components::currency_input::DecimalInput,
@@ -53,7 +57,7 @@ pub fn journal_entry_row(props: &JournalEntryRowProps) -> Html {
         let entry = props.entry.clone();
         Callback::from(move |e: Event| {
             let value = e.target_unchecked_into::<HtmlSelectElement>().value();
-            if let Ok(id) = Uuid::parse_str(&value).map(AccountId) {
+            if let Ok(id) = AccountId::from_str(&value) {
                 let mut updated_entry = entry.clone();
                 updated_entry.account_id = id;
                 on_change.emit(updated_entry);

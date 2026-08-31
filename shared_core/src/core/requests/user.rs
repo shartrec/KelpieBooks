@@ -10,6 +10,7 @@ use serde::{
     Deserialize,
     Serialize,
 };
+
 use crate::RoleId;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

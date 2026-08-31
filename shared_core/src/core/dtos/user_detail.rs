@@ -10,7 +10,11 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{OrgId, UserId};
+
+use crate::{
+    OrgId,
+    UserId,
+};
 
 /// A Data Transfer Object representing the user details that are safe
 /// to send to the frontend. This struct explicitly omits sensitive

@@ -7,16 +7,19 @@
  */
 
 use fluent::fluent_args;
-use shared_core::sales::{
-    dtos::sales_order_dto::SalesOrderDto,
-    models::{
-        sales_document_status::SalesDocumentStatus,
-        sales_order::SalesOrder,
+use shared_core::{
+    sales::{
+        dtos::sales_order_dto::SalesOrderDto,
+        models::{
+            sales_document_status::SalesDocumentStatus,
+            sales_order::SalesOrder,
+        },
     },
+    OrderId,
 };
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::OrderId;
+
 use crate::{
     api::Api,
     contexts::{

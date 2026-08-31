@@ -13,14 +13,17 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::core::{
-    dtos::organization::{
-        AuditModeRequest,
-        LockDateRequest,
+use shared_core::{
+    core::{
+        dtos::organization::{
+            AuditModeRequest,
+            LockDateRequest,
+        },
+        models::organization::Organization,
     },
-    models::organization::Organization,
+    OrgId,
 };
-use shared_core::OrgId;
+
 use crate::{
     core::{
         db,
@@ -30,9 +33,7 @@ use crate::{
         ManageOrganization,
         RequirePrivilege,
     },
-    util::{
-        ApiError,
-    },
+    util::ApiError,
     DbKelpie,
 };
 

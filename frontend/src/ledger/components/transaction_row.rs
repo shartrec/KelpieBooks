@@ -7,13 +7,16 @@
  */
 
 use gloo_net::http::Request;
-use shared_core::ledger::dtos::{
-    journal_entry_with_balance::JournalEntryWithBalance,
-    transaction_detail::TransactionDetail,
+use shared_core::{
+    ledger::dtos::{
+        journal_entry_with_balance::JournalEntryWithBalance,
+        transaction_detail::TransactionDetail,
+    },
+    TransactionId,
 };
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::TransactionId;
+
 use crate::{
     contexts::{
         locale_context::use_locale,

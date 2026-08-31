@@ -7,14 +7,18 @@
  */
 
 use rocket_db_pools::Connection;
-use shared_core::sales::{
-    models::item::{
-        Item,
-        ItemType,
+use shared_core::{
+    sales::{
+        models::item::{
+            Item,
+            ItemType,
+        },
+        requests::item::CreateItemRequest,
     },
-    requests::item::CreateItemRequest,
+    ItemId,
+    OrgId,
 };
-use shared_core::{ItemId, OrgId};
+
 use crate::{
     sales::db::item as item_db,
     util::ApiError,

@@ -12,23 +12,29 @@ use rocket_db_pools::sqlx::{
     Row,
 };
 use rust_decimal::Decimal;
-use shared_core::sales::{
-    dtos::sales_order_dto::SalesOrderDto,
-    models::{
-        fulfillment_status::FulfillmentStatus,
-        order_address::{
-            AddressType,
-            OrderAddress,
+use shared_core::{
+    sales::{
+        dtos::sales_order_dto::SalesOrderDto,
+        models::{
+            fulfillment_status::FulfillmentStatus,
+            order_address::{
+                AddressType,
+                OrderAddress,
+            },
+            payment_status::PaymentStatus,
+            sales_document_status::SalesDocumentStatus,
+            sales_order::SalesOrder,
+            sales_order_item::SalesOrderItem,
         },
-        payment_status::PaymentStatus,
-        sales_document_status::SalesDocumentStatus,
-        sales_order::SalesOrder,
-        sales_order_item::SalesOrderItem,
+        requests::sales_order::CreateSalesOrderRequest,
     },
-    requests::sales_order::CreateSalesOrderRequest,
+    AddressId,
+    OrderId,
+    OrgId,
+    PartnerId,
+    TaxCategoryId,
 };
 use sqlx::Acquire;
-use shared_core::{AddressId, OrderId, OrgId, PartnerId, TaxCategoryId};
 
 fn from_row_to_sales_order_list_item(row: &sqlx::postgres::PgRow) -> SalesOrder {
     SalesOrder {

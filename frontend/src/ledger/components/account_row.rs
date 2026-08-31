@@ -9,7 +9,11 @@
 use std::collections::HashSet;
 
 use rust_decimal::dec;
-use shared_core::{core::models::auth::SystemPrivilege, ledger::dtos::account_with_balance::AccountWithBalance, AccountId};
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    ledger::dtos::account_with_balance::AccountWithBalance,
+    AccountId,
+};
 use yew::prelude::*;
 use yew_router::prelude::*;
 

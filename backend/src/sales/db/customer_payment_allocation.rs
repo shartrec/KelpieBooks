@@ -10,8 +10,10 @@ use rocket_db_pools::sqlx::{
     self,
     PgConnection,
 };
-use shared_core::sales::models::customer_payment_allocation::CustomerPaymentAllocation;
-use shared_core::PaymentId;
+use shared_core::{
+    sales::models::customer_payment_allocation::CustomerPaymentAllocation,
+    PaymentId,
+};
 
 pub(crate) async fn get(
     pool: &mut PgConnection,

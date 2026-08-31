@@ -11,8 +11,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{InvoiceId, PartnerId};
-use crate::payables::models::vendor_invoice_item::VendorInvoiceItem;
+
+use crate::{
+    payables::models::vendor_invoice_item::VendorInvoiceItem,
+    InvoiceId,
+    PartnerId,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct CreateVendorInvoiceRequest {

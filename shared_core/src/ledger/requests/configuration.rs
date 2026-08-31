@@ -12,8 +12,11 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::AccountId;
-use crate::ledger::models::system_tag::SystemTag;
+
+use crate::{
+    ledger::models::system_tag::SystemTag,
+    AccountId,
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateConfigurationRequest {

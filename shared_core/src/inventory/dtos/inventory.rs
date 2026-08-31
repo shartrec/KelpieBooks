@@ -11,7 +11,13 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{ItemId, LocationEntryId, PartnerId, WarehouseId};
+
+use crate::{
+    ItemId,
+    LocationEntryId,
+    PartnerId,
+    WarehouseId,
+};
 // =============================================================================
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

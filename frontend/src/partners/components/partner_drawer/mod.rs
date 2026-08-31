@@ -13,17 +13,20 @@ pub mod contacts_view;
 pub mod general_view;
 
 use fluent::fluent_args;
-use shared_core::partners::{
-    models::{
-        partner::Partner,
-        partner_address::PartnerAddress,
-        partner_contact::PartnerContact,
+use shared_core::{
+    partners::{
+        models::{
+            partner::Partner,
+            partner_address::PartnerAddress,
+            partner_contact::PartnerContact,
+        },
+        requests::partner::UpdatePartnerRequest,
     },
-    requests::partner::UpdatePartnerRequest,
+    AccountId,
 };
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::AccountId;
+
 use crate::{
     api::Api,
     contexts::{

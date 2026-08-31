@@ -22,7 +22,14 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{ItemId, LocationEntryId, OrgId, WarehouseBalId, WarehouseId};
+
+use crate::{
+    ItemId,
+    LocationEntryId,
+    OrgId,
+    WarehouseBalId,
+    WarehouseId,
+};
 // =============================================================================
 // 1. Warehouse Physical Profile Extensions
 // =============================================================================

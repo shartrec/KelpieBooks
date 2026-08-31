@@ -21,7 +21,6 @@ pub mod core;
 pub mod i18n;
 pub mod util;
 
-
 /// Generates a strongly-typed wrapper around a [`uuid::Uuid`] (Newtype pattern).
 ///
 /// This macro creates a type-safe identifier to prevent parameter-ordering bugs
@@ -34,7 +33,7 @@ pub mod util;
 /// - `Serialize` and `Deserialize` (via `serde`).
 /// - `sqlx::Type` with `#[sqlx(transparent)]` when the `backend` feature is active, allowing
 ///   the type to bind directly to PostgreSQL `UUID` database columns.
-/// - `Deref<Target = Uuid>` for seamless access to underlying [`Uuid`] methods.
+/// - `Deref<Target = Uuid>` for seamless access to underlying [`uuid::Uuid`] methods.
 /// - `From<Uuid>` and `From<$name> for Uuid` for easy conversion.
 /// - [`Display`](std::fmt::Display) for direct string formatting.
 ///

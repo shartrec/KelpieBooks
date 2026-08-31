@@ -10,10 +10,13 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::AccountId;
-use crate::partners::models::{
-    partner_address::PartnerAddress,
-    partner_contact::PartnerContact,
+
+use crate::{
+    partners::models::{
+        partner_address::PartnerAddress,
+        partner_contact::PartnerContact,
+    },
+    AccountId,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]

@@ -5,6 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use std::str::FromStr;
 
 use chrono::{
     Local,
@@ -13,14 +14,20 @@ use chrono::{
 };
 use fluent::fluent_args;
 use rust_decimal::Decimal;
-use shared_core::{ledger::models::account::Account, payables::{
-    models::{
-        vendor_invoice::VendorInvoice,
-        vendor_payment::VendorPayment,
-        vendor_payment_allocation::VendorPaymentAllocation,
+use shared_core::{
+    ledger::models::account::Account,
+    payables::{
+        models::{
+            vendor_invoice::VendorInvoice,
+            vendor_payment::VendorPayment,
+            vendor_payment_allocation::VendorPaymentAllocation,
+        },
+        requests::vendor_payment::CreateVendorPaymentRequest,
     },
-    requests::vendor_payment::CreateVendorPaymentRequest,
-}, AccountId, AllocationId, PaymentId};
+    AccountId,
+    AllocationId,
+    PaymentId,
+};
 use uuid::Uuid;
 use web_sys::{
     HtmlInputElement,
@@ -247,7 +254,7 @@ pub fn payments_view(props: &PaymentsViewProps) -> Html {
 
                     <label>{i18n.t("payments-view-bank-account-label")}</label>
                     <select onchange={on_select_change(|r, v| {
-                        r.bank_account_id = Uuid::parse_str(&v).map(AccountId).unwrap_or_default()
+                        r.bank_account_id = AccountId::from_str(&v).unwrap_or_default()
                     })} required=true>
                         <option value="" disabled=true selected=true>{i18n.t("journal-entry-select-account")}</option>
                         { for (*accounts).iter().map(|account| html! {

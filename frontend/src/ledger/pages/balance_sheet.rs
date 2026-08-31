@@ -15,16 +15,19 @@ use std::{
 };
 
 use fluent::fluent_args;
-use shared_core::ledger::dtos::{
-    account_with_balance::AccountWithBalance,
-    balance_sheet::BalanceSheet,
+use shared_core::{
+    ledger::dtos::{
+        account_with_balance::AccountWithBalance,
+        balance_sheet::BalanceSheet,
+    },
+    AccountId,
 };
 use yew::prelude::*;
 use yew_router::prelude::{
     use_navigator,
     Link,
 };
-use shared_core::AccountId;
+
 use crate::{
     api::Api,
     contexts::{

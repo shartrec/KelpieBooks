@@ -5,7 +5,11 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use shared_core::{core::models::auth::SystemPrivilege, partners::dtos::partner_list_item::PartnerListItem, PartnerId};
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    partners::dtos::partner_list_item::PartnerListItem,
+    PartnerId,
+};
 use yew::prelude::*;
 
 use crate::contexts::{

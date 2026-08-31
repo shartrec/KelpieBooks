@@ -7,8 +7,12 @@
  */
 
 use rocket_db_pools::Connection;
-use shared_core::sales::models::tax::TaxCategory;
-use shared_core::{OrgId, TaxCategoryId};
+use shared_core::{
+    sales::models::tax::TaxCategory,
+    OrgId,
+    TaxCategoryId,
+};
+
 use crate::{
     sales::db::tax_category as tax_db,
     DbKelpie,

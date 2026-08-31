@@ -5,6 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use std::str::FromStr;
 
 use chrono::{
     Local,
@@ -12,21 +13,30 @@ use chrono::{
 };
 use fluent::fluent_args;
 use rust_decimal::Decimal;
-use shared_core::{inventory::models::warehouse::Warehouse, partners::{
-    dtos::partner_list_item::PartnerListItem,
-    models::{
-        address_type::AddressType,
-        partner_address::PartnerAddress,
+use shared_core::{
+    inventory::models::warehouse::Warehouse,
+    partners::{
+        dtos::partner_list_item::PartnerListItem,
+        models::{
+            address_type::AddressType,
+            partner_address::PartnerAddress,
+        },
     },
-}, sales::{
-    models::{
-        order_address::OrderAddress,
-        sales_order::SalesOrder,
-        sales_order_item::SalesOrderItem,
+    sales::{
+        models::{
+            order_address::OrderAddress,
+            sales_order::SalesOrder,
+            sales_order_item::SalesOrderItem,
+        },
+        requests::sales_order::CreateSalesOrderRequest,
     },
-    requests::sales_order::CreateSalesOrderRequest,
-}, AddressId, ItemId, OrderId, OrderItemId, PartnerId, WarehouseId};
-use uuid::Uuid;
+    AddressId,
+    ItemId,
+    OrderId,
+    OrderItemId,
+    PartnerId,
+    WarehouseId,
+};
 use web_sys::{
     HtmlInputElement,
     HtmlSelectElement,
@@ -309,7 +319,7 @@ pub fn new_sales_order_page() -> Html {
         let state = request.clone();
         Callback::from(move |e: Event| {
             let value = e.target_unchecked_into::<HtmlSelectElement>().value();
-            if let Ok(id) = Uuid::parse_str(&value).map(WarehouseId) {
+            if let Ok(id) = WarehouseId::from_str(&value) {
                 let mut req = (*state).clone();
                 req.warehouse_id = id;
                 state.set(req);
@@ -475,7 +485,7 @@ pub fn new_sales_order_page() -> Html {
                                             let partner_addresses = partner_addresses.clone();
                                             Callback::from(move |e: Event| {
                                                 let value = e.target_unchecked_into::<HtmlSelectElement>().value();
-                                                if let Ok(id) = Uuid::parse_str(&value).map(AddressId) {
+                                                if let Ok(id) = AddressId::from_str(&value) {
                                                     if let Some(addr) = (*partner_addresses).iter().find(|a| a.id == id) {
                                                         let mut req = (*state).clone();
                                                         req.billing_address_id = Some(id);
@@ -522,7 +532,7 @@ pub fn new_sales_order_page() -> Html {
                                             let partner_addresses = partner_addresses.clone();
                                             Callback::from(move |e: Event| {
                                                 let value = e.target_unchecked_into::<HtmlSelectElement>().value();
-                                                if let Ok(id) = Uuid::parse_str(&value).map(AddressId) {
+                                                if let Ok(id) = AddressId::from_str(&value) {
                                                     if let Some(addr) = (*partner_addresses).iter().find(|a| a.id == id) {
                                                         let mut req = (*state).clone();
                                                         req.shipping_address_id = Some(id);

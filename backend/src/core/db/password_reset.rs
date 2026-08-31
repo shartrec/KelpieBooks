@@ -10,11 +10,11 @@ use chrono::{
     DateTime,
     Utc,
 };
+use shared_core::UserId;
 use sqlx::{
     PgConnection,
     Row,
 };
-use shared_core::UserId;
 
 pub struct PasswordResetToken {
     pub user_id: UserId,

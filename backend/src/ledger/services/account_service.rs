@@ -20,24 +20,30 @@ use rust_decimal::{
     dec,
     Decimal,
 };
-use shared_core::ledger::{
-    dtos::{
-        account_with_balance::AccountWithBalance,
-        journal_entry_with_balance::JournalEntryWithBalance,
+use shared_core::{
+    ledger::{
+        dtos::{
+            account_with_balance::AccountWithBalance,
+            journal_entry_with_balance::JournalEntryWithBalance,
+        },
+        models::{
+            account::Account,
+            account_category::AccountCategory,
+            system_tag::SystemTag,
+        },
+        requests::{
+            configuration::UpdateConfigurationRequest,
+            transaction::CreateTransactionRequest,
+        },
     },
-    models::{
-        account::Account,
-        account_category::AccountCategory,
-        system_tag::SystemTag,
-    },
-    requests::{
-        configuration::UpdateConfigurationRequest,
-        transaction::CreateTransactionRequest,
-    },
+    AccountId,
+    JournalEntryId,
+    OrgId,
+    TransactionId,
 };
 use sqlx::Acquire;
 use uuid::Uuid;
-use shared_core::{AccountId, JournalEntryId, OrgId, TransactionId};
+
 use crate::{
     core::db,
     ledger::db::{
@@ -79,13 +85,9 @@ pub(crate) async fn get_account_with_balance(
         .await?
         .ok_or_else(|| ApiError::NotFound("Account not found".to_string()))?;
 
-    let balance = journal_entry::get_balance_up_to_date(
-        pool,
-        org_id,
-        account_id,
-        Local::now().date_naive(),
-    )
-    .await?;
+    let balance =
+        journal_entry::get_balance_up_to_date(pool, org_id, account_id, Local::now().date_naive())
+            .await?;
 
     Ok(AccountWithBalance {
         balance,

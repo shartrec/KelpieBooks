@@ -11,8 +11,10 @@ use serde::{
     Serialize,
 };
 
-use crate::core::models::auth::SystemPrivilege;
-use crate::RoleId;
+use crate::{
+    core::models::auth::SystemPrivilege,
+    RoleId,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Role {

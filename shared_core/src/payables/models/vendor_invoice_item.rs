@@ -14,7 +14,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{AccountId, InvoiceId, InvoiceItemId};
+
+use crate::{
+    AccountId,
+    InvoiceId,
+    InvoiceItemId,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct VendorInvoiceItem {

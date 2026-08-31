@@ -16,10 +16,12 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::ItemId;
-use shared_core::sales::{
-    models::item::Item,
-    requests::item::CreateItemRequest,
+use shared_core::{
+    sales::{
+        models::item::Item,
+        requests::item::CreateItemRequest,
+    },
+    ItemId,
 };
 
 use crate::{
@@ -31,9 +33,7 @@ use crate::{
         UseSales,
     },
     util::{
-        types::{
-            FormItemType,
-        },
+        types::FormItemType,
         ApiError,
     },
     DbKelpie,

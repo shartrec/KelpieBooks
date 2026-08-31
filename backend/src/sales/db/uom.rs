@@ -10,10 +10,16 @@ use rocket_db_pools::sqlx::{
     self,
     PgConnection,
 };
-use shared_core::sales::models::item::UnitOfMeasure;
-use shared_core::{OrgId, UomId};
+use shared_core::{
+    sales::models::item::UnitOfMeasure,
+    OrgId,
+    UomId,
+};
 
-pub async fn all(conn: &mut PgConnection, org_id: OrgId) -> Result<Vec<UnitOfMeasure>, sqlx::Error> {
+pub async fn all(
+    conn: &mut PgConnection,
+    org_id: OrgId,
+) -> Result<Vec<UnitOfMeasure>, sqlx::Error> {
     sqlx::query_as!(
         UnitOfMeasure,
         r#"SELECT id, organization_id as org_id, code, name, is_active

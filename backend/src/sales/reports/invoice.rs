@@ -5,10 +5,17 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::{
+    fs,
+    path::{
+        Path,
+        PathBuf,
+    },
+};
+
 use rocket::State;
 use rocket_db_pools::Connection;
+use shared_core::OrderId;
 use typst_as_lib::{
     typst_kit_options::TypstKitFontOptions,
     TypstEngine,
@@ -19,13 +26,23 @@ use typst_library::foundations::{
     Dict,
     Value,
 };
-use shared_core::OrderId;
+
 use crate::{
     core::{
         db::organization as db_org,
         routes::security::AuthenticatedUser,
     },
-    sales::db::sales_order::get_sales_order,
+    inventory::db::{
+        inventory::get_first_balance_for_item_warehouse,
+        location::get_location,
+    },
+    sales::{
+        db::sales_order::get_sales_order,
+        services::{
+            item_service::get_item,
+            uom_service::get_uom,
+        },
+    },
     util::{
         locale_context::LocaleContext,
         ApiError,
@@ -33,10 +50,6 @@ use crate::{
     DbKelpie,
     TemplateConfig,
 };
-use crate::inventory::db::inventory::get_first_balance_for_item_warehouse;
-use crate::inventory::db::location::get_location;
-use crate::sales::services::item_service::get_item;
-use crate::sales::services::uom_service::get_uom;
 
 pub(crate) async fn generate_invoice(
     conn: &mut Connection<DbKelpie>,
@@ -44,7 +57,6 @@ pub(crate) async fn generate_invoice(
     config: &State<TemplateConfig>,
     order_id: OrderId,
 ) -> Result<Vec<u8>, ApiError> {
-
     let dict = gather_order_dictionary(conn, &user, order_id).await?;
 
     let template_dir = config.root_directory.to_string_lossy();
@@ -52,7 +64,6 @@ pub(crate) async fn generate_invoice(
     let path = Path::new(&*template_dir).join("invoice_template.typ");
 
     build_order_pdf(dict, path)
-
 }
 pub(crate) async fn generate_picklist(
     conn: &mut Connection<DbKelpie>,
@@ -60,7 +71,6 @@ pub(crate) async fn generate_picklist(
     config: &State<TemplateConfig>,
     order_id: OrderId,
 ) -> Result<Vec<u8>, ApiError> {
-
     let dict = gather_order_dictionary(conn, &user, order_id).await?;
 
     let template_dir = config.root_directory.to_string_lossy();
@@ -68,12 +78,14 @@ pub(crate) async fn generate_picklist(
     let path = Path::new(&*template_dir).join("picklist_template.typ");
 
     build_order_pdf(dict, path)
-
 }
 
-async fn gather_order_dictionary(conn: &mut Connection<DbKelpie>, user: &AuthenticatedUser, order_id: OrderId) -> Result<Dict, ApiError> {
+async fn gather_order_dictionary(
+    conn: &mut Connection<DbKelpie>,
+    user: &AuthenticatedUser,
+    order_id: OrderId,
+) -> Result<Dict, ApiError> {
     let i18n = LocaleContext::new(&user.locale);
-
 
     // Gather the audit details and generate a structure to pass to the Typst template.
     let mut dict = Dict::new();
@@ -190,7 +202,13 @@ async fn gather_order_dictionary(conn: &mut Connection<DbKelpie>, user: &Authent
                         item.insert("uom".into(), Value::Str(uom.name.into()));
                     }
                 }
-                let wib = get_first_balance_for_item_warehouse(conn, order.org_id, line.item_id, order.warehouse_id).await?;
+                let wib = get_first_balance_for_item_warehouse(
+                    conn,
+                    order.org_id,
+                    line.item_id,
+                    order.warehouse_id,
+                )
+                .await?;
                 if let Some(wib) = wib {
                     let wl = get_location(conn, order.org_id, wib.location_id).await?;
                     if let Some(wl) = wl {
@@ -207,7 +225,6 @@ async fn gather_order_dictionary(conn: &mut Connection<DbKelpie>, user: &Authent
 }
 
 fn build_order_pdf(order: Dict, template_path: PathBuf) -> Result<Vec<u8>, ApiError> {
-
     let template_source = fs::read_to_string(template_path)
         .map_err(|e| ApiError::Internal(format!("Failed to read template file: {}", e)))?;
 

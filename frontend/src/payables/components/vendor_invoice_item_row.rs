@@ -5,9 +5,15 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use std::str::FromStr;
+
 use rust_decimal::Decimal;
-use shared_core::{ledger::models::account::Account, payables::models::vendor_invoice_item::VendorInvoiceItem, AccountId, InvoiceItemId};
-use uuid::Uuid;
+use shared_core::{
+    ledger::models::account::Account,
+    payables::models::vendor_invoice_item::VendorInvoiceItem,
+    AccountId,
+    InvoiceItemId,
+};
 use yew::prelude::*;
 
 use crate::{
@@ -48,7 +54,7 @@ pub fn vendor_invoice_item_row(props: &VendorInvoiceItemRowProps) -> Html {
             let value = e
                 .target_unchecked_into::<web_sys::HtmlSelectElement>()
                 .value();
-            new_item.account_id = Uuid::parse_str(&value).map(AccountId).unwrap_or_default();
+            new_item.account_id = AccountId::from_str(&value).unwrap_or_default();
             on_change.emit(new_item);
         })
     };

@@ -9,17 +9,20 @@
 use std::rc::Rc;
 
 use fluent::fluent_args;
-use shared_core::core::{
-    dtos::user_detail::UserDetail,
-    models::role::Role,
-    requests::user::{
-        CreateUserRequest,
-        UpdateUserRequest,
+use shared_core::{
+    core::{
+        dtos::user_detail::UserDetail,
+        models::role::Role,
+        requests::user::{
+            CreateUserRequest,
+            UpdateUserRequest,
+        },
     },
+    UserId,
 };
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::UserId;
+
 use crate::{
     api::Api,
     contexts::{

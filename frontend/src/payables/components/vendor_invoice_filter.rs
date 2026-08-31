@@ -5,6 +5,7 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
+use std::str::FromStr;
 
 use chrono::NaiveDate;
 use gloo_console::info;
@@ -12,8 +13,10 @@ use rust_decimal::{
     dec,
     Decimal,
 };
-use shared_core::partners::dtos::partner_list_item::PartnerListItem;
-use uuid::Uuid;
+use shared_core::{
+    partners::dtos::partner_list_item::PartnerListItem,
+    PartnerId,
+};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
@@ -86,7 +89,7 @@ pub fn vendor_invoice_filter() -> Html {
             info!("Vendor change:");
             if value.is_empty() {
                 filter_ctx.dispatch(VendorInvoiceFilterAction::SetPartnerId(None));
-            } else if let Ok(id) = Uuid::parse_str(&value) {
+            } else if let Ok(id) = PartnerId::from_str(&value) {
                 filter_ctx.dispatch(VendorInvoiceFilterAction::SetPartnerId(Some(id)));
             }
         })

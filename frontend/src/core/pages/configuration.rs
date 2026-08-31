@@ -6,17 +6,23 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    str::FromStr,
+};
 
 use fluent::fluent_args;
-use shared_core::{core::models::organization::Organization, ledger::{
-    models::{
-        account::Account,
-        system_tag::SystemTag,
+use shared_core::{
+    core::models::organization::Organization,
+    ledger::{
+        models::{
+            account::Account,
+            system_tag::SystemTag,
+        },
+        requests::configuration::UpdateConfigurationRequest,
     },
-    requests::configuration::UpdateConfigurationRequest,
-}, AccountId};
-use uuid::Uuid;
+    AccountId,
+};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
 
@@ -168,7 +174,7 @@ pub fn configuration_page() -> Html {
     let on_select_change = {
         let system_accounts = system_accounts.clone();
         Callback::from(move |(tag, id_str): (SystemTag, String)| {
-            if let Ok(id) = id_str.parse::<Uuid>().map(AccountId) {
+            if let Ok(id) = AccountId::from_str(&id_str) {
                 let mut new_map = (*system_accounts).clone();
                 new_map.insert(tag, id);
                 system_accounts.set(new_map);

@@ -16,8 +16,11 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::sales::models::item::UnitOfMeasure;
-use shared_core::UomId;
+use shared_core::{
+    sales::models::item::UnitOfMeasure,
+    UomId,
+};
+
 use crate::{
     core::routes::security::AuthenticatedUser,
     sales::services::uom_service,
@@ -26,9 +29,7 @@ use crate::{
         RequirePrivilege,
         UseSales,
     },
-    util::{
-        ApiError,
-    },
+    util::ApiError,
     DbKelpie,
 };
 

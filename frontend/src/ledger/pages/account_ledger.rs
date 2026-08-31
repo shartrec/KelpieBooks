@@ -13,11 +13,16 @@ use std::{
 
 use fluent::fluent_args;
 use rust_decimal::dec;
-use shared_core::{core::models::auth::SystemPrivilege, ledger::{
-    dtos::journal_entry_with_balance::JournalEntryWithBalance,
-    models::account::Account,
-    requests::transaction::ReverseTransactionRequest,
-}, AccountId, TransactionId};
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    ledger::{
+        dtos::journal_entry_with_balance::JournalEntryWithBalance,
+        models::account::Account,
+        requests::transaction::ReverseTransactionRequest,
+    },
+    AccountId,
+    TransactionId,
+};
 use yew::prelude::*;
 use yew_router::prelude::*;
 

@@ -11,8 +11,11 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::PartnerId;
-use crate::sales::models::sales_order::SalesOrder;
+
+use crate::{
+    sales::models::sales_order::SalesOrder,
+    PartnerId,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct AgedReceivableSummary {

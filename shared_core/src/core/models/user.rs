@@ -14,7 +14,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use crate::{OrgId, RoleId, UserId};
+
+use crate::{
+    OrgId,
+    RoleId,
+    UserId,
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {

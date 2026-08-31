@@ -6,7 +6,13 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use rust_decimal::Decimal;
-use shared_core::{core::models::auth::SystemPrivilege, inventory::dtos::inventory::ItemStockBalancesResponse, sales::models::item::Item, LocationEntryId, WarehouseId};
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    inventory::dtos::inventory::ItemStockBalancesResponse,
+    sales::models::item::Item,
+    LocationEntryId,
+    WarehouseId,
+};
 use yew::prelude::*;
 use yew_router::hooks::use_navigator;
 

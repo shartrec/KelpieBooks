@@ -15,18 +15,21 @@ use rocket::{
     Route,
 };
 use rocket_db_pools::Connection;
-use shared_core::inventory::{
-    dtos::inventory::{
-        ItemStockBalancesResponse,
-        ReceiveStockRequest,
-        StockAdjustmentRequest,
+use shared_core::{
+    inventory::{
+        dtos::inventory::{
+            ItemStockBalancesResponse,
+            ReceiveStockRequest,
+            StockAdjustmentRequest,
+        },
+        models::warehouse_profile::{
+            ItemWarehouseProfile,
+            WarehouseInventoryBalance,
+        },
     },
-    models::warehouse_profile::{
-        ItemWarehouseProfile,
-        WarehouseInventoryBalance,
-    },
+    ItemId,
 };
-use shared_core::ItemId;
+
 use crate::{
     core::routes::security::AuthenticatedUser,
     inventory::services::{
@@ -41,9 +44,7 @@ use crate::{
         RequirePrivilege,
         UseInventory,
     },
-    util::{
-        ApiError,
-    },
+    util::ApiError,
     DbKelpie,
 };
 

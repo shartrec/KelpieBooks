@@ -7,19 +7,25 @@
  */
 
 use rocket_db_pools::sqlx::PgConnection;
-use shared_core::partners::{
-    dtos::partner_list_item::PartnerListItem,
-    models::{
-        partner::Partner,
-        partner_address::PartnerAddress,
-        partner_contact::PartnerContact,
+use shared_core::{
+    partners::{
+        dtos::partner_list_item::PartnerListItem,
+        models::{
+            partner::Partner,
+            partner_address::PartnerAddress,
+            partner_contact::PartnerContact,
+        },
+        requests::partner::{
+            CreatePartnerRequest,
+            UpdatePartnerRequest,
+        },
     },
-    requests::partner::{
-        CreatePartnerRequest,
-        UpdatePartnerRequest,
-    },
+    AddressId,
+    ContactId,
+    OrgId,
+    PartnerId,
 };
-use shared_core::{AddressId, ContactId, OrgId, PartnerId};
+
 use crate::{
     partners::db::partner as partner_db,
     util::ApiError,

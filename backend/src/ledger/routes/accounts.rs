@@ -23,20 +23,22 @@ use rocket::{
 };
 use rocket_db_pools::Connection;
 use rust_decimal::dec;
-use shared_core::AccountId;
-use shared_core::ledger::{
-    dtos::{
-        account_with_balance::AccountWithBalance,
-        journal_entry_with_balance::JournalEntryWithBalance,
+use shared_core::{
+    ledger::{
+        dtos::{
+            account_with_balance::AccountWithBalance,
+            journal_entry_with_balance::JournalEntryWithBalance,
+        },
+        models::{
+            account::Account,
+            account_category::AccountCategory,
+        },
+        requests::account::{
+            CreateAccountRequest,
+            UpdateAccountRequest,
+        },
     },
-    models::{
-        account::Account,
-        account_category::AccountCategory,
-    },
-    requests::account::{
-        CreateAccountRequest,
-        UpdateAccountRequest,
-    },
+    AccountId,
 };
 
 use crate::{

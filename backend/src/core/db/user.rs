@@ -10,13 +10,18 @@ use rocket_db_pools::sqlx::{
     PgConnection,
     Row,
 };
-use shared_core::core::models::{
-    auth::SystemPrivilege,
-    role::Role,
-    user::User,
-    user_with_org::UserWithOrg,
+use shared_core::{
+    core::models::{
+        auth::SystemPrivilege,
+        role::Role,
+        user::User,
+        user_with_org::UserWithOrg,
+    },
+    OrgId,
+    RoleId,
+    UserId,
 };
-use shared_core::{OrgId, RoleId, UserId};
+
 use crate::util::{
     locale_context::LocaleContext,
     ApiError,
@@ -58,7 +63,6 @@ pub(crate) async fn insert(
     display_name: Option<&str>,
     role_id: Option<RoleId>,
 ) -> Result<User, sqlx::Error> {
-
     let user = sqlx::query_as!(
         User,
         r#"INSERT INTO users (organization_id, email, password_hash, full_name, display_name, role_id)

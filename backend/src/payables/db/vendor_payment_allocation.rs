@@ -10,8 +10,11 @@ use rocket_db_pools::sqlx::{
     self,
     PgConnection,
 };
-use shared_core::payables::models::vendor_payment_allocation::VendorPaymentAllocation;
-use shared_core::{AllocationId, PaymentId};
+use shared_core::{
+    payables::models::vendor_payment_allocation::VendorPaymentAllocation,
+    AllocationId,
+    PaymentId,
+};
 
 pub(crate) async fn get(
     pool: &mut PgConnection,
@@ -84,11 +87,8 @@ pub(crate) async fn update(
 }
 
 pub(crate) async fn delete(pool: &mut PgConnection, id: AllocationId) -> Result<u64, sqlx::Error> {
-    let result = sqlx::query!(
-        "DELETE FROM vendor_payment_allocations WHERE id = $1",
-        *id
-    )
-    .execute(pool)
-    .await?;
+    let result = sqlx::query!("DELETE FROM vendor_payment_allocations WHERE id = $1", *id)
+        .execute(pool)
+        .await?;
     Ok(result.rows_affected())
 }
