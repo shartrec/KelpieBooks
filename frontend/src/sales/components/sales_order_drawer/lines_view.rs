@@ -76,12 +76,23 @@ pub fn lines_view(props: &LinesViewProps) -> Html {
                 }
             }) }
 
-            <div class="voucher-footer">
-                <span class="amount-badge amount-badge--gross">
-                    { i18n.t_args("vendor-invoice-drawer-gross",
-                        &fluent_args!["amount" => i18n.format_currency(order.order.total_amount)]) }
-                </span>
+            <div class="voucher-footer card-item-compact__financials">
+                <div class="financials-grid">
+                    <span class="label">{ i18n.t("sales-orders-drawer-net") }</span>
+                    <span class="value">{ i18n.format_currency(order.order.subtotal) }</span>
+
+                    <span class="label">{ i18n.t("sales-orders-drawer-tax") }</span>
+                    <span class="value">{ i18n.format_currency(order.order.tax_total) }</span>
+
+                    <span class="label label--bold">{ i18n.t("sales-orders-drawer-gross") }</span>
+                    <span class="value value--bold">{ i18n.format_currency(order.order.total_amount) }</span>
+
+                    <span class="label label--due">{ i18n.t("sales-orders-drawer-outstanding-balance") }</span>
+                    <span class="value value--due">{ i18n.format_currency(order.order.amount_remaining) }</span>
+                </div>
             </div>
+
+
         </div>
     }
 }

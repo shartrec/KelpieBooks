@@ -293,6 +293,60 @@
   }
 }
 
+.voucher-footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 2px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end; // Aligns the box to the bottom right of the drawer
+
+  .financials-grid {
+    display: grid;
+    grid-template-columns: 1fr auto; // Label column fits text, value column fills remaining width
+    gap: 0.35rem 1.5rem;             // Row gap / Column gap
+    align-items: center;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    min-width: 240px;                // Ensures a standard width across drawers
+
+    .label {
+      font-size: 0.85rem;
+      color: #64748b;
+      text-align: right;
+
+      &--bold {
+        font-weight: 700;
+        color: #1e293b;
+      }
+
+      &--due {
+        font-weight: 700;
+        color: #92400e;
+      }
+    }
+
+    .value {
+      font-size: 0.85rem;
+      color: #1e293b;
+      text-align: right;
+      font-variant-numeric: tabular-nums; // Aligns numbers visually
+
+      &--bold {
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+
+      &--due {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #b45309;
+      }
+    }
+  }
+}
+
 .payment-context-banner {
   background-color: #f8fafc; // Soft, non-intrusive slate background
   border: 1px solid var(--border-color, #e2e8f0);

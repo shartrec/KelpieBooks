@@ -100,6 +100,7 @@ common-credit = Credit
 common-account = Account
 common-network-error = Network error: { $error }
 common-total = Total
+common-due = Due
 common-none = None
 common-list = List
 common-aged = Aged
@@ -200,7 +201,6 @@ about-author-label = Author
 about-license-label = License
 about-website-label = Source Code
 about-docs-label = Documentation
-
 
 # Sales invoice list
 sales-invoice-list = Sales Invoices
@@ -765,6 +765,10 @@ sales-orders-list-error-fetch = Failed to fetch orders: { $status }
 # Sales Orders — Drawer
 sales-orders-drawer-order-number = Order #{ $number }
 sales-orders-drawer-warehouse = Warehouse: { $warehouse }
+sales-orders-drawer-tax = Tax:
+sales-orders-drawer-net = Net:
+sales-orders-drawer-gross = Gross:
+sales-orders-drawer-outstanding-balance = Due:
 sales-order-drawer-address-edit-future = Address editing coming soon
 sales-orders-drawer-confirm-button = Confirm Order
 sales-orders-drawer-cancel-button = Cancel Order

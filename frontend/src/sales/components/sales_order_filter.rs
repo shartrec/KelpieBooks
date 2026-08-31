@@ -5,17 +5,16 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
+use std::str::FromStr;
 use chrono::NaiveDate;
 use rust_decimal::{
     dec,
     Decimal,
 };
 use shared_core::partners::dtos::partner_list_item::PartnerListItem;
-use uuid::Uuid;
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-
+use shared_core::PartnerId;
 use crate::{
     api::Api,
     contexts::{
@@ -24,18 +23,18 @@ use crate::{
     },
     core::components::currency_input::DecimalInput,
     sales::contexts::sales_order_filter_context::{
-        use_sales_invoice_filter,
+        use_sales_order_filter,
         PaymentStatusFilter,
-        SalesInvoiceFilterAction,
+        SalesOrderFilterAction,
     },
 };
 
-#[function_component(SalesInvoiceFilter)]
-pub fn sales_invoice_filter() -> Html {
+#[function_component(SalesOrderFilter)]
+pub fn sales_order_filter() -> Html {
     let user_ctx = use_user_context();
     let i18n = use_locale();
     let navigator = use_navigator().unwrap();
-    let filter_ctx = use_sales_invoice_filter();
+    let filter_ctx = use_sales_order_filter();
     let customers = use_state(Vec::new);
 
     {
@@ -62,7 +61,7 @@ pub fn sales_invoice_filter() -> Html {
         Callback::from(move |e: Event| {
             let target: web_sys::HtmlInputElement = e.target_unchecked_into();
             if let Ok(new_date) = NaiveDate::parse_from_str(&target.value(), "%Y-%m-%d") {
-                filter_ctx.dispatch(SalesInvoiceFilterAction::SetStartDate(new_date));
+                filter_ctx.dispatch(SalesOrderFilterAction::SetStartDate(new_date));
             }
         })
     };
@@ -72,7 +71,7 @@ pub fn sales_invoice_filter() -> Html {
         Callback::from(move |e: Event| {
             let target: web_sys::HtmlInputElement = e.target_unchecked_into();
             if let Ok(new_date) = NaiveDate::parse_from_str(&target.value(), "%Y-%m-%d") {
-                filter_ctx.dispatch(SalesInvoiceFilterAction::SetEndDate(new_date));
+                filter_ctx.dispatch(SalesOrderFilterAction::SetEndDate(new_date));
             }
         })
     };
@@ -83,9 +82,9 @@ pub fn sales_invoice_filter() -> Html {
             let target: web_sys::HtmlSelectElement = e.target_unchecked_into();
             let value = target.value();
             if value.is_empty() {
-                filter_ctx.dispatch(SalesInvoiceFilterAction::SetPartnerId(None));
-            } else if let Ok(id) = Uuid::parse_str(&value) {
-                filter_ctx.dispatch(SalesInvoiceFilterAction::SetPartnerId(Some(id)));
+                filter_ctx.dispatch(SalesOrderFilterAction::SetPartnerId(None));
+            } else if let Ok(id) = PartnerId::from_str(&value) {
+                filter_ctx.dispatch(SalesOrderFilterAction::SetPartnerId(Some(id)));
             }
         })
     };
@@ -94,9 +93,9 @@ pub fn sales_invoice_filter() -> Html {
         let filter_ctx = filter_ctx.clone();
         Callback::from(move |amount: Decimal| {
             if amount == dec!(0.00) {
-                filter_ctx.dispatch(SalesInvoiceFilterAction::SetMinAmount(None));
+                filter_ctx.dispatch(SalesOrderFilterAction::SetMinAmount(None));
             } else {
-                filter_ctx.dispatch(SalesInvoiceFilterAction::SetMinAmount(Some(amount)));
+                filter_ctx.dispatch(SalesOrderFilterAction::SetMinAmount(Some(amount)));
             }
         })
     };
@@ -104,7 +103,7 @@ pub fn sales_invoice_filter() -> Html {
     let set_status = {
         let filter_ctx = filter_ctx.clone();
         Callback::from(move |filter: PaymentStatusFilter| {
-            filter_ctx.dispatch(SalesInvoiceFilterAction::SetStatus(filter));
+            filter_ctx.dispatch(SalesOrderFilterAction::SetStatus(filter));
         })
     };
 

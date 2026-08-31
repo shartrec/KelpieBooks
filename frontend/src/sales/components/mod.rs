@@ -14,6 +14,7 @@ pub mod item_filter;
 pub mod item_list_table;
 pub mod item_row;
 pub mod sales_order_drawer;
+pub mod sales_order_filter;
 pub mod sales_order_item_row;
 pub mod tax_category_drawer;
 pub mod tax_category_list_table;
@@ -21,6 +22,7 @@ pub mod tax_category_row;
 pub mod uom_list_table;
 pub mod uom_modal;
 pub mod uom_row;
+pub mod sales_order_list;
 
 use shared_core::core::models::auth::SystemPrivilege;
 

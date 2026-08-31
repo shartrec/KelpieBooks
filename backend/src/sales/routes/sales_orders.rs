@@ -19,14 +19,12 @@ use rocket::{
     State,
 };
 use rocket_db_pools::Connection;
-use shared_core::{
-    sales::{
-        dtos::sales_order_dto::SalesOrderDto,
-        models::sales_order::SalesOrder,
-        requests::sales_order::CreateSalesOrderRequest,
-    },
-    OrderId,
-};
+use rust_decimal::Decimal;
+use shared_core::{sales::{
+    dtos::sales_order_dto::SalesOrderDto,
+    models::sales_order::SalesOrder,
+    requests::sales_order::CreateSalesOrderRequest,
+}, OrderId, PartnerId};
 
 use crate::{
     sales::{
@@ -46,6 +44,7 @@ use crate::{
     DbKelpie,
     TemplateConfig,
 };
+use crate::util::types::PathDate;
 
 pub(crate) fn routes() -> Vec<Route> {
     routes![
@@ -59,10 +58,14 @@ pub(crate) fn routes() -> Vec<Route> {
     ]
 }
 
-#[get("/api/sales-orders?<status>")]
+#[get("/api/sales-orders?<start_date>&<end_date>&<partner_id>&<min_amount>&<status>")]
 async fn list_sales_orders(
     mut pool: Connection<DbKelpie>,
     guard: RequirePrivilege<UseSales>,
+    start_date: Option<PathDate>,
+    end_date: Option<PathDate>,
+    partner_id: Option<PartnerId>,
+    min_amount: Option<Decimal>,
     status: Option<FormSalesOrderStatus>,
 ) -> Result<Json<Vec<SalesOrder>>, ApiError> {
     let user = guard.0;
@@ -74,10 +77,10 @@ async fn list_sales_orders(
     let orders = sales_order_service::list_sales_orders(
         &mut pool,
         user.organization_id,
-        None,
-        None,
-        None,
-        None,
+        start_date.map(|d| *d),
+        end_date.map(|d| *d),
+        partner_id,
+        min_amount,
         status_list,
     )
     .await?;

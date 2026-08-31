@@ -28,7 +28,7 @@ pub enum PaymentStatusFilter {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct SalesInvoiceFilterState {
+pub struct SalesOrderFilterState {
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
     pub partner_id: Option<PartnerId>,
@@ -36,7 +36,7 @@ pub struct SalesInvoiceFilterState {
     pub status: PaymentStatusFilter,
 }
 
-impl Default for SalesInvoiceFilterState {
+impl Default for SalesOrderFilterState {
     fn default() -> Self {
         let today = chrono::Local::now().date_naive();
         Self {
@@ -49,7 +49,7 @@ impl Default for SalesInvoiceFilterState {
     }
 }
 
-pub enum SalesInvoiceFilterAction {
+pub enum SalesOrderFilterAction {
     SetStartDate(NaiveDate),
     SetEndDate(NaiveDate),
     SetPartnerId(Option<PartnerId>),
@@ -57,36 +57,36 @@ pub enum SalesInvoiceFilterAction {
     SetStatus(PaymentStatusFilter),
 }
 
-impl Reducible for SalesInvoiceFilterState {
-    type Action = SalesInvoiceFilterAction;
+impl Reducible for SalesOrderFilterState {
+    type Action = SalesOrderFilterAction;
 
     fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
         let mut next_state = (*self).clone();
         match action {
-            SalesInvoiceFilterAction::SetStartDate(date) => next_state.start_date = date,
-            SalesInvoiceFilterAction::SetEndDate(date) => next_state.end_date = date,
-            SalesInvoiceFilterAction::SetPartnerId(id) => next_state.partner_id = id,
-            SalesInvoiceFilterAction::SetMinAmount(amount) => next_state.min_amount = amount,
-            SalesInvoiceFilterAction::SetStatus(status) => next_state.status = status,
+            SalesOrderFilterAction::SetStartDate(date) => next_state.start_date = date,
+            SalesOrderFilterAction::SetEndDate(date) => next_state.end_date = date,
+            SalesOrderFilterAction::SetPartnerId(id) => next_state.partner_id = id,
+            SalesOrderFilterAction::SetMinAmount(amount) => next_state.min_amount = amount,
+            SalesOrderFilterAction::SetStatus(status) => next_state.status = status,
         }
         next_state.into()
     }
 }
 
-pub type SalesInvoiceFilterContext = UseReducerHandle<SalesInvoiceFilterState>;
+pub type SalesOrderFilterContext = UseReducerHandle<SalesOrderFilterState>;
 
-#[function_component(SalesInvoiceFilterProvider)]
+#[function_component(SalesOrderFilterProvider)]
 pub fn sales_invoice_filter_provider(props: &ChildrenProps) -> Html {
-    let filter_state = use_reducer(SalesInvoiceFilterState::default);
+    let filter_state = use_reducer(SalesOrderFilterState::default);
 
     html! {
-        <ContextProvider<SalesInvoiceFilterContext> context={filter_state}>
+        <ContextProvider<SalesOrderFilterContext> context={filter_state}>
             {props.children.clone()}
-        </ContextProvider<SalesInvoiceFilterContext>>
+        </ContextProvider<SalesOrderFilterContext>>
     }
 }
 
 #[hook]
-pub fn use_sales_invoice_filter() -> SalesInvoiceFilterContext {
-    use_context::<SalesInvoiceFilterContext>().expect("No SalesInvoiceFilterContext found")
+pub fn use_sales_order_filter() -> SalesOrderFilterContext {
+    use_context::<SalesOrderFilterContext>().expect("No SalesOrderFilterContext found")
 }
