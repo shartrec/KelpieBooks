@@ -9,8 +9,10 @@
 @use '../abstracts/variables' as *;
 
 .about-modal {
-  width: 40%;
-
+  width: 60%;
+  height: 45%;
+  padding-right: 20%;
+  padding-top: 15%;
   &__body {
     background-color: darken($bg-main, 3%);
     padding: 1.5rem 2rem;
