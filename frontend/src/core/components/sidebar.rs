@@ -9,7 +9,7 @@
 use shared_core::core::models::auth::SystemPrivilege;
 use yew::prelude::*;
 use yew_router::prelude::*;
-
+use shared_core::util::info::DOCSITE;
 #[cfg(feature = "ledger")]
 use crate::ledger;
 #[cfg(feature = "partners")]
@@ -84,6 +84,18 @@ pub fn sidebar() -> Html {
         }
     }
 
+
+    let on_help_click = Callback::from(move |_| {
+        // Open external URL in a new tab/window
+        window_open(DOCSITE, "_blank");
+    });
+
+    // Helper function to safely open a window
+    fn window_open(url: &str, target: &str) {
+        // Use the browser's window.open API
+        web_sys::window().unwrap().open_with_url_and_target(url, target).unwrap();
+    }
+
     let on_about_open = {
         let show_about = show_about.clone();
         Callback::from(move |_| show_about.set(true))
@@ -93,7 +105,7 @@ pub fn sidebar() -> Html {
         Callback::from(move |()| show_about.set(false))
     };
 
-    if let Some(contrib) = get_help_contribution(on_about_open) {
+    if let Some(contrib) = get_help_contribution(on_about_open, on_help_click) {
         registry.push(contrib);
     }
 
@@ -248,20 +260,30 @@ pub fn get_core_contribution() -> Option<SidebarModuleContribution> {
     })
 }
 
-pub fn get_help_contribution(on_about_open: Callback<()>) -> Option<SidebarModuleContribution> {
+pub fn get_help_contribution(on_about_open: Callback<()>, on_help_click: Callback<()>) -> Option<SidebarModuleContribution> {
     Some(SidebarModuleContribution {
         id: "sidebar-help",
         label_key: "sidebar-help",
         privilege: Some(SystemPrivilege::ManageUsers),
         target_route: None,
         on_click: None,
-        children: vec![SidebarModuleContribution {
-            id: "sidebar-about",
-            label_key: "sidebar-about",
-            privilege: Some(SystemPrivilege::ManageUsers),
-            target_route: None,
-            on_click: Some(on_about_open),
-            children: vec![],
-        }],
+        children: vec![
+            SidebarModuleContribution {
+                id: "sidebar-about",
+                label_key: "sidebar-about",
+                privilege: None,
+                target_route: None,
+                on_click: Some(on_about_open),
+                children: vec![],
+            },
+            SidebarModuleContribution {
+                id: "sidebar-help-docs",
+                label_key: "sidebar-help-docs",
+                privilege: None,
+                target_route: None,
+                on_click: Some(on_help_click),
+                children: vec![],
+            }
+        ],
     })
 }

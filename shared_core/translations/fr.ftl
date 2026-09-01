@@ -192,6 +192,7 @@ sidebar-sales = Ventes
 sidebar-sales-orders = Commandes clients
 sidebar-help = Aide
 sidebar-about = À propos de KelpieBooks...
+sidebar-help-docs = Kelpie Books aide
 
 # Boîte de dialogue À propos
 about-title = À propos de KelpieBooks

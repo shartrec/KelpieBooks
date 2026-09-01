@@ -192,6 +192,7 @@ sidebar-sales = Sales
 sidebar-sales-orders = Sales Orders
 sidebar-help = Help
 sidebar-about = About KelpieBooks...
+sidebar-help-docs = Kelpie Books help
 
 # About dialog
 about-title = About KelpieBooks
