@@ -762,6 +762,8 @@ sales-orders-list-col-number = Order #
 sales-orders-list-col-warehouse = Warehouse
 sales-orders-list-error-parse = Failed to parse orders: { $error }
 sales-orders-list-error-fetch = Failed to fetch orders: { $status }
+sales-orders-print-invoice = Print Invoice
+sales-orders-print-picklist = Print Picklist
 
 # Sales Orders — Drawer
 sales-orders-drawer-order-number = Order #{ $number }

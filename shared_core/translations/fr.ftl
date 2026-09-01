@@ -762,6 +762,8 @@ sales-orders-list-col-number = N° commande
 sales-orders-list-col-warehouse = Entrepôt
 sales-orders-list-error-parse = Échec de l'analyse des commandes : { $error }
 sales-orders-list-error-fetch = Échec du chargement des commandes : { $status }
+sales-orders-print-invoice = Imprimer la facture
+sales-orders-print-picklist = Liste de prépa
 
 # Sales Orders — Drawer
 sales-orders-drawer-order-number = Commande n°{ $number }

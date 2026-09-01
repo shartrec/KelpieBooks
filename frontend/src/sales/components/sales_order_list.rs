@@ -165,6 +165,22 @@ pub fn sales_orders_list() -> Html {
         })
     };
 
+    let on_print_invoice_click = Callback::from(move |id: OrderId| {
+        let pdf_url = format!("/api/sales-orders/{}/print-invoice", id);
+        web_sys::window()
+            .unwrap()
+            .open_with_url_and_target(&pdf_url, "_blank")
+            .unwrap();
+    });
+
+    let on_print_picklist_click = Callback::from(move |id: OrderId| {
+        let pdf_url = format!("/api/sales-orders/{}/print-picklist", id);
+        web_sys::window()
+            .unwrap()
+            .open_with_url_and_target(&pdf_url, "_blank")
+            .unwrap();
+    });
+
     let on_drawer_close = {
         let selected_order = selected_order.clone();
         Callback::from(move |()| selected_order.set(None))
@@ -231,6 +247,24 @@ pub fn sales_orders_list() -> Html {
                                 on_view_click.emit(order_id);
                             })
                         };
+                        let on_print_invoice = {
+                            let on_print_invoice_click = on_print_invoice_click.clone();
+                            let show_actions = show_actions.clone();
+                            let order_id = id;
+                            Callback::from(move |_| {
+                                show_actions.set(None);
+                                on_print_invoice_click.emit(order_id);
+                            })
+                        };
+                        let on_print_picklist = {
+                            let on_print_picklist_click = on_print_picklist_click.clone();
+                            let show_actions = show_actions.clone();
+                            let order_id = id;
+                            Callback::from(move |_| {
+                                show_actions.set(None);
+                                on_print_picklist_click.emit(order_id);
+                            })
+                        };
                         let on_actions_toggle = {
                             let show_actions = show_actions.clone();
                             let order_id = id;
@@ -261,6 +295,14 @@ pub fn sales_orders_list() -> Html {
                                                 <button class="dropdown-item" onclick={on_view}>
                                                     <img src="/images/view.svg" alt={i18n.t("common-view")} />
                                                     <span>{ i18n.t("common-view") }</span>
+                                                </button>
+                                                <button class="dropdown-item" onclick={on_print_picklist}>
+                                                    <img src="/images/export-pdf.svg" alt={i18n.t("sales-orders-print-picklist")} />
+                                                    <span>{ i18n.t("sales-orders-print-picklist") }</span>
+                                                </button>
+                                                <button class="dropdown-item" onclick={on_print_invoice}>
+                                                    <img src="/images/export-pdf.svg" alt={i18n.t("sales-orders-print-invoice")} />
+                                                    <span>{ i18n.t("sales-orders-print-invoice") }</span>
                                                 </button>
                                                 <button class="dropdown-item">
                                                     <img src="/images/delete.svg" alt={i18n.t("common-delete")} />
