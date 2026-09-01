@@ -122,6 +122,41 @@ Good candidates for `shared_core` include:
 * Enum values used by both frontend and backend
 * Shared formatting or validation helpers
 
+### Database Primary Key Conventions
+
+We use UUIDs for primary keys across all domain entities in our database. This provides significant security 
+advantages in multi-tenancy applications—most notably ensuring data will not easily leak between tenants 
+if a query scoping error occurs, and preventing enumeration or parameter-tampering attacks.
+
+However, because all primary keys share the identical underlying primitive type (Uuid), 
+function signatures frequently take multiple parameters of the exact same type:
+```Rust
+pub async fn get_item_warehouse_profile(
+pool: &mut Connection<DbKelpie>,
+org_id: Uuid,
+item_id: Uuid,
+warehouse_id: Uuid,
+) -> Result<Option<ItemWarehouseProfile>, sqlx::Error> {}
+```
+This creates a high risk of subtle bugs caused by accidentally swapping arguments of the same type at call sites.
+
+To enforce compile-time safety, we wrap entity IDs in strongly-typed Newtypes generated via our define_id! macro:
+```Rust
+pub struct ItemId(pub uuid::Uuid);
+```
+These wrappers implement Deref, FromStr, Display, serde, and database/framework integration 
+traits (sqlx::Type, Rocket FromParam), making them largely transparent while preventing cross-assignment errors.
+
+Functions must accept these explicit domain types instead of raw Uuids:
+```Rust
+pub async fn get_balance_at_location(
+pool: &mut Connection<DbKelpie>,
+org_id: OrgId,
+item_id: ItemId,
+location_id: LocationEntryId,
+) -> Result<Option<WarehouseInventoryBalance>, sqlx::Error> {}
+```
+This provides strict compile-time type safety across our database layers, backend routes, and Yew frontend components.
 
 
 ### Handling Currency values
