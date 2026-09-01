@@ -9,10 +9,8 @@ use std::{
     fs,
     path::{
         Path,
-        PathBuf,
     },
 };
-
 use rocket::State;
 use rocket_db_pools::Connection;
 use shared_core::OrderId;
@@ -26,7 +24,7 @@ use typst_library::foundations::{
     Dict,
     Value,
 };
-
+use uuid::Uuid;
 use crate::{
     core::{
         db::organization as db_org,
@@ -61,9 +59,9 @@ pub(crate) async fn generate_invoice(
 
     let template_dir = config.root_directory.to_string_lossy();
 
-    let path = Path::new(&*template_dir).join("invoice_template.typ");
+    let path = Path::new(&*template_dir);
 
-    build_order_pdf(dict, path)
+    build_order_pdf(dict, path, "invoice_template.typ")
 }
 pub(crate) async fn generate_picklist(
     conn: &mut Connection<DbKelpie>,
@@ -75,9 +73,9 @@ pub(crate) async fn generate_picklist(
 
     let template_dir = config.root_directory.to_string_lossy();
 
-    let path = Path::new(&*template_dir).join("picklist_template.typ");
+    let path = Path::new(&*template_dir);
 
-    build_order_pdf(dict, path)
+    build_order_pdf(dict, path, "picklist_template.typ")
 }
 
 async fn gather_order_dictionary(
@@ -101,6 +99,8 @@ async fn gather_order_dictionary(
     if let Some(order_dto) = order {
         let order = order_dto.order;
 
+        let uuid = order.id.hyphenated().encode_lower(&mut Uuid::encode_buffer()).to_string();
+        dict.insert("order-id".into(), Value::Str(uuid.into()));
         dict.insert("order-number".into(), Value::Str(order.order_number.into()));
         let inv_due = i18n.format_date(order.due_date);
         dict.insert("due-date".into(), Value::Str(inv_due.into()));
@@ -224,11 +224,15 @@ async fn gather_order_dictionary(
     Ok(dict)
 }
 
-fn build_order_pdf(order: Dict, template_path: PathBuf) -> Result<Vec<u8>, ApiError> {
-    let template_source = fs::read_to_string(template_path)
+fn build_order_pdf(order: Dict, template_dir: &Path, template: &str ) -> Result<Vec<u8>, ApiError> {
+
+    let path = Path::new(&*template_dir).join(template);
+
+    let template_source = fs::read_to_string(path)
         .map_err(|e| ApiError::Internal(format!("Failed to read template file: {}", e)))?;
 
     let template = TypstEngine::builder()
+        .with_file_system_resolver(template_dir)
         .main_file(template_source)
         .fonts(fonts())
         .search_fonts_with(TypstKitFontOptions::default())

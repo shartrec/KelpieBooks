@@ -1,5 +1,6 @@
 // Import the data supplied as dictionary
 #import sys: inputs
+#import "typst/packages/local/zebra/0.1.0/lib.typ": *
 
 // Some style elements
 #set text(font: "Noto Sans", size: 10pt, fill: rgb("#2c3e50"))
@@ -9,6 +10,7 @@
 
 // Extract basic order data into variables, for simplicity
 #let company-name = inputs.at("company-name")
+#let order-id = inputs.at("order-id")
 #let order-num = inputs.at("order-number")
 #let order-date = inputs.at("order-date")
 #let due-date = inputs.at("due-date")
@@ -48,8 +50,13 @@
 )
 
 // --- Header Section ---
+// Alternate QR stings
+//#let qr-string = "{\"type\":\"sales_order_pick\",\"order\":\"" + order-id + "\"}"
+#let qr-string = "http://kelpie-books-host/sales/picklist-entry/" + order-id
+
 #grid(
-  columns: (1fr, 1fr),
+  columns: (7fr, 2fr ,1fr),
+  gutter: 8pt,
   align(left)[
 
     #v(2pt)
@@ -69,7 +76,11 @@
       [*Order No:*], [#order-num],
       [*Date:*], [#order-date],
     )
-  ]
+  ],
+     [#qrcode(
+           qr-string,
+           width: 2.5cm,
+     )]
 )
 
 #v(30pt)
@@ -79,6 +90,7 @@
 // --- Bill To / Ship To Section ---
 #let bill_to = inputs.at("bill_to")
 #let ship_to = inputs.at("ship_to")
+
 
 
 #grid(
