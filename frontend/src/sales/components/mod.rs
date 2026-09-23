@@ -16,13 +16,13 @@ pub mod item_row;
 pub mod sales_order_drawer;
 pub mod sales_order_filter;
 pub mod sales_order_item_row;
+pub mod sales_order_list;
 pub mod tax_category_drawer;
 pub mod tax_category_list_table;
 pub mod tax_category_row;
 pub mod uom_list_table;
 pub mod uom_modal;
 pub mod uom_row;
-pub mod sales_order_list;
 
 use shared_core::core::models::auth::SystemPrivilege;
 
@@ -45,6 +45,14 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 label_key: "sidebar-sales-orders",
                 privilege: Some(SystemPrivilege::UseSales),
                 target_route: Some(Route::SalesOrders),
+                on_click: None,
+                children: vec![],
+            },
+            SidebarModuleContribution {
+                id: "sales-order-list",
+                label_key: "sidebar-sales-order-pick-entry",
+                privilege: Some(SystemPrivilege::UseSales),
+                target_route: Some(Route::PickPrompt),
                 on_click: None,
                 children: vec![],
             },

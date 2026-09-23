@@ -14,7 +14,10 @@ use rocket_db_pools::sqlx::{
 use rust_decimal::Decimal;
 use shared_core::{
     sales::{
-        dtos::sales_order_dto::SalesOrderDto,
+        dtos::{
+            picklist::PickLineItem,
+            sales_order_dto::SalesOrderDto,
+        },
         models::{
             fulfillment_status::FulfillmentStatus,
             order_address::{
@@ -25,11 +28,15 @@ use shared_core::{
             sales_document_status::SalesDocumentStatus,
             sales_order::SalesOrder,
             sales_order_item::SalesOrderItem,
+            shipment::ShipmentItem,
         },
         requests::sales_order::CreateSalesOrderRequest,
     },
     AddressId,
+    ItemId,
+    LocationEntryId,
     OrderId,
+    OrderItemId,
     OrgId,
     PartnerId,
     TaxCategoryId,
@@ -152,11 +159,12 @@ pub(crate) async fn insert_sales_order_line(
         r#"
         INSERT INTO sales_order_items (
             order_id, item_id, code, name, description,
-            quantity, unit_price, tax_category_id, tax_rate, tax_amount, net_amount, sort_order
+            quantity, picked_quantity, shipped_quantity,
+            unit_price, tax_category_id, tax_rate, tax_amount, net_amount, sort_order
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        VALUES ($1, $2, $3, $4, $5, 0.0, 0.0, $6, $7, $8, $9, $10, $11, $12)
         RETURNING id, order_id, item_id, code, name, description,
-            quantity, unit_price, tax_category_id as "tax_category_id: TaxCategoryId",
+            quantity, picked_quantity, shipped_quantity, unit_price, tax_category_id as "tax_category_id: TaxCategoryId",
             tax_rate, tax_amount, net_amount, sort_order, null as "quantity_available: Decimal"
         "#,
         *order_id,
@@ -217,7 +225,8 @@ pub(crate) async fn get_sales_order_items(
         SalesOrderItem,
         r#"
         SELECT id, order_id, item_id, code, name, description,
-               quantity, unit_price, tax_category_id as "tax_category_id: TaxCategoryId", tax_rate,
+               quantity,  picked_quantity, shipped_quantity,
+               unit_price, tax_category_id as "tax_category_id: TaxCategoryId", tax_rate,
                tax_amount, net_amount, sort_order, null as "quantity_available: Decimal"
         FROM sales_order_items soi
         WHERE order_id = $1
@@ -229,6 +238,67 @@ pub(crate) async fn get_sales_order_items(
     .await?;
 
     Ok(rows)
+}
+pub(crate) async fn get_pick_list_items(
+    conn: &mut PgConnection,
+    order_id: OrderId,
+) -> Result<Vec<PickLineItem>, sqlx::Error> {
+    let rows = sqlx::query_as!(
+        PickLineItem,
+        r#"
+        SELECT DISTINCT ON (soi.id)
+                soi.id  AS "order_line_id: OrderItemId",
+                soi.item_id  AS "item_id: ItemId",
+                soi.name,
+                soi.code,
+                CASE
+                    WHEN wl.display_label IS NOT NULL THEN wl.display_label
+                    ELSE 'UNASSIGNED'
+                END AS location,
+                CASE
+                    WHEN uom.code IS NOT NULL THEN uom.code
+                    ELSE 'EA'
+                END       AS uom,
+                soi.quantity            AS ordered_qty,
+                soi.picked_quantity     AS picked_qty,
+                wib.location_id as "location_id: LocationEntryId"
+            FROM sales_order_items soi
+            JOIN sales_orders so ON so.id = soi.order_id
+            JOIN items i ON i.id = soi.item_id
+            -- Join Units of Measure
+            LEFT JOIN units_of_measure uom ON uom.id = i.uom_id
+            -- Join Inventory Balances & Bin Locations for the order's warehouse
+            LEFT JOIN warehouse_inventory_balances wib
+                ON wib.item_id = soi.item_id
+               AND wib.warehouse_id = so.warehouse_id
+            LEFT JOIN warehouse_locations wl
+                ON wl.id = wib.location_id
+            WHERE so.id = $1
+            -- Priority: pick from bins with stock/allocated qty first, then by location code
+            ORDER BY soi.id, (wib.quantity_on_hand > 0) DESC, wl.display_label ASC;
+        "#,
+        *order_id,
+    )
+    .fetch_all(&mut *conn)
+    .await?;
+
+    Ok(rows)
+}
+
+pub(crate) async fn update_picked_qty(
+    conn: &mut PgConnection,
+    line: &ShipmentItem,
+) -> Result<(), sqlx::Error> {
+    let _rows = sqlx::query!(
+        r#"
+            UPDATE sales_order_items set picked_quantity = $1, shipped_quantity = $1 WHERE id = $2;
+        "#,
+        line.qty,
+        *line.order_line_id,
+    )
+    .execute(&mut *conn)
+    .await?;
+    Ok(())
 }
 
 pub(crate) async fn get_sales_order_address(
@@ -302,6 +372,7 @@ pub(crate) async fn list_sales_orders(
     partner_id: Option<PartnerId>,
     min_amount: Option<Decimal>,
     statuses: Option<Vec<SalesDocumentStatus>>,
+    inc_shipped: bool,
 ) -> Result<Vec<SalesOrder>, sqlx::Error> {
     let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(
         r#"
@@ -361,6 +432,9 @@ pub(crate) async fn list_sales_orders(
 
             separated.push_unseparated(")");
         }
+    }
+    if !inc_shipped {
+        query.push(" AND so.fulfillment_status NOT IN ('fulfilled', 'not_required')");
     }
 
     query.push(" ORDER BY so.order_date DESC, so.order_number DESC");
@@ -448,5 +522,75 @@ pub(crate) async fn update_amount_remaining(
     .execute(&mut *pool)
     .await?;
 
+    Ok(())
+}
+
+pub(crate) async fn get_sales_order_header(
+    conn: &mut PgConnection,
+    org_id: OrgId,
+    order_number: &str,
+) -> Result<Option<SalesOrder>, sqlx::Error> {
+    let order = sqlx::query_as!(
+        SalesOrder,
+        r#"
+        SELECT so.id, so.organization_id as org_id, so.partner_id, so.warehouse_id, so.order_number, so.order_date, so.due_date,
+               so.fulfillment_status as "fulfillment_status: FulfillmentStatus",
+               so.payment_status as "payment_status: PaymentStatus",
+               so.document_status as "document_status: SalesDocumentStatus",
+               so.billing_address_id as "billing_address_id: AddressId", so.shipping_address_id as "shipping_address_id: AddressId",
+               so.subtotal, so.tax_total, so.total_amount, so.amount_remaining,
+               null as warehouse_name, null as partner_name
+        FROM sales_orders so
+        WHERE so.order_number = $1 AND so.organization_id = $2
+        "#,
+        order_number,
+        *org_id,
+    )
+        .fetch_optional(&mut *conn)
+        .await?;
+    Ok(order)
+}
+
+/// Return true if all
+pub(crate) async fn compute_fulfillment_status(
+    conn: &mut PgConnection,
+    org_id: OrgId,
+    order_id: OrderId,
+) -> Result<FulfillmentStatus, sqlx::Error> {
+    let rec = sqlx::query!(
+        r#"
+           SELECT SUM(quantity) AS qty_ordered, SUM(shipped_quantity) AS qty_shipped
+           FROM sales_order_items WHERE order_id = $1
+        "#,
+        *order_id,
+    )
+    .fetch_one(&mut *conn)
+    .await?;
+
+    let (qty_ordered, qty_shipped) = (rec.qty_ordered, rec.qty_shipped);
+    let status = if qty_ordered == qty_shipped {
+        FulfillmentStatus::Fulfilled
+    } else if qty_shipped > Some(Decimal::ZERO) {
+        FulfillmentStatus::PartiallyFulfilled
+    } else {
+        FulfillmentStatus::Unfulfilled
+    };
+    Ok(status)
+}
+
+pub(crate) async fn set_fulfillment_status(
+    conn: &mut PgConnection,
+    org_id: OrgId,
+    order_id: OrderId,
+    fulfillment_status: FulfillmentStatus,
+) -> Result<(), sqlx::Error> {
+    let _rows = sqlx::query!(
+        "UPDATE sales_orders SET fulfillment_status = $1::fulfillment_status WHERE organization_id = $2 AND id = $3",
+        fulfillment_status as FulfillmentStatus,
+        *org_id,
+        *order_id,
+    )
+    .execute(&mut *conn)
+    .await?;
     Ok(())
 }

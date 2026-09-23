@@ -1,0 +1,70 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT DISTINCT ON (soi.id)\n                soi.id  AS \"order_line_id: OrderItemId\",\n                soi.item_id  AS \"item_id: ItemId\",\n                soi.name,\n                soi.code,\n                CASE\n                    WHEN wl.display_label IS NOT NULL THEN wl.display_label\n                    ELSE 'UNASSIGNED'\n                END AS location,\n                CASE\n                    WHEN uom.code IS NOT NULL THEN uom.code\n                    ELSE 'EA'\n                END       AS uom,\n                soi.quantity            AS ordered_qty,\n                soi.picked_quantity     AS picked_qty,\n                wib.location_id as \"location_id: LocationEntryId\"\n            FROM sales_order_items soi\n            JOIN sales_orders so ON so.id = soi.order_id\n            JOIN items i ON i.id = soi.item_id\n            -- Join Units of Measure\n            LEFT JOIN units_of_measure uom ON uom.id = i.uom_id\n            -- Join Inventory Balances & Bin Locations for the order's warehouse\n            LEFT JOIN warehouse_inventory_balances wib\n                ON wib.item_id = soi.item_id\n               AND wib.warehouse_id = so.warehouse_id\n            LEFT JOIN warehouse_locations wl\n                ON wl.id = wib.location_id\n            WHERE so.id = $1\n            -- Priority: pick from bins with stock/allocated qty first, then by location code\n            ORDER BY soi.id, (wib.quantity_on_hand > 0) DESC, wl.display_label ASC;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "order_line_id: OrderItemId",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "item_id: ItemId",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "code",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "location",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "uom",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "ordered_qty",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 7,
+        "name": "picked_qty",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 8,
+        "name": "location_id: LocationEntryId",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null,
+      null,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d599f71256175e504b5920ff78e3b1ba32a7f6e6a020e58daea9c2ada329ffed"
+}

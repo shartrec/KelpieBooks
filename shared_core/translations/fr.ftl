@@ -190,6 +190,7 @@ sidebar-users = Utilisateurs
 sidebar-roles = Rôles
 sidebar-sales = Ventes
 sidebar-sales-orders = Commandes clients
+sidebar-sales-order-pick-entry = Saisie prépa
 sidebar-help = Aide
 sidebar-about = À propos de KelpieBooks...
 sidebar-help-docs = Kelpie Books aide
@@ -453,15 +454,16 @@ vendor-invoice-filter-all-vendors = Tous les fournisseurs
 vendor-invoice-filter-min-amount-label = Montant minimum :
 
 # Sales Invoice Filter
-sales-invoice-filter-draft = Provisoire
-sales-invoice-filter-outstanding = Impayées
-sales-invoice-filter-fully-paid = Entièrement payées
-sales-invoice-filter-all-invoices = Toutes les factures
-sales-invoice-filter-from-label = De :
-sales-invoice-filter-to-label = À :
-sales-invoice-filter-customer-label = Client :
-sales-invoice-filter-all-customers = Tous les clients
-sales-invoice-filter-min-amount-label = Montant minimum :
+sales-order-filter-draft = Provisoire
+sales-order-filter-outstanding = Impayées
+sales-order-filter-fully-paid = Entièrement payées
+sales-order-filter-all-invoices = Toutes les factures
+sales-order-filter-from-label = De :
+sales-order-filter-to-label = À :
+sales-order-filter-customer-label = Client :
+sales-order-filter-all-customers = Tous les clients
+sales-order-filter-min-amount-label = Montant minimum :
+sales-order-filter-include-shipped = Expédié
 
 # Vendor Invoice Table
 vendor-invoice-table-invoice-number = Facture n°
@@ -787,6 +789,30 @@ sales-order-item-col-available = Disponible
 # Sales Order — Item availability badge
 sales-order-item-available = { $qty } disponible
 sales-order-item-insufficient-stock = Seulement { $qty } disponible
+
+# Picklist entry
+picking-error-fetch-details = Échec de la récupération des détails de la commande ou du bon de prépa.
+picking-error-commit-data = Échec de l'enregistrement des données de préparation.
+picking-prompt-title = Scannez le QR du bon de prépa ou saisissez le N° de commande
+picking-prompt-placeholder = Scanner QR / Code-barres...
+picking-loading-order = Chargement du bon de prépa pour la commande n°{$order}...
+picking-submitting-state = Finalisation de la préparation...
+picking-button-try-another = Essayer une autre commande
+picking-header-title = Préparation commande n°{$order_number}
+picking-header-warehouse = Entrepôt : {$warehouse_name}
+picking-btn-pick-all = Tout préparer
+picking-btn-confirm = Confirmer & valider la prépa
+picking-scan-label = Scanner article ou emplacement :
+picking-scan-placeholder = Scanner le code-barres ou saisir l'article et appuyer sur Entrée...
+picking-table-header-location = Emplacement
+picking-table-header-item = Article / Description
+picking-table-header-ordered = Commandé
+picking-table-header-uom = Unité
+picking-table-header-picked-qty = Qté préparée
+picking-table-header-status = Statut
+picking-status-ok = OK
+picking-status-over = Excès
+picking-status-pending = En attente
 
 # Address field labels/placeholders
 address-name = Nom

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n           SELECT SUM(quantity) AS qty_ordered, SUM(shipped_quantity) AS qty_shipped\n           FROM sales_order_items WHERE order_id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "qty_ordered",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 1,
+        "name": "qty_shipped",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "51fcbe1104d4c4130cb59708d3ddff6a8668740067ab068240ae8d313f8a3950"
+}

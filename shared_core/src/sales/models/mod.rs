@@ -7,4 +7,5 @@ pub mod payment_status;
 pub mod sales_document_status;
 pub mod sales_order;
 pub mod sales_order_item;
+pub mod shipment;
 pub mod tax;

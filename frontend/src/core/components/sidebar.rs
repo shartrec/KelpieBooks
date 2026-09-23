@@ -6,10 +6,13 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use shared_core::core::models::auth::SystemPrivilege;
+use shared_core::{
+    core::models::auth::SystemPrivilege,
+    util::info::DOCSITE,
+};
 use yew::prelude::*;
 use yew_router::prelude::*;
-use shared_core::util::info::DOCSITE;
+
 #[cfg(feature = "ledger")]
 use crate::ledger;
 #[cfg(feature = "partners")]
@@ -84,7 +87,6 @@ pub fn sidebar() -> Html {
         }
     }
 
-
     let on_help_click = Callback::from(move |_| {
         // Open external URL in a new tab/window
         window_open(DOCSITE, "_blank");
@@ -93,7 +95,10 @@ pub fn sidebar() -> Html {
     // Helper function to safely open a window
     fn window_open(url: &str, target: &str) {
         // Use the browser's window.open API
-        web_sys::window().unwrap().open_with_url_and_target(url, target).unwrap();
+        web_sys::window()
+            .unwrap()
+            .open_with_url_and_target(url, target)
+            .unwrap();
     }
 
     let on_about_open = {
@@ -260,7 +265,10 @@ pub fn get_core_contribution() -> Option<SidebarModuleContribution> {
     })
 }
 
-pub fn get_help_contribution(on_about_open: Callback<()>, on_help_click: Callback<()>) -> Option<SidebarModuleContribution> {
+pub fn get_help_contribution(
+    on_about_open: Callback<()>,
+    on_help_click: Callback<()>,
+) -> Option<SidebarModuleContribution> {
     Some(SidebarModuleContribution {
         id: "sidebar-help",
         label_key: "sidebar-help",
@@ -283,7 +291,7 @@ pub fn get_help_contribution(on_about_open: Callback<()>, on_help_click: Callbac
                 target_route: None,
                 on_click: Some(on_help_click),
                 children: vec![],
-            }
+            },
         ],
     })
 }

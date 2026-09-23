@@ -7,10 +7,9 @@
  */
 use std::{
     fs,
-    path::{
-        Path,
-    },
+    path::Path,
 };
+
 use rocket::State;
 use rocket_db_pools::Connection;
 use shared_core::OrderId;
@@ -25,6 +24,7 @@ use typst_library::foundations::{
     Value,
 };
 use uuid::Uuid;
+
 use crate::{
     core::{
         db::organization as db_org,
@@ -99,7 +99,11 @@ async fn gather_order_dictionary(
     if let Some(order_dto) = order {
         let order = order_dto.order;
 
-        let uuid = order.id.hyphenated().encode_lower(&mut Uuid::encode_buffer()).to_string();
+        let uuid = order
+            .id
+            .hyphenated()
+            .encode_lower(&mut Uuid::encode_buffer())
+            .to_string();
         dict.insert("order-id".into(), Value::Str(uuid.into()));
         dict.insert("order-number".into(), Value::Str(order.order_number.into()));
         let inv_due = i18n.format_date(order.due_date);
@@ -224,8 +228,7 @@ async fn gather_order_dictionary(
     Ok(dict)
 }
 
-fn build_order_pdf(order: Dict, template_dir: &Path, template: &str ) -> Result<Vec<u8>, ApiError> {
-
+fn build_order_pdf(order: Dict, template_dir: &Path, template: &str) -> Result<Vec<u8>, ApiError> {
     let path = Path::new(&*template_dir).join(template);
 
     let template_source = fs::read_to_string(path)

@@ -96,6 +96,12 @@ pub enum Route {
     #[at("/sales/orders/new")]
     NewSalesOrder,
     #[cfg(feature = "sales")]
+    #[at("/orders/pick/:order_number")]
+    PickOrder { order_number: String },
+    #[at("/orders/pick")]
+    PickPrompt,
+    #[cfg(feature = "sales")]
+    #[cfg(feature = "sales")]
     #[at("/sales/reports/aged-receivables")]
     AgedReceivables,
 

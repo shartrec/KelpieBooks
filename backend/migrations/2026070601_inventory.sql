@@ -237,12 +237,14 @@ CREATE TABLE sales_order_items
     name            TEXT            NOT NULL,
     description     TEXT,
     quantity        NUMERIC(15,4)   NOT NULL DEFAULT 0,
+    picked_quantity NUMERIC(15,4)   NOT NULL DEFAULT 0,
+    shipped_quantity NUMERIC(15,4)  NOT NULL DEFAULT 0,
     unit_price      NUMERIC(15,4)   NOT NULL DEFAULT 0,
-    tax_category_id UUID            REFERENCES tax_categories(id) ON DELETE SET NULL,
+    tax_category_id UUID             REFERENCES tax_categories(id) ON DELETE SET NULL,
     tax_rate        NUMERIC(15,4)   NOT NULL DEFAULT 0,
     tax_amount      NUMERIC(15,4)   NOT NULL DEFAULT 0,
     net_amount      NUMERIC(15,4)   NOT NULL DEFAULT 0,
-    sort_order      INT             NOT NULL DEFAULT 0
+    sort_order      INT              NOT NULL DEFAULT 0
 );
 
 CREATE INDEX idx_sales_order_items_org ON sales_order_items(order_id);
@@ -264,6 +266,23 @@ CREATE TABLE sales_order_addresses
 
 CREATE INDEX idx_sales_order_address_ord ON sales_order_items(order_id);
 
+CREATE TABLE shipments (
+                           id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                           order_id        UUID NOT NULL REFERENCES sales_orders(id) ON DELETE CASCADE,
+                           shipment_number TEXT NOT NULL UNIQUE,
+                           carrier         TEXT,
+                           tracking_number TEXT,
+                           shipped_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                           created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 3. Map shipped quantities per shipment dispatch
+CREATE TABLE shipment_items (
+                                id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                                shipment_id   UUID NOT NULL REFERENCES shipments(id) ON DELETE CASCADE,
+                                order_item_id UUID NOT NULL REFERENCES sales_order_items(id) ON DELETE RESTRICT,
+                                quantity      NUMERIC(15,4) NOT NULL
+);
 -- =============================================================================
 -- 1. Customer Payments
 -- =============================================================================

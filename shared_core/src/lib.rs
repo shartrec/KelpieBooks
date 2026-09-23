@@ -145,6 +145,7 @@ define_id!(OrderId);
 define_id!(OrderItemId);
 define_id!(PartnerId);
 define_id!(PaymentId);
+define_id!(ShipmentId);
 define_id!(TaxCategoryId);
 define_id!(TaxRateId);
 define_id!(TransactionId);

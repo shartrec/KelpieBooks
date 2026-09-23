@@ -29,10 +29,17 @@ use crate::{
         },
     },
     router::Route,
-    sales::components::sales_order_drawer::SalesOrderDrawer,
+    sales::{
+        components::{
+            sales_order_drawer::SalesOrderDrawer,
+            sales_order_filter::SalesOrderFilter,
+        },
+        contexts::sales_order_filter_context::{
+            use_sales_order_filter,
+            PaymentStatusFilter,
+        },
+    },
 };
-use crate::sales::components::sales_order_filter::SalesOrderFilter;
-use crate::sales::contexts::sales_order_filter_context::{use_sales_order_filter, PaymentStatusFilter};
 
 #[function_component(SalesOrdersList)]
 pub fn sales_orders_list() -> Html {
@@ -84,6 +91,7 @@ pub fn sales_orders_list() -> Html {
                 if let Some(min) = filter_ctx.min_amount {
                     url.push_str(&format!("&min_amount={}", min));
                 }
+                url.push_str(&format!("&include_shipped={}", filter_ctx.shipped));
 
                 let resp = Api::get(&url, user_ctx, navigator).await;
                 match resp {

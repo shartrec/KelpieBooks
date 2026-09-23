@@ -28,7 +28,7 @@ use crate::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
-    core::components::currency_input::DecimalInput,
+    core::components::number_input::DecimalInput,
     ledger::util::get_accounts_by_category,
 };
 

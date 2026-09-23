@@ -12,7 +12,6 @@ use std::collections::{
 };
 
 use fluent::fluent_args;
-use log::info;
 use shared_core::{
     core::models::auth::SystemPrivilege,
     ledger::{
@@ -81,7 +80,6 @@ pub fn chart_of_accounts_table() -> Html {
                     Ok(response) if response.ok() => {
                         match response.json::<Vec<AccountWithBalance>>().await {
                             Ok(mut data) => {
-                                info!("Successfully fetched {} accounts.", data.len());
                                 data.sort_by(|a, b| a.code.cmp(&b.code));
                                 accounts.set(data);
                             }

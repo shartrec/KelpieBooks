@@ -10,9 +10,11 @@ use yew::prelude::*;
 
 use crate::{
     core::components::layout::Layout,
+    sales::{
+        components::sales_order_list::SalesOrdersList,
+        contexts::sales_order_filter_context::SalesOrderFilterProvider,
+    },
 };
-use crate::sales::components::sales_order_list::SalesOrdersList;
-use crate::sales::contexts::sales_order_filter_context::SalesOrderFilterProvider;
 
 #[function_component(SalesOrdersPage)]
 pub fn sales_orders_page() -> Html {

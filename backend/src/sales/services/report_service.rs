@@ -37,6 +37,7 @@ pub(crate) async fn get_trial_balance(
         None,
         None,
         Some(vec![SalesDocumentStatus::Draft, SalesDocumentStatus::Open]),
+        true,
     )
     .await?;
 

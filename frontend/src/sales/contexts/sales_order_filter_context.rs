@@ -34,6 +34,7 @@ pub struct SalesOrderFilterState {
     pub partner_id: Option<PartnerId>,
     pub min_amount: Option<Decimal>,
     pub status: PaymentStatusFilter,
+    pub shipped: bool,
 }
 
 impl Default for SalesOrderFilterState {
@@ -45,6 +46,7 @@ impl Default for SalesOrderFilterState {
             partner_id: None,
             min_amount: None,
             status: PaymentStatusFilter::Outstanding,
+            shipped: false,
         }
     }
 }
@@ -55,6 +57,7 @@ pub enum SalesOrderFilterAction {
     SetPartnerId(Option<PartnerId>),
     SetMinAmount(Option<Decimal>),
     SetStatus(PaymentStatusFilter),
+    SetShipped(bool),
 }
 
 impl Reducible for SalesOrderFilterState {
@@ -68,6 +71,7 @@ impl Reducible for SalesOrderFilterState {
             SalesOrderFilterAction::SetPartnerId(id) => next_state.partner_id = id,
             SalesOrderFilterAction::SetMinAmount(amount) => next_state.min_amount = amount,
             SalesOrderFilterAction::SetStatus(status) => next_state.status = status,
+            SalesOrderFilterAction::SetShipped(shipped) => next_state.shipped = shipped,
         }
         next_state.into()
     }

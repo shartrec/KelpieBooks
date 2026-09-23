@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE sales_orders SET fulfillment_status = $1::fulfillment_status WHERE organization_id = $2 AND id = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "fulfillment_status",
+            "kind": {
+              "Enum": [
+                "unfulfilled",
+                "partially_fulfilled",
+                "fulfilled",
+                "not_required"
+              ]
+            }
+          }
+        },
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4e15d93664662a8513748b75d42ad2fe0cd31a169ba3439e38264d1e6c56ddb4"
+}

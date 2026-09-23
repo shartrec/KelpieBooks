@@ -19,6 +19,9 @@ use crate::contexts::locale_context::{
 
 #[derive(Properties, PartialEq)]
 pub struct DecimalInputProps {
+    #[prop_or_default]
+    pub on_focus: Callback<HtmlInputElement>,
+    #[prop_or_default]
     pub on_change: Callback<Decimal>,
     #[prop_or_default]
     pub class: Classes,
@@ -54,6 +57,14 @@ pub fn decimal_input(props: &DecimalInputProps) -> Html {
         });
     }
 
+    let onfocus = {
+        let on_focus = props.on_focus.clone();
+        Callback::from(move |e: FocusEvent| {
+            let input: HtmlInputElement = e.target_unchecked_into();
+            on_focus.emit(input);
+        })
+    };
+
     let oninput = {
         let display_value = display_value.clone();
         let on_change = props.on_change.clone();
@@ -84,6 +95,7 @@ pub fn decimal_input(props: &DecimalInputProps) -> Html {
             value={(*display_value).clone()}
             readonly={props.readonly}
             {oninput}
+            {onfocus}
         />
     }
 }

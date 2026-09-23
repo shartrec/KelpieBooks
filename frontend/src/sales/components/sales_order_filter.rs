@@ -6,22 +6,26 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 use std::str::FromStr;
+
 use chrono::NaiveDate;
 use rust_decimal::{
     dec,
     Decimal,
 };
-use shared_core::partners::dtos::partner_list_item::PartnerListItem;
+use shared_core::{
+    partners::dtos::partner_list_item::PartnerListItem,
+    PartnerId,
+};
 use yew::prelude::*;
 use yew_router::prelude::use_navigator;
-use shared_core::PartnerId;
+
 use crate::{
     api::Api,
     contexts::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
-    core::components::currency_input::DecimalInput,
+    core::components::number_input::DecimalInput,
     sales::contexts::sales_order_filter_context::{
         use_sales_order_filter,
         PaymentStatusFilter,
@@ -107,6 +111,14 @@ pub fn sales_order_filter() -> Html {
         })
     };
 
+    let on_shipped_change = {
+        let filter_ctx = filter_ctx.clone();
+        Callback::from(move |e: Event| {
+            let target: web_sys::HtmlInputElement = e.target_unchecked_into();
+            filter_ctx.dispatch(SalesOrderFilterAction::SetShipped(target.checked()));
+        })
+    };
+
     html! {
         <div class="report__options">
             <div class="report__action-bar">
@@ -117,55 +129,65 @@ pub fn sales_order_filter() -> Html {
                             class={classes!("segment-trigger", (filter_ctx.status == PaymentStatusFilter::Draft).then_some("segment-trigger--active"))}
                             onclick={let s = set_status.clone(); move |_| s.emit(PaymentStatusFilter::Draft)}
                         >
-                            { i18n.t("sales-invoice-filter-draft") }
+                            { i18n.t("sales-order-filter-draft") }
                         </button>
                         <button
                             type="button"
                             class={classes!("segment-trigger", (filter_ctx.status == PaymentStatusFilter::Outstanding).then_some("segment-trigger--active"))}
                             onclick={let s = set_status.clone(); move |_| s.emit(PaymentStatusFilter::Outstanding)}
                         >
-                            { i18n.t("sales-invoice-filter-outstanding") }
+                            { i18n.t("sales-order-filter-outstanding") }
                         </button>
                         <button
                             type="button"
                             class={classes!("segment-trigger", (filter_ctx.status == PaymentStatusFilter::Paid).then_some("segment-trigger--active"))}
                             onclick={let s = set_status.clone(); move |_| s.emit(PaymentStatusFilter::Paid)}
                         >
-                            { i18n.t("sales-invoice-filter-fully-paid") }
+                            { i18n.t("sales-order-filter-fully-paid") }
                         </button>
                         <button
                             type="button"
                             class={classes!("segment-trigger", (filter_ctx.status == PaymentStatusFilter::All).then_some("segment-trigger--active"))}
                             onclick={let s = set_status.clone(); move |_| s.emit(PaymentStatusFilter::All)}
                         >
-                            { i18n.t("sales-invoice-filter-all-invoices") }
+                            { i18n.t("sales-order-filter-all-invoices") }
                         </button>
                     </div>
                     <div class="report__date-range-selector">
-                        <label>{ i18n.t("sales-invoice-filter-from-label") }</label>
+                        <label>{ i18n.t("sales-order-filter-from-label") }</label>
                         <input type="date" value={filter_ctx.start_date.format("%Y-%m-%d").to_string()} onchange={on_start_change} />
-                        <label>{ i18n.t("sales-invoice-filter-to-label") }</label>
+                        <label>{ i18n.t("sales-order-filter-to-label") }</label>
                         <input type="date" value={filter_ctx.end_date.format("%Y-%m-%d").to_string()} onchange={on_end_change} />
                     </div>
                 </div>
             </div>
             <div class="report__advanced-filters">
                 <div class="report__filter-group">
-                    <label>{ i18n.t("sales-invoice-filter-customer-label") }</label>
+                    <label>{ i18n.t("sales-order-filter-customer-label") }</label>
                     <select onchange={on_customer_change}>
-                        <option value="" selected=true>{ i18n.t("sales-invoice-filter-all-customers") }</option>
+                        <option value="" selected=true>{ i18n.t("sales-order-filter-all-customers") }</option>
                         { for (*customers).iter().map(|c| html! {
                             <option value={c.id.to_string()}>{ &c.legal_name }</option>
                         })}
                     </select>
                 </div>
                 <div class="report__filter-group">
-                    <label>{ i18n.t("sales-invoice-filter-min-amount-label") }</label>
+                    <label>{ i18n.t("sales-order-filter-min-amount-label") }</label>
                     <DecimalInput
                         value={filter_ctx.min_amount.unwrap_or(dec!(0.00))}
                         on_change={on_min_amount_change}
                         placeholder={i18n.t("journal-entry-currency-placeholder")}
                     />
+                </div>
+                <div class="report__filter-group" style="display: flex; align-items: flex-end;">
+                    <label class="checkbox-label" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding-bottom: 0.5rem;">
+                        <input
+                            type="checkbox"
+                            checked={filter_ctx.shipped}
+                            onchange={on_shipped_change}
+                        />
+                        { i18n.t("sales-order-filter-include-shipped") }
+                    </label>
                 </div>
             </div>
         </div>

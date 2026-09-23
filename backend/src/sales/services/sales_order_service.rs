@@ -5,7 +5,6 @@
  * called LICENSE at the top level of the KelpieBooks source tree
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
-
 use rocket_db_pools::sqlx::{
     self,
     PgConnection,
@@ -17,10 +16,14 @@ use shared_core::{
         TransactionType,
     },
     sales::{
-        dtos::sales_order_dto::SalesOrderDto,
+        dtos::{
+            picklist::PickLineItem,
+            sales_order_dto::SalesOrderDto,
+        },
         models::{
             sales_document_status::SalesDocumentStatus,
             sales_order::SalesOrder,
+            shipment::Shipment,
         },
         requests::sales_order::CreateSalesOrderRequest,
     },
@@ -37,12 +40,15 @@ use crate::{
         get_next_order_number,
         SeqType,
     },
-    inventory::db::{
-        inventory as inventory_db,
-        stock_transaction::{
-            log_transaction,
-            NewStockTransaction,
+    inventory::{
+        db::{
+            inventory as inventory_db,
+            stock_transaction::{
+                log_transaction,
+                NewStockTransaction,
+            },
         },
+        services::inventory::ship_stock,
     },
     sales::db::{
         item as item_db,
@@ -119,6 +125,25 @@ pub(crate) async fn get_sales_order(
 
     Ok(order)
 }
+pub(crate) async fn get_sales_order_header(
+    pool: &mut PgConnection,
+    org_id: OrgId,
+    order_number: &str,
+) -> Result<SalesOrder, ApiError> {
+    if let Some(order) = sales_order_db::get_sales_order_header(pool, org_id, order_number).await? {
+        Ok(order)
+    } else {
+        Err(ApiError::NotFound("Sales order not found.".to_string()))
+    }
+}
+
+pub(crate) async fn get_pick_details(
+    pool: &mut PgConnection,
+    org_id: OrgId,
+    order_id: OrderId,
+) -> Result<Vec<PickLineItem>, ApiError> {
+    Ok(sales_order_db::get_pick_list_items(pool, order_id).await?)
+}
 
 pub(crate) async fn list_sales_orders(
     pool: &mut PgConnection,
@@ -128,6 +153,7 @@ pub(crate) async fn list_sales_orders(
     partner_id: Option<PartnerId>,
     min_amount: Option<rust_decimal::Decimal>,
     statuses: Vec<SalesDocumentStatus>,
+    inc_shipped: bool,
 ) -> Result<Vec<SalesOrder>, ApiError> {
     let items = sales_order_db::list_sales_orders(
         pool,
@@ -137,6 +163,7 @@ pub(crate) async fn list_sales_orders(
         partner_id,
         min_amount,
         Some(statuses),
+        inc_shipped,
     )
     .await?;
     Ok(items)
@@ -240,6 +267,29 @@ pub(crate) async fn cancel_order(
 
     sales_order_db::update_sales_order_status(pool, org_id, id, SalesDocumentStatus::Cancelled)
         .await?;
+
+    Ok(())
+}
+
+pub(crate) async fn update_pick_details(
+    conn: &mut PgConnection,
+    org_id: OrgId,
+    user_id: UserId,
+    shipment: &Shipment,
+) -> Result<(), ApiError> {
+    // Update the order lines sequentially
+    for item in &shipment.lines {
+        sales_order_db::update_picked_qty(conn, item).await?;
+    }
+
+    let fullfilment_status =
+        sales_order_db::compute_fulfillment_status(conn, org_id, shipment.order_id).await?;
+    let _ =
+        sales_order_db::set_fulfillment_status(conn, org_id, shipment.order_id, fullfilment_status)
+            .await?;
+
+    // Update the stock
+    ship_stock(conn, org_id, user_id, shipment).await?;
 
     Ok(())
 }

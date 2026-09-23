@@ -8,7 +8,6 @@
 use std::str::FromStr;
 
 use chrono::NaiveDate;
-use gloo_console::info;
 use rust_decimal::{
     dec,
     Decimal,
@@ -26,7 +25,7 @@ use crate::{
         auth_context::use_user_context,
         locale_context::use_locale,
     },
-    core::components::currency_input::DecimalInput,
+    core::components::number_input::DecimalInput,
     payables::vendor_invoice_filter_context::{
         use_vendor_invoice_filter,
         PaymentStatusFilter,
@@ -86,7 +85,6 @@ pub fn vendor_invoice_filter() -> Html {
         Callback::from(move |e: Event| {
             let target: web_sys::HtmlSelectElement = e.target_unchecked_into();
             let value = target.value();
-            info!("Vendor change:");
             if value.is_empty() {
                 filter_ctx.dispatch(VendorInvoiceFilterAction::SetPartnerId(None));
             } else if let Ok(id) = PartnerId::from_str(&value) {

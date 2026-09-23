@@ -298,3 +298,58 @@ pub async fn adjust_allocated(
         }
     }
 }
+
+pub async fn adjust_allocated_on_hand(
+    conn: &mut PgConnection,
+    org_id: OrgId,
+    warehouse_id: WarehouseId,
+    location_id: LocationEntryId,
+    item_id: ItemId,
+    delta: Decimal,
+) -> Result<WarehouseInventoryBalance, ApiError> {
+    let w_bal = sqlx::query_as!(
+        WarehouseInventoryBalance,
+        r#"
+        UPDATE warehouse_inventory_balances
+        SET quantity_allocated = quantity_allocated - $1, quantity_on_hand = quantity_on_hand - $1,
+            updated_at = NOW()
+        WHERE warehouse_id = $2 AND location_id = $3 AND item_id = $4 AND organization_id = $5
+        RETURNING *
+        "#,
+        delta,
+        *warehouse_id,
+        *location_id,
+        *item_id,
+        *org_id,
+    )
+    .fetch_optional(&mut *conn)
+    .await?;
+
+    match w_bal {
+        Some(w_bal) => Ok(w_bal),
+        None => {
+            Ok(sqlx::query_as!(
+                WarehouseInventoryBalance,
+                r#"
+                    INSERT INTO warehouse_inventory_balances
+                        (organization_id, warehouse_id, location_id, item_id, quantity_on_hand, quantity_allocated, unit_cost)
+                    VALUES ($1, $2, $3, $4, $5, 0.0 - $5, 0.0)
+                    ON CONFLICT (location_id, item_id)
+                    DO UPDATE SET
+                    quantity_on_hand = warehouse_inventory_balances.quantity_on_hand + EXCLUDED.quantity_on_hand,
+                    updated_at = NOW()
+                    RETURNING *
+                        "#,
+                *org_id,
+                *warehouse_id,
+                *location_id,
+                *item_id,
+                delta
+            )
+                .fetch_one(&mut *conn)
+                .await?
+            )
+
+        }
+    }
+}

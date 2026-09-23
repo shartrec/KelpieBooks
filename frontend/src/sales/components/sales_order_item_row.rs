@@ -27,7 +27,7 @@ use crate::{
         locale_context::use_locale,
     },
     core::components::{
-        currency_input::DecimalInput,
+        number_input::DecimalInput,
         progressive_search::ProgressiveSearch,
         SearchableItem,
     },

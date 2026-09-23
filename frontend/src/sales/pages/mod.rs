@@ -8,6 +8,8 @@
 pub mod aged_receivables;
 pub mod item_list;
 pub mod new_sales_order;
+pub mod pick_order_wrapper;
+pub mod sales_order_pick_page;
 pub mod sales_orders;
 pub mod tax_category_list;
 pub mod uom_list;

@@ -8,5 +8,6 @@
 
 pub mod aged_receivable_summary;
 pub mod item_payload;
+pub mod picklist;
 pub mod sales_order_dto;
 pub mod sales_order_list_item;

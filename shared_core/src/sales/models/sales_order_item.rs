@@ -29,6 +29,8 @@ pub struct SalesOrderItem {
     pub name: String,
     pub description: Option<String>,
     pub quantity: Decimal,
+    pub picked_quantity: Decimal,
+    pub shipped_quantity: Decimal,
     pub unit_price: Decimal,
     pub tax_category_id: Option<TaxCategoryId>,
     pub tax_rate: Decimal,

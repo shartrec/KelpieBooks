@@ -6,7 +6,6 @@
  *  (online at: https://github.com/shartrec/kelpiebooks/LICENSE ).
  */
 
-use rocket_db_pools::Connection;
 use shared_core::{
     sales::{
         models::item::{
@@ -18,15 +17,15 @@ use shared_core::{
     ItemId,
     OrgId,
 };
+use sqlx::PgConnection;
 
 use crate::{
     sales::db::item as item_db,
     util::ApiError,
-    DbKelpie,
 };
 
 pub async fn get_items(
-    pool: &mut Connection<DbKelpie>,
+    pool: &mut PgConnection,
     org_id: OrgId,
     search_term: Option<String>,
     item_type: Option<ItemType>,
@@ -45,7 +44,7 @@ pub async fn get_items(
 }
 
 pub async fn get_item(
-    pool: &mut Connection<DbKelpie>,
+    pool: &mut PgConnection,
     org_id: OrgId,
     id: ItemId,
 ) -> Result<Option<Item>, sqlx::Error> {
@@ -53,7 +52,7 @@ pub async fn get_item(
 }
 
 pub async fn create_item(
-    pool: &mut Connection<DbKelpie>,
+    pool: &mut PgConnection,
     org_id: OrgId,
     item: &CreateItemRequest,
 ) -> Result<Item, sqlx::Error> {
@@ -61,7 +60,7 @@ pub async fn create_item(
 }
 
 pub async fn update_item(
-    pool: &mut Connection<DbKelpie>,
+    pool: &mut PgConnection,
     org_id: OrgId,
     id: ItemId,
     item: &Item,
@@ -70,7 +69,7 @@ pub async fn update_item(
 }
 
 pub async fn delete_item(
-    pool: &mut Connection<DbKelpie>,
+    pool: &mut PgConnection,
     org_id: OrgId,
     id: ItemId,
 ) -> Result<u64, ApiError> {

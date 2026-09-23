@@ -32,7 +32,7 @@ use crate::{
             ReportContext,
         },
     },
-    core::components::currency_input::DecimalInput,
+    core::components::number_input::DecimalInput,
 };
 
 #[derive(Properties, PartialEq)]

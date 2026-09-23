@@ -9,12 +9,12 @@
 pub mod about_modal;
 pub mod add_role_modal;
 pub mod add_user_modal;
-pub mod currency_input;
 pub mod delete_confirmation_modal;
 pub mod edit_role_modal;
 pub mod edit_user_modal;
 pub mod header;
 pub mod layout;
+pub mod number_input;
 pub mod progressive_search;
 pub mod report_options;
 pub mod sidebar;

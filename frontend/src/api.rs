@@ -13,7 +13,6 @@ use gloo_net::{
     },
     Error,
 };
-use log::info;
 use serde::Serialize;
 use yew_router::prelude::Navigator;
 
@@ -30,7 +29,6 @@ impl Api {
         user_ctx: &UserContextHandle,
         navigator: &Navigator,
     ) {
-        info!("Response: {:?}", response);
         if let Ok(resp) = response {
             if resp.status() == 401 {
                 user_ctx.dispatch(None);

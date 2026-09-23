@@ -70,13 +70,13 @@ use frontend::{
     sales::pages::{
         item_list::ItemListPage,
         new_sales_order::NewSalesOrderPage,
+        pick_order_wrapper::PickOrderWrapper,
         sales_orders::SalesOrdersPage,
         tax_category_list::TaxCategoryListPage,
         uom_list::UomListPage,
     },
 };
 use gloo_net::http::Request;
-use log::info;
 use shared_core::core::{
     dtos::user_detail::AuthUserDetail,
     models::organization::Organization,
@@ -126,7 +126,6 @@ fn app() -> Html {
                 if let Ok(resp) = Request::get("/api/organization").send().await {
                     if resp.ok() {
                         if let Ok(org) = resp.json::<Organization>().await {
-                            info!("Org: {:?}", org);
                             org_ctx.dispatch(OrgAction::SetOrg(OrgState {
                                 id: org.id,
                                 name: org.name,
@@ -198,12 +197,15 @@ fn switch(routes: Route) -> Html {
         Route::NewVendorInvoice => html! { <NewVendorInvoicePage /> },
         #[cfg(feature = "payables")]
         Route::AgedPayables => html! { <AgedPayablesPage /> },
+
         #[cfg(any(feature = "sales", feature = "inventory"))]
         Route::ItemList => html! { <ItemListPage /> },
         #[cfg(any(feature = "sales", feature = "inventory"))]
         Route::UomList => html! { <UomListPage /> },
         #[cfg(feature = "sales")]
         Route::SalesOrders => html! { <SalesOrdersPage /> },
+        #[cfg(feature = "sales")]
+        Route::PickOrder { .. } | Route::PickPrompt => html! { <PickOrderWrapper />},
         #[cfg(feature = "sales")]
         Route::NewSalesOrder => html! { <NewSalesOrderPage /> },
         #[cfg(feature = "sales")]

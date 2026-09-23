@@ -146,7 +146,8 @@ fn rocket() -> _ {
     #[cfg(any(feature = "sales", feature = "inventory"))]
     let rocket = rocket
         .mount("/", sales::routes::items::routes())
-        .mount("/", sales::routes::uoms::routes());
+        .mount("/", sales::routes::uoms::routes())
+        .mount("/", sales::routes::picking::routes());
 
     #[cfg(feature = "inventory")]
     let rocket = rocket

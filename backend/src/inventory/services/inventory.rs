@@ -7,7 +7,7 @@
  */
 use std::collections::HashMap;
 
-use chrono::NaiveDate;
+use chrono::Local;
 use rocket_db_pools::Connection;
 use rust_decimal::{
     prelude::FromPrimitive,
@@ -39,6 +39,7 @@ use shared_core::{
             JournalEntryLine,
         },
     },
+    sales::models::shipment::Shipment,
     AccountId,
     ItemId,
     LocationEntryId,
@@ -158,7 +159,7 @@ pub async fn update_stock_levels(
 }
 
 pub async fn receive_vendor_stock(
-    pool: &mut Connection<DbKelpie>,
+    pool: &mut PgConnection,
     org_id: OrgId,
     user_id: UserId,
     req: &ReceiveStockRequest,
@@ -224,6 +225,94 @@ pub async fn receive_vendor_stock(
             org_id,
             total_amount,
             &*req.po_number.clone().unwrap_or("n/a".to_string()),
+        )
+        .await?;
+
+        updated_balances.push(balance);
+    }
+
+    // Commit changes
+    tx.commit().await?;
+
+    Ok(updated_balances)
+}
+pub async fn ship_stock(
+    pool: &mut PgConnection,
+    org_id: OrgId,
+    user_id: UserId,
+    shipment: &Shipment,
+) -> Result<Vec<WarehouseInventoryBalance>, ApiError> {
+    if shipment.lines.is_empty() {
+        return Err(ApiError::BadRequest(
+            "Cannot ship empty shipment list.".to_string(),
+        ));
+    }
+
+    // Begin ACID transaction
+    let mut tx = pool.begin().await?;
+    let mut updated_balances = Vec::new();
+
+    // Build standard reference string combining vendor/PO details for the ledger
+    let ref_notes = format!(
+        "Order No: {} | {}",
+        &shipment.order_id, &shipment.shipment_number
+    );
+
+    for line in &shipment.lines {
+        // Get the item warehouse inventory balance
+        let wib = match inventory_db::get_balance_for_location(
+            &mut *tx,
+            org_id,
+            line.item_id,
+            line.location_id,
+        )
+        .await?
+        {
+            Some(wib) => wib,
+            None => {
+                return Err(ApiError::BadRequest(
+                    "No warehouse record for this transaction".to_string(),
+                ))
+            }
+        };
+
+        // 1. Update/Upsert the location balance on hand
+        let balance = inventory_db::adjust_allocated_on_hand(
+            &mut tx,
+            org_id,
+            line.warehouse_id,
+            line.location_id,
+            line.item_id,
+            line.qty,
+        )
+        .await?;
+
+        // 2. Write immutable transaction audit entry
+        stock_transaction::log_transaction(
+            &mut tx,
+            NewStockTransaction {
+                organization_id: org_id,
+                warehouse_id: line.warehouse_id,
+                location_id: line.location_id,
+                item_id: line.item_id,
+                transaction_type: TransactionType::Shipment,
+                quantity_change: line.qty,
+                reference_type: Some(ReferenceType::SalesOrder),
+                reference_id: Some(*shipment.order_id),
+                notes: Some(&ref_notes),
+                created_by: user_id,
+            },
+        )
+        .await?;
+
+        //todo get total amount
+        let total_amount = line.qty * wib.unit_cost;
+
+        let _tx_id = post_sales_journal_entry(
+            &mut tx,
+            org_id,
+            total_amount,
+            shipment.order_number.clone().as_str(),
         )
         .await?;
 
@@ -353,6 +442,50 @@ pub async fn post_receive_journal_entry(
     let system_accounts_map = get_system_accounts(conn, org_id).await?;
     let accounts = InventorySystemAccounts::from_map(&system_accounts_map)?;
 
+    post_journal_entry(
+        conn,
+        org_id,
+        total_value,
+        reference,
+        accounts.cogs_id,
+        accounts.inventory_asset_id,
+    )
+    .await?
+}
+
+pub async fn post_sales_journal_entry(
+    conn: &mut PgConnection,
+    org_id: OrgId,
+    total_value: Decimal,
+    reference: &str,
+) -> Result<TransactionId, ApiError> {
+    if total_value <= Decimal::ZERO {
+        return Ok(TransactionId::default()); // Skip 0-value postings
+    }
+
+    // 1. Fetch system account mappings
+    let system_accounts_map = get_system_accounts(conn, org_id).await?;
+    let accounts = InventorySystemAccounts::from_map(&system_accounts_map)?;
+
+    post_journal_entry(
+        conn,
+        org_id,
+        total_value,
+        reference,
+        accounts.cogs_id,
+        accounts.inventory_asset_id,
+    )
+    .await?
+}
+
+async fn post_journal_entry(
+    conn: &mut PgConnection,
+    org_id: OrgId,
+    total_value: Decimal,
+    reference: &str,
+    debit_account: AccountId,
+    credit_account: AccountId,
+) -> Result<Result<TransactionId, ApiError>, ApiError> {
     // 2. Draft Journal Entry
     // Debit: Inventory Asset (Increases Asset)
     // Credit: Received Not Invoiced (Increases Liability)
@@ -360,14 +493,14 @@ pub async fn post_receive_journal_entry(
     let jels = vec![
         JournalEntryLine {
             line_id: Uuid::new_v4(),
-            account_id: accounts.inventory_asset_id,
+            account_id: debit_account,
             debit: total_value,
             credit: Decimal::ZERO,
             description: description.clone(),
         },
         JournalEntryLine {
             line_id: Uuid::new_v4(),
-            account_id: accounts.received_not_invoiced_id,
+            account_id: credit_account,
             debit: Decimal::ZERO,
             credit: total_value,
             description: description.clone(),
@@ -375,14 +508,14 @@ pub async fn post_receive_journal_entry(
     ];
 
     let ct_req = CreateTransactionRequest {
-        date: NaiveDate::default(),
+        date: Local::now().date_naive(),
         description,
         reference: Some(reference.to_string()),
         entries: jels,
     };
     let journal_id = account_service::create_transaction(conn, org_id, &ct_req).await?;
 
-    Ok(journal_id)
+    Ok(Ok(journal_id))
 }
 
 pub async fn post_adjustment_journal_entry(
@@ -434,7 +567,7 @@ pub async fn post_adjustment_journal_entry(
     ];
 
     let ct_req = CreateTransactionRequest {
-        date: NaiveDate::default(),
+        date: Local::now().date_naive(),
         description,
         reference: Some(reference.to_string()),
         entries: jels,

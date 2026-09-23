@@ -190,6 +190,7 @@ sidebar-users = Users
 sidebar-roles = Roles
 sidebar-sales = Sales
 sidebar-sales-orders = Sales Orders
+sidebar-sales-order-pick-entry = Enter Picklist
 sidebar-help = Help
 sidebar-about = About KelpieBooks...
 sidebar-help-docs = Kelpie Books help
@@ -453,15 +454,16 @@ vendor-invoice-filter-all-vendors = All Vendors
 vendor-invoice-filter-min-amount-label = Min Amount:
 
 # Sales Invoice Filter
-sales-invoice-filter-draft = Draft
-sales-invoice-filter-outstanding = Outstanding
-sales-invoice-filter-fully-paid = Fully Paid
-sales-invoice-filter-all-invoices = All Invoices
-sales-invoice-filter-from-label = From:
-sales-invoice-filter-to-label = To:
-sales-invoice-filter-customer-label = Customer:
-sales-invoice-filter-all-customers = All Customers
-sales-invoice-filter-min-amount-label = Min Amount:
+sales-order-filter-draft = Draft
+sales-order-filter-outstanding = Outstanding
+sales-order-filter-fully-paid = Fully Paid
+sales-order-filter-all-invoices = All Invoices
+sales-order-filter-from-label = From:
+sales-order-filter-to-label = To:
+sales-order-filter-customer-label = Customer:
+sales-order-filter-all-customers = All Customers
+sales-order-filter-min-amount-label = Min Amount:
+sales-order-filter-include-shipped = Shipped
 
 # Vendor Invoice Table
 vendor-invoice-table-invoice-number = Invoice #
@@ -787,6 +789,30 @@ sales-order-item-col-available = Available
 # Sales Order — Item availability badge
 sales-order-item-available = { $qty } available
 sales-order-item-insufficient-stock = Only { $qty } available
+
+# Picklist entry
+picking-error-fetch-details = Failed to fetch order or pick details.
+picking-error-commit-data = Failed to commit pick data.
+picking-prompt-title = Scan Picklist QR or Enter Order Number
+picking-prompt-placeholder = Scan QR / Barcode...
+picking-loading-order = Loading picklist for order #{$order}...
+picking-submitting-state = Finalizing pick state...
+picking-button-try-another = Try Another Order
+picking-header-title = Pick Order #{$order_number}
+picking-header-warehouse = Warehouse: {$warehouse_name}
+picking-btn-pick-all = Pick All Complete
+picking-btn-confirm = Confirm & Finalize Pick
+picking-scan-label = Scan Item or Location:
+picking-scan-placeholder = Scan barcode or type SKU and hit Enter...
+picking-table-header-location = Location
+picking-table-header-item = Item / Description
+picking-table-header-ordered = Ordered
+picking-table-header-uom = UoM
+picking-table-header-picked-qty = Picked Qty
+picking-table-header-status = Status
+picking-status-ok = OK
+picking-status-over = Over
+picking-status-pending = Pending
 
 # Address field labels/placeholders
 address-name = Name
