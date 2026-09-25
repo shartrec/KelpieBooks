@@ -33,29 +33,44 @@ use crate::{
 
 #[cfg(feature = "sales")]
 pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
-    Some(SidebarModuleContribution {
-        id: "sidebar-sales",
-        label_key: "sidebar-sales",
-        privilege: Some(SystemPrivilege::UseSales),
-        target_route: None,
-        on_click: None,
-        children: vec![
-            SidebarModuleContribution {
-                id: "sales-orders",
-                label_key: "sidebar-sales-orders",
+
+    let mut children = vec![
+        SidebarModuleContribution {
+            id: "sales-orders",
+            label_key: "sidebar-sales-orders",
+            privilege: Some(SystemPrivilege::UseSales),
+            target_route: Some(Route::SalesOrders),
+            on_click: None,
+            children: vec![],
+        },
+        SidebarModuleContribution {
+            id: "sales-order-list",
+            label_key: "sidebar-sales-order-pick-entry",
+            privilege: Some(SystemPrivilege::UseSales),
+            target_route: Some(Route::PickPrompt),
+            on_click: None,
+            children: vec![],
+        },
+        SidebarModuleContribution {
+            id: "sidebar-sales-reports",
+            label_key: "sidebar-reports",
+            privilege: Some(SystemPrivilege::UseSales),
+            target_route: None,
+            on_click: None,
+            children: vec![SidebarModuleContribution {
+                id: "sidebar-aged-receivables",
+                label_key: "sidebar-aged-receivables",
                 privilege: Some(SystemPrivilege::UseSales),
-                target_route: Some(Route::SalesOrders),
+                target_route: Some(Route::AgedReceivables),
                 on_click: None,
                 children: vec![],
-            },
-            SidebarModuleContribution {
-                id: "sales-order-list",
-                label_key: "sidebar-sales-order-pick-entry",
-                privilege: Some(SystemPrivilege::UseSales),
-                target_route: Some(Route::PickPrompt),
-                on_click: None,
-                children: vec![],
-            },
+            }],
+        },
+    ];
+
+    #[cfg(not (feature = "inventory"))]
+    {
+        let inventory_children = vec![
             SidebarModuleContribution {
                 id: "sales-item-list",
                 label_key: "item-list-title",
@@ -79,22 +94,17 @@ pub fn get_sidebar_contribution() -> Option<SidebarModuleContribution> {
                 target_route: Some(Route::TaxCategoryList),
                 on_click: None,
                 children: vec![],
-            },
-            SidebarModuleContribution {
-                id: "sidebar-sales-reports",
-                label_key: "sidebar-reports",
-                privilege: Some(SystemPrivilege::UseSales),
-                target_route: None,
-                on_click: None,
-                children: vec![SidebarModuleContribution {
-                    id: "sidebar-aged-receivables",
-                    label_key: "sidebar-aged-receivables",
-                    privilege: Some(SystemPrivilege::UseSales),
-                    target_route: Some(Route::AgedReceivables),
-                    on_click: None,
-                    children: vec![],
-                }],
-            },
-        ],
+            }
+        ];
+        children.extend(inventory_children);
+    }
+
+    Some(SidebarModuleContribution {
+        id: "sidebar-sales",
+        label_key: "sidebar-sales",
+        privilege: Some(SystemPrivilege::UseSales),
+        target_route: None,
+        on_click: None,
+        children,
     })
 }
