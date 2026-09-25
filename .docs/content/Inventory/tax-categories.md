@@ -1,7 +1,7 @@
 +++
 title = "Tax Categories and Rates"
 description = "How to configure and maintain tax categories and rates."
-weight = 10
+weight = 20
 +++
 
 # Tax Categories and Rates

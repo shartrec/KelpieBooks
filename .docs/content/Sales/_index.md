@@ -1,6 +1,6 @@
 +++
 title = "Sales"
-description = "Managing your items, sales invoices and payments."
+description = "Managing  sales orders and payments."
 weight = 20
 sort_by = "weight"
 template = "section.html"
